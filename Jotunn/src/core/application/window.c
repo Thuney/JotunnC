@@ -5,7 +5,7 @@
 #include <stdlib.h> 
 #include <string.h>
 
-extern void window_graphics_init(struct window_t* window);
+extern int window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 
@@ -32,9 +32,8 @@ void window_set_metadata(struct window_data_t* metadata, int width, int height, 
 int window_init(struct window_t* window, int width, int height, char* tag)
 {
     window_set_metadata(&window->metadata, width, height, tag);
-    window_graphics_init(window);
-
-    return 0;
+    
+    return window_graphics_init(window);
 }
 
 int window_run(struct window_t* window)
@@ -44,12 +43,10 @@ int window_run(struct window_t* window)
     return window->metadata.signaled_close;
 }
 
-int window_cleanup(struct window_t* window)
+void window_cleanup(struct window_t* window)
 {
     free(window->metadata.tag);
     window->metadata.tag = 0;
 
     window_graphics_cleanup(window);
-
-    return 0;
 }

@@ -13,7 +13,7 @@ struct application_t
 int application_init(struct application_t* app, char* app_name);
 
 int application_start(struct application_t* app);
-int application_run(struct application_t* app);
+void application_run(struct application_t* app);
 int application_stop(struct application_t* app);
 
-int application_cleanup(struct application_t* app);
+void application_cleanup(struct application_t* app);

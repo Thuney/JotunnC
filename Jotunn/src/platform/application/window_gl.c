@@ -138,16 +138,16 @@ int window_gl_init(struct window_t* window)
    // Set a pointer in GLFW to our window data
    glfwSetWindowUserPointer(gl_window_ptr, (void*)&(window->metadata));
 
-   window_gl_set_callbacks(window);
+   window_gl_set_callbacks(gl_window_ptr);
 
    // Set the GL viewport to the size of the window
    glViewport(0, 0, window->metadata.width, window->metadata.height);
 
    glfwMakeContextCurrent(gl_window_ptr);
 
-   if(!is_glew_initialized)
+   if (!is_glew_initialized)
    {
-      is_glew_initialized = glewInit();
+      is_glew_initialized = (glewInit() == GLEW_OK);
    }
 
    return !(is_glfw_initialized && is_glew_initialized);
@@ -168,7 +168,7 @@ void window_gl_cleanup(struct window_t* window)
       fprintf(stdout, "Cleaning up OpenGL Window\n");
    #endif
 
-   if(is_glfw_initialized)
+   if (is_glfw_initialized)
    {
       GLFWwindow* gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
 
@@ -178,7 +178,7 @@ void window_gl_cleanup(struct window_t* window)
       is_glfw_initialized = 0;
    }
 
-   if(is_glew_initialized)
+   if (is_glew_initialized)
    {
       is_glew_initialized = 0;
    }
@@ -189,13 +189,13 @@ void window_gl_cleanup(struct window_t* window)
  *  Extern window function definitions
  * 
  **************************************************/
-void window_graphics_init(struct window_t* window)
+int window_graphics_init(struct window_t* window)
 {
    #ifdef DEBUG
       fprintf(stdout, "Found OpenGL Backend\n");
    #endif
 
-   window_gl_init(window);
+   return window_gl_init(window);
 }
 
 void window_graphics_run(struct window_t* window)

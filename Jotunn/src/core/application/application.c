@@ -17,9 +17,7 @@ int application_init(struct application_t* app, char* app_name)
     app->name = (char*) malloc(name_length*sizeof(char));    
     strcpy(app->name, app_name);
 
-    window_init(&app->window, 800, 600, "Window");
-
-    return 0;
+    return window_init(&app->window, 800, 600, "Window");
 }
 
 int application_start(struct application_t* app)
@@ -33,32 +31,17 @@ int application_start(struct application_t* app)
     return 0;
 }
 
-int application_run(struct application_t* app)
+void application_run(struct application_t* app)
 {
-    #ifdef DEBUG
-        fprintf(stdout, "Running application\n");
-    #endif
-
-    static int counter = 0;
-
-    while(counter++ < 1000)
+    int signaled_close = window_run(&app->window);
+    if(signaled_close)
     {
-        for (int i = 0; i < 10000; i++);
+        app->running = 0;
 
-        // Run as long as window doesn't signal to close
-        if(window_run(&app->window))
-        {
-            #ifdef DEBUG
-                fprintf(stdout, "Window signaled to close\n");
-            #endif
-            
-            break;
-        }
+        #ifdef DEBUG
+            fprintf(stdout, "Window signaled to close\n");
+        #endif
     }
-
-    app->running = 0;
-
-    return 0;
 }
 
 int application_stop(struct application_t* app)
@@ -72,18 +55,16 @@ int application_stop(struct application_t* app)
     return 0;
 }
 
-int application_cleanup(struct application_t* app)
+void application_cleanup(struct application_t* app)
 {
     #ifdef DEBUG
         fprintf(stdout, "Cleaning up application\n");
     #endif
 
-    if(app->running) application_stop(app);
+    if (app->running) application_stop(app);
 
     free(app->name);
     app->name = 0;
 
     window_cleanup(&app->window);
-
-    return 0;
 }

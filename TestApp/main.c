@@ -8,19 +8,29 @@ int main(int argc, char** argv)
 {
     struct application_t* app_ptr = &jotunn_app; 
 
-    application_init(app_ptr, "JotunnTestApp");
-    application_start(app_ptr);
-
-    while (app_ptr->running)
+    int init_error = application_init(app_ptr, "JotunnTestApp");
+    if (!init_error)
     {
-        application_run(app_ptr);
+        application_start(app_ptr);
+
+        #ifdef DEBUG
+            fprintf(stdout, "Running application\n");
+        #endif
+
+        while (app_ptr->running)
+        {
+            application_run(app_ptr);
+        }
+
+        application_stop(app_ptr);
+        application_cleanup(app_ptr);
     }
-
-    application_stop(app_ptr);
-    application_cleanup(app_ptr);
-
-    #ifdef DEBUG
-        fprintf(stdout, "Jobs done from main.c\n");
-        fflush(stdout);
-    #endif  
+#ifdef DEBUG
+    else
+    {
+        fprintf(stdout, "Error initializing application\n");
+    }
+    fprintf(stdout, "Jobs done from main.c\n");
+    fflush(stdout);
+#endif  
 }
