@@ -207,3 +207,8 @@ void window_graphics_cleanup(struct window_t* window)
 {
    window_gl_cleanup(window);
 }
+
+void window_graphics_set_background_color(struct window_t* window, int red, int green, int blue)
+{
+   
+}

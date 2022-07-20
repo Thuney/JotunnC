@@ -2,7 +2,7 @@
 
 #include <memory.h>
 #include <stdio.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 #include <string.h>
 
 int application_init(struct application_t* app, char* app_name)
@@ -11,7 +11,7 @@ int application_init(struct application_t* app, char* app_name)
         fprintf(stdout, "Initializing application\n");
     #endif
 
-    memset(app, 0, sizeof(struct application_t));   
+    memset(app, 0, sizeof(struct application_t));
 
     int name_length = strlen(app_name);
     app->name = (char*) malloc(name_length*sizeof(char));    

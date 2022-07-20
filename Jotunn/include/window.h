@@ -26,3 +26,5 @@ int window_init(struct window_t* window, int width, int height, char* tag);
 int window_run(struct window_t* window);
 
 void window_cleanup(struct window_t* window);
+
+void window_set_background_color(int red, int green, int blue);

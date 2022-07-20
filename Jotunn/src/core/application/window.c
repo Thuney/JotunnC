@@ -8,6 +8,7 @@
 extern int window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
+extern void window_graphics_set_background_color(struct window_t* window, int red, int green, int blue);
 
 // Window Callbacks
 
@@ -49,4 +50,9 @@ void window_cleanup(struct window_t* window)
     window->metadata.tag = 0;
 
     window_graphics_cleanup(window);
+}
+
+void window_set_background_color(int red, int green, int blue)
+{
+
 }
