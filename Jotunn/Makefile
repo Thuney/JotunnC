@@ -1,7 +1,17 @@
-C      := -gcc
-CFLAGS := -pedantic-errors -Wall -Wextra -fPIC
+C        := -gcc
+CFLAGS   := -pedantic-errors -Wall -Wextra -fPIC
+CDEFINES := 
 
-LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lpthread -lGL -lglfw -lGLEW -shared
+GRAPHICS_BACKEND := OPENGL
+
+ifeq ($(GRAPHICS_BACKEND), OPENGL)
+
+LD_GRAPHICS_FLAGS := -lGL -lglfw -lGLEW
+CDEFINES := $(CDEFINES) -DBACKEND_OPENGL 
+
+endif
+
+LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lpthread $(LD_GRAPHICS_FLAGS) -shared
 
 BUILD    := ./.build
 OBJ_DIR  := $(BUILD)/objects
@@ -10,10 +20,26 @@ TARGET   := libjotunn.so
 INCLUDE  := -I./include \
 
 HDRS     := \
-			$(wildcard ./include/*.h)  \
+			./include/application.h \
+			./include/window.h      \
 
-SRC      := \
-			$(wildcard ./src/Core/Application/*.c)  \
+# Platform independent application sources
+CORE_SRC := \
+			./src/core/application/application.c  \
+			./src/core/application/window.c       \
+
+# Alternate source linking depending on graphical backend
+ifeq ($(GRAPHICS_BACKEND), OPENGL)
+
+PLATFORM_SRC := ./src/platform/application/window_gl.c \
+
+else
+
+PLATFORM_SRC := ./src/platform/application/window_no_backend.c \
+
+endif
+
+SRC := $(CORE_SRC) $(PLATFORM_SRC) 
 
 OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)
 
@@ -25,7 +51,7 @@ $(OBJ_DIR)/%.o: %.c $(HDRS)
 
 $(LIB_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)
-	$(C) $(CFLAGS) $(INCLUDE) -o $(LIB_DIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
+	$(C) $(CFLAGS) $(CDEFINES) $(INCLUDE) -o $(LIB_DIR)/$(TARGET) $(OBJECTS) $(LDFLAGS)
 
 .PHONY: all build clean debug release
 

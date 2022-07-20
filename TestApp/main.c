@@ -6,7 +6,7 @@ struct application_t jotunn_app;
 
 int main(int argc, char** argv)
 {
-    struct application_t* app_ptr = &jotunn_app;
+    struct application_t* app_ptr = &jotunn_app; 
 
     application_init(app_ptr, "JotunnTestApp");
     application_start(app_ptr);
@@ -18,4 +18,9 @@ int main(int argc, char** argv)
 
     application_stop(app_ptr);
     application_cleanup(app_ptr);
+
+    #ifdef DEBUG
+        fprintf(stdout, "Jobs done from main.c\n");
+        fflush(stdout);
+    #endif  
 }

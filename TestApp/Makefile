@@ -3,7 +3,7 @@ CFLAGS := -pedantic-errors -Wall -Wextra
 
 RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../Jotunn/.build/lib/
 
-LDFLAGS  := $(RPATH_LINKAGE) -L$(CURDIR)/../Jotunn/.build/lib/ -ljotunn
+LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lpthread $(RPATH_LINKAGE) -L$(CURDIR)/../Jotunn/.build/lib/ -ljotunn
 
 BUILD    := ./.build
 OBJ_DIR  := $(BUILD)/objects
