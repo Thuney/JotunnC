@@ -54,6 +54,34 @@ void fmatrix_4x4_init(fmatrix_4x4* matrix)
    fmatrix_4x4_identity(matrix);
 }
 
+static void fmatrix_set(float* dest_buf, const float* src_buf, int dim)
+{
+   int r, c;
+
+   for (r = 0; r < dim; r++)
+   {
+      for (c = 0; c < dim; c++)
+      {
+         dest_buf[dim*r + c] = src_buf[dim*r + c];
+      }
+   }
+} 
+
+void fmatrix_2x2_set(fmatrix_2x2* matrix, const float mat_data[2][2])
+{
+   fmatrix_set(&(matrix->buf[0]), &(mat_data[0][0]), 2);
+}
+
+void fmatrix_3x3_set(fmatrix_3x3* matrix, const float mat_data[3][3])
+{
+   fmatrix_set(&(matrix->buf[0]), &(mat_data[0][0]), 3);
+}
+
+void fmatrix_4x4_set(fmatrix_4x4* matrix, const float mat_data[4][4])
+{
+   fmatrix_set(&(matrix->buf[0]), &(mat_data[0][0]), 4);
+}
+
 //
 
 static void fmatrix_add(float* matrix_dest, float* matrix1, float* matrix2, int dim)
@@ -163,9 +191,35 @@ fmatrix_4x4 fmatrix_4x4_scale(fmatrix_4x4 matrix, float scalar)
 
 //
 
+static void fmatrix_multiply(float* matrix_dest, float* matrix1, float* matrix2, int dim)
+{
+   int r, c, i, j;
+   float sum;
+
+   for (r = 0; r < dim; r++)
+   {
+      for (c = 0; c < dim; c++)
+      {
+         sum = 0.0f;
+
+         for (i = 0; i < dim; i++)
+         {
+            int mat1_idx = (dim*r + i);
+            int mat2_idx = (c + dim*i);
+
+            sum += (matrix1[mat1_idx] * matrix2[mat2_idx]);
+         }
+
+         matrix_dest[dim*r + c] = sum;
+      }
+   }
+}
+
 fmatrix_2x2 fmatrix_2x2_multiply(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2)
 {
    fmatrix_2x2 resultant;
+
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 2);
 
    return resultant;
 }
@@ -174,12 +228,16 @@ fmatrix_3x3 fmatrix_3x3_multiply(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2)
 {
    fmatrix_3x3 resultant;
 
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 3);
+
    return resultant;
 }
 
 fmatrix_4x4 fmatrix_4x4_multiply(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2)
 {
    fmatrix_4x4 resultant;
+
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 4);
 
    return resultant;
 }
@@ -306,19 +364,19 @@ static void fmatrix_print_buffer_form(float buf[], int length)
 void fmatrix_2x2_print(fmatrix_2x2* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 2);
-   fmatrix_print_buffer_form(matrix->buf, 2*2);
+   // fmatrix_print_buffer_form(matrix->buf, 2*2);
 }
 
 void fmatrix_3x3_print(fmatrix_3x3* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 3);
-   fmatrix_print_buffer_form(matrix->buf, 3*3);
+   // fmatrix_print_buffer_form(matrix->buf, 3*3);
 }
 
 void fmatrix_4x4_print(fmatrix_4x4* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 4);
-   fmatrix_print_buffer_form(matrix->buf, 4*4);
+   // fmatrix_print_buffer_form(matrix->buf, 4*4);
 }
 
 #endif
