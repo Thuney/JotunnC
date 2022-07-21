@@ -14,7 +14,7 @@ void camera_init(struct camera_base_t* camera)
 
 void camera_recalculate_view_matrix(struct camera_base_t* camera)
 {
-
+   
 }
 
 void camera_set_projection(struct camera_base_t* camera, float aspect_ratio, float near_plane, float far_plane)

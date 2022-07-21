@@ -6,9 +6,9 @@
 
 struct camera_base_t
 {
-   struct fmatrix_4x4_t projection_matrix;
-   struct fmatrix_4x4_t view_matrix;
-   struct fmatrix_4x4_t view_projection_matrix;
+   fmatrix_4x4 projection_matrix;
+   fmatrix_4x4 view_matrix;
+   fmatrix_4x4 view_projection_matrix;
 
    float aspect_ratio;
    float near_plane;

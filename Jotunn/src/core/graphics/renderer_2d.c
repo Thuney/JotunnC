@@ -1,4 +1,7 @@
 #include <memory.h>
+#ifdef DEBUG
+   #include <stdio.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,7 +20,7 @@ void renderer_2d_cleanup(struct renderer_2d_t* renderer)
 {
    #ifdef DEBUG
         fprintf(stdout, "Cleaning up renderer 2D\n");
-    #endif
+   #endif
 
     free(renderer->tag);
     renderer->tag = 0;
