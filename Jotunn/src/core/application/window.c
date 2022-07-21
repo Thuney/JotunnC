@@ -8,7 +8,7 @@
 extern int window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
-extern void window_graphics_set_background_color(struct window_t* window, int red, int green, int blue);
+extern void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha);
 
 // Window Callbacks
 
@@ -33,8 +33,12 @@ void window_set_metadata(struct window_data_t* metadata, int width, int height, 
 int window_init(struct window_t* window, int width, int height, char* tag)
 {
     window_set_metadata(&window->metadata, width, height, tag);
-    
-    return window_graphics_init(window);
+
+    int error = window_graphics_init(window);
+
+    window_set_background_color(window, 0.2f, 0.5f, 0.1f, 1.0f);
+
+    return error;
 }
 
 int window_run(struct window_t* window)
@@ -52,7 +56,7 @@ void window_cleanup(struct window_t* window)
     window_graphics_cleanup(window);
 }
 
-void window_set_background_color(int red, int green, int blue)
+void window_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
 {
-
+    window_graphics_set_background_color(window, red, green, blue, alpha);
 }

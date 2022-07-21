@@ -5,31 +5,43 @@
 
 #include "window.h"
 
+#include "shader.h"
+
 /**************************************************
  * 
  *  Variables
  * 
  **************************************************/
 
-const GLchar* vertex_shader =
-    "#version 150"										//Defines the GLSL version of this shader to be 1.50
-    "\n"
-    "in vec2 position;"									//Defines an input to the shader which is a 2-dimensional vector
-    "\n"
-    "void main()"
-    "{"
-    "	gl_Position = vec4(position, 0.0, 1.0);"		//Set the homogenous coordinates of the vertex given our 2D vector input
-    "};";
+const GLchar* vertex_shader_src =
+   "#version 150"										//Defines the GLSL version of this shader to be 1.50
+   "\n"
+   "in vec2 position;"									//Defines an input to the shader which is a 2-dimensional vector
+   "\n"
+   "void main()"
+   "{"
+   "	gl_Position = vec4(position, 0.0, 1.0);"		//Set the homogenous coordinates of the vertex given our 2D vector input
+   "};";
 
-const GLchar* fragment_shader =
-    "#version 150"										//Defines the GLSL version of this shader to be 1.50
-    "\n"
-    "out vec4 outColor;"								//Defines an output to the shader which is a 4-dimensional vector
-    "\n"
-    "void main()"
-    "{"
-    "	outColor = vec4(1.0, 1.0, 1.0, 1.0);"			//Set the value of the (in this case constant and white) color output
-    "}";
+const GLchar* fragment_shader_src =
+   "#version 150"										//Defines the GLSL version of this shader to be 1.50
+   "\n"
+   "out vec4 outColor;"								//Defines an output to the shader which is a 4-dimensional vector
+   "\n"
+   "void main()"
+   "{"
+   "	outColor = vec4(1.0, 1.0, 1.0, 1.0);"			//Set the value of the (in this case constant and white) color output
+   "}";
+
+//Hardcoded array of our triangle vertices in (X, Y) pairs
+//Note that these values are in the range [-1.0, 1.0] to fit in
+//OpenGL's unprojected coordinate system
+float triangle_vertices[] =
+{
+   -0.5f, 0.5f,  //Vertex 1 (X, Y), top point
+   0.0f, -0.5f,  //Vertex 2 (X, Y), bottom right point
+   -1.0f, -0.5f, //Vertex 3 (X, Y), bottom left point
+};
 
 static int is_glfw_initialized = 0;
 static int is_glew_initialized = 0;
@@ -45,6 +57,27 @@ void gl_window_size_callback(GLFWwindow* window, int width, int height)
    #ifdef DEBUG
       fprintf(stdout, "Event - Window Resize - W: %d H: %d\n", width, height);
    #endif
+
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+   metadata->width  = width;
+   metadata->height = height;
+
+   // Set the GL viewport to the size of the window
+   glViewport(0, 0, metadata->width, metadata->height);
+}
+
+void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
+{
+   #ifdef DEBUG
+      fprintf(stdout, "Event - Framebuffer Resize - W: %d H: %d\n", width, height);
+   #endif
+
+   // struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+   // metadata->width  = width;
+   // metadata->height = height;
+
+   // Set the GL viewport to the size of the window
+   // glViewport(0, 0, metadata->width, metadata->height);
 }
 
 void gl_window_close_callback(GLFWwindow* window)
@@ -104,11 +137,72 @@ void gl_window_error_callback(int error_code, const char* description)
  *  Internal GL window functions
  * 
  **************************************************/
+static struct shader_program_t shader_program;
+static GLuint vao, vbo;
+
+void window_gl_do_stuff_init(struct window_t* window)
+{
+   struct vertex_shader_t vertex_shader;
+   struct fragment_shader_t fragment_shader;
+
+   vertex_shader_init(&vertex_shader, vertex_shader_src);
+   fragment_shader_init(&fragment_shader, fragment_shader_src);
+
+   shader_program_init(&shader_program, &vertex_shader, &fragment_shader);
+
+   //Now that we have compiled the shaders into a single program, we can dispose of them
+	glDeleteShader(vertex_shader.vertex_shader);
+	glDeleteShader(fragment_shader.fragment_shader);
+
+   /***************
+    * VERTEX ARRAYS
+    ***************/
+
+   //Initialization and binding of a vertex array object for linking our vertex attributes to
+	//our vertex buffer object containing the vertex data. The VAO has to be instantiated and bound 
+	//before the vertex buffer object and vertex attribute arrays, and those components will be automatically
+	//added to the VAO when they are instantiated
+	glGenVertexArrays(1, &vao);
+
+	//Initialization of our vertex buffer object, which stores the vertex data for the triangle we're trying to draw
+	glGenBuffers(1, &vbo);
+
+	//Create VAO with settings for triangle
+	glBindVertexArray(vao);
+
+	//Set the vbo as the system's active buffer
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	//Add our vertex data to the vbo
+	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW);
+
+	//Find the index of the "position" attribute in the vertex shader
+	GLint triangle_pos_attrib = glGetAttribLocation(shader_program.shader_program, "position");
+	//Specify how to interpret the vertex data for our position attribute
+	glVertexAttribPointer(triangle_pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(triangle_pos_attrib);
+
+	glBindVertexArray(0);
+}
+
+void window_gl_do_stuff_run(struct window_t* window)
+{
+   glBindVertexArray(vao);
+   glUseProgram(shader_program.shader_program);
+   glDrawArrays(GL_TRIANGLES, 0, 3);
+}
+
+void window_gl_do_stuff_cleanup(struct window_t* window)
+{
+   glDeleteVertexArrays(1, &vao);
+	glDeleteBuffers(1, &vbo);
+   glDeleteProgram(shader_program.shader_program);
+}
 
 void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
 {
    // Window action callback assignment
    glfwSetWindowSizeCallback(glfw_window_ptr,  (GLFWwindowsizefun)&gl_window_size_callback);
+   glfwSetFramebufferSizeCallback(glfw_window_ptr, (GLFWframebuffersizefun)&gl_framebuffer_size_callback);
    glfwSetWindowCloseCallback(glfw_window_ptr, (GLFWwindowclosefun)&gl_window_close_callback);
    glfwSetKeyCallback(glfw_window_ptr,         (GLFWkeyfun)&gl_window_key_callback);
    glfwSetCharCallback(glfw_window_ptr,        (GLFWcharfun)&gl_window_char_callback);
@@ -127,7 +221,17 @@ int window_gl_init(struct window_t* window)
    if (!is_glfw_initialized)
    {
       is_glfw_initialized = glfwInit();
-      glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
+      if (is_glfw_initialized)
+      {
+         glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
+
+         //Set some GLFW settings such as GL context version, modern core profile for the context, etc.
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+      }
    }
 
    // Create window via GLFW
@@ -140,23 +244,30 @@ int window_gl_init(struct window_t* window)
 
    window_gl_set_callbacks(gl_window_ptr);
 
-   // Set the GL viewport to the size of the window
-   glViewport(0, 0, window->metadata.width, window->metadata.height);
-
    glfwMakeContextCurrent(gl_window_ptr);
 
    if (!is_glew_initialized)
    {
+      glewExperimental = GL_TRUE;
       is_glew_initialized = (glewInit() == GLEW_OK);
    }
+
+   glEnable(GL_BLEND);
+   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+   window_gl_do_stuff_init(window);
 
    return !(is_glfw_initialized && is_glew_initialized);
 }
 
 void window_gl_run(struct window_t* window)
 {
+   glClear(GL_COLOR_BUFFER_BIT);
+
    GLFWwindow* gl_window_ptr;
    gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
+
+   window_gl_do_stuff_run(window);
 
    glfwPollEvents();
    glfwSwapBuffers(gl_window_ptr);
@@ -170,6 +281,8 @@ void window_gl_cleanup(struct window_t* window)
 
    if (is_glfw_initialized)
    {
+      window_gl_do_stuff_cleanup(window);
+
       GLFWwindow* gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
 
       glfwDestroyWindow(gl_window_ptr);
@@ -208,7 +321,7 @@ void window_graphics_cleanup(struct window_t* window)
    window_gl_cleanup(window);
 }
 
-void window_graphics_set_background_color(struct window_t* window, int red, int green, int blue)
+void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
 {
-   
+   glClearColor(red, green, blue, alpha);
 }

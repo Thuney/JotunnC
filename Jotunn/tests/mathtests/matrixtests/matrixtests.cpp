@@ -1,5 +1,5 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE MatrixTests
+#define BOOST_TEST_MODULE matrix_tests
 #include <boost/test/unit_test.hpp>
 
 extern "C" 
@@ -89,16 +89,16 @@ BOOST_AUTO_TEST_CASE(multiplication_tests, *boost::unit_test::tolerance(0.0001))
       fmatrix_2x2_init(&mat_2d_b);
 
       const float mat_2d_a_buf[2][2] = { {1.0f, 7.0f}, 
-                                       {2.0f, 4.0f} };
+                                         {2.0f, 4.0f} };
 
       const float mat_2d_b_buf[2][2] = { {3.0f, 3.0f}, 
-                                       {5.0f, 2.0f} };
+                                         {5.0f, 2.0f} };
 
       const float mat_2d_axb_mult_key_buf[2][2] = { {38.0f, 17.0f}, 
-                                                   {26.0f, 14.0f} };
+                                                    {26.0f, 14.0f} };
 
       const float mat_2d_bxa_mult_key_buf[2][2] = { {9.0f, 33.0f}, 
-                                                   {9.0f, 43.0f} };
+                                                    {9.0f, 43.0f} };
 
       fmatrix_2x2_set(&mat_2d_a, mat_2d_a_buf);
       fmatrix_2x2_set(&mat_2d_b, mat_2d_b_buf);

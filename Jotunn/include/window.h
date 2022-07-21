@@ -27,4 +27,4 @@ int window_run(struct window_t* window);
 
 void window_cleanup(struct window_t* window);
 
-void window_set_background_color(int red, int green, int blue);
+void window_set_background_color(struct window_t* window, float red, float green, float blue, float alpha);

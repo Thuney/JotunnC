@@ -6,10 +6,10 @@ void camera_init(struct camera_base_t* camera)
    fmatrix_4x4_init(&camera->view_matrix);
    fmatrix_4x4_init(&camera->view_projection_matrix);
 
-   camera_set_projection(camera, 0.0f, 0.0f, 0.0f);
-
    fvector3_init(&camera->position);
    fquaternion_init(&camera->orientation);
+
+   camera_set_projection(camera, 0.0f, 0.0f, 0.0f);
 }
 
 void camera_recalculate_view_matrix(struct camera_base_t* camera)
