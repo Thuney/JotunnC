@@ -7,34 +7,37 @@
  **************************************************/
 
 const char* vertex_shader_src =
-   "#version 150"										//Defines the GLSL version of this shader to be 1.50
+   "#version 150"
    "\n"
-   "in vec2 position;\n"									//Defines an input to the shader which is a 2-dimensional vector
-   "in vec3 color;"
+   "in vec2 position;\n"
+   "\n"
+   "in vec4 color;"
+   "\n"
+   "out vec4 vColor;"
    "\n"
    "void main()"
    "{"
-   "	gl_Position = vec4(position, 0.0, 1.0);"		//Set the homogenous coordinates of the vertex given our 2D vector input
+   "	gl_Position = vec4(position, 0.0, 1.0);"
+   "  vColor = color;"
    "};";
 
 const char* fragment_shader_src =
-   "#version 150"										//Defines the GLSL version of this shader to be 1.50
+   "#version 150"
    "\n"
-   "out vec4 outColor;"								//Defines an output to the shader which is a 4-dimensional vector
+   "in vec4 vColor;"
+   "\n"
+   "out vec4 fColor;"
    "\n"
    "void main()"
    "{"
-   "	outColor = vec4(1.0, 1.0, 1.0, 1.0);"			//Set the value of the (in this case constant and white) color output
+   "	fColor = vColor;"
    "}";
 
-//Hardcoded array of our triangle vertices in (X, Y) pairs
-//Note that these values are in the range [-1.0, 1.0] to fit in
-//OpenGL's unprojected coordinate system
 float triangle_data[] =
 {
-   -0.5f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
-    0.0f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
-   -1.0f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f
+    0.0f,  0.5f, 1.0f, 0.0f, 0.0f, 1.0f,
+   -0.5f, -0.5f, 0.0f, 1.0f, 0.0f, 1.0f,
+    0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 1.0f
 };
 
 void renderable_2d_init(struct renderable_2d_t* renderable_2d)
@@ -53,7 +56,7 @@ void renderable_2d_init(struct renderable_2d_t* renderable_2d)
    fragment_shader_init(&fragment_shader, fragment_shader_src);
 
    shader_program_init(shader, &vertex_shader, &fragment_shader);
-   shader_program_bind_fragment_data_location(shader, 0, "outColor");
+   shader_program_bind_fragment_data_location(shader, 0, "fColor");
    shader_program_link(shader);
 
    vertex_shader_destroy(&vertex_shader);
@@ -75,10 +78,8 @@ void renderable_2d_init(struct renderable_2d_t* renderable_2d)
    int pos_attrib_index   = shader_program_get_attribute_location(shader, position_attrib_name);
    int color_attrib_index = shader_program_get_attribute_location(shader, color_attrib_name);
 
-   int stride = 0;
-
    vertex_attribute_init(&attributes[0], position_attrib_name, pos_attrib_index,   2, V_FLOAT, 0, 6*sizeof(float), 0);
-   vertex_attribute_init(&attributes[1], color_attrib_name,    color_attrib_index, 4, V_FLOAT, 0, 6*sizeof(float), 0);
+   vertex_attribute_init(&attributes[1], color_attrib_name,    color_attrib_index, 4, V_FLOAT, 0, 6*sizeof(float), ((void*)(2*sizeof(float))));
 
    vertex_array_set_attribute(vao, &attributes[0]);
    vertex_array_set_attribute(vao, &attributes[1]);

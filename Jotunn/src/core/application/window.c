@@ -36,7 +36,7 @@ int window_init(struct window_t* window, int width, int height, char* tag)
 
     int error = window_graphics_init(window);
 
-    window_set_background_color(window, 0.2f, 0.5f, 0.1f, 1.0f);
+    window_set_background_color(window, 0.1f, 0.1f, 0.1f, 1.0f);
 
     return error;
 }
