@@ -32,7 +32,7 @@ typedef union fvector4_t
         float w, x, y, z;
     } comp;
     /*
-    *  < x, y, z >
+    *  < w, x, y, z >
     */
 } fvector4;
 
