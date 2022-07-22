@@ -4,7 +4,7 @@
 
 //
 
-static void fmatrix_identity(float* matrix, int dim)
+static void fmatrix_identity(float* matrix, const int dim)
 {
    int r, c;
    float val;
@@ -54,7 +54,7 @@ void fmatrix_4x4_init(fmatrix_4x4* matrix)
    fmatrix_4x4_identity(matrix);
 }
 
-static void fmatrix_set(float* dest_buf, const float* src_buf, int dim)
+static void fmatrix_set(float* dest_buf, const float* src_buf, const int dim)
 {
    int r, c;
 
@@ -84,7 +84,7 @@ void fmatrix_4x4_set(fmatrix_4x4* matrix, const float mat_data[4][4])
 
 //
 
-static void fmatrix_add(float* matrix_dest, float* matrix1, float* matrix2, int dim)
+static void fmatrix_add(float* matrix_dest, const float* matrix1, const float* matrix2, const int dim)
 {
    int r, c;
    float val1, val2;
@@ -101,7 +101,7 @@ static void fmatrix_add(float* matrix_dest, float* matrix1, float* matrix2, int 
    }
 }
 
-static void fmatrix_scale(float* matrix_dest, float* matrix_src, int dim, float scalar)
+static void fmatrix_scale(float* matrix_dest, const float* matrix_src, const int dim, const float scalar)
 {
    int r, c;
    float val;
@@ -116,82 +116,85 @@ static void fmatrix_scale(float* matrix_dest, float* matrix_src, int dim, float 
    }
 }
 
-fmatrix_2x2 fmatrix_2x2_add(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2)
+fmatrix_2x2 fmatrix_2x2_add(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2)
 {
    fmatrix_2x2 resultant;
    
-   fmatrix_add(resultant.buf, matrix1.buf, matrix2.buf, 2);
+   fmatrix_add(resultant.buf, matrix1->buf, matrix2->buf, 2);
 
    return resultant;
 }
 
-fmatrix_3x3 fmatrix_3x3_add(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2)
+fmatrix_3x3 fmatrix_3x3_add(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2)
 {
    fmatrix_3x3 resultant;
 
-   fmatrix_add(resultant.buf, matrix1.buf, matrix2.buf, 3);
+   fmatrix_add(resultant.buf, matrix1->buf, matrix2->buf, 3);
 
    return resultant;
 }
 
-fmatrix_4x4 fmatrix_4x4_add(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2)
+fmatrix_4x4 fmatrix_4x4_add(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2)
 {
    fmatrix_4x4 resultant;
 
-   fmatrix_add(resultant.buf, matrix1.buf, matrix2.buf, 4);
+   fmatrix_add(resultant.buf, matrix1->buf, matrix2->buf, 4);
 
    return resultant;
 }
 
 //
 
-fmatrix_2x2 fmatrix_2x2_subtract(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2)
+fmatrix_2x2 fmatrix_2x2_subtract(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2)
 {
-   return fmatrix_2x2_add(matrix1, fmatrix_2x2_scale(matrix2, -1.0f));
+   fmatrix_2x2 mat2_neg_scaled = fmatrix_2x2_scale(matrix2, -1.0f);
+   return fmatrix_2x2_add(matrix1, &mat2_neg_scaled);
 }
 
-fmatrix_3x3 fmatrix_3x3_subtract(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2)
+fmatrix_3x3 fmatrix_3x3_subtract(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2)
 {
-   return fmatrix_3x3_add(matrix1, fmatrix_3x3_scale(matrix2, -1.0f));
+   fmatrix_3x3 mat3_neg_scaled = fmatrix_3x3_scale(matrix2, -1.0f);
+   return fmatrix_3x3_add(matrix1, &mat3_neg_scaled);
 }
 
-fmatrix_4x4 fmatrix_4x4_subtract(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2)
+fmatrix_4x4 fmatrix_4x4_subtract(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2)
 {
-   return fmatrix_4x4_add(matrix1, fmatrix_4x4_scale(matrix2, -1.0f));
+   fmatrix_4x4 mat4_neg_scaled = fmatrix_4x4_scale(matrix2, -1.0f);
+   return fmatrix_4x4_add(matrix1, &mat4_neg_scaled);
 }
 
 //
 
-fmatrix_2x2 fmatrix_2x2_scale(fmatrix_2x2 matrix, float scalar)
+fmatrix_2x2 fmatrix_2x2_scale(const fmatrix_2x2* matrix, const float scalar)
 {
    fmatrix_2x2 resultant;
 
-   fmatrix_scale(resultant.buf, matrix.buf, 2, scalar);
+   fmatrix_scale(resultant.buf, matrix->buf, 2, scalar);
 
    return resultant;
 }
 
-fmatrix_3x3 fmatrix_3x3_scale(fmatrix_3x3 matrix, float scalar)
+fmatrix_3x3 fmatrix_3x3_scale(const fmatrix_3x3* matrix, const float scalar)
 {
    fmatrix_3x3 resultant;
 
-   fmatrix_scale(resultant.buf, matrix.buf, 3, scalar);
+   fmatrix_scale(resultant.buf, matrix->buf, 3, scalar);
 
    return resultant;
 }
 
-fmatrix_4x4 fmatrix_4x4_scale(fmatrix_4x4 matrix, float scalar)
+fmatrix_4x4 fmatrix_4x4_scale(const fmatrix_4x4* matrix, const float scalar)
 {
    fmatrix_4x4 resultant;
 
-   fmatrix_scale(resultant.buf, matrix.buf, 3, scalar);
+   fmatrix_scale(resultant.buf, matrix->buf, 4, scalar);
 
    return resultant;
 }
 
 //
 
-static void fmatrix_multiply(float* matrix_dest, float* matrix1, float* matrix2, int dim)
+static void fmatrix_multiply(float* matrix_dest, const float* matrix1, const float* matrix2, const int dim)
 {
    int r, c, i;
    float sum;
@@ -215,29 +218,29 @@ static void fmatrix_multiply(float* matrix_dest, float* matrix1, float* matrix2,
    }
 }
 
-fmatrix_2x2 fmatrix_2x2_multiply(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2)
+fmatrix_2x2 fmatrix_2x2_multiply(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2)
 {
    fmatrix_2x2 resultant;
 
-   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 2);
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1->buf[0]), &(matrix2->buf[0]), 2);
 
    return resultant;
 }
 
-fmatrix_3x3 fmatrix_3x3_multiply(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2)
+fmatrix_3x3 fmatrix_3x3_multiply(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2)
 {
    fmatrix_3x3 resultant;
 
-   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 3);
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1->buf[0]), &(matrix2->buf[0]), 3);
 
    return resultant;
 }
 
-fmatrix_4x4 fmatrix_4x4_multiply(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2)
+fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2)
 {
    fmatrix_4x4 resultant;
 
-   fmatrix_multiply(&(resultant.buf[0]), &(matrix1.buf[0]), &(matrix2.buf[0]), 4);
+   fmatrix_multiply(&(resultant.buf[0]), &(matrix1->buf[0]), &(matrix2->buf[0]), 4);
 
    return resultant;
 }
@@ -253,7 +256,7 @@ fmatrix_4x4 fmatrix_4x4_multiply(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2)
 #include <math.h>
 #include <stdio.h>
 
-static int fmatrix_are_equal(float* matrix1, float* matrix2, const int dim)
+static int fmatrix_are_equal(const float* matrix1, const float* matrix2, const int dim)
 {
    int are_equal = 1;
 
@@ -278,22 +281,22 @@ static int fmatrix_are_equal(float* matrix1, float* matrix2, const int dim)
    return are_equal;
 }
 
-int fmatrix_2x2_are_equal(fmatrix_2x2* matrix1, fmatrix_2x2* matrix2)
+int fmatrix_2x2_are_equal(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2)
 {
    return fmatrix_are_equal(matrix1->buf, matrix2->buf, 2);
 }
 
-int fmatrix_3x3_are_equal(fmatrix_3x3* matrix1, fmatrix_3x3* matrix2)
+int fmatrix_3x3_are_equal(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2)
 {
    return fmatrix_are_equal(matrix1->buf, matrix2->buf, 3);
 }
 
-int fmatrix_4x4_are_equal(fmatrix_4x4* matrix1, fmatrix_4x4* matrix2)
+int fmatrix_4x4_are_equal(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2)
 {
    return fmatrix_are_equal(matrix1->buf, matrix2->buf, 4);
 }
 
-static int fmatrix_is_identity(float* matrix, const int dim)
+static int fmatrix_is_identity(const float* matrix, const int dim)
 {
    int is_identity = 1;
 
@@ -317,22 +320,22 @@ static int fmatrix_is_identity(float* matrix, const int dim)
    return is_identity;
 }
 
-int fmatrix_2x2_is_identity(fmatrix_2x2* matrix)
+int fmatrix_2x2_is_identity(const fmatrix_2x2* matrix)
 {
    return fmatrix_is_identity(matrix->buf, 2);
 }
 
-int fmatrix_3x3_is_identity(fmatrix_3x3* matrix)
+int fmatrix_3x3_is_identity(const fmatrix_3x3* matrix)
 {
    return fmatrix_is_identity(matrix->buf, 3);
 }
 
-int fmatrix_4x4_is_identity(fmatrix_4x4* matrix)
+int fmatrix_4x4_is_identity(const fmatrix_4x4* matrix)
 {
    return fmatrix_is_identity(matrix->buf, 4);
 }
 
-static void fmatrix_print_matrix_form(float* matrix, int dim)
+static void fmatrix_print_matrix_form(const float* matrix, const int dim)
 {
    printf("Printing matrix representation\n");
    
@@ -348,7 +351,7 @@ static void fmatrix_print_matrix_form(float* matrix, int dim)
    printf("\n\n");
 }
 
-static void fmatrix_print_buffer_form(float buf[], int length)
+static void fmatrix_print_buffer_form(const float buf[], const int length)
 {
    printf("Printing buffer representation\n");
 
@@ -361,19 +364,19 @@ static void fmatrix_print_buffer_form(float buf[], int length)
    printf("\n\n");
 }
 
-void fmatrix_2x2_print(fmatrix_2x2* matrix)
+void fmatrix_2x2_print(const fmatrix_2x2* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 2);
    // fmatrix_print_buffer_form(matrix->buf, 2*2);
 }
 
-void fmatrix_3x3_print(fmatrix_3x3* matrix)
+void fmatrix_3x3_print(const fmatrix_3x3* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 3);
    // fmatrix_print_buffer_form(matrix->buf, 3*3);
 }
 
-void fmatrix_4x4_print(fmatrix_4x4* matrix)
+void fmatrix_4x4_print(const fmatrix_4x4* matrix)
 {
    fmatrix_print_matrix_form(&(matrix->mat[0][0]), 4);
    // fmatrix_print_buffer_form(matrix->buf, 4*4);

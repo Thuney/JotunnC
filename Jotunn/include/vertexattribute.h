@@ -16,6 +16,7 @@ enum vertex_attribute_data_type_t
 
 struct vertex_attribute_t
 {
+   char* attribute_name;
    unsigned int index;
    int size;
    enum vertex_attribute_data_type_t data_type;
@@ -24,7 +25,8 @@ struct vertex_attribute_t
    void* ptr_offset_to_attrib;
 };
 
-void vertex_attribute_init(struct vertex_attribute_t* vertex_attribute, 
+void vertex_attribute_init(struct vertex_attribute_t* vertex_attribute,
+                           char* attribute_name,
                            unsigned int index, 
                            int size, 
                            enum vertex_attribute_data_type_t data_type, 

@@ -5,46 +5,13 @@
 
 #include "window.h"
 
-#include "shader.h"
-#include "vertexarray.h"
-#include "vertexattribute.h"
-#include "vertexbuffer.h"
+#include "renderable_2d.h"
 
 /**************************************************
  * 
  *  Variables
  * 
  **************************************************/
-
-const GLchar* vertex_shader_src =
-   "#version 150"										//Defines the GLSL version of this shader to be 1.50
-   "\n"
-   "in vec2 position;"									//Defines an input to the shader which is a 2-dimensional vector
-   "\n"
-   "void main()"
-   "{"
-   "	gl_Position = vec4(position, 0.0, 1.0);"		//Set the homogenous coordinates of the vertex given our 2D vector input
-   "};";
-
-const GLchar* fragment_shader_src =
-   "#version 150"										//Defines the GLSL version of this shader to be 1.50
-   "\n"
-   "out vec4 outColor;"								//Defines an output to the shader which is a 4-dimensional vector
-   "\n"
-   "void main()"
-   "{"
-   "	outColor = vec4(1.0, 1.0, 1.0, 1.0);"			//Set the value of the (in this case constant and white) color output
-   "}";
-
-//Hardcoded array of our triangle vertices in (X, Y) pairs
-//Note that these values are in the range [-1.0, 1.0] to fit in
-//OpenGL's unprojected coordinate system
-float triangle_vertices[] =
-{
-   -0.5f, 0.5f,  //Vertex 1 (X, Y), top point
-   0.0f, -0.5f,  //Vertex 2 (X, Y), bottom right point
-   -1.0f, -0.5f, //Vertex 3 (X, Y), bottom left point
-};
 
 static int is_glfw_initialized = 0;
 static int is_glew_initialized = 0;
@@ -140,58 +107,21 @@ void gl_window_error_callback(int error_code, const char* description)
  *  Internal GL window functions
  * 
  **************************************************/
-static struct shader_program_t shader_program;
-static struct vertex_attribute_t pos_attribute;
-static struct vertex_array_t vao;
-static struct vertex_buffer_t vbo;
+static struct renderable_2d_t triangle;
 
 void window_gl_do_stuff_init(struct window_t* window)
 {
-   struct vertex_shader_t vertex_shader;
-   struct fragment_shader_t fragment_shader;
-
-   vertex_shader_init(&vertex_shader, vertex_shader_src);
-   fragment_shader_init(&fragment_shader, fragment_shader_src);
-
-   shader_program_init(&shader_program, &vertex_shader, &fragment_shader);
-   shader_program_bind_fragment_data_location(&shader_program, 0, "outColor");
-   shader_program_link(&shader_program);
-
-   vertex_shader_destroy(&vertex_shader);
-   fragment_shader_destroy(&fragment_shader);
-
-   vertex_array_init(&vao, 1);
-   vertex_buffer_init(&vbo, 1);
-
-   vertex_array_bind(&vao);
-   vertex_buffer_bind(&vbo);
-
-   vertex_buffer_buffer_data(&vbo, triangle_vertices, sizeof(triangle_vertices), STATIC_DRAW);
-
-   int triangle_pos_attrib_index = shader_program_get_attribute_location(&shader_program, "position");
-
-   vertex_attribute_init(&pos_attribute, triangle_pos_attrib_index, 2, V_FLOAT, GL_FALSE, 0, 0);
-   vertex_array_set_attribute(&vao, &pos_attribute);
-
-	// //Specify how to interpret the vertex data for our position attribute
-	// glVertexAttribPointer(triangle_pos_attrib_index, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	// glEnableVertexAttribArray(triangle_pos_attrib_index);
-
-	glBindVertexArray(0);
+   renderable_2d_init(&triangle);
 }
 
 void window_gl_do_stuff_run(struct window_t* window)
 {
-   vertex_array_bind(&vao);
-   shader_program_use(&shader_program);
-   glDrawArrays(GL_TRIANGLES, 0, 3);
+   renderable_2d_render(&triangle);
 }
 
 void window_gl_do_stuff_cleanup(struct window_t* window)
 {
-   vertex_array_destroy(&vao, 1);
-   vertex_buffer_destroy(&vbo, 1);
-   shader_program_destroy(&shader_program);
+   renderable_2d_cleanup(&triangle);
 }
 
 void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)

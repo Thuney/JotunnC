@@ -19,6 +19,11 @@ static void gl_vertex_array_bind(struct vertex_array_t* vertex_array)
    glBindVertexArray(vertex_array->vertex_array);
 }
 
+void gl_vertex_array_unbind()
+{
+   glBindVertexArray(0);
+}
+
 static GLenum get_gl_attribute_data_type(enum vertex_attribute_data_type_t data_type)
 {
    GLenum gl_data_type;
@@ -100,6 +105,11 @@ int platform_vertex_array_init(struct vertex_array_t* vertex_array, int num)
 void platform_vertex_array_bind(struct vertex_array_t* vertex_array)
 {
    gl_vertex_array_bind(vertex_array);
+}
+
+void platform_vertex_array_unbind()
+{
+   gl_vertex_array_unbind();
 }
 
 void platform_vertex_array_set_attribute(struct vertex_array_t* vertex_array, struct vertex_attribute_t* vertex_attribute)

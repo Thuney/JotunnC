@@ -24,6 +24,7 @@ HDRS     := \
 			./include/window.h           \
 											     \
 			./include/renderer_2d.h      \
+			./include/renderable_2d.h    \
 			./include/camera.h           \
 											     \
 			./include/shader.h           \
@@ -41,6 +42,7 @@ CORE_SRC := \
 			./src/core/application/window.c                  \
 															             \
 			./src/core/graphics/renderer_2d.c                \
+			./src/core/graphics/renderable_2d.c              \
 			./src/core/graphics/camera.c		                \
 															             \
 			./src/core/graphics/datatypes/shader.c           \

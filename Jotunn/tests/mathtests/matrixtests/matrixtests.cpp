@@ -72,8 +72,8 @@ BOOST_AUTO_TEST_CASE(basic_operation_tests, *boost::unit_test::tolerance(0.0001)
    fmatrix_2x2_set(&mat_2d_added_key, mat_2d_added_key_buf);
    fmatrix_2x2_set(&mat_2d_subbed_key, mat_2d_subbed_key_buf);
 
-   mat_2d_added  = fmatrix_2x2_add(mat_2d_a, mat_2d_b);
-   mat_2d_subbed = fmatrix_2x2_subtract(mat_2d_a, mat_2d_b);
+   mat_2d_added  = fmatrix_2x2_add(&mat_2d_a, &mat_2d_b);
+   mat_2d_subbed = fmatrix_2x2_subtract(&mat_2d_a, &mat_2d_b);
 
    BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d_added, &mat_2d_added_key) );
    BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d_subbed, &mat_2d_subbed_key) );
@@ -105,8 +105,8 @@ BOOST_AUTO_TEST_CASE(multiplication_tests, *boost::unit_test::tolerance(0.0001))
       fmatrix_2x2_set(&mat_2d_axb_mult_key, mat_2d_axb_mult_key_buf);
       fmatrix_2x2_set(&mat_2d_bxa_mult_key, mat_2d_bxa_mult_key_buf);
 
-      mat_2d_axb_mult = fmatrix_2x2_multiply(mat_2d_a, mat_2d_b);
-      mat_2d_bxa_mult = fmatrix_2x2_multiply(mat_2d_b, mat_2d_a);
+      mat_2d_axb_mult = fmatrix_2x2_multiply(&mat_2d_a, &mat_2d_b);
+      mat_2d_bxa_mult = fmatrix_2x2_multiply(&mat_2d_b, &mat_2d_a);
 
       BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d_axb_mult, &mat_2d_axb_mult_key) );
       BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d_bxa_mult, &mat_2d_bxa_mult_key) );
@@ -141,8 +141,8 @@ BOOST_AUTO_TEST_CASE(multiplication_tests, *boost::unit_test::tolerance(0.0001))
       fmatrix_3x3_set(&mat_3d_axb_mult_key, mat_2d_axb_mult_key_buf);
       fmatrix_3x3_set(&mat_3d_bxa_mult_key, mat_2d_bxa_mult_key_buf);
 
-      mat_3d_axb_mult = fmatrix_3x3_multiply(mat_3d_a, mat_3d_b);
-      mat_3d_bxa_mult = fmatrix_3x3_multiply(mat_3d_b, mat_3d_a);
+      mat_3d_axb_mult = fmatrix_3x3_multiply(&mat_3d_a, &mat_3d_b);
+      mat_3d_bxa_mult = fmatrix_3x3_multiply(&mat_3d_b, &mat_3d_a);
 
       BOOST_TEST( fmatrix_3x3_are_equal(&mat_3d_axb_mult, &mat_3d_axb_mult_key) );
       BOOST_TEST( fmatrix_3x3_are_equal(&mat_3d_bxa_mult, &mat_3d_bxa_mult_key) );

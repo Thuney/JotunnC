@@ -54,17 +54,17 @@ typedef union fmatrix_4x4_t
 
 #ifdef DEBUG
 
-int fmatrix_2x2_are_equal(fmatrix_2x2* matrix1, fmatrix_2x2* matrix2);
-int fmatrix_3x3_are_equal(fmatrix_3x3* matrix1, fmatrix_3x3* matrix2);
-int fmatrix_4x4_are_equal(fmatrix_4x4* matrix1, fmatrix_4x4* matrix2);
+int fmatrix_2x2_are_equal(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2);
+int fmatrix_3x3_are_equal(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2);
+int fmatrix_4x4_are_equal(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2);
 
-int fmatrix_2x2_is_identity(fmatrix_2x2* matrix);
-int fmatrix_3x3_is_identity(fmatrix_3x3* matrix);
-int fmatrix_4x4_is_identity(fmatrix_4x4* matrix);
+int fmatrix_2x2_is_identity(const fmatrix_2x2* matrix);
+int fmatrix_3x3_is_identity(const fmatrix_3x3* matrix);
+int fmatrix_4x4_is_identity(const fmatrix_4x4* matrix);
 
-void fmatrix_2x2_print(fmatrix_2x2* matrix);
-void fmatrix_3x3_print(fmatrix_3x3* matrix);
-void fmatrix_4x4_print(fmatrix_4x4* matrix);
+void fmatrix_2x2_print(const fmatrix_2x2* matrix);
+void fmatrix_3x3_print(const fmatrix_3x3* matrix);
+void fmatrix_4x4_print(const fmatrix_4x4* matrix);
 
 #endif
 
@@ -80,18 +80,18 @@ void fmatrix_2x2_set(fmatrix_2x2* matrix, const float mat_data[2][2]);
 void fmatrix_3x3_set(fmatrix_3x3* matrix, const float mat_data[3][3]);
 void fmatrix_4x4_set(fmatrix_4x4* matrix, const float mat_data[4][4]);
 
-fmatrix_2x2 fmatrix_2x2_add(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2);
-fmatrix_3x3 fmatrix_3x3_add(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2);
-fmatrix_4x4 fmatrix_4x4_add(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2);
+fmatrix_2x2 fmatrix_2x2_add(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2);
+fmatrix_3x3 fmatrix_3x3_add(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2);
+fmatrix_4x4 fmatrix_4x4_add(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2);
 
-fmatrix_2x2 fmatrix_2x2_subtract(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2);
-fmatrix_3x3 fmatrix_3x3_subtract(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2);
-fmatrix_4x4 fmatrix_4x4_subtract(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2);
+fmatrix_2x2 fmatrix_2x2_subtract(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2);
+fmatrix_3x3 fmatrix_3x3_subtract(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2);
+fmatrix_4x4 fmatrix_4x4_subtract(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2);
 
-fmatrix_2x2 fmatrix_2x2_scale(fmatrix_2x2 matrix, float scalar);
-fmatrix_3x3 fmatrix_3x3_scale(fmatrix_3x3 matrix, float scalar);
-fmatrix_4x4 fmatrix_4x4_scale(fmatrix_4x4 matrix, float scalar);
+fmatrix_2x2 fmatrix_2x2_scale(const fmatrix_2x2* matrix, const float scalar);
+fmatrix_3x3 fmatrix_3x3_scale(const fmatrix_3x3* matrix, const float scalar);
+fmatrix_4x4 fmatrix_4x4_scale(const fmatrix_4x4* matrix, const float scalar);
 
-fmatrix_2x2 fmatrix_2x2_multiply(fmatrix_2x2 matrix1, fmatrix_2x2 matrix2);
-fmatrix_3x3 fmatrix_3x3_multiply(fmatrix_3x3 matrix1, fmatrix_3x3 matrix2);
-fmatrix_4x4 fmatrix_4x4_multiply(fmatrix_4x4 matrix1, fmatrix_4x4 matrix2);
+fmatrix_2x2 fmatrix_2x2_multiply(const fmatrix_2x2* matrix1, const fmatrix_2x2* matrix2);
+fmatrix_3x3 fmatrix_3x3_multiply(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2);
+fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2);

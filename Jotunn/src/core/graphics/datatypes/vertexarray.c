@@ -2,6 +2,7 @@
 
 extern int platform_vertex_array_init(struct vertex_array_t* vertex_array, int num);
 extern void platform_vertex_array_bind(struct vertex_array_t* vertex_array);
+extern void platform_vertex_array_unbind();
 extern void platform_vertex_array_set_attribute(struct vertex_array_t* vertex_array, struct vertex_attribute_t* vertex_attribute);
 extern void platform_vertex_array_destroy(struct vertex_array_t* vertex_array, int num);
 
@@ -12,7 +13,12 @@ int vertex_array_init(struct vertex_array_t* vertex_array, int num)
 
 void vertex_array_bind(struct vertex_array_t* vertex_array)
 {
-   platform_vertex_array_bind(vertex_array);  
+   platform_vertex_array_bind(vertex_array);
+}
+
+void vertex_array_unbind()
+{
+   platform_vertex_array_unbind();
 }
 
 void vertex_array_set_attribute(struct vertex_array_t* vertex_array, struct vertex_attribute_t* vertex_attribute)
