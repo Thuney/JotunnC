@@ -193,7 +193,7 @@ fmatrix_4x4 fmatrix_4x4_scale(fmatrix_4x4 matrix, float scalar)
 
 static void fmatrix_multiply(float* matrix_dest, float* matrix1, float* matrix2, int dim)
 {
-   int r, c, i, j;
+   int r, c, i;
    float sum;
 
    for (r = 0; r < dim; r++)

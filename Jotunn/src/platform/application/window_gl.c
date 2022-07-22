@@ -6,6 +6,9 @@
 #include "window.h"
 
 #include "shader.h"
+#include "vertexarray.h"
+#include "vertexattribute.h"
+#include "vertexbuffer.h"
 
 /**************************************************
  * 
@@ -138,7 +141,9 @@ void gl_window_error_callback(int error_code, const char* description)
  * 
  **************************************************/
 static struct shader_program_t shader_program;
-static GLuint vao, vbo;
+static struct vertex_attribute_t pos_attribute;
+static struct vertex_array_t vao;
+static struct vertex_buffer_t vbo;
 
 void window_gl_do_stuff_init(struct window_t* window)
 {
@@ -149,53 +154,44 @@ void window_gl_do_stuff_init(struct window_t* window)
    fragment_shader_init(&fragment_shader, fragment_shader_src);
 
    shader_program_init(&shader_program, &vertex_shader, &fragment_shader);
+   shader_program_bind_fragment_data_location(&shader_program, 0, "outColor");
+   shader_program_link(&shader_program);
 
-   //Now that we have compiled the shaders into a single program, we can dispose of them
-	glDeleteShader(vertex_shader.vertex_shader);
-	glDeleteShader(fragment_shader.fragment_shader);
+   vertex_shader_destroy(&vertex_shader);
+   fragment_shader_destroy(&fragment_shader);
 
-   /***************
-    * VERTEX ARRAYS
-    ***************/
+   vertex_array_init(&vao, 1);
+   vertex_buffer_init(&vbo, 1);
 
-   //Initialization and binding of a vertex array object for linking our vertex attributes to
-	//our vertex buffer object containing the vertex data. The VAO has to be instantiated and bound 
-	//before the vertex buffer object and vertex attribute arrays, and those components will be automatically
-	//added to the VAO when they are instantiated
-	glGenVertexArrays(1, &vao);
+   vertex_array_bind(&vao);
+   vertex_buffer_bind(&vbo);
 
-	//Initialization of our vertex buffer object, which stores the vertex data for the triangle we're trying to draw
-	glGenBuffers(1, &vbo);
+   vertex_buffer_buffer_data(&vbo, triangle_vertices, sizeof(triangle_vertices), STATIC_DRAW);
 
-	//Create VAO with settings for triangle
-	glBindVertexArray(vao);
+   int triangle_pos_attrib_index = shader_program_get_attribute_location(&shader_program, "position");
 
-	//Set the vbo as the system's active buffer
-	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	//Add our vertex data to the vbo
-	glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_vertices), triangle_vertices, GL_STATIC_DRAW);
+   vertex_attribute_init(&pos_attribute, triangle_pos_attrib_index, 2, V_FLOAT, GL_FALSE, 0, 0);
+   vertex_array_set_attribute(&vao, &pos_attribute);
 
-	//Find the index of the "position" attribute in the vertex shader
-	GLint triangle_pos_attrib = glGetAttribLocation(shader_program.shader_program, "position");
-	//Specify how to interpret the vertex data for our position attribute
-	glVertexAttribPointer(triangle_pos_attrib, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(triangle_pos_attrib);
+	// //Specify how to interpret the vertex data for our position attribute
+	// glVertexAttribPointer(triangle_pos_attrib_index, 2, GL_FLOAT, GL_FALSE, 0, 0);
+	// glEnableVertexAttribArray(triangle_pos_attrib_index);
 
 	glBindVertexArray(0);
 }
 
 void window_gl_do_stuff_run(struct window_t* window)
 {
-   glBindVertexArray(vao);
-   glUseProgram(shader_program.shader_program);
+   vertex_array_bind(&vao);
+   shader_program_use(&shader_program);
    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 void window_gl_do_stuff_cleanup(struct window_t* window)
 {
-   glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-   glDeleteProgram(shader_program.shader_program);
+   vertex_array_destroy(&vao, 1);
+   vertex_buffer_destroy(&vbo, 1);
+   shader_program_destroy(&shader_program);
 }
 
 void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)

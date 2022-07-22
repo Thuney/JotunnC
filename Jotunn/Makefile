@@ -20,42 +20,54 @@ TARGET   := libjotunn.so
 INCLUDE  := -I./include \
 
 HDRS     := \
-			./include/application.h \
-			./include/window.h      \
-											\
-			./include/renderer_2d.h \
-			./include/camera.h      \
-											\
-			./include/shader.h      \
-											\
-			./include/fvector.h     \
-			./include/fmatrix.h     \
-			./include/fquaternion.h \
+			./include/application.h      \
+			./include/window.h           \
+											     \
+			./include/renderer_2d.h      \
+			./include/camera.h           \
+											     \
+			./include/shader.h           \
+			./include/vertexarray.h      \
+			./include/vertexattribute.h  \
+			./include/vertexbuffer.h     \
+											     \
+			./include/fvector.h          \
+			./include/fmatrix.h          \
+			./include/fquaternion.h      \
 
 # Platform independent application sources
 CORE_SRC := \
-			./src/core/application/application.c   \
-			./src/core/application/window.c        \
-															   \
-			./src/core/graphics/renderer_2d.c      \
-			./src/core/graphics/camera.c		      \
-															   \
-			./src/core/graphics/datatypes/shader.c \
-																\
-			./src/math/fvector.c    				   \
-			./src/math/fmatrix.c						   \
-			./src/math/fquaternion.c				   \
+			./src/core/application/application.c             \
+			./src/core/application/window.c                  \
+															             \
+			./src/core/graphics/renderer_2d.c                \
+			./src/core/graphics/camera.c		                \
+															             \
+			./src/core/graphics/datatypes/shader.c           \
+			./src/core/graphics/datatypes/vertexarray.c      \
+			./src/core/graphics/datatypes/vertexattribute.c  \
+			./src/core/graphics/datatypes/vertexbuffer.c     \
+																          \
+			./src/math/fvector.c    				             \
+			./src/math/fmatrix.c						             \
+			./src/math/fquaternion.c				             \
 
 # Alternate source linking depending on graphical backend
 ifeq ($(GRAPHICS_BACKEND), OPENGL)
 
-PLATFORM_SRC := ./src/platform/application/window_gl.c 		  \
-					 ./src/platform/graphics/datatypes/shader_gl.c \
+PLATFORM_SRC := ./src/platform/application/window_gl.c 		            \
+					 ./src/platform/graphics/datatypes/shader_gl.c           \
+					 ./src/platform/graphics/datatypes/vertexarray_gl.c      \
+					 ./src/platform/graphics/datatypes/vertexattribute_gl.c  \
+					 ./src/platform/graphics/datatypes/vertexbuffer_gl.c     \
 
 else
 
-PLATFORM_SRC := ./src/platform/application/window_no_backend.c 		 \
-					 ./src/platform/graphics/datatypes/shader_no_backend.c \
+PLATFORM_SRC := ./src/platform/application/window_no_backend.c 		           \
+					 ./src/platform/graphics/datatypes/shader_no_backend.c           \
+					 ./src/platform/graphics/datatypes/vertexarray_no_backend.c      \
+					 ./src/platform/graphics/datatypes/vertexattribute_no_backend.c  \
+					 ./src/platform/graphics/datatypes/vertexbuffer_no_backend.c     \
 
 endif
 
