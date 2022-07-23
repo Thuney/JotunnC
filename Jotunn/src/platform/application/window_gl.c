@@ -3,9 +3,10 @@
 
 #include <stdio.h>
 
+#include "fvector.h"
+#include "render_api.h"
+#include "renderer_2d.h"
 #include "window.h"
-
-#include "renderable_2d.h"
 
 /**************************************************
  * 
@@ -102,121 +103,11 @@ void gl_window_error_callback(int error_code, const char* description)
    #endif
 }
 
-struct vertex_data_2d_t
-{
-   fvector2 position;
-   fvector4 color_rgba;
-};
-
-struct rgba_triangle_2d_t
-{
-   struct vertex_data_2d_t vertices[3];
-   unsigned int indices[3];
-};
-
-struct rgba_square_2d_t
-{
-   struct vertex_data_2d_t vertices[4];
-   unsigned int indices[6];
-};
-
-static struct rgba_triangle_2d_t triangle_data;
-static struct rgba_square_2d_t square_data;
-
 /**************************************************
  * 
  *  Internal GL window functions
  * 
  **************************************************/
-static struct renderable_2d_t triangle, square;
-
-void window_gl_do_stuff_init(struct window_t* window)
-{
-   // V0 Pos
-   triangle_data.vertices[0].position.comp.x = -0.75f;
-   triangle_data.vertices[0].position.comp.y =  0.0f;
-   // V0 Color
-   triangle_data.vertices[0].color_rgba.comp.w = 1.0f;
-   triangle_data.vertices[0].color_rgba.comp.x = 0.0f;
-   triangle_data.vertices[0].color_rgba.comp.y = 0.0f;
-   triangle_data.vertices[0].color_rgba.comp.z = 1.0f;
-   // V1 Pos
-   triangle_data.vertices[1].position.comp.x = -0.5f;
-   triangle_data.vertices[1].position.comp.y =  0.5f;
-   // V1 Color
-   triangle_data.vertices[1].color_rgba.comp.w = 0.0f;
-   triangle_data.vertices[1].color_rgba.comp.x = 1.0f;
-   triangle_data.vertices[1].color_rgba.comp.y = 0.0f;
-   triangle_data.vertices[1].color_rgba.comp.z = 1.0f;
-   // V2 Pos
-   triangle_data.vertices[2].position.comp.x = -0.25f;
-   triangle_data.vertices[2].position.comp.y =  0.0f;
-   // V2 Color
-   triangle_data.vertices[2].color_rgba.comp.w = 0.0f;
-   triangle_data.vertices[2].color_rgba.comp.x = 0.0f;
-   triangle_data.vertices[2].color_rgba.comp.y = 1.0f;
-   triangle_data.vertices[2].color_rgba.comp.z = 1.0f;
-
-   triangle_data.indices[0] = 0;
-   triangle_data.indices[1] = 1;
-   triangle_data.indices[2] = 2;
-
-   // V0 Pos
-   square_data.vertices[0].position.comp.x = 0.25f;
-   square_data.vertices[0].position.comp.y = 0.25f;
-   // V0 Color
-   square_data.vertices[0].color_rgba.comp.w = 1.0f;
-   square_data.vertices[0].color_rgba.comp.x = 0.0f;
-   square_data.vertices[0].color_rgba.comp.y = 0.0f;
-   square_data.vertices[0].color_rgba.comp.z = 1.0f;
-   // V1 Pos
-   square_data.vertices[1].position.comp.x = 0.75f;
-   square_data.vertices[1].position.comp.y = 0.25f;
-   // V1 Color
-   square_data.vertices[1].color_rgba.comp.w = 0.0f;
-   square_data.vertices[1].color_rgba.comp.x = 1.0f;
-   square_data.vertices[1].color_rgba.comp.y = 0.0f;
-   square_data.vertices[1].color_rgba.comp.z = 1.0f;
-   // V2 Pos
-   square_data.vertices[2].position.comp.x = 0.75f;
-   square_data.vertices[2].position.comp.y = 0.75f;
-   // V2 Color
-   square_data.vertices[2].color_rgba.comp.w = 0.0f;
-   square_data.vertices[2].color_rgba.comp.x = 0.0f;
-   square_data.vertices[2].color_rgba.comp.y = 1.0f;
-   square_data.vertices[2].color_rgba.comp.z = 1.0f;
-   // V3 Pos
-   square_data.vertices[3].position.comp.x = 0.25f;
-   square_data.vertices[3].position.comp.y = 0.75f;
-   // V3 Color
-   square_data.vertices[3].color_rgba.comp.w = 0.0f;
-   square_data.vertices[3].color_rgba.comp.x = 0.0f;
-   square_data.vertices[3].color_rgba.comp.y = 0.0f;
-   square_data.vertices[3].color_rgba.comp.z = 1.0f;
-
-   square_data.indices[0] = 0;
-   square_data.indices[1] = 1;
-   square_data.indices[2] = 2;
-   square_data.indices[3] = 0;
-   square_data.indices[4] = 3;
-   square_data.indices[5] = 2;
-
-   renderable_2d_init(&triangle, (float*)&triangle_data.vertices, 3, (unsigned int*)&triangle_data.indices, 3);
-   renderable_2d_init(&square, (float*)&square_data.vertices, 4, (unsigned int*)&square_data.indices, 6);
-}
-
-void window_gl_do_stuff_run(struct window_t* window)
-{
-   renderable_2d_render(&triangle);
-   renderable_2d_render(&square);
-}
-
-void window_gl_do_stuff_cleanup(struct window_t* window)
-{
-   renderable_2d_cleanup(&triangle);
-   renderable_2d_cleanup(&square);
-}
-
 void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
 {
    // Window action callback assignment
@@ -271,22 +162,13 @@ int window_gl_init(struct window_t* window)
       is_glew_initialized = (glewInit() == GLEW_OK);
    }
 
-   glEnable(GL_BLEND);
-   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-   window_gl_do_stuff_init(window);
-
    return !(is_glfw_initialized && is_glew_initialized);
 }
 
 void window_gl_run(struct window_t* window)
 {
-   glClear(GL_COLOR_BUFFER_BIT);
-
    GLFWwindow* gl_window_ptr;
    gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
-
-   window_gl_do_stuff_run(window);
 
    glfwPollEvents();
    glfwSwapBuffers(gl_window_ptr);
@@ -300,8 +182,6 @@ void window_gl_cleanup(struct window_t* window)
 
    if (is_glfw_initialized)
    {
-      window_gl_do_stuff_cleanup(window);
-
       GLFWwindow* gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
 
       glfwDestroyWindow(gl_window_ptr);
@@ -340,7 +220,7 @@ void window_graphics_cleanup(struct window_t* window)
    window_gl_cleanup(window);
 }
 
-void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
+void window_graphics_set_background_color(struct window_t* window, const fvector4 color)
 {
-   glClearColor(red, green, blue, alpha);
+   render_api_set_clear_color(color);
 }

@@ -3,6 +3,23 @@
 
 #include "fvector.h"
 
+#ifdef DEBUG
+void fvector2_print(const fvector2* vector)
+{
+   fprintf(stdout, "fvector2 - X = %f, Y = %f\n", vector->comp.x, vector->comp.y);
+}
+
+void fvector3_print(const fvector3* vector)
+{
+   fprintf(stdout, "fvector3 - X = %f, Y = %f, Z = %f\n", vector->comp.x, vector->comp.y, vector->comp.z);
+}
+
+void fvector4_print(const fvector4* vector)
+{
+   fprintf(stdout, "fvector4 - W = %f, X = %f, Y = %f, Z = %f\n", vector->comp.w, vector->comp.x, vector->comp.y, vector->comp.z);
+}
+#endif
+
 void fvector2_init(fvector2* vector)
 {
    memset(vector, 0, sizeof(fvector2));
@@ -16,6 +33,27 @@ void fvector3_init(fvector3* vector)
 void fvector4_init(fvector4* vector)
 {
    memset(vector, 0, sizeof(fvector4));
+}
+
+void fvector2_set(fvector2* vector, float x, float y)
+{
+   vector->comp.x = x;
+   vector->comp.y = y;
+}
+
+void fvector3_set(fvector3* vector, float x, float y, float z)
+{
+   vector->comp.x = x;
+   vector->comp.y = y;
+   vector->comp.x = z;
+}
+
+void fvector4_set(fvector4* vector, float w, float x, float y, float z)
+{
+   vector->comp.w = w;
+   vector->comp.x = x;
+   vector->comp.y = y;
+   vector->comp.z = z;
 }
 
 float fvector2_magnitude(const fvector2* vector)

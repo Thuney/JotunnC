@@ -36,9 +36,21 @@ typedef union fvector4_t
     */
 } fvector4;
 
+#ifdef DEBUG
+    #include <stdio.h>
+
+    void fvector2_print(const fvector2* vector);
+    void fvector3_print(const fvector3* vector);
+    void fvector4_print(const fvector4* vector);
+#endif
+
 void fvector2_init(fvector2* vector);
 void fvector3_init(fvector3* vector);
 void fvector4_init(fvector4* vector);
+
+void fvector2_set(fvector2* vector, float x, float y);
+void fvector3_set(fvector3* vector, float x, float y, float z);
+void fvector4_set(fvector4* vector, float w, float x, float y, float z);
 
 float fvector2_magnitude(const fvector2* vector);
 float fvector3_magnitude(const fvector3* vector);

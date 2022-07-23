@@ -14,6 +14,7 @@ enum renderable_2d_attribute_t
 
 struct renderable_2d_t
 {
+   struct shader_program_t* shader_program;
    float* vertex_data;
    unsigned int num_vertices;
    unsigned int* index_data;
@@ -25,5 +26,4 @@ struct renderable_2d_t
 };
 
 void renderable_2d_init(struct renderable_2d_t* renderable_2d, float* vertex_data, unsigned int num_vertices, unsigned int* index_data, unsigned int num_indices);
-void renderable_2d_render(struct renderable_2d_t* renderable_2d);
 void renderable_2d_cleanup(struct renderable_2d_t* renderable_2d);

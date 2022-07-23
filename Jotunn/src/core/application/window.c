@@ -1,3 +1,4 @@
+#include "fvector.h"
 #include "window.h"
 
 #include <memory.h>
@@ -8,7 +9,7 @@
 extern int window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
-extern void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha);
+extern void window_graphics_set_background_color(struct window_t* window, const fvector4 color);
 
 // Window Callbacks
 
@@ -36,13 +37,31 @@ int window_init(struct window_t* window, int width, int height, char* tag)
 
     int error = window_graphics_init(window);
 
-    window_set_background_color(window, 0.1f, 0.1f, 0.1f, 1.0f);
+    fvector4 background_color;
+    fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+    window_set_background_color(window, background_color);
+
+    // renderer_2d_init(&window->renderer, "2DRenderer");
+
+    fvector4 triangle_color, square_color;
+    fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
+    fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
+
+    rgba_triangle_2d_init(&window->triangle, triangle_color);
+    rgba_square_2d_init(&window->square, square_color);
 
     return error;
 }
 
 int window_run(struct window_t* window)
 {
+    renderer_2d_begin(&window->renderer);
+
+    renderer_2d_submit_2d_prim(&window->renderer, &window->triangle.renderable_data);
+    // renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
+
+    renderer_2d_end(&window->renderer);
+
     window_graphics_run(window);
 
     return window->metadata.signaled_close;
@@ -53,10 +72,15 @@ void window_cleanup(struct window_t* window)
     free(window->metadata.tag);
     window->metadata.tag = 0;
 
+    renderer_2d_cleanup(&window->renderer);
+
+    renderable_2d_cleanup(&window->triangle.renderable_data);
+    renderable_2d_cleanup(&window->square.renderable_data);
+
     window_graphics_cleanup(window);
 }
 
-void window_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
+void window_set_background_color(struct window_t* window, const fvector4 color)
 {
-    window_graphics_set_background_color(window, red, green, blue, alpha);
+    window_graphics_set_background_color(window, color);
 }
