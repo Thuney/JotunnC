@@ -16,7 +16,6 @@ static fmatrix_4x4 position_as_matrix(const fvector3 position)
 
 static fmatrix_4x4 calculate_look_at_matrix(const fvector3 position, const fvector3 target, const fvector3 up)
 {
-
    fvector3 direction, right;
 
    fvector3 pos_minus_target, up_cross_direction;

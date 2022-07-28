@@ -37,6 +37,10 @@ int window_init(struct window_t* window, int width, int height, char* tag)
 
     int error = window_graphics_init(window);
 
+    #ifdef DEBUG
+        if (error) fprintf(stdout, "Error during window_graphics_init\n");
+    #endif
+
     fvector4 background_color;
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
@@ -48,9 +52,9 @@ int window_init(struct window_t* window, int width, int height, char* tag)
     fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
 
     rgba_triangle_2d_init(&window->triangle, triangle_color);
-    rgba_square_2d_init(&window->square, square_color);
+    // rgba_square_2d_init(&window->square, square_color);
 
-    // fmatrix_4x4_scale(&window->triangle.renderable_data.model_matrix, 10.0f);
+    // fmatrix_4x4_scale(&window->triangle.renderable_data.model_matrix, 0.1f);
     // fmatrix_4x4_scale(&window->square.renderable_data.model_matrix, 5.0f);
 
     return error;
@@ -61,7 +65,7 @@ int window_run(struct window_t* window)
     renderer_2d_begin(&window->renderer);
 
     renderer_2d_submit_2d_prim(&window->renderer, &window->triangle.renderable_data);
-    renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
+    // renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
 
     renderer_2d_end(&window->renderer);
 
@@ -78,7 +82,7 @@ void window_cleanup(struct window_t* window)
     renderer_2d_cleanup(&window->renderer);
 
     renderable_2d_cleanup(&window->triangle.renderable_data);
-    renderable_2d_cleanup(&window->square.renderable_data);
+    // renderable_2d_cleanup(&window->square.renderable_data);
 
     window_graphics_cleanup(window);
 }

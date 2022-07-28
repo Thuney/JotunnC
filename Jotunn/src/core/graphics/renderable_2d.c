@@ -8,33 +8,40 @@
  * 
  **************************************************/
 
+static struct shader_program_t s_renderable_2d_shader_program;
+
 static unsigned int initialized = 0;
 static unsigned int instances   = 0;
 
-static struct shader_program_t s_renderable_2d_shader_program;
-
 static void renderable_2d_shader_init(struct shader_program_t* shader)
 {
-   struct vertex_shader_t vertex_shader;
-   struct fragment_shader_t fragment_shader;
+   if (!initialized)
+   {
+      struct vertex_shader_t vertex_shader;
+      struct fragment_shader_t fragment_shader;
 
-   int error;
+      int error;
 
-   error = vertex_shader_init_filepath(&vertex_shader, "/vol/Projects/JotunnC/Jotunn/res/shaders/renderable_2d.vert");
-   if (error) fprintf(stdout, "Error occurred during renderable_2d vertex shader init\n");
+      error = vertex_shader_init_filepath(&vertex_shader, "../../../Jotunn/res/shaders/renderable_2d.vert");
+      if (error) fprintf(stdout, "Error occurred during renderable_2d vertex shader init\n");
 
-   error = fragment_shader_init_filepath(&fragment_shader, "/vol/Projects/JotunnC/Jotunn/res/shaders/renderable_2d.frag");
-   if (error) fprintf(stdout, "Error occurred during renderable_2d fragment shader init\n");
+      error = fragment_shader_init_filepath(&fragment_shader, "../../../Jotunn/res/shaders/renderable_2d.frag");
+      if (error) fprintf(stdout, "Error occurred during renderable_2d fragment shader init\n");
 
-   error = shader_program_init(shader, &vertex_shader, &fragment_shader);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program init\n");
+      error = shader_program_init(shader, &vertex_shader, &fragment_shader);
+      if (error) fprintf(stdout, "Error occurred during renderable_2d shader program init\n");
 
-   shader_program_bind_fragment_data_location(shader, 0, "fColor");
-   error = shader_program_link(shader);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program linkage\n");
+      shader_program_bind_fragment_data_location(shader, 0, "fColor");
+      error = shader_program_link(shader);
+      if (error) fprintf(stdout, "Error occurred during renderable_2d shader program linkage\n");
 
-   vertex_shader_destroy(&vertex_shader);
-   fragment_shader_destroy(&fragment_shader);
+      vertex_shader_destroy(&vertex_shader);
+      fragment_shader_destroy(&fragment_shader);
+
+      instances   = 0;
+      initialized = 1;
+   }
+   instances++;
 }
 
 static void renderable_2d_vao_init(struct renderable_2d_t* renderable_2d, float* vertex_data, unsigned int num_vertices, unsigned int* index_data, unsigned int num_indices)
@@ -84,13 +91,7 @@ void renderable_2d_init(struct renderable_2d_t* renderable_2d, float* vertex_dat
 
    fmatrix_4x4_init(&renderable_2d->model_matrix);
 
-   if(!initialized)
-   {
-      renderable_2d_shader_init(&s_renderable_2d_shader_program);
-      instances = 0;
-      initialized = 1;
-   }
-   instances++;
+   renderable_2d_shader_init(&s_renderable_2d_shader_program);
    renderable_2d->shader_program = &s_renderable_2d_shader_program;
 
    // Vertex Array / Buffer
@@ -103,7 +104,7 @@ void renderable_2d_cleanup(struct renderable_2d_t* renderable_2d)
    vertex_array_destroy(&renderable_2d->vao, 1);
    vertex_buffer_destroy(&renderable_2d->vbo, 1);
 
-   if(--instances == 0) 
+   if(--instances == 0)
    {
       shader_program_destroy(&s_renderable_2d_shader_program);
       initialized = 0;

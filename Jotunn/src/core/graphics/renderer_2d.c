@@ -53,7 +53,7 @@ void renderer_2d_submit_2d_prim(struct renderer_2d_t* renderer, struct renderabl
    view       = renderer->camera.base.view_matrix;
    projection = renderer->camera.base.projection_matrix;
 
-   // fmatrix_4x4_transpose(&model);
+   fmatrix_4x4_transpose(&model);
    fmatrix_4x4_transpose(&view);
    fmatrix_4x4_transpose(&projection);
 
