@@ -34,6 +34,101 @@ void fmatrix_4x4_identity(fmatrix_4x4* matrix)
    fmatrix_identity(&(matrix->mat[0][0]), 4);
 }
 
+//
+
+/*
+ * |---|---|
+ * | A | B |  Swap [0,1] with [1,0]
+ * |---|---|
+ * | C | D |   00 [01]
+ * |---|---|  [10] 11
+ *       |
+ *       V 
+ * |---|---|
+ * | A | C |
+ * |---|---|
+ * | B | D |
+ * |---|---|
+ */
+
+/*
+ * |---|---|---|
+ * | A | B | C |  Swap [0,1] with [1,0]; Swap [0,2] with [2,0]; Swap [1,2] with [2,1]
+ * |---|---|---|
+ * | D | E | F |    00  [01] [02]
+ * |---|---|---|   [10]  11  [12]
+ * | G | H | I |   [20] [21]  22
+ * |---|---|---|
+ *       |
+ *       V 
+ * |---|---|---|
+ * | A | D | G |
+ * |---|---|---|
+ * | B | E | H |
+ * |---|---|---|
+ * | C | F | I |
+ * |---|---|---|
+ */
+
+/*
+ * |---|---|---|---|
+ * | A | B | C | D |  00  [01] [02] [03]
+ * |---|---|---|---| [10]  11  [12] [13]
+ * | E | F | G | H | [20] [21]  22  [23]
+ * |---|---|---|---| [30] [31] [32]  33
+ * | I | J | K | L |
+ * |---|---|---|---|
+ * | M | N | O | P |
+ * |---|---|---|---|
+ *       |
+ *       V 
+ * |---|---|---|---|
+ * | A | E | I | M |
+ * |---|---|---|---|
+ * | B | F | J | N |
+ * |---|---|---|---|
+ * | C | G | K | O |
+ * |---|---|---|---|
+ * | D | H | L | P |
+ * |---|---|---|---|
+ */
+
+// for i in ((dim*dim)/2) if (r != c) swap m[r][c] with m[c][r] if hasn't already been swapped 
+
+static void fmatrix_transpose(float* matrix, const int dim)
+{
+   int r, c;
+   float temp;
+
+   for (r = 0; r < dim; r++)
+   {
+      for (c = 0; c < dim; c++)
+      {
+         if (c > r)
+         {
+            temp = matrix[dim*c + r];
+            matrix[dim*c + r] = matrix[dim*r + c];
+            matrix[dim*r + c] = temp;
+         }
+      }
+   }
+}
+
+void fmatrix_2x2_transpose(fmatrix_2x2* matrix)
+{
+   fmatrix_transpose(matrix->buf, 2);
+}
+
+void fmatrix_3x3_transpose(fmatrix_3x3* matrix)
+{
+   fmatrix_transpose(matrix->buf, 3);
+}
+
+void fmatrix_4x4_transpose(fmatrix_4x4* matrix)
+{
+   fmatrix_transpose(matrix->buf, 4);
+}
+
 // 
 
 void fmatrix_2x2_init(fmatrix_2x2* matrix)
@@ -271,7 +366,7 @@ static int fmatrix_are_equal(const float* matrix1, const float* matrix2, const i
          b = matrix2[dim*r + c];
 
          // Row and Column are equal AND !(cur_val = 1)
-         if ( !(fabs(a - b) < 0.0001) )
+         if ( !(fabs(a - b) < 0.001) )
          {
             are_equal = 0;
          }

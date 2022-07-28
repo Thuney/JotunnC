@@ -43,12 +43,12 @@ void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
       fprintf(stdout, "Event - Framebuffer Resize - W: %d H: %d\n", width, height);
    #endif
 
-   // struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
-   // metadata->width  = width;
-   // metadata->height = height;
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+   metadata->width  = width;
+   metadata->height = height;
 
    // Set the GL viewport to the size of the window
-   // glViewport(0, 0, metadata->width, metadata->height);
+   glViewport(0, 0, metadata->width, metadata->height);
 }
 
 void gl_window_close_callback(GLFWwindow* window)
@@ -155,6 +155,8 @@ int window_gl_init(struct window_t* window)
    window_gl_set_callbacks(gl_window_ptr);
 
    glfwMakeContextCurrent(gl_window_ptr);
+   // Set the GL viewport to the size of the window
+   glViewport(0, 0, window->metadata.width, window->metadata.height);
 
    if (!is_glew_initialized)
    {

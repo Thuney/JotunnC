@@ -1,37 +1,12 @@
 #include "renderable_2d.h"
 
+#include <stdio.h>
+
 /**************************************************
  * 
  *  Variables
  * 
  **************************************************/
-
-static const char* vertex_shader_src =
-   "#version 150"
-   "\n"
-   "in vec2 position;\n"
-   "\n"
-   "in vec4 color;"
-   "\n"
-   "out vec4 vColor;"
-   "\n"
-   "void main()"
-   "{"
-   "	gl_Position = vec4(position, 0.0, 1.0);"
-   "  vColor = color;"
-   "};";
-
-static const char* fragment_shader_src =
-   "#version 150"
-   "\n"
-   "in vec4 vColor;"
-   "\n"
-   "out vec4 fColor;"
-   "\n"
-   "void main()"
-   "{"
-   "	fColor = vColor;"
-   "}";
 
 static unsigned int initialized = 0;
 static unsigned int instances   = 0;
@@ -43,12 +18,20 @@ static void renderable_2d_shader_init(struct shader_program_t* shader)
    struct vertex_shader_t vertex_shader;
    struct fragment_shader_t fragment_shader;
 
-   vertex_shader_init(&vertex_shader, vertex_shader_src);
-   fragment_shader_init(&fragment_shader, fragment_shader_src);
+   int error;
 
-   shader_program_init(shader, &vertex_shader, &fragment_shader);
+   error = vertex_shader_init_filepath(&vertex_shader, "/vol/Projects/JotunnC/Jotunn/res/shaders/renderable_2d.vert");
+   if (error) fprintf(stdout, "Error occurred during renderable_2d vertex shader init\n");
+
+   error = fragment_shader_init_filepath(&fragment_shader, "/vol/Projects/JotunnC/Jotunn/res/shaders/renderable_2d.frag");
+   if (error) fprintf(stdout, "Error occurred during renderable_2d fragment shader init\n");
+
+   error = shader_program_init(shader, &vertex_shader, &fragment_shader);
+   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program init\n");
+
    shader_program_bind_fragment_data_location(shader, 0, "fColor");
-   shader_program_link(shader);
+   error = shader_program_link(shader);
+   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program linkage\n");
 
    vertex_shader_destroy(&vertex_shader);
    fragment_shader_destroy(&fragment_shader);
@@ -98,6 +81,8 @@ void renderable_2d_init(struct renderable_2d_t* renderable_2d, float* vertex_dat
    renderable_2d->num_vertices = num_vertices;
    renderable_2d->index_data   = index_data;
    renderable_2d->num_indices  = num_indices;
+
+   fmatrix_4x4_init(&renderable_2d->model_matrix);
 
    if(!initialized)
    {

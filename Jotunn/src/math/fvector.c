@@ -35,25 +35,40 @@ void fvector4_init(fvector4* vector)
    memset(vector, 0, sizeof(fvector4));
 }
 
-void fvector2_set(fvector2* vector, float x, float y)
+void fvector2_set(fvector2* vector, const float x, const float y)
 {
    vector->comp.x = x;
    vector->comp.y = y;
 }
 
-void fvector3_set(fvector3* vector, float x, float y, float z)
+void fvector3_set(fvector3* vector, const float x, const float y, const float z)
 {
    vector->comp.x = x;
    vector->comp.y = y;
    vector->comp.x = z;
 }
 
-void fvector4_set(fvector4* vector, float w, float x, float y, float z)
+void fvector4_set(fvector4* vector, const float w, const float x, const float y, const float z)
 {
    vector->comp.w = w;
    vector->comp.x = x;
    vector->comp.y = y;
    vector->comp.z = z;
+}
+
+void fvector2_setv(fvector2* dest_vector, const fvector2 src_vector)
+{
+   fvector2_set(dest_vector, src_vector.comp.x, src_vector.comp.y);
+}
+
+void fvector3_setv(fvector3* dest_vector, const fvector3 src_vector)
+{
+   fvector3_set(dest_vector, src_vector.comp.x, src_vector.comp.y, src_vector.comp.z);
+}
+
+void fvector4_setv(fvector4* dest_vector, const fvector4 src_vector)
+{
+   fvector4_set(dest_vector, src_vector.comp.w, src_vector.comp.x, src_vector.comp.y, src_vector.comp.z);
 }
 
 float fvector2_magnitude(const fvector2* vector)
@@ -75,6 +90,24 @@ float fvector4_magnitude(const fvector4* vector)
    float magnitude;
    magnitude = sqrtf((vector->comp.w*vector->comp.w) + (vector->comp.x*vector->comp.x) + (vector->comp.y * vector->comp.y) + (vector->comp.z * vector->comp.z));
    return magnitude;
+}
+
+fvector2 fvector2_normalize(const fvector2* vector)
+{
+   // float magnitude = fvector2_magnitude(vector);
+   // return (fvector2) { (vector->comp.x / magnitude), (vector->comp.y / magnitude) };
+
+   return fvector2_scale(vector, (1.0f / fvector2_magnitude(vector)));
+}
+
+fvector3 fvector3_normalize(const fvector3* vector)
+{
+   return fvector3_scale(vector, (1.0f / fvector3_magnitude(vector)));
+}
+
+fvector4 fvector4_normalize(const fvector4* vector)
+{
+   return fvector4_scale(vector, (1.0f / fvector4_magnitude(vector)));
 }
 
 fvector2 fvector2_add(const fvector2* vector1, const fvector2* vector2)
@@ -140,32 +173,17 @@ fvector4 fvector4_subtract(const fvector4* vector1, const fvector4* vector2)
 // <V>*s
 fvector2 fvector2_scale(const fvector2* vector, float scalar)
 {
-   fvector2 resultant;
-   resultant.comp.x = (vector->comp.x * scalar);
-   resultant.comp.y = (vector->comp.y * scalar);
-
-   return resultant;
+   return (fvector2) { (vector->comp.x * scalar), (vector->comp.y * scalar) };
 }
 
 fvector3 fvector3_scale(const fvector3* vector, float scalar)
 {
-   fvector3 resultant;
-   resultant.comp.x = (vector->comp.x * scalar);
-   resultant.comp.y = (vector->comp.y * scalar);
-   resultant.comp.z = (vector->comp.z * scalar);
-
-   return resultant;
+   return (fvector3) { (vector->comp.x * scalar), (vector->comp.y * scalar), (vector->comp.z * scalar) };
 }
 
 fvector4 fvector4_scale(const fvector4* vector, float scalar)
 {
-   fvector4 resultant;
-   resultant.comp.w = (vector->comp.w * scalar);
-   resultant.comp.x = (vector->comp.x * scalar);
-   resultant.comp.y = (vector->comp.y * scalar);
-   resultant.comp.z = (vector->comp.z * scalar);
-
-   return resultant;
+   return (fvector4) { (vector->comp.w * scalar), (vector->comp.x * scalar), (vector->comp.y * scalar), (vector->comp.z * scalar) };
 }
 
 // <V1> dot product <V2>

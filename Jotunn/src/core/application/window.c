@@ -41,7 +41,7 @@ int window_init(struct window_t* window, int width, int height, char* tag)
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
-    // renderer_2d_init(&window->renderer, "2DRenderer");
+    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, 0.0f, 100.0f);
 
     fvector4 triangle_color, square_color;
     fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
@@ -49,6 +49,9 @@ int window_init(struct window_t* window, int width, int height, char* tag)
 
     rgba_triangle_2d_init(&window->triangle, triangle_color);
     rgba_square_2d_init(&window->square, square_color);
+
+    // fmatrix_4x4_scale(&window->triangle.renderable_data.model_matrix, 10.0f);
+    // fmatrix_4x4_scale(&window->square.renderable_data.model_matrix, 5.0f);
 
     return error;
 }
@@ -58,7 +61,7 @@ int window_run(struct window_t* window)
     renderer_2d_begin(&window->renderer);
 
     renderer_2d_submit_2d_prim(&window->renderer, &window->triangle.renderable_data);
-    // renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
+    renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
 
     renderer_2d_end(&window->renderer);
 

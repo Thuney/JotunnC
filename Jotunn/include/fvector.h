@@ -48,13 +48,21 @@ void fvector2_init(fvector2* vector);
 void fvector3_init(fvector3* vector);
 void fvector4_init(fvector4* vector);
 
-void fvector2_set(fvector2* vector, float x, float y);
-void fvector3_set(fvector3* vector, float x, float y, float z);
-void fvector4_set(fvector4* vector, float w, float x, float y, float z);
+void fvector2_set(fvector2* vector, const float x, const float y);
+void fvector3_set(fvector3* vector, const float x, const float y, const float z);
+void fvector4_set(fvector4* vector, const float w, const float x, const float y, const float z);
+
+void fvector2_setv(fvector2* dest_vector, const fvector2 src_vector);
+void fvector3_setv(fvector3* dest_vector, const fvector3 src_vector);
+void fvector4_setv(fvector4* dest_vector, const fvector4 src_vector);
 
 float fvector2_magnitude(const fvector2* vector);
 float fvector3_magnitude(const fvector3* vector);
 float fvector4_magnitude(const fvector4* vector);
+
+fvector2 fvector2_normalize(const fvector2* vector);
+fvector3 fvector3_normalize(const fvector3* vector);
+fvector4 fvector4_normalize(const fvector4* vector);
 
 // <V1> + <V2>
 fvector2 fvector2_add(const fvector2* vector1, const fvector2* vector2);

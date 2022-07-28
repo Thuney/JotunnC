@@ -15,7 +15,7 @@ static int gl_vertex_shader_init(struct vertex_shader_t* shader, const char* ver
 	glCompileShader(shader->vertex_shader);
 
    #ifdef DEBUG
-      //Get the status of our shader compilation. If successful, vertStatus = 1
+      //Get the status of our shader compilation. If successful, compilation_status = 1
       glGetShaderiv(shader->vertex_shader, GL_COMPILE_STATUS, &shader->compilation_status);
       if (!shader->compilation_status)
       {
@@ -26,7 +26,7 @@ static int gl_vertex_shader_init(struct vertex_shader_t* shader, const char* ver
       return shader->compilation_status;
    #endif
 
-   return 0;
+   return 1;
 }
 
 static int gl_fragment_shader_init(struct fragment_shader_t* shader, const char* fragment_shader_src)
@@ -37,7 +37,7 @@ static int gl_fragment_shader_init(struct fragment_shader_t* shader, const char*
 	glCompileShader(shader->fragment_shader);
 
    #ifdef DEBUG
-      //Get the status of our shader compilation. If successful, vertStatus = 1
+      //Get the status of our shader compilation. If successful, compilation_status = 1
       glGetShaderiv(shader->fragment_shader, GL_COMPILE_STATUS, &shader->compilation_status);
       if (!shader->compilation_status)
       {
@@ -48,7 +48,7 @@ static int gl_fragment_shader_init(struct fragment_shader_t* shader, const char*
       return shader->compilation_status;
    #endif
 
-   return 0;
+   return 1;
 }
 
 static int gl_shader_program_init(struct shader_program_t* shader_program, struct vertex_shader_t* vertex_shader, struct fragment_shader_t* fragment_shader)
@@ -58,7 +58,7 @@ static int gl_shader_program_init(struct shader_program_t* shader_program, struc
 	glAttachShader(shader_program->shader_program, vertex_shader->vertex_shader);
 	glAttachShader(shader_program->shader_program, fragment_shader->fragment_shader);
 
-   return 0;
+   return 1;
 }
 
 static int gl_shader_program_link(struct shader_program_t* shader_program)
@@ -67,7 +67,7 @@ static int gl_shader_program_link(struct shader_program_t* shader_program)
 	glLinkProgram(shader_program->shader_program);
 
    #ifdef DEBUG
-      //Get the status of our shader program linking. If successful, shaderLinkStatus = 1
+      //Get the status of our shader program linking. If successful, link_status = 1
       glGetProgramiv(shader_program->shader_program, GL_LINK_STATUS, &shader_program->link_status);
       if (!shader_program->link_status)
       {
@@ -78,7 +78,7 @@ static int gl_shader_program_link(struct shader_program_t* shader_program)
       return shader_program->link_status;
    #endif
 
-   return 0;
+   return 1;
 }
 
 static void gl_shader_program_use(struct shader_program_t* shader_program)
@@ -94,6 +94,61 @@ static void gl_shader_program_bind_fragment_data_location(struct shader_program_
 static int gl_shader_program_get_attribute_location(struct shader_program_t* shader_program, const char* attribute_name)
 {
    return glGetAttribLocation(shader_program->shader_program, attribute_name);
+}
+
+static void gl_shader_program_set_uniform(struct shader_program_t* shader_program, const char* uniform_name, void* uniform_data, enum shader_program_uniform_t uniform_type)
+{
+   GLint uniform_location = glGetUniformLocation(shader_program->shader_program, uniform_name);
+
+   switch (uniform_type)
+   {
+      case SHADER_BOOL:
+      {
+         glUniform1i(uniform_location, *((int*)uniform_data));
+      }
+      break;
+      case SHADER_INT:
+      {
+         glUniform1i(uniform_location, *((int*)uniform_data));
+      }
+      break;
+      case SHADER_FLOAT:
+      {
+         glUniform1f(uniform_location, *((float*)uniform_data));
+      }
+      break;
+      case SHADER_FVEC2:
+      {
+         glUniform2fv(uniform_location, 1, (const float*)uniform_data);
+      }
+      break;
+      case SHADER_FVEC3:
+      {
+         glUniform3fv(uniform_location, 1, (const float*)uniform_data);
+      }
+      break;
+      case SHADER_FVEC4:
+      {
+         glUniform4fv(uniform_location, 1, (const float*)uniform_data);
+      }
+      break;
+      case SHADER_FMAT2x2:
+      {
+         glUniformMatrix2fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+      }
+      break;
+      case SHADER_FMAT3x3:
+      {
+         glUniformMatrix3fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+      }
+      break;
+      case SHADER_FMAT4x4:
+      {
+         glUniformMatrix4fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+      }
+      break;
+   }
+
 }
 
 static void gl_vertex_shader_destroy(struct vertex_shader_t* shader)
@@ -128,15 +183,21 @@ int platform_shader_program_init(struct shader_program_t* shader_program, struct
    return gl_shader_program_init(shader_program, vertex_shader, fragment_shader);
 }
 
+//
+
 int platform_shader_program_link(struct shader_program_t* shader_program)
 {
    return gl_shader_program_link(shader_program);
 }
 
+//
+
 void platform_shader_program_use(struct shader_program_t* shader_program)
 {
    gl_shader_program_use(shader_program);
 }
+
+//
 
 void platform_shader_program_bind_fragment_data_location(struct shader_program_t* shader_program, unsigned int buffer_index, const char* var_name)
 {
@@ -147,6 +208,15 @@ int platform_shader_program_get_attribute_location(struct shader_program_t* shad
 {
    gl_shader_program_get_attribute_location(shader_program, attribute_name);
 }
+
+//
+
+void platform_shader_program_set_uniform(struct shader_program_t* shader_program, const char* uniform_name, void* uniform_data, const enum shader_program_uniform_t uniform_type)
+{
+   gl_shader_program_set_uniform(shader_program, uniform_name, uniform_data, uniform_type);
+}
+
+//
 
 void platform_vertex_shader_destroy(struct vertex_shader_t* shader)
 {

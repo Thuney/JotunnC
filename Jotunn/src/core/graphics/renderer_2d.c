@@ -7,7 +7,7 @@
 
 #include "renderer_2d.h"
 
-void renderer_2d_init(struct renderer_2d_t* renderer, char* tag)
+void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)
 {
    memset(renderer, 0, sizeof(struct renderer_2d_t));
 
@@ -16,6 +16,13 @@ void renderer_2d_init(struct renderer_2d_t* renderer, char* tag)
    strcpy(renderer->tag, tag);
 
    render_api_init();
+
+   const fvector3 camera_position = (fvector3) { 0.0f, 0.0f,  5.0f };
+   const fvector3 camera_up       = (fvector3) { 0.0f, 1.0f,  0.0f };
+   const fvector3 camera_front    = (fvector3) { 0.0f, 0.0f, -1.0f };
+
+   camera_init_orthographic(&(renderer->camera), camera_position, camera_up, camera_front);
+   camera_set_projection_orthographic(&(renderer->camera), left, right, top, bottom, near_plane, far_plane);
 }
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
@@ -39,6 +46,21 @@ void renderer_2d_submit_2d_prim(struct renderer_2d_t* renderer, struct renderabl
 {
    vertex_array_bind(&submission->vao);
    shader_program_use(submission->shader_program);
+
+   static fmatrix_4x4 model, view, projection;
+
+   model      = submission->model_matrix;
+   view       = renderer->camera.base.view_matrix;
+   projection = renderer->camera.base.projection_matrix;
+
+   // fmatrix_4x4_transpose(&model);
+   fmatrix_4x4_transpose(&view);
+   fmatrix_4x4_transpose(&projection);
+
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "model", &model);
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "view", &view);
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "projection", &projection);
+
    render_api_draw_elements(DRAW_TYPE_TRIANGLES, submission->num_indices, ELEMENT_UNSIGNED_INT, 0);
 
    vertex_array_unbind();

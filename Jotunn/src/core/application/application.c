@@ -14,10 +14,10 @@ int application_init(struct application_t* app, char* app_name)
     memset(app, 0, sizeof(struct application_t));
 
     int name_length = strlen(app_name);
-    app->name = (char*) malloc(name_length*sizeof(char));    
+    app->name = (char*) malloc(name_length*sizeof(char));
     strcpy(app->name, app_name);
 
-    return window_init(&app->window, 800, 600, "Window");
+    return window_init(&app->window, 800, 600, "JotunnWindow");
 }
 
 int application_start(struct application_t* app)

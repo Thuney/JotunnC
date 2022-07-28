@@ -35,6 +35,11 @@ int platform_shader_program_get_attribute_location(struct shader_program_t* shad
    return 0;
 }
 
+void platform_shader_program_set_uniform(struct shader_program_t* shader_program, const char* uniform_name, void* uniform_data, const enum shader_program_uniform_t uniform_type)
+{
+   return 0;  
+}
+
 void platform_vertex_shader_destroy(struct vertex_shader_t* shader)
 {
    return 0;

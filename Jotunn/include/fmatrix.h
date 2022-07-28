@@ -72,6 +72,10 @@ void fmatrix_2x2_identity(fmatrix_2x2* matrix);
 void fmatrix_3x3_identity(fmatrix_3x3* matrix);
 void fmatrix_4x4_identity(fmatrix_4x4* matrix);
 
+void fmatrix_2x2_transpose(fmatrix_2x2* matrix);
+void fmatrix_3x3_transpose(fmatrix_3x3* matrix);
+void fmatrix_4x4_transpose(fmatrix_4x4* matrix);
+
 void fmatrix_2x2_init(fmatrix_2x2* matrix);
 void fmatrix_3x3_init(fmatrix_3x3* matrix);
 void fmatrix_4x4_init(fmatrix_4x4* matrix);
