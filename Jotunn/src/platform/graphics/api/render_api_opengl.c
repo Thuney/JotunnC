@@ -76,8 +76,8 @@ static GLenum get_gl_draw_mode(enum render_api_draw_mode_t draw_mode)
 static void opengl_render_api_init()
 {
    glEnable(GL_BLEND);
-   // glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   // glEnable(GL_DEPTH_TEST);
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)

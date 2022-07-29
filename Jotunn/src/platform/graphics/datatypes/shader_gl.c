@@ -96,7 +96,7 @@ static int gl_shader_program_get_attribute_location(struct shader_program_t* sha
    return glGetAttribLocation(shader_program->shader_program, attribute_name);
 }
 
-static void gl_shader_program_set_uniform(struct shader_program_t* shader_program, const char* uniform_name, void* uniform_data, enum shader_program_uniform_t uniform_type)
+static void gl_shader_program_set_uniform(struct shader_program_t* shader_program, const char* uniform_name, void* uniform_data, const enum shader_program_uniform_t uniform_type)
 {
    GLint uniform_location = glGetUniformLocation(shader_program->shader_program, uniform_name);
 
@@ -119,35 +119,52 @@ static void gl_shader_program_set_uniform(struct shader_program_t* shader_progra
       break;
       case SHADER_FVEC2:
       {
-         glUniform2fv(uniform_location, 1, (const float*)uniform_data);
+         glUniform2fv(uniform_location, 1, (GLfloat*)uniform_data);
       }
       break;
       case SHADER_FVEC3:
       {
-         glUniform3fv(uniform_location, 1, (const float*)uniform_data);
+         glUniform3fv(uniform_location, 1, (GLfloat*)uniform_data);
       }
       break;
       case SHADER_FVEC4:
       {
-         glUniform4fv(uniform_location, 1, (const float*)uniform_data);
+         glUniform4fv(uniform_location, 1, (GLfloat*)uniform_data);
       }
       break;
       case SHADER_FMAT2x2:
       {
-         glUniformMatrix2fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+         glUniformMatrix2fv(uniform_location, 1, GL_FALSE, (GLfloat*)uniform_data);
       }
       break;
       case SHADER_FMAT3x3:
       {
-         glUniformMatrix3fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+         glUniformMatrix3fv(uniform_location, 1, GL_FALSE, (GLfloat*)uniform_data);
       }
       break;
       case SHADER_FMAT4x4:
       {
-         glUniformMatrix4fv(uniform_location, 1, GL_FALSE, (const float*)uniform_data);
+         fmatrix_4x4* matrix = (fmatrix_4x4*)uniform_data;
+
+         // #ifdef DEBUG
+         //    fmatrix_4x4_print(matrix);
+         // #endif
+
+         glUniformMatrix4fv(uniform_location, 1, GL_FALSE, &matrix->mat[0][0]);
+      }
+      break;
+      default:
+      {
+         #ifdef DEBUG
+            fprintf(stdout, "Unknown shader uniform enum type\n");
+         #endif
       }
       break;
    }
+
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Uploaded uniform of type %d at location %d\n", uniform_type, uniform_location);
+   // #endif
 
 }
 
@@ -206,7 +223,7 @@ void platform_shader_program_bind_fragment_data_location(struct shader_program_t
 
 int platform_shader_program_get_attribute_location(struct shader_program_t* shader_program, const char* attribute_name)
 {
-   gl_shader_program_get_attribute_location(shader_program, attribute_name);
+   return gl_shader_program_get_attribute_location(shader_program, attribute_name);
 }
 
 //

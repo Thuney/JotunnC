@@ -1,5 +1,9 @@
 #include "camera.h"
 
+#ifdef DEBUG
+   #include <stdio.h>
+#endif
+
 static fmatrix_4x4 position_as_matrix(const fvector3 position)
 {
    fmatrix_4x4 position_as_matrix;
@@ -53,10 +57,10 @@ static void camera_init(struct camera_base_t* camera, const fvector3 position, c
    fvector3_setv(&(camera->up), up);
    fvector3_setv(&(camera->front), front);
 
-   camera->view_matrix = calculate_look_at_matrix(position, fvector3_add(&position, &front), up);
+   fvector3 target = fvector3_add(&position, &front);
 
-   // fmatrix_4x4 look_at_matrix = calculate_look_at_matrix(position, fvector3_add(&position, &front), up);
-   // fmatrix_4x4_set(&(camera->view_matrix), look_at_matrix.mat);
+   camera->view_matrix = calculate_look_at_matrix(position, target, up);
+   camera_recalculate_view_projection_matrix(camera);
 }
 
 void camera_init_orthographic(struct camera_ortho_t* camera, const fvector3 position, const fvector3 up, const fvector3 front)
@@ -83,12 +87,18 @@ void camera_set_projection_orthographic(struct camera_ortho_t* ortho_camera, con
 
    camera_base->projection_type = CAMERA_ORTHOGRAPHIC;
 
-   const float ortho_matrix[4][4] = {{ (2.0f/(right - left)), 0.0f, 0.0f, 0.0f }, 
-                                     { 0.0f, (2.0f/(top - bottom)), 0.0f, 0.0f }, 
-                                     { 0.0f, 0.0f, (-2.0f/(far_plane - near_plane)), 0.0f }, 
-                                     { -((right + left)/(right - left)), -((top + bottom)/(top - bottom)), -((far_plane + near_plane)/(far_plane - near_plane)), 1.0f }};
+   const float ortho_matrix[4][4] = {{ (2.0f/(right - left)), 0.0f, 0.0f, -((right + left)/(right - left)) }, 
+                                     { 0.0f, (2.0f/(top - bottom)), 0.0f, -((top + bottom)/(top - bottom)) }, 
+                                     { 0.0f, 0.0f, (-2.0f/(far_plane - near_plane)), -((far_plane + near_plane)/(far_plane - near_plane)) }, 
+                                     { 0.0f, 0.0f, 0.0f, 1.0f }};
 
    fmatrix_4x4_set(&camera_base->projection_matrix, ortho_matrix);
+
+   fmatrix_4x4_transpose(&camera_base->projection_matrix);
+
+   #ifdef DEBUG
+      fmatrix_4x4_print(&camera_base->projection_matrix);
+   #endif
 
    camera_recalculate_view_projection_matrix(camera_base);
 }
@@ -109,13 +119,14 @@ void camera_set_projection_perspective(struct camera_perspective_t* perspective_
                                      { 0.0f, 0.0f, 0.0f, 0.0f }};
 
    fmatrix_4x4_set(&camera_base->projection_matrix, persp_matrix);
+   fmatrix_4x4_transpose(&camera_base->projection_matrix);
 
    camera_recalculate_view_projection_matrix(camera_base);
 }
 
 void camera_recalculate_view_projection_matrix(struct camera_base_t* camera)
 {
-   camera->view_projection_matrix = fmatrix_4x4_multiply(&(camera->projection_matrix), &(camera->view_matrix));
+   camera->view_projection_matrix = fmatrix_4x4_multiply(&(camera->view_matrix), &(camera->projection_matrix));
 }
 
 fvector3 camera_get_front_vector(struct camera_base_t* camera)

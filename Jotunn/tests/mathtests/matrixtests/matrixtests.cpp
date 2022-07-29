@@ -13,6 +13,32 @@ extern "C"
 
 #include <math.h>
 
+static bool are_matrices_transpose(const fmatrix_4x4* mat1, const fmatrix_4x4* mat2)
+{
+   bool are_transpose = true;
+
+   int c, r;
+   for (c = 0; c < 4; c++)
+   {
+      for (r = 0; r < 4; r++)
+      {
+         float mat1_val = mat1->mat[r][c];
+         float mat2_val = mat2->mat[c][r];
+
+         // fprintf(stdout, "%1d%1d - mat1_val = %f mat2_val = %f\n", c, r, mat1_val, mat2_val);
+
+         if (!(fabs(mat1_val - mat2_val) < 0.001))
+         {
+            are_transpose = false;
+         }
+      }
+   }
+
+   // fprintf(stdout, "Are transpose: %1d\n", (int)are_transpose);
+
+   return are_transpose;
+}
+
 BOOST_AUTO_TEST_CASE(initialization_tests, *boost::unit_test::tolerance(0.0001))
 {
    int sizeof_mat_2d = sizeof(fmatrix_2x2);
@@ -196,9 +222,9 @@ BOOST_AUTO_TEST_CASE(multiplication_tests, *boost::unit_test::tolerance(0.0001))
    }
 
    {
-      fmatrix_2x2 mat_2d, mat_2d_transposed;
-      fmatrix_3x3 mat_3d, mat_3d_transposed;
-      fmatrix_4x4 mat_4d, mat_4d_transposed;
+      fmatrix_2x2 mat_2d, mat_2d_transposed, mat_2d_transposed_key;
+      fmatrix_3x3 mat_3d, mat_3d_transposed, mat_3d_transposed_key;
+      fmatrix_4x4 mat_4d, mat_4d_transposed, mat_4d_transposed_key;
 
       const float mat_2d_data[2][2] = {{ 1.0f, 2.0f }, 
                                        { 3.0f, 4.0f }};
@@ -228,17 +254,23 @@ BOOST_AUTO_TEST_CASE(multiplication_tests, *boost::unit_test::tolerance(0.0001))
       fmatrix_3x3_set(&mat_3d, mat_3d_data);
       fmatrix_4x4_set(&mat_4d, mat_4d_data);
 
-      fmatrix_2x2_set(&mat_2d_transposed, mat_2d_transposed_data);
-      fmatrix_3x3_set(&mat_3d_transposed, mat_3d_transposed_data);
-      fmatrix_4x4_set(&mat_4d_transposed, mat_4d_transposed_data);
+      fmatrix_2x2_set(&mat_2d_transposed_key, mat_2d_transposed_data);
+      fmatrix_3x3_set(&mat_3d_transposed_key, mat_3d_transposed_data);
+      fmatrix_4x4_set(&mat_4d_transposed_key, mat_4d_transposed_data);
 
-      fmatrix_2x2_transpose(&mat_2d);
-      fmatrix_3x3_transpose(&mat_3d);
-      fmatrix_4x4_transpose(&mat_4d);
+      fmatrix_2x2_set(&mat_2d_transposed, mat_2d_data);
+      fmatrix_3x3_set(&mat_3d_transposed, mat_3d_data);
+      fmatrix_4x4_set(&mat_4d_transposed, mat_4d_data);
 
-      BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d, &mat_2d_transposed) );
-      BOOST_TEST( fmatrix_3x3_are_equal(&mat_3d, &mat_3d_transposed) );
-      BOOST_TEST( fmatrix_4x4_are_equal(&mat_4d, &mat_4d_transposed) );
+      fmatrix_2x2_transpose(&mat_2d_transposed);
+      fmatrix_3x3_transpose(&mat_3d_transposed);
+      fmatrix_4x4_transpose(&mat_4d_transposed);
+
+      BOOST_TEST( fmatrix_2x2_are_equal(&mat_2d_transposed, &mat_2d_transposed_key) );
+      BOOST_TEST( fmatrix_3x3_are_equal(&mat_3d_transposed, &mat_3d_transposed_key) );
+      BOOST_TEST( fmatrix_4x4_are_equal(&mat_4d_transposed, &mat_4d_transposed_key) );
+
+      BOOST_TEST( are_matrices_transpose(&mat_4d, &mat_4d_transposed) );
    }
 }
 
@@ -249,13 +281,15 @@ static bool are_matrices_equal(glm::mat4 glm_matrix, const fmatrix_4x4* our_matr
 {
    bool are_equal = true;
 
-   int r, c;
-   for (r = 0; r < 4; r++)
+   int c, r;
+   for (c = 0; c < 4; c++)
    {
-      for (c = 0; c < 4; c++)
+      for (r = 0; r < 4; r++)
       {
-         float glm_val = glm_matrix[r][c];
-         float our_val = our_matrix->mat[r][c];
+         float glm_val = glm_matrix[c][r];
+         float our_val = our_matrix->mat[c][r];
+
+         // fprintf(stdout, "%1d%1d - glm_val = %f our_val = %f\n", c, r, glm_val, our_val);
 
          if (!(fabs(our_val - glm_val) < 0.001))
          {
@@ -263,6 +297,9 @@ static bool are_matrices_equal(glm::mat4 glm_matrix, const fmatrix_4x4* our_matr
          }
       }
    }
+
+   // fprintf(stdout, "Are equal: %1d\n", (int)are_equal);
+
    return are_equal;
 }
 
@@ -271,13 +308,13 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
 
    struct camera_ortho_t camera;
 
-   const fvector3 camera_position = (fvector3) { 0.0f, 0.0f, -5.0f };
-   const fvector3 camera_up       = (fvector3) { 0.0f, 1.0f, 0.0f };
-   const fvector3 camera_front    = (fvector3) { 0.0f, 0.0f, 1.0f };
+   const fvector3 camera_position = (fvector3) { 0.0f, 0.0f, -10.0f };
+   const fvector3 camera_up       = (fvector3) { 0.0f, 1.0f,   0.0f };
+   const fvector3 camera_front    = (fvector3) { 0.0f, 0.0f,   1.0f };
 
-   const glm::vec3 glm_camera_position = glm::vec3(0.0f, 0.0f, -5.0f);
-   const glm::vec3 glm_camera_up       = glm::vec3(0.0f, 1.0f, 0.0f);
-   const glm::vec3 glm_camera_front    = glm::vec3(0.0f, 0.0f, 1.0f);
+   const glm::vec3 glm_camera_position = glm::vec3(0.0f, 0.0f, -10.0f);
+   const glm::vec3 glm_camera_up       = glm::vec3(0.0f, 1.0f,  0.0f);
+   const glm::vec3 glm_camera_front    = glm::vec3(0.0f, 0.0f,  1.0f);
 
    float left       = 0.0f;
    float right      = 800.0f;
@@ -286,8 +323,8 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
    float near_plane = 0.0f;
    float far_plane  = 100.0f;
 
-   camera_init_orthographic(&camera, camera_position, camera_up, camera_front);
-   camera_set_projection_orthographic(&camera, left, right, top, bottom, near_plane, far_plane);
+   camera_init_orthographic(&(camera), camera_position, camera_up, camera_front);
+   camera_set_projection_orthographic(&(camera), left, right, top, bottom, near_plane, far_plane);
 
    // Orthographic Projection Check
 
@@ -299,7 +336,7 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
 
    // Look At Matrix Check
 
-   glm::mat4 glm_look_at_mat = glm::lookAt(glm_camera_position, glm_camera_position + glm_camera_front, glm_camera_up);
+   glm::mat4 glm_look_at_mat = glm::lookAt(glm_camera_position, (glm_camera_position + glm_camera_front), glm_camera_up);
 
    fmatrix_4x4* our_lookat_matrix = &(camera.base.view_matrix);
 
@@ -307,11 +344,13 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
 
    // View Projection Check
 
-   glm::mat4 glm_view_projection_mat = glm_look_at_mat * glm_ortho_mat;
+   glm::mat4 glm_view_projection_mat = glm_ortho_mat * glm_look_at_mat;
 
-   fmatrix_4x4 our_view_projection_mat = fmatrix_4x4_multiply(our_projection_matrix, our_lookat_matrix);
+   // fmatrix_4x4 our_view_projection_mat = fmatrix_4x4_multiply(our_lookat_matrix, our_projection_matrix);
 
-   BOOST_TEST( are_matrices_equal(glm_view_projection_mat, &our_view_projection_mat) );
+   fmatrix_4x4* our_view_projection_mat = &(camera.base.view_projection_matrix);
+
+   BOOST_TEST( are_matrices_equal(glm_view_projection_mat, our_view_projection_mat) );
 }
 
 BOOST_AUTO_TEST_CASE(TautologicalTests, *boost::unit_test::tolerance(0.0001))

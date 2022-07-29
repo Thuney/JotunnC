@@ -81,14 +81,15 @@ static void gl_vertex_array_set_attribute(struct vertex_array_t* vertex_array, s
 
       unsigned int offset_ptr_provided = (ptr_offset_to_attrib != 0);
 
-      fprintf(stdout, "Index = %u, Size = %d, Data Type = %u, Should Normalize = %u, Stride = %u, Offset Provided = %u\n", index, size, data_type, should_normalize, stride, offset_ptr_provided);
+      // fprintf(stdout, "Index = %u, Size = %d, Data Type = %u, Should Normalize = %u, Stride = %u, Offset Provided = %u\n", index, size, data_type, should_normalize, stride, offset_ptr_provided);
 
       glVertexAttribPointer(index, size, data_type, should_normalize, stride, ptr_offset_to_attrib);
 
+   #else
+      //Specify how to interpret the vertex data for our position attribute
+      glVertexAttribPointer(vertex_attribute->index, vertex_attribute->size, get_gl_attribute_data_type(vertex_attribute->data_type), vertex_attribute->should_normalize, vertex_attribute->stride, vertex_attribute->ptr_offset_to_attrib);
    #endif
 
-   //Specify how to interpret the vertex data for our position attribute
-   glVertexAttribPointer(vertex_attribute->index, vertex_attribute->size, get_gl_attribute_data_type(vertex_attribute->data_type), vertex_attribute->should_normalize, vertex_attribute->stride, vertex_attribute->ptr_offset_to_attrib);
 	glEnableVertexAttribArray(vertex_attribute->index);
 }
 

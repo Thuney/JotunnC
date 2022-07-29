@@ -76,7 +76,7 @@ int shader_program_get_attribute_location(struct shader_program_t* shader_progra
 
 void shader_program_set_uniform_fmat4x4(struct shader_program_t* shader_program, const char* uniform_name, const fmatrix_4x4* matrix)
 {
-   platform_shader_program_set_uniform(shader_program, uniform_name, (void*)matrix->buf, SHADER_FMAT4x4);
+   platform_shader_program_set_uniform(shader_program, uniform_name, (void*)matrix, SHADER_FMAT4x4);
 }
 
 void vertex_shader_destroy(struct vertex_shader_t* shader)

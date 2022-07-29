@@ -45,7 +45,8 @@ int window_init(struct window_t* window, int width, int height, char* tag)
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
-    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, 0.0f, 100.0f);
+    // renderer_2d_init(&window->renderer, "2DRenderer", -100.0f, 100.0f, 100.0f, -100.0f, 0.1f, 100.0f);
+    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, 0.1f, 100.0f);
 
     fvector4 triangle_color, square_color;
     fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
@@ -79,10 +80,10 @@ void window_cleanup(struct window_t* window)
     free(window->metadata.tag);
     window->metadata.tag = 0;
 
-    renderer_2d_cleanup(&window->renderer);
-
     renderable_2d_cleanup(&window->triangle.renderable_data);
     // renderable_2d_cleanup(&window->square.renderable_data);
+
+    renderer_2d_cleanup(&window->renderer);
 
     window_graphics_cleanup(window);
 }

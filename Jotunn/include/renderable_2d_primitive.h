@@ -5,7 +5,7 @@
 
 struct vertex_data_2d_t
 {
-   fvector2 position;
+   fvector3 position;
    fvector4 color_rgba;
 };
 

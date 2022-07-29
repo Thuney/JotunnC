@@ -93,8 +93,6 @@ void fmatrix_4x4_identity(fmatrix_4x4* matrix)
  * |---|---|---|---|
  */
 
-// for i in ((dim*dim)/2) if (r != c) swap m[r][c] with m[c][r] if hasn't already been swapped 
-
 static void fmatrix_transpose(float* matrix, const int dim)
 {
    int r, c;
@@ -338,6 +336,21 @@ fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* 
    fmatrix_multiply(&(resultant.buf[0]), &(matrix1->buf[0]), &(matrix2->buf[0]), 4);
 
    return resultant;
+}
+
+fmatrix_4x4 fmatrix_4x4_translate(fmatrix_4x4* matrix, const fvector3 translation)
+{
+   fmatrix_4x4 translation_matrix;
+
+   const float translation_matrix_data[4][4] = {{ 1.0f, 0.0f, 0.0f, 0.0f }, 
+                                                { 0.0f, 1.0f, 0.0f, 0.0f }, 
+                                                { 0.0f, 0.0f, 1.0f, 0.0f }, 
+                                                { translation.comp.x, translation.comp.y, translation.comp.z, 1.0f }};
+
+   fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
+   fmatrix_4x4_transpose(&translation_matrix);
+
+   return fmatrix_4x4_multiply(&translation_matrix, matrix);
 }
 
 /*************************
