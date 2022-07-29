@@ -23,7 +23,7 @@ struct window_t
     struct window_context_data_t context_data;
     struct renderer_2d_t renderer;
     struct rgba_triangle_2d_t triangle;
-    // struct rgba_square_2d_t square;
+    struct rgba_square_2d_t square;
 };
 
 int window_init(struct window_t* window, int width, int height, char* tag);

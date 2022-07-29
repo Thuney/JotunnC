@@ -354,35 +354,11 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
    }
 
    {
-      fmatrix_4x4 identity_matrix, scale_matrix, translation_matrix, identity_scale_matrix, identity_scale_translation_matrix;
-
-      fmatrix_4x4_init(&identity_matrix);
-
       const float scale_factor = 50.0f;
-
-      const float scale_matrix_data[4][4] = {{ scale_factor,         0.0f,         0.0f, 0.0f }, 
-                                             {         0.0f, scale_factor,         0.0f, 0.0f }, 
-                                             {         0.0f,         0.0f, scale_factor, 0.0f }, 
-                                             {         0.0f,         0.0f,         0.0f, 1.0f }};
-
+      const fvector3 scale_factors      = (fvector3) { {scale_factor, scale_factor, scale_factor} };
       const fvector3 translation_coords = (fvector3) { {400.0f, 200.0f, 0.0f} };
 
-      const float translation_matrix_data[4][4] = {{ 1.0f, 0.0f, 0.0f, translation_coords.comp.x }, 
-                                                   { 0.0f, 1.0f, 0.0f, translation_coords.comp.y }, 
-                                                   { 0.0f, 0.0f, 1.0f, translation_coords.comp.z }, 
-                                                   { 0.0f, 0.0f, 0.0f, 1.0f }};
-
-      fmatrix_4x4_set(&scale_matrix, scale_matrix_data);
-      fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
-
-      fmatrix_4x4_transpose(&scale_matrix);
-      fmatrix_4x4_transpose(&translation_matrix);
-
-      identity_scale_matrix = fmatrix_4x4_multiply(&identity_matrix, &scale_matrix);
-      identity_scale_translation_matrix = fmatrix_4x4_multiply(&identity_scale_matrix, &translation_matrix);
-
-      // fmatrix_4x4_transpose(&identity_scale_translation_matrix);
-
+      // GLM
       glm::vec3 glm_translation_coords = glm::vec3(translation_coords.comp.x, translation_coords.comp.y, translation_coords.comp.z);
       glm::vec3 glm_scale_factors      = glm::vec3(scale_factor, scale_factor, scale_factor);
 
@@ -394,13 +370,21 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
       glm_scale_matrix = glm::scale(glm_identity_matrix, glm_scale_factors);
       glm_translation_matrix = glm::translate(glm_identity_matrix, glm_translation_coords);
 
-      BOOST_TEST( are_matrices_equal(glm_identity_matrix, &identity_matrix) );
-      BOOST_TEST( are_matrices_equal(glm_scale_matrix, &scale_matrix) );
-      BOOST_TEST( are_matrices_equal(glm_translation_matrix, &translation_matrix) );
-
       glm_identity_scale_translation_matrix = glm_translation_matrix * glm_scale_matrix * glm_identity_matrix;
 
-      BOOST_TEST( are_matrices_equal(glm_identity_scale_translation_matrix, &identity_scale_translation_matrix) );
+      // Ours
+      fmatrix_4x4 transform_matrix;
+      fmatrix_4x4_init(&transform_matrix);
+
+      BOOST_TEST( are_matrices_equal(glm_identity_matrix, &transform_matrix) );
+
+      transform_matrix = fmatrix_4x4_transform_scale(&transform_matrix, scale_factors);
+
+      BOOST_TEST( are_matrices_equal(glm_scale_matrix, &transform_matrix) );
+
+      transform_matrix = fmatrix_4x4_transform_translate(&transform_matrix, translation_coords);
+
+      BOOST_TEST( are_matrices_equal(glm_identity_scale_translation_matrix, &transform_matrix) );
    }
 }
 

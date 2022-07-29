@@ -45,49 +45,43 @@ int window_init(struct window_t* window, int width, int height, char* tag)
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
-    // renderer_2d_init(&window->renderer, "2DRenderer", -2.0f, 2.0f, 2.0f, -2.0f, -2.0f, 2.0f);
-    // renderer_2d_init(&window->renderer, "2DRenderer", -((float)width/2.0f), ((float)width/2.0f), ((float)height/2.0f), -((float)height/2.0f), -1.0, 100.0);
-    // renderer_2d_init(&window->renderer, "2DRenderer", -100.0f, 100.0f, 100.0f, -100.0f, 0.1f, 100.0f);
     renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
 
-    // fvector4 triangle_color, square_color;
-    // fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
-    // fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
-
+    // Triangle
     fvector4 triangle_color;
     fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
 
+    const float triangle_scale_factor = 50.0f;
+    const fvector3 triangle_scale_factors      = (fvector3) { {triangle_scale_factor, triangle_scale_factor, triangle_scale_factor} };
+    const fvector3 triangle_translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
+
     rgba_triangle_2d_init(&window->triangle, triangle_color);
-    // rgba_square_2d_init(&window->square, square_color);
 
-    fmatrix_4x4 identity_matrix, scale_matrix, translation_matrix, identity_scale_matrix, identity_scale_translation_matrix;
+    fmatrix_4x4 triangle_transform_matrix;
 
-    fmatrix_4x4_init(&identity_matrix);
+    fmatrix_4x4_init(&triangle_transform_matrix);
+    triangle_transform_matrix = fmatrix_4x4_transform_scale(&triangle_transform_matrix, triangle_scale_factors);
+    triangle_transform_matrix = fmatrix_4x4_transform_translate(&triangle_transform_matrix, triangle_translation_coords);
 
-    const float scale_factor = 50.0f;
+    window->triangle.renderable_data.model_matrix = triangle_transform_matrix;
 
-    const float scale_matrix_data[4][4] = {{ scale_factor,         0.0f,         0.0f, 0.0f }, 
-                                            {         0.0f, scale_factor,         0.0f, 0.0f }, 
-                                            {         0.0f,         0.0f, scale_factor, 0.0f }, 
-                                            {         0.0f,         0.0f,         0.0f, 1.0f }};
+    // Square
+    fvector4 square_color;
+    fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
 
-    const fvector3 translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
+    const float square_scale_factor = 25.0f;
+    const fvector3 square_scale_factors      = (fvector3) { {square_scale_factor, square_scale_factor, square_scale_factor} };
+    const fvector3 square_translation_coords = (fvector3) { {200.0f, 250.0f, 0.0f} };
 
-    const float translation_matrix_data[4][4] = {{ 1.0f, 0.0f, 0.0f, translation_coords.comp.x }, 
-                                                { 0.0f, 1.0f, 0.0f,  translation_coords.comp.y }, 
-                                                { 0.0f, 0.0f, 1.0f,  translation_coords.comp.z }, 
-                                                { 0.0f, 0.0f, 0.0f, 1.0f }};
+    rgba_square_2d_init(&window->square, square_color);
 
-    fmatrix_4x4_set(&scale_matrix, scale_matrix_data);
-    fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
+    fmatrix_4x4 square_transform_matrix;
 
-    fmatrix_4x4_transpose(&scale_matrix);
-    fmatrix_4x4_transpose(&translation_matrix);
+    fmatrix_4x4_init(&square_transform_matrix);
+    square_transform_matrix = fmatrix_4x4_transform_scale(&square_transform_matrix, square_scale_factors);
+    square_transform_matrix = fmatrix_4x4_transform_translate(&square_transform_matrix, square_translation_coords);
 
-    identity_scale_matrix = fmatrix_4x4_multiply(&identity_matrix, &scale_matrix);
-    identity_scale_translation_matrix = fmatrix_4x4_multiply(&identity_scale_matrix, &translation_matrix);
-
-    window->triangle.renderable_data.model_matrix = identity_scale_translation_matrix;
+    window->square.renderable_data.model_matrix = square_transform_matrix;
 
     return error;
 }
@@ -97,7 +91,7 @@ int window_run(struct window_t* window)
     renderer_2d_begin(&window->renderer);
 
     renderer_2d_submit_2d_prim(&window->renderer, &window->triangle.renderable_data);
-    // renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
+    renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
 
     renderer_2d_end(&window->renderer);
 
@@ -112,7 +106,7 @@ void window_cleanup(struct window_t* window)
     window->metadata.tag = 0;
 
     renderable_2d_cleanup(&window->triangle.renderable_data);
-    // renderable_2d_cleanup(&window->square.renderable_data);
+    renderable_2d_cleanup(&window->square.renderable_data);
 
     renderer_2d_cleanup(&window->renderer);
 

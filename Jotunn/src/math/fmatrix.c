@@ -338,7 +338,7 @@ fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* 
    return resultant;
 }
 
-fmatrix_4x4 fmatrix_4x4_translate(fmatrix_4x4* matrix, const fvector3 translation)
+fmatrix_4x4 fmatrix_4x4_transform_translate(fmatrix_4x4* matrix, const fvector3 translation)
 {
    fmatrix_4x4 translation_matrix;
 
@@ -348,9 +348,22 @@ fmatrix_4x4 fmatrix_4x4_translate(fmatrix_4x4* matrix, const fvector3 translatio
                                                 { translation.comp.x, translation.comp.y, translation.comp.z, 1.0f }};
 
    fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
-   fmatrix_4x4_transpose(&translation_matrix);
 
-   return fmatrix_4x4_multiply(&translation_matrix, matrix);
+   return fmatrix_4x4_multiply(matrix, &translation_matrix);
+}
+
+fmatrix_4x4 fmatrix_4x4_transform_scale(fmatrix_4x4* matrix, const fvector3 scale_factors)
+{
+   fmatrix_4x4 scale_matrix;
+
+   const float scale_matrix_data[4][4] = {{ scale_factors.comp.x, 0.0f, 0.0f, 0.0f }, 
+                                          { 0.0f, scale_factors.comp.y, 0.0f, 0.0f }, 
+                                          { 0.0f, 0.0f, scale_factors.comp.z, 0.0f }, 
+                                          { 0.0f, 0.0f, 0.0f, 1.0f }};
+
+   fmatrix_4x4_set(&scale_matrix, scale_matrix_data);
+
+   return fmatrix_4x4_multiply(matrix, &scale_matrix);
 }
 
 /*************************

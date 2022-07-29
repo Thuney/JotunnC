@@ -102,4 +102,5 @@ fmatrix_2x2 fmatrix_2x2_multiply(const fmatrix_2x2* matrix1, const fmatrix_2x2* 
 fmatrix_3x3 fmatrix_3x3_multiply(const fmatrix_3x3* matrix1, const fmatrix_3x3* matrix2);
 fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* matrix2);
 
-fmatrix_4x4 fmatrix_4x4_translate(fmatrix_4x4* matrix, const fvector3 translation);
+fmatrix_4x4 fmatrix_4x4_transform_translate(fmatrix_4x4* matrix, const fvector3 translation);
+fmatrix_4x4 fmatrix_4x4_transform_scale(fmatrix_4x4* matrix, const fvector3 scale_factors);
