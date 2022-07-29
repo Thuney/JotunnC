@@ -45,18 +45,49 @@ int window_init(struct window_t* window, int width, int height, char* tag)
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
+    // renderer_2d_init(&window->renderer, "2DRenderer", -2.0f, 2.0f, 2.0f, -2.0f, -2.0f, 2.0f);
+    // renderer_2d_init(&window->renderer, "2DRenderer", -((float)width/2.0f), ((float)width/2.0f), ((float)height/2.0f), -((float)height/2.0f), -1.0, 100.0);
     // renderer_2d_init(&window->renderer, "2DRenderer", -100.0f, 100.0f, 100.0f, -100.0f, 0.1f, 100.0f);
-    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, 0.1f, 100.0f);
+    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
 
-    fvector4 triangle_color, square_color;
+    // fvector4 triangle_color, square_color;
+    // fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
+    // fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
+
+    fvector4 triangle_color;
     fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
-    fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
 
     rgba_triangle_2d_init(&window->triangle, triangle_color);
     // rgba_square_2d_init(&window->square, square_color);
 
-    // fmatrix_4x4_scale(&window->triangle.renderable_data.model_matrix, 0.1f);
-    // fmatrix_4x4_scale(&window->square.renderable_data.model_matrix, 5.0f);
+    fmatrix_4x4 identity_matrix, scale_matrix, translation_matrix, identity_scale_matrix, identity_scale_translation_matrix;
+
+    fmatrix_4x4_init(&identity_matrix);
+
+    const float scale_factor = 50.0f;
+
+    const float scale_matrix_data[4][4] = {{ scale_factor,         0.0f,         0.0f, 0.0f }, 
+                                            {         0.0f, scale_factor,         0.0f, 0.0f }, 
+                                            {         0.0f,         0.0f, scale_factor, 0.0f }, 
+                                            {         0.0f,         0.0f,         0.0f, 1.0f }};
+
+    const fvector3 translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
+
+    const float translation_matrix_data[4][4] = {{ 1.0f, 0.0f, 0.0f, translation_coords.comp.x }, 
+                                                { 0.0f, 1.0f, 0.0f,  translation_coords.comp.y }, 
+                                                { 0.0f, 0.0f, 1.0f,  translation_coords.comp.z }, 
+                                                { 0.0f, 0.0f, 0.0f, 1.0f }};
+
+    fmatrix_4x4_set(&scale_matrix, scale_matrix_data);
+    fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
+
+    fmatrix_4x4_transpose(&scale_matrix);
+    fmatrix_4x4_transpose(&translation_matrix);
+
+    identity_scale_matrix = fmatrix_4x4_multiply(&identity_matrix, &scale_matrix);
+    identity_scale_translation_matrix = fmatrix_4x4_multiply(&identity_scale_matrix, &translation_matrix);
+
+    window->triangle.renderable_data.model_matrix = identity_scale_translation_matrix;
 
     return error;
 }

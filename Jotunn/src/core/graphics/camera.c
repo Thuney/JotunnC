@@ -96,9 +96,9 @@ void camera_set_projection_orthographic(struct camera_ortho_t* ortho_camera, con
 
    fmatrix_4x4_transpose(&camera_base->projection_matrix);
 
-   #ifdef DEBUG
-      fmatrix_4x4_print(&camera_base->projection_matrix);
-   #endif
+   // #ifdef DEBUG
+   //    fmatrix_4x4_print(&camera_base->projection_matrix);
+   // #endif
 
    camera_recalculate_view_projection_matrix(camera_base);
 }

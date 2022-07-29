@@ -305,52 +305,103 @@ static bool are_matrices_equal(glm::mat4 glm_matrix, const fmatrix_4x4* our_matr
 
 BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
 {
+   {
+      struct camera_ortho_t camera;
 
-   struct camera_ortho_t camera;
+      const fvector3 camera_position = (fvector3) { 0.0f, 0.0f, -10.0f };
+      const fvector3 camera_up       = (fvector3) { 0.0f, 1.0f,   0.0f };
+      const fvector3 camera_front    = (fvector3) { 0.0f, 0.0f,   1.0f };
 
-   const fvector3 camera_position = (fvector3) { 0.0f, 0.0f, -10.0f };
-   const fvector3 camera_up       = (fvector3) { 0.0f, 1.0f,   0.0f };
-   const fvector3 camera_front    = (fvector3) { 0.0f, 0.0f,   1.0f };
+      const glm::vec3 glm_camera_position = glm::vec3(0.0f, 0.0f, -10.0f);
+      const glm::vec3 glm_camera_up       = glm::vec3(0.0f, 1.0f,  0.0f);
+      const glm::vec3 glm_camera_front    = glm::vec3(0.0f, 0.0f,  1.0f);
 
-   const glm::vec3 glm_camera_position = glm::vec3(0.0f, 0.0f, -10.0f);
-   const glm::vec3 glm_camera_up       = glm::vec3(0.0f, 1.0f,  0.0f);
-   const glm::vec3 glm_camera_front    = glm::vec3(0.0f, 0.0f,  1.0f);
+      float left       = 0.0f;
+      float right      = 800.0f;
+      float top        = 600.0f;
+      float bottom     = 0.0f;
+      float near_plane = 0.0f;
+      float far_plane  = 100.0f;
 
-   float left       = 0.0f;
-   float right      = 800.0f;
-   float top        = 600.0f;
-   float bottom     = 0.0f;
-   float near_plane = 0.0f;
-   float far_plane  = 100.0f;
+      camera_init_orthographic(&(camera), camera_position, camera_up, camera_front);
+      camera_set_projection_orthographic(&(camera), left, right, top, bottom, near_plane, far_plane);
 
-   camera_init_orthographic(&(camera), camera_position, camera_up, camera_front);
-   camera_set_projection_orthographic(&(camera), left, right, top, bottom, near_plane, far_plane);
+      // Orthographic Projection Check
 
-   // Orthographic Projection Check
+      glm::mat4 glm_ortho_mat = glm::ortho(left, right, bottom, top, near_plane, far_plane);
 
-   glm::mat4 glm_ortho_mat = glm::ortho(left, right, bottom, top, near_plane, far_plane);
+      fmatrix_4x4* our_projection_matrix = &(camera.base.projection_matrix);
 
-   fmatrix_4x4* our_projection_matrix = &(camera.base.projection_matrix);
+      BOOST_TEST( are_matrices_equal(glm_ortho_mat, our_projection_matrix) );
 
-   BOOST_TEST( are_matrices_equal(glm_ortho_mat, our_projection_matrix) );
+      // Look At Matrix Check
 
-   // Look At Matrix Check
+      glm::mat4 glm_look_at_mat = glm::lookAt(glm_camera_position, (glm_camera_position + glm_camera_front), glm_camera_up);
 
-   glm::mat4 glm_look_at_mat = glm::lookAt(glm_camera_position, (glm_camera_position + glm_camera_front), glm_camera_up);
+      fmatrix_4x4* our_lookat_matrix = &(camera.base.view_matrix);
 
-   fmatrix_4x4* our_lookat_matrix = &(camera.base.view_matrix);
+      BOOST_TEST( are_matrices_equal(glm_look_at_mat, our_lookat_matrix) );
 
-   BOOST_TEST( are_matrices_equal(glm_look_at_mat, our_lookat_matrix) );
+      // View Projection Check
 
-   // View Projection Check
+      glm::mat4 glm_view_projection_mat = glm_ortho_mat * glm_look_at_mat;
 
-   glm::mat4 glm_view_projection_mat = glm_ortho_mat * glm_look_at_mat;
+      // fmatrix_4x4 our_view_projection_mat = fmatrix_4x4_multiply(our_lookat_matrix, our_projection_matrix);
 
-   // fmatrix_4x4 our_view_projection_mat = fmatrix_4x4_multiply(our_lookat_matrix, our_projection_matrix);
+      fmatrix_4x4* our_view_projection_mat = &(camera.base.view_projection_matrix);
 
-   fmatrix_4x4* our_view_projection_mat = &(camera.base.view_projection_matrix);
+      BOOST_TEST( are_matrices_equal(glm_view_projection_mat, our_view_projection_mat) );
+   }
 
-   BOOST_TEST( are_matrices_equal(glm_view_projection_mat, our_view_projection_mat) );
+   {
+      fmatrix_4x4 identity_matrix, scale_matrix, translation_matrix, identity_scale_matrix, identity_scale_translation_matrix;
+
+      fmatrix_4x4_init(&identity_matrix);
+
+      const float scale_factor = 50.0f;
+
+      const float scale_matrix_data[4][4] = {{ scale_factor,         0.0f,         0.0f, 0.0f }, 
+                                             {         0.0f, scale_factor,         0.0f, 0.0f }, 
+                                             {         0.0f,         0.0f, scale_factor, 0.0f }, 
+                                             {         0.0f,         0.0f,         0.0f, 1.0f }};
+
+      const fvector3 translation_coords = (fvector3) { {400.0f, 200.0f, 0.0f} };
+
+      const float translation_matrix_data[4][4] = {{ 1.0f, 0.0f, 0.0f, translation_coords.comp.x }, 
+                                                   { 0.0f, 1.0f, 0.0f, translation_coords.comp.y }, 
+                                                   { 0.0f, 0.0f, 1.0f, translation_coords.comp.z }, 
+                                                   { 0.0f, 0.0f, 0.0f, 1.0f }};
+
+      fmatrix_4x4_set(&scale_matrix, scale_matrix_data);
+      fmatrix_4x4_set(&translation_matrix, translation_matrix_data);
+
+      fmatrix_4x4_transpose(&scale_matrix);
+      fmatrix_4x4_transpose(&translation_matrix);
+
+      identity_scale_matrix = fmatrix_4x4_multiply(&identity_matrix, &scale_matrix);
+      identity_scale_translation_matrix = fmatrix_4x4_multiply(&identity_scale_matrix, &translation_matrix);
+
+      // fmatrix_4x4_transpose(&identity_scale_translation_matrix);
+
+      glm::vec3 glm_translation_coords = glm::vec3(translation_coords.comp.x, translation_coords.comp.y, translation_coords.comp.z);
+      glm::vec3 glm_scale_factors      = glm::vec3(scale_factor, scale_factor, scale_factor);
+
+      glm::mat4 glm_identity_matrix(1.0f);
+      glm::mat4 glm_scale_matrix(1.0f);
+      glm::mat4 glm_translation_matrix(1.0f);
+      glm::mat4 glm_identity_scale_translation_matrix(1.0f);
+
+      glm_scale_matrix = glm::scale(glm_identity_matrix, glm_scale_factors);
+      glm_translation_matrix = glm::translate(glm_identity_matrix, glm_translation_coords);
+
+      BOOST_TEST( are_matrices_equal(glm_identity_matrix, &identity_matrix) );
+      BOOST_TEST( are_matrices_equal(glm_scale_matrix, &scale_matrix) );
+      BOOST_TEST( are_matrices_equal(glm_translation_matrix, &translation_matrix) );
+
+      glm_identity_scale_translation_matrix = glm_translation_matrix * glm_scale_matrix * glm_identity_matrix;
+
+      BOOST_TEST( are_matrices_equal(glm_identity_scale_translation_matrix, &identity_scale_translation_matrix) );
+   }
 }
 
 BOOST_AUTO_TEST_CASE(TautologicalTests, *boost::unit_test::tolerance(0.0001))

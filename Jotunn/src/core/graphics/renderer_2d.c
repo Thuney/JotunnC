@@ -17,7 +17,7 @@ void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const flo
 
    render_api_init();
 
-   const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  30.0f} };
+   const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
    const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
    const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
 
@@ -47,11 +47,11 @@ void renderer_2d_submit_2d_prim(struct renderer_2d_t* renderer, struct renderabl
    vertex_array_bind(&submission->vao);
    shader_program_use(submission->shader_program);
 
-   // static fmatrix_4x4 *model, *view, *projection;
+   static fmatrix_4x4 *model_ptr, *view_ptr, *projection_ptr;
 
-   // model      = &submission->model_matrix;
-   // view       = &renderer->camera.base.view_matrix;
-   // projection = &renderer->camera.base.projection_matrix;
+   model_ptr      = &submission->model_matrix;
+   view_ptr       = &renderer->camera.base.view_matrix;
+   projection_ptr = &renderer->camera.base.projection_matrix;
 
    // #ifdef DEBUG
 
@@ -63,9 +63,9 @@ void renderer_2d_submit_2d_prim(struct renderer_2d_t* renderer, struct renderabl
 
    // fmatrix_4x4_translate(&model, (fvector3){ 0.0f, 0.0f, 0.0f });
 
-   // shader_program_set_uniform_fmat4x4(submission->shader_program, "model", model);
-   shader_program_set_uniform_fmat4x4(submission->shader_program, "u_View", &renderer->camera.base.view_matrix);
-   // shader_program_set_uniform_fmat4x4(submission->shader_program, "u_Projection", projection);
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "model", model_ptr);
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "view", view_ptr);
+   shader_program_set_uniform_fmat4x4(submission->shader_program, "projection", projection_ptr);
 
    render_api_draw_elements(DRAW_TYPE_TRIANGLES, submission->num_indices, ELEMENT_UNSIGNED_INT, 0);
 }

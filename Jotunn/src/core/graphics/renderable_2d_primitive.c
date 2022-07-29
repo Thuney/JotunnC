@@ -3,9 +3,13 @@
 void rgba_triangle_2d_init(struct rgba_triangle_2d_t* triangle, const fvector4 color)
 {
    // Triangle data
-   fvector3_set(&triangle->vertices[0].position, 0.0f, 0.0f, 0.0f);
-   fvector3_set(&triangle->vertices[1].position, 0.5f, 1.0f, 0.0f);
-   fvector3_set(&triangle->vertices[2].position, 1.0f, 0.0f, 0.0f);
+   // fvector3_set(&triangle->vertices[0].position, 0.0f, 0.0f, 0.0f);
+   // fvector3_set(&triangle->vertices[1].position, 0.5f, 1.0f, 0.0f);
+   // fvector3_set(&triangle->vertices[2].position, 1.0f, 0.0f, 0.0f);
+
+   fvector2_set(&triangle->vertices[0].position, 0.0f, 0.0f);
+   fvector2_set(&triangle->vertices[1].position, 0.5f, 1.0f);
+   fvector2_set(&triangle->vertices[2].position, 1.0f, 0.0f);
 
    fvector4_set(&triangle->vertices[0].color_rgba, color.comp.w, color.comp.x, color.comp.y, color.comp.z);
    fvector4_set(&triangle->vertices[1].color_rgba, color.comp.w, color.comp.x, color.comp.y, color.comp.z);
@@ -21,10 +25,15 @@ void rgba_triangle_2d_init(struct rgba_triangle_2d_t* triangle, const fvector4 c
 void rgba_square_2d_init(struct rgba_square_2d_t* square, const fvector4 color)
 {
    // Square data
-   fvector3_set(&square->vertices[0].position, 0.0f, 0.0f, 0.0f);
-   fvector3_set(&square->vertices[1].position, 1.0f, 0.0f, 0.0f);
-   fvector3_set(&square->vertices[2].position, 1.0f, 1.0f, 0.0f);
-   fvector3_set(&square->vertices[3].position, 0.0f, 1.0f, 0.0f);
+   // fvector3_set(&square->vertices[0].position, 0.0f, 0.0f, 0.0f);
+   // fvector3_set(&square->vertices[1].position, 1.0f, 0.0f, 0.0f);
+   // fvector3_set(&square->vertices[2].position, 1.0f, 1.0f, 0.0f);
+   // fvector3_set(&square->vertices[3].position, 0.0f, 1.0f, 0.0f);
+
+   fvector2_set(&square->vertices[0].position, 0.0f, 0.0f);
+   fvector2_set(&square->vertices[1].position, 1.0f, 0.0f);
+   fvector2_set(&square->vertices[2].position, 1.0f, 1.0f);
+   fvector2_set(&square->vertices[3].position, 0.0f, 1.0f);
 
    fvector4_set(&square->vertices[0].color_rgba, color.comp.w, color.comp.x, color.comp.y, color.comp.z);
    fvector4_set(&square->vertices[1].color_rgba, color.comp.w, color.comp.x, color.comp.y, color.comp.z);
