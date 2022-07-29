@@ -66,7 +66,7 @@ static void renderable_2d_vao_init(struct renderable_2d_t* renderable_2d, float*
    int pos_attrib_index   = shader_program_get_attribute_location(shader_program, position_attrib_name);
    int color_attrib_index = shader_program_get_attribute_location(shader_program, color_attrib_name);
 
-   int pos_attrib_size   = 2;
+   int pos_attrib_size   = 3;
    int color_attrib_size = 4;
    int vertex_size_bytes = (pos_attrib_size+color_attrib_size)*sizeof(float);
 

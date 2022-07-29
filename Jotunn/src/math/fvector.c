@@ -45,7 +45,7 @@ void fvector3_set(fvector3* vector, const float x, const float y, const float z)
 {
    vector->comp.x = x;
    vector->comp.y = y;
-   vector->comp.x = z;
+   vector->comp.z = z;
 }
 
 void fvector4_set(fvector4* vector, const float w, const float x, const float y, const float z)

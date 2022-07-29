@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fmatrix.h"
-#include "fvector.h"
 #include "vertexarray.h"
 #include "vertexbuffer.h"
 #include "shader.h" 

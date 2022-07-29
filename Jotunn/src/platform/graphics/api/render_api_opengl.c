@@ -77,7 +77,7 @@ static void opengl_render_api_init()
 {
    glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   // glEnable(GL_DEPTH_TEST);
+   glEnable(GL_DEPTH_TEST);
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)
@@ -87,8 +87,8 @@ static void opengl_render_api_set_clear_color(const fvector4 color)
 
 static void opengl_render_api_clear()
 {
-   glClear(GL_COLOR_BUFFER_BIT);
-   // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   // glClear(GL_COLOR_BUFFER_BIT);
+   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 static void opengl_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)

@@ -1,7 +1,8 @@
 # C++ Compiler
 CXX      := -gcc
 # Compiler Flags
-CXXFLAGS := -pedantic-errors -Wall -Wextra -std=c++17
+#-pedantic-errors
+CXXFLAGS := -Wall -Wextra -std=c++17
 
 RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../../../.build/lib/
 

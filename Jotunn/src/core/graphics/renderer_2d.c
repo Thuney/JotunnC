@@ -53,16 +53,6 @@ void renderer_2d_submit_2d_prim(struct renderer_2d_t* renderer, struct renderabl
    view_ptr       = &renderer->camera.base.view_matrix;
    projection_ptr = &renderer->camera.base.projection_matrix;
 
-   // #ifdef DEBUG
-
-   //    fmatrix_4x4_print(model);
-   //    fmatrix_4x4_print(view);
-   //    fmatrix_4x4_print(projection);
-
-   // #endif
-
-   // fmatrix_4x4_translate(&model, (fvector3){ 0.0f, 0.0f, 0.0f });
-
    shader_program_set_uniform_fmat4x4(submission->shader_program, "model", model_ptr);
    shader_program_set_uniform_fmat4x4(submission->shader_program, "view", view_ptr);
    shader_program_set_uniform_fmat4x4(submission->shader_program, "projection", projection_ptr);
