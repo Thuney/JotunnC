@@ -35,3 +35,10 @@ struct event_window_resize_t
    int width, height;
 };
 
+struct event_mouse_moved_t
+{
+   struct event_base_t base;
+   void* window_handle;
+   float x, y;
+};
+

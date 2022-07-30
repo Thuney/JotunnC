@@ -111,6 +111,23 @@ void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double
    #ifdef DEBUG
       fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos, y_pos);
    #endif
+
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+   struct event_mouse_moved_t mouse_moved_event = 
+      (struct event_mouse_moved_t)
+      {
+         .base          = (struct event_base_t)
+         {
+            .event_type = EVENT_MOUSE_MOVED,
+            .handled    = 0
+         },
+         .window_handle = (void*)window,
+         .x             = (float)x_pos,
+         .y             = (float)y_pos
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(mouse_moved_event.base));
 }
 
 void gl_window_error_callback(int error_code, const char* description)

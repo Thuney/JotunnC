@@ -55,19 +55,21 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
     fvector4 triangle_color;
     fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
 
-    const float triangle_scale_factor = 50.0f;
-    const fvector3 triangle_scale_factors      = (fvector3) { {triangle_scale_factor, triangle_scale_factor, triangle_scale_factor} };
-    const fvector3 triangle_translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
+    // const float triangle_scale_factor = 50.0f;
+    // const fvector3 triangle_scale_factors      = (fvector3) { {triangle_scale_factor, triangle_scale_factor, triangle_scale_factor} };
+    // const fvector3 triangle_translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
 
     rgba_triangle_2d_init(&window->triangle, triangle_color);
 
-    fmatrix_4x4 triangle_transform_matrix;
+    fmatrix_4x4_init(&window->triangle.renderable_data.model_matrix);
 
-    fmatrix_4x4_init(&triangle_transform_matrix);
-    triangle_transform_matrix = fmatrix_4x4_transform_scale(&triangle_transform_matrix, triangle_scale_factors);
-    triangle_transform_matrix = fmatrix_4x4_transform_translate(&triangle_transform_matrix, triangle_translation_coords);
+    // fmatrix_4x4 triangle_transform_matrix;
 
-    window->triangle.renderable_data.model_matrix = triangle_transform_matrix;
+    // fmatrix_4x4_init(&triangle_transform_matrix);
+    // triangle_transform_matrix = fmatrix_4x4_transform_scale(&triangle_transform_matrix, triangle_scale_factors);
+    // triangle_transform_matrix = fmatrix_4x4_transform_translate(&triangle_transform_matrix, triangle_translation_coords);
+
+    // window->triangle.renderable_data.model_matrix = triangle_transform_matrix;
 
     // Square
     fvector4 square_color;
