@@ -3,6 +3,8 @@
 
 #include <stdio.h>
 
+#include "application.h"
+#include "event.h"
 #include "fvector.h"
 #include "render_api.h"
 #include "renderer_2d.h"
@@ -35,6 +37,21 @@ void gl_window_size_callback(GLFWwindow* window, int width, int height)
 
    // Set the GL viewport to the size of the window
    glViewport(0, 0, metadata->width, metadata->height);
+
+   struct event_window_resize_t resize_event = 
+      (struct event_window_resize_t)
+      {
+         .base          = (struct event_base_t)
+         {
+            .event_type = EVENT_WINDOW_RESIZE,
+            .handled    = 0
+         },
+         .window_handle = (void*)window,
+         .width         = width,
+         .height        = height
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(resize_event.base));
 }
 
 void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)

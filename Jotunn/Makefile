@@ -21,6 +21,7 @@ INCLUDE  := -I./include -I./res
 
 HDRS := \
 ./include/application.h               \
+./include/event.h               		  \
 ./include/window.h                    \
 \
 ./include/util.h                      \

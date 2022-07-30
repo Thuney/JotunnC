@@ -1,3 +1,4 @@
+#include "application.h"
 #include "fvector.h"
 #include "window.h"
 
@@ -15,7 +16,7 @@ extern void window_graphics_set_background_color(struct window_t* window, const 
 
 // Helpers
 
-void window_set_metadata(struct window_data_t* metadata, int width, int height, char* tag)
+static void window_set_metadata(struct window_data_t* metadata, int width, int height, char* tag, struct application_t* app_parent, void (*function_event_notify)(struct application_t*, struct event_base_t*))
 {
     // Store our window tag
     int tag_length = strlen(tag);
@@ -27,13 +28,16 @@ void window_set_metadata(struct window_data_t* metadata, int width, int height, 
     metadata->height = height;
 
     metadata->signaled_close = 0;
+
+    metadata->parent_application    = app_parent;
+    metadata->function_event_notify = function_event_notify;
 }
 
 // Exposed functions
 
-int window_init(struct window_t* window, int width, int height, char* tag)
+int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent)
 {
-    window_set_metadata(&window->metadata, width, height, tag);
+    window_set_metadata(&window->metadata, width, height, tag, app_parent, &application_on_event);
 
     int error = window_graphics_init(window);
 
