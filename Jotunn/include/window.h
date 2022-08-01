@@ -1,5 +1,4 @@
-#ifndef WINDOW_H
-#define WINDOW_H
+#pragma once
 
 #include "renderer_2d.h"
 
@@ -29,9 +28,6 @@ struct window_t
     struct window_context_data_t context_data;
     // 
     struct renderer_2d_t renderer;
-    // 
-    struct rgba_triangle_2d_t triangle;
-    struct rgba_square_2d_t square;
 };
 
 int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent);
@@ -41,5 +37,3 @@ int window_run(struct window_t* window);
 void window_cleanup(struct window_t* window);
 
 void window_set_background_color(struct window_t* window, const fvector4 color);
-
-#endif

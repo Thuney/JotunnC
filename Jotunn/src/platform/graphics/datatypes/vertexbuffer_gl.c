@@ -61,6 +61,11 @@ static void gl_vertex_buffer_buffer_data(struct vertex_buffer_t* vertex_buffer, 
    glBufferData(GL_ARRAY_BUFFER, data_bytes, data, get_gl_data_usage_type(usage_type));
 }
 
+static void gl_vertex_buffer_buffer_sub_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes)
+{
+   glBufferSubData(GL_ARRAY_BUFFER, 0, data_bytes, data);
+}
+
 static void gl_vertex_buffer_destroy(struct vertex_buffer_t* vertex_buffer, int num)
 {
    glDeleteBuffers(num, &vertex_buffer->vertex_buffer);
@@ -103,6 +108,11 @@ void platform_vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer)
 void platform_vertex_buffer_buffer_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes, enum buffer_data_usage_t usage_type)
 {
    gl_vertex_buffer_buffer_data(vertex_buffer, data, data_bytes, usage_type);
+}
+
+void platform_vertex_buffer_buffer_sub_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes)
+{
+   gl_vertex_buffer_buffer_sub_data(vertex_buffer, data, data_bytes);
 }
 
 void platform_vertex_buffer_destroy(struct vertex_buffer_t* vertex_buffer, int num)

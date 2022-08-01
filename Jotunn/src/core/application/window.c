@@ -35,6 +35,14 @@ static void window_set_metadata(struct window_data_t* metadata, int width, int h
 
 // Exposed functions
 
+#define NUM_WINDOW_QUADS 100
+static const float increment = 1.0f/(float)NUM_WINDOW_QUADS;
+
+static const unsigned int spacing = 10.0f, offset = 50.0f;
+
+fvector3 quad_positions[NUM_WINDOW_QUADS];
+fvector4 quad_colors[NUM_WINDOW_QUADS];
+
 int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent)
 {
     window_set_metadata(&window->metadata, width, height, tag, app_parent, &application_on_event);
@@ -49,57 +57,32 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
-    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
+    // renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
+    renderer_2d_init(&window->renderer, "2DRenderer", -(float)width/2.0f, (float)width/2.0f, (float)height/2.0f, -(float)height/2.0f, -1.0f, 100.0f);
 
-    // Triangle
-    fvector4 triangle_color;
-    fvector4_set(&triangle_color, 0.0f, 1.0f, 0.0f, 1.0f);
-
-    // const float triangle_scale_factor = 50.0f;
-    // const fvector3 triangle_scale_factors      = (fvector3) { {triangle_scale_factor, triangle_scale_factor, triangle_scale_factor} };
-    // const fvector3 triangle_translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
-
-    rgba_triangle_2d_init(&window->triangle, triangle_color);
-
-    fmatrix_4x4_init(&window->triangle.renderable_data.model_matrix);
-
-    // fmatrix_4x4 triangle_transform_matrix;
-
-    // fmatrix_4x4_init(&triangle_transform_matrix);
-    // triangle_transform_matrix = fmatrix_4x4_transform_scale(&triangle_transform_matrix, triangle_scale_factors);
-    // triangle_transform_matrix = fmatrix_4x4_transform_translate(&triangle_transform_matrix, triangle_translation_coords);
-
-    // window->triangle.renderable_data.model_matrix = triangle_transform_matrix;
-
-    // Square
-    fvector4 square_color;
-    fvector4_set(&square_color, 1.0f, 1.0f, 0.0f, 1.0f);
-
-    const float square_scale_factor = 25.0f;
-    const fvector3 square_scale_factors      = (fvector3) { {square_scale_factor, square_scale_factor, square_scale_factor} };
-    const fvector3 square_translation_coords = (fvector3) { {200.0f, 250.0f, 0.0f} };
-
-    rgba_square_2d_init(&window->square, square_color);
-
-    fmatrix_4x4 square_transform_matrix;
-
-    fmatrix_4x4_init(&square_transform_matrix);
-    square_transform_matrix = fmatrix_4x4_transform_scale(&square_transform_matrix, square_scale_factors);
-    square_transform_matrix = fmatrix_4x4_transform_translate(&square_transform_matrix, square_translation_coords);
-
-    window->square.renderable_data.model_matrix = square_transform_matrix;
+    int r, c;
+    for (r = 0; r < NUM_WINDOW_QUADS % 10; r++)
+    {
+        for (c = 0; c < NUM_WINDOW_QUADS % 10; c++)
+        {
+            quad_positions[r*10 + c] = (fvector3) { { c*spacing + offset, r*spacing + offset, 0.0f } };
+            quad_colors[r*10 + c]    = (fvector4) { { c*increment, r*increment, 0.0f, 1.0f } };
+        }
+    }
 
     return error;
 }
 
 int window_run(struct window_t* window)
 {
-    renderer_2d_begin(&window->renderer);
+    renderer_2d_begin_scene(&window->renderer);
 
-    renderer_2d_submit_2d_prim(&window->renderer, &window->triangle.renderable_data);
-    renderer_2d_submit_2d_prim(&window->renderer, &window->square.renderable_data);
+    for (int i = 0; i < NUM_WINDOW_QUADS; i++)
+    {
+        renderer_2d_draw_quad(&window->renderer, quad_positions[i], &quad_colors[i]);
+    }
 
-    renderer_2d_end(&window->renderer);
+    renderer_2d_end_scene(&window->renderer);
 
     window_graphics_run(window);
 
@@ -110,9 +93,6 @@ void window_cleanup(struct window_t* window)
 {
     free(window->metadata.tag);
     window->metadata.tag = 0;
-
-    renderable_2d_cleanup(&window->triangle.renderable_data);
-    renderable_2d_cleanup(&window->square.renderable_data);
 
     renderer_2d_cleanup(&window->renderer);
 

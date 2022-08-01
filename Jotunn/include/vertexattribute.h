@@ -33,3 +33,9 @@ void vertex_attribute_init(struct vertex_attribute_t* vertex_attribute,
                            unsigned int should_normalize, 
                            unsigned int stride, 
                            void* ptr_offset_to_attrib);
+
+void vertex_attribute_cleanup(struct vertex_attribute_t* vertex_attribute, unsigned int num);
+
+#ifdef DEBUG
+   void vertex_attribute_print(struct vertex_attribute_t* vertex_attribute);
+#endif

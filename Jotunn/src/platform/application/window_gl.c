@@ -70,12 +70,26 @@ void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
 
 void gl_window_close_callback(GLFWwindow* window)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Event - Window Close\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Event - Window Close\n");
+   // #endif
 
    struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+
    metadata->signaled_close = 1;
+
+   struct event_window_close_t window_close_event = 
+      (struct event_window_close_t)
+      {
+         .base          = (struct event_base_t)
+         {
+            .event_type = EVENT_MOUSE_SCROLLED,
+            .handled    = 0
+         },
+         .window_handle = (void*)window
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(window_close_event.base));
 }
 
 void gl_window_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -104,13 +118,29 @@ void gl_window_scroll_callback(GLFWwindow* window, double x_offset, double y_off
    #ifdef DEBUG
       fprintf(stdout, "Event - Scroll Wheel - X: %lf Y: %lf\n", x_offset, y_offset);
    #endif
+
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+   struct event_mouse_scrolled_t mouse_scrolled_event = 
+      (struct event_mouse_scrolled_t)
+      {
+         .base          = (struct event_base_t)
+         {
+            .event_type = EVENT_MOUSE_SCROLLED,
+            .handled    = 0
+         },
+         .x_offset = (float)x_offset,
+         .y_offset = (float)y_offset
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(mouse_scrolled_event.base));
 }
 
 void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double y_pos)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos, y_pos);
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos, y_pos);
+   // #endif
 
    struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
 

@@ -28,7 +28,6 @@ HDRS := \
 \
 ./include/render_api.h                \
 ./include/renderer_2d.h               \
-./include/renderable_2d.h             \
 ./include/renderable_2d_primitive.h   \
 ./include/camera.h                    \
 \
@@ -50,7 +49,6 @@ CORE_SRC := \
 \
 ./src/core/graphics/api/render_api.c             \
 ./src/core/graphics/renderer_2d.c                \
-./src/core/graphics/renderable_2d.c              \
 ./src/core/graphics/renderable_2d_primitive.c    \
 ./src/core/graphics/camera.c                     \
 \

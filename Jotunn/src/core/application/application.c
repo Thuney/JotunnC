@@ -88,24 +88,11 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
 
         case EVENT_MOUSE_MOVED:
         {
-            // Should be safe cast from base to derived form with base as first element
             struct event_mouse_moved_t* mouse_moved_event = (struct event_mouse_moved_t*)event;
 
             float x, y;
             x = mouse_moved_event->x;
             y = (app->window.metadata.height - mouse_moved_event->y);
-
-            const float triangle_scale_factor = 50.0f;
-            const fvector3 triangle_scale_factors      = (fvector3) { {triangle_scale_factor, triangle_scale_factor, triangle_scale_factor} };
-            // const fvector3 triangle_translation_coords = (fvector3) { {400.0f, 500.0f, 0.0f} };
-
-            fmatrix_4x4 triangle_transform_matrix;
-
-            fmatrix_4x4_init(&triangle_transform_matrix);
-            triangle_transform_matrix = fmatrix_4x4_transform_scale(&triangle_transform_matrix, triangle_scale_factors);
-            triangle_transform_matrix = fmatrix_4x4_transform_translate(&triangle_transform_matrix, (fvector3) { {x, y, 0.0f} });
-
-            app->window.triangle.renderable_data.model_matrix = triangle_transform_matrix;
         }
         break;
 

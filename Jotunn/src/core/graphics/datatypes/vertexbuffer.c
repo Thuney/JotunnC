@@ -3,6 +3,7 @@
 extern int platform_vertex_buffer_init(struct vertex_buffer_t* vertex_buffer, int num);
 extern void platform_vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer);
 extern void platform_vertex_buffer_buffer_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes, enum buffer_data_usage_t usage_type);
+extern void platform_vertex_buffer_buffer_sub_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes);
 extern void platform_vertex_buffer_destroy(struct vertex_buffer_t* vertex_buffer, int num);
 
 extern int platform_element_buffer_init(struct element_buffer_t* element_buffer, int num);
@@ -25,6 +26,11 @@ void vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer)
 void vertex_buffer_buffer_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes, enum buffer_data_usage_t usage_type)
 {
    platform_vertex_buffer_buffer_data(vertex_buffer, data, data_bytes, usage_type);
+}
+
+void vertex_buffer_buffer_sub_data(struct vertex_buffer_t* vertex_buffer, float* data, unsigned int data_bytes)
+{
+   platform_vertex_buffer_buffer_sub_data(vertex_buffer, data, data_bytes);
 }
 
 void vertex_buffer_destroy(struct vertex_buffer_t* vertex_buffer, int num)

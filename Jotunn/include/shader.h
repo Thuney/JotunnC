@@ -54,6 +54,7 @@ int shader_program_init(struct shader_program_t* shader_program, struct vertex_s
 
 int vertex_shader_init_filepath(struct vertex_shader_t* shader, const char* filepath);
 int fragment_shader_init_filepath(struct fragment_shader_t* shader, const char* filepath);
+int shader_program_init_filepath(struct shader_program_t* shader_program, const char* vertex_shader_filepath, const char* fragment_shader_filepath);
 
 int shader_program_link(struct shader_program_t* shader_program);
 

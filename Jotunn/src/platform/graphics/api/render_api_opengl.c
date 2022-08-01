@@ -78,6 +78,7 @@ static void opengl_render_api_init()
    glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_DEPTH_TEST);
+   glFrontFace(GL_CW);
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)
@@ -94,6 +95,16 @@ static void opengl_render_api_clear()
 static void opengl_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)
 {
    glDrawElements(get_gl_draw_mode(draw_mode), element_count, get_gl_element_data_type(element_data_type), indices);
+}
+
+static void opengl_render_api_draw_lines(unsigned int vertex_count)
+{
+   glDrawArrays(get_gl_draw_mode(DRAW_TYPE_LINES), 0, vertex_count);
+}
+
+static void opengl_render_api_set_line_width(float line_width)
+{
+   glLineWidth(line_width);
 }
 
 //
@@ -116,4 +127,14 @@ void platform_render_api_clear()
 void platform_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)
 {
    opengl_render_api_draw_elements(draw_mode, element_count, element_data_type, indices);
+}
+
+void platform_render_api_draw_lines(unsigned int vertex_count)
+{
+   opengl_render_api_draw_lines(vertex_count);
+}
+
+void platform_render_api_set_line_width(float line_width)
+{
+   opengl_render_api_set_line_width(line_width);
 }

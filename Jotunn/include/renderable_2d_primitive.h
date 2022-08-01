@@ -1,27 +1,126 @@
 #pragma once
 
 #include "fvector.h"
-#include "renderable_2d.h"
+#include "shader.h"
+#include "vertexarray.h"
+#include "vertexbuffer.h"
 
-struct vertex_data_2d_t
+// Vertex data
+
+extern const fvector3 triangle_2d_position_data[3];
+extern const fvector3 quad_2d_position_data[4];
+
+enum renderable_2d_triangle_vertex_attribute_t
+{
+   TRIANGLE_2D_POSITION = 0x00,
+   TRIANGLE_2D_COLOR,
+   _TRIANGLE_2D_ATTRIBUTE_NUM
+};
+
+enum renderable_2d_quad_vertex_attribute_t
+{
+   QUAD_2D_POSITION = 0x00,
+   QUAD_2D_COLOR,
+   _QUAD_2D_ATTRIBUTE_NUM
+};
+
+enum renderable_2d_circle_vertex_attribute_t
+{
+   CIRCLE_2D_POSITION = 0x00,
+   CIRCLE_2D_COLOR,
+   _CIRCLE_2D_ATTRIBUTE_NUM
+};
+
+enum renderable_2d_line_vertex_attribute_t
+{
+   LINE_2D_POSITION = 0x00,
+   LINE_2D_COLOR,
+   _LINE_2D_ATTRIBUTE_NUM
+};
+
+// 
+
+struct renderable_2d_triangle_vertex_t
 {
    fvector3 position;
-   fvector4 color_rgba;
+   fvector4 color;
 };
 
-struct rgba_triangle_2d_t
+struct renderable_2d_quad_vertex_t
 {
-   struct vertex_data_2d_t vertices[3];
-   unsigned int indices[3];
-   struct renderable_2d_t renderable_data;
+   fvector3 position;
+   fvector4 color;
 };
 
-struct rgba_square_2d_t
+struct renderable_2d_circle_vertex_t
 {
-   struct vertex_data_2d_t vertices[4];
-   unsigned int indices[6];
-   struct renderable_2d_t renderable_data;
+   fvector3 position;
+   fvector4 color;
 };
 
-void rgba_triangle_2d_init(struct rgba_triangle_2d_t* triangle, const fvector4 color);
-void rgba_square_2d_init(struct rgba_square_2d_t* square, const fvector4 color);
+struct renderable_2d_line_vertex_t
+{
+   fvector3 position;
+   fvector4 color;
+};
+
+// 
+
+struct renderable_2d_triangle_data_t
+{
+   struct vertex_array_t vao;
+   struct vertex_buffer_t vbo;
+   struct element_buffer_t ebo;
+   // 
+   unsigned int triangle_index_count;
+   // Data pointers
+   struct renderable_2d_triangle_vertex_t* vertex_data_base;
+   struct renderable_2d_triangle_vertex_t* vertex_data_ptr;
+};
+
+struct renderable_2d_quad_data_t
+{
+   struct vertex_array_t vao;
+   struct vertex_buffer_t vbo;
+   struct element_buffer_t ebo;
+   // 
+   unsigned int quad_index_count;
+   // Data pointers
+   struct renderable_2d_quad_vertex_t* vertex_data_base;
+   struct renderable_2d_quad_vertex_t* vertex_data_ptr;
+};
+
+struct renderable_2d_circle_data_t
+{
+   struct vertex_array_t vao;
+   struct vertex_buffer_t vbo;
+   struct element_buffer_t ebo;
+   // 
+   unsigned int circle_index_count;
+   // Data pointers
+   struct renderable_2d_circle_vertex_t* vertex_data_base;
+   struct renderable_2d_circle_vertex_t* vertex_data_ptr;
+};
+
+struct renderable_2d_line_data_t
+{
+   struct vertex_array_t vao;
+   struct vertex_buffer_t vbo;
+   // 
+   unsigned int line_vertex_count;
+   // Data pointers
+   struct renderable_2d_line_vertex_t* vertex_data_base;
+   struct renderable_2d_line_vertex_t* vertex_data_ptr;
+};
+
+//
+
+void renderable_2d_triangle_data_init(struct renderable_2d_triangle_data_t* triangle_data, const unsigned int max_count, struct shader_program_t* shader_program);
+void renderable_2d_quad_data_init(struct renderable_2d_quad_data_t* quad_data, const unsigned int max_count, struct shader_program_t* shader_program);
+void renderable_2d_circle_data_init(struct renderable_2d_circle_data_t* circle_data, const unsigned int max_count, struct shader_program_t* shader_program);
+void renderable_2d_line_data_init(struct renderable_2d_line_data_t* line_data, const unsigned int max_count, struct shader_program_t* shader_program);
+
+void renderable_2d_triangle_data_cleanup(struct renderable_2d_triangle_data_t* triangle_data);
+void renderable_2d_quad_data_cleanup(struct renderable_2d_quad_data_t* quad_data);
+void renderable_2d_circle_data_cleanup(struct renderable_2d_circle_data_t* circle_data);
+void renderable_2d_line_data_cleanup(struct renderable_2d_line_data_t* line_data);
