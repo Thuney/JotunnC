@@ -28,30 +28,17 @@ struct renderer_2d_data_t
 static struct renderer_2d_data_t renderer_2d_data;
 
 #define PRIMITIVE_SCALE_FACTOR 50.0f
-static const fvector3 primitive_scale_factors      = { {PRIMITIVE_SCALE_FACTOR, PRIMITIVE_SCALE_FACTOR, 0.0f} };
+static const fvector3 primitive_scale_factors = { {PRIMITIVE_SCALE_FACTOR, PRIMITIVE_SCALE_FACTOR, 0.0f} };
 
 static fmatrix_4x4 model_matrix;
 
 static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Flushing batch!\n");
-   #endif
-
    struct renderer_2d_data_t* data = &renderer_2d_data;
 
    if (data->triangle_data.triangle_index_count)
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Flushing triangles! Index count = %u\n", data->triangle_data.triangle_index_count);
-         fprintf(stdout, "Triangle Data Ptr - %u Base Ptr - %u\n", data->triangle_data.vertex_data_ptr, data->triangle_data.vertex_data_base);
-      #endif
-
       const unsigned int triangle_data_size = (unsigned int)((uint8_t*)data->triangle_data.vertex_data_ptr - (uint8_t*)data->triangle_data.vertex_data_base);
-
-      #ifdef DEBUG
-        fprintf(stdout, "Triangle data size = %d\n", triangle_data_size);
-      #endif
 
       vertex_array_bind(&data->triangle_data.vao);
       vertex_buffer_bind(&data->triangle_data.vbo);
@@ -70,10 +57,6 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
    if (data->quad_data.quad_index_count)
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Flushing quads\n");
-      #endif
-
       const unsigned int quad_data_size = (unsigned int)((uint8_t*)data->quad_data.vertex_data_ptr - (uint8_t*)data->quad_data.vertex_data_base);
 
       vertex_array_bind(&data->quad_data.vao);
@@ -93,15 +76,11 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
    if (data->circle_data.circle_index_count)
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Flushing circles\n");
-      #endif
-
       const unsigned int circle_data_size = (unsigned int)((uint8_t*)data->circle_data.vertex_data_ptr - (uint8_t*)data->circle_data.vertex_data_base);
 
-      vertex_array_bind(&data->quad_data.vao);
-      vertex_buffer_bind(&data->quad_data.vbo);
-      element_buffer_bind(&data->quad_data.ebo);
+      vertex_array_bind(&data->circle_data.vao);
+      vertex_buffer_bind(&data->circle_data.vbo);
+      element_buffer_bind(&data->circle_data.ebo);
 
       shader_program_use(&data->circle_shader);
 
@@ -116,9 +95,9 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
    if (data->line_data.line_vertex_count)
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Flushing lines\n");
-      #endif
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Flushing lines\n");
+      // #endif
 
       const unsigned int line_data_size = (unsigned int)((uint8_t*)data->line_data.vertex_data_ptr - (uint8_t*)data->line_data.vertex_data_base);
 
@@ -139,10 +118,6 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
 static void renderer_2d_start_batch(const struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Starting batch!\n");
-   #endif
-
    struct renderer_2d_data_t* data = &renderer_2d_data;
 
    data->triangle_data.triangle_index_count = 0;
@@ -160,10 +135,6 @@ static void renderer_2d_start_batch(const struct renderer_2d_t* renderer)
 
 static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-         fprintf(stdout, "Next batch!\n");
-   #endif
-
    renderer_2d_flush(renderer);
    renderer_2d_start_batch(renderer);
 }
@@ -243,23 +214,16 @@ void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const flo
    camera_init_orthographic(&(renderer->camera), camera_position, camera_up, camera_front);
    camera_set_projection_orthographic(&(renderer->camera), left, right, top, bottom, near_plane, far_plane);
 
-   #ifdef DEBUG
-      fprintf(stdout, "Initializing renderer_2d data\n");
-   #endif
    // Batch stuff
    renderer_2d_data_init(&renderer_2d_data);
-
-   #ifdef DEBUG
-      fprintf(stdout, "Setting renderer_2d line width\n");
-   #endif
    renderer_2d_set_line_width(renderer, renderer_2d_data.line_width);
 }
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-        fprintf(stdout, "Cleaning up renderer 2D\n");
-   #endif
+   // #ifdef DEBUG
+   //      fprintf(stdout, "Cleaning up renderer 2D\n");
+   // #endif
 
    free(renderer->tag);
    renderer->tag = 0;
@@ -285,15 +249,8 @@ void renderer_2d_end_scene(struct renderer_2d_t* renderer)
 
 //
 
-void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4* color)
+void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Triangle position\n");
-      fvector3_print(&position);
-      fprintf(stdout, "Triangle color\n");
-      fvector4_print(color);
-   #endif
-
    const unsigned int triangle_vertex_count = 3;
 
    if (renderer_2d_data.triangle_data.triangle_index_count >= max_indices)
@@ -303,7 +260,7 @@ void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvect
    for (i = 0; i < triangle_vertex_count; i++)
    {
       renderer_2d_data.triangle_data.vertex_data_ptr->position = fvector3_add(&triangle_2d_position_data[i], &position);;
-      renderer_2d_data.triangle_data.vertex_data_ptr->color    = *color;
+      renderer_2d_data.triangle_data.vertex_data_ptr->color    = color;
 
       renderer_2d_data.triangle_data.vertex_data_ptr++;
    }
@@ -312,12 +269,8 @@ void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvect
 
 }
 
-void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4* color)
+void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Adding quad\n");
-   #endif
-
    const unsigned int quad_vertex_count = 4;
 
    if (renderer_2d_data.quad_data.quad_index_count >= max_indices)
@@ -327,7 +280,7 @@ void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 
    for (i = 0; i < quad_vertex_count; i++)
    {
       renderer_2d_data.quad_data.vertex_data_ptr->position = fvector3_add(&quad_2d_position_data[i], &position);
-      renderer_2d_data.quad_data.vertex_data_ptr->color    = *color;
+      renderer_2d_data.quad_data.vertex_data_ptr->color    = color;
       
       renderer_2d_data.quad_data.vertex_data_ptr++;
    }
@@ -335,34 +288,57 @@ void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 
    renderer_2d_data.quad_data.quad_index_count += 6;
 }
 
-void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4* color)
+void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
 {
-   const unsigned int circle_vertex_count = 4;
-
    if (renderer_2d_data.circle_data.circle_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
 
    unsigned int i;
-   for (i = 0; i < circle_vertex_count; i++)
+   for (i = 0; i < _NUM_CIRCLE_2D_VERTICES; i++)
    {
-      renderer_2d_data.circle_data.vertex_data_ptr->position = fvector3_add(&quad_2d_position_data[i], &position);
-      renderer_2d_data.circle_data.vertex_data_ptr->color    = *color;
+
+      const fvector3 new_position = fvector3_add(&circle_2d_position_data[i], &position);
+      #ifdef DEBUG
+         static unsigned int done = 0;
+
+         if(!done++) fvector3_print(&new_position);
+      #endif
+
+      renderer_2d_data.circle_data.vertex_data_ptr->position = new_position;
+      renderer_2d_data.circle_data.vertex_data_ptr->color    = color;
       
       renderer_2d_data.circle_data.vertex_data_ptr++;
    }
 
-   renderer_2d_data.circle_data.circle_index_count += 6;
+   renderer_2d_data.circle_data.circle_index_count += (3*(_RENDERABLE_2D_CIRCLE_RESOLUTION));
+
+   #ifdef DEBUG
+      static unsigned int done = 0;
+
+      struct renderable_2d_circle_vertex_t* debug_circle_data_base = renderer_2d_data.circle_data.vertex_data_base;
+
+      if (!done)
+      {
+         fprintf(stdout, "Index count = %u\n", renderer_2d_data.circle_data.circle_index_count);
+         for (unsigned int i = 0; i < 17; i++)
+         {
+            fvector3_print(&debug_circle_data_base->position);
+            debug_circle_data_base++;
+         }
+         done = 1;
+      }
+   #endif
 }
 
-void renderer_2d_draw_line(const struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4* color)
+void renderer_2d_draw_line(const struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4 color)
 {
    renderer_2d_data.line_data.vertex_data_ptr->position = pos_1;
-   renderer_2d_data.line_data.vertex_data_ptr->color    = *color;
+   renderer_2d_data.line_data.vertex_data_ptr->color    = color;
 
    renderer_2d_data.line_data.vertex_data_ptr++;
 
    renderer_2d_data.line_data.vertex_data_ptr->position = pos_2;
-   renderer_2d_data.line_data.vertex_data_ptr->color    = *color;
+   renderer_2d_data.line_data.vertex_data_ptr->color    = color;
 
    renderer_2d_data.line_data.vertex_data_ptr++;
 

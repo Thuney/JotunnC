@@ -1,5 +1,9 @@
 #include <memory.h>
 #include <stdlib.h>
+#ifdef DEBUG
+   #include <stdio.h>
+#endif
+#include <math.h>
 
 #include "renderable_2d_primitive.h"
 
@@ -18,6 +22,7 @@ const fvector3 triangle_2d_position_data[3] =
       { 10.0f, 0.0f, 0.0f }
    }
 };
+
 const fvector3 quad_2d_position_data[4] =
 { 
    [0] = 
@@ -37,6 +42,38 @@ const fvector3 quad_2d_position_data[4] =
       { 0.0f, 10.0f, 0.0f }
    }
 };
+
+fvector3 circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
+
+#define PI 3.14159f
+
+static void gen_circle_2d_position_data()
+{
+   const float angle_increment_degrees = (360.0f / (float)_RENDERABLE_2D_CIRCLE_RESOLUTION), r = 5.0f;
+
+   float angle_degrees = 0.0f;
+
+   unsigned int v;
+
+   const fvector2 offset = { 1.0f, 1.0f };
+
+   float x, y, angle_radians;
+
+   circle_2d_position_data[0] = (fvector3) { r*offset.comp.x, r*offset.comp.y, 0.0f }; // Origin / Center of circle
+
+   // Generate vertices on circle
+   for (v = 1; v < _NUM_CIRCLE_2D_VERTICES; v++)
+   {
+      angle_radians = (PI / 180.0f)*angle_degrees;
+
+      x = r*(cosf(angle_radians) + offset.comp.x);
+      y = r*(sinf(angle_radians) + offset.comp.y);
+
+      circle_2d_position_data[v] = (fvector3) { x, y, 0.0f };
+
+      angle_degrees += angle_increment_degrees;
+   }
+}
 
 // Triangle 2D vertex attributes
 static struct vertex_attribute_t triangle_vertex_attributes[2] = {
@@ -136,43 +173,19 @@ static struct vertex_attribute_t line_vertex_attributes[2] = {
 
 static void renderable_2d_primitive_data_init(struct vertex_array_t* vao, struct vertex_buffer_t* vbo, struct element_buffer_t* ebo, unsigned int use_ebo, struct vertex_attribute_t* attributes, const unsigned int num_attributes, struct shader_program_t* shader_program)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Initializing vertex array\n");
-   #endif
-
    vertex_array_init(vao, 1);
-
-   #ifdef DEBUG
-      fprintf(stdout, "Initializing vertex buffer\n");
-   #endif
-
    vertex_buffer_init(vbo, 1);
 
    if (use_ebo) 
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Initializing element buffer\n");
-      #endif
       element_buffer_init(ebo, 1);
    }
 
-   #ifdef DEBUG
-      fprintf(stdout, "Binding vertex array\n");
-   #endif
-
    vertex_array_bind(vao);
-
-   #ifdef DEBUG
-      fprintf(stdout, "Binding vertex buffer\n");
-   #endif
-
    vertex_buffer_bind(vbo);
 
    if (use_ebo)
    {
-      #ifdef DEBUG
-         fprintf(stdout, "Binding element buffer\n");
-      #endif
       element_buffer_bind(ebo);
    }
 
@@ -212,7 +225,7 @@ void renderable_2d_triangle_data_init(struct renderable_2d_triangle_data_t* tria
    unsigned int triangle_indices[max_indices];
 
    unsigned int offset = 0;
-   for (unsigned int i = 0; i < max_indices; i+= 3)
+   for (unsigned int i = 0; i < max_indices; i += 3)
    {
       triangle_indices[i + 0] = offset + 0;
       triangle_indices[i + 1] = offset + 1;
@@ -240,7 +253,7 @@ void renderable_2d_quad_data_init(struct renderable_2d_quad_data_t* quad_data, c
    unsigned int quad_indices[max_indices];
 
    unsigned int offset = 0;
-   for (unsigned int i = 0; i < max_indices; i+= 6)
+   for (unsigned int i = 0; i < max_indices; i += 6)
    {
       quad_indices[i + 0] = offset + 0;
       quad_indices[i + 1] = offset + 1;
@@ -255,38 +268,50 @@ void renderable_2d_quad_data_init(struct renderable_2d_quad_data_t* quad_data, c
 
    element_buffer_buffer_data(&quad_data->ebo, quad_indices, max_indices*sizeof(unsigned int), STATIC_DRAW);
    vertex_buffer_buffer_data(&quad_data->vbo, (float*)quad_data->vertex_data_base, max_vertices*sizeof(struct renderable_2d_quad_vertex_t), DYNAMIC_DRAW);
+
    vertex_array_unbind();
 }
 
 // Circle
 void renderable_2d_circle_data_init(struct renderable_2d_circle_data_t* circle_data, const unsigned int max_count, struct shader_program_t* shader_program)
 {
-   const unsigned int max_vertices = 4*max_count;
-   const unsigned int max_indices  = 6*max_count;
+   gen_circle_2d_position_data();
+
+   const unsigned int indices_per_circle = (3*_RENDERABLE_2D_CIRCLE_RESOLUTION);
+
+   const unsigned int max_vertices = _NUM_CIRCLE_2D_VERTICES*max_count;
+   const unsigned int max_indices   = indices_per_circle*max_count;
 
    renderable_2d_primitive_data_init(&circle_data->vao, &circle_data->vbo, &circle_data->ebo, 1, circle_vertex_attributes, _CIRCLE_2D_ATTRIBUTE_NUM, shader_program);
 
    circle_data->vertex_data_base = (struct renderable_2d_circle_vertex_t*) calloc(max_vertices, sizeof(struct renderable_2d_circle_vertex_t));
    circle_data->vertex_data_ptr  = circle_data->vertex_data_base;
 
-   unsigned int circle_indices[max_indices]; // Actually the same as our quad indices, and will cull pixels in the shader to form circle
+   unsigned int circle_indices[max_indices];
 
-   unsigned int offset = 0;
-   for (unsigned int i = 0; i < max_indices; i+= 6)
+   unsigned int circle;
+
+   unsigned int vertex_offset = 0;
+
+   for (circle = 0; circle < max_count; circle++)
    {
-      circle_indices[i + 0] = offset + 0;
-      circle_indices[i + 1] = offset + 1;
-      circle_indices[i + 2] = offset + 2;
+      unsigned int triangle;
+      for (triangle = 1; triangle < _RENDERABLE_2D_CIRCLE_RESOLUTION; triangle++)
+      {
+         circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 0] = vertex_offset;
+         circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 1] = vertex_offset + triangle;
+         circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 2] = vertex_offset + triangle + 1;
+      }
+      circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 0] = vertex_offset;
+      circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 1] = vertex_offset + triangle;
+      circle_indices[indices_per_circle*circle + (3*(triangle-1)) + 2] = vertex_offset + 1;
 
-      circle_indices[i + 3] = offset + 0;
-      circle_indices[i + 4] = offset + 3;
-      circle_indices[i + 5] = offset + 2;
-
-      offset += 4;
+      vertex_offset += _NUM_CIRCLE_2D_VERTICES;
    }
 
    element_buffer_buffer_data(&circle_data->ebo, circle_indices, max_indices*sizeof(unsigned int), STATIC_DRAW);
    vertex_buffer_buffer_data(&circle_data->vbo, (float*)circle_data->vertex_data_base, max_vertices*sizeof(struct renderable_2d_circle_vertex_t), DYNAMIC_DRAW);
+
    vertex_array_unbind();
 }
 
@@ -327,7 +352,6 @@ void renderable_2d_circle_data_cleanup(struct renderable_2d_circle_data_t* circl
 {
    vertex_array_destroy(&circle_data->vao, 1);
    vertex_buffer_destroy(&circle_data->vbo, 1);
-   element_buffer_destroy(&circle_data->ebo, 1);
 
    free(circle_data->vertex_data_base);
 }

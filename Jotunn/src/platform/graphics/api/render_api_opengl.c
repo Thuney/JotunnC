@@ -97,6 +97,11 @@ static void opengl_render_api_draw_elements(enum render_api_draw_mode_t draw_mod
    glDrawElements(get_gl_draw_mode(draw_mode), element_count, get_gl_element_data_type(element_data_type), indices);
 }
 
+static void opengl_render_api_draw_triangle_fan(unsigned int vertex_count)
+{
+   glDrawArrays(get_gl_draw_mode(DRAW_TYPE_TRIANGLE_FAN), 0, vertex_count);
+}
+
 static void opengl_render_api_draw_lines(unsigned int vertex_count)
 {
    glDrawArrays(get_gl_draw_mode(DRAW_TYPE_LINES), 0, vertex_count);
@@ -127,6 +132,11 @@ void platform_render_api_clear()
 void platform_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)
 {
    opengl_render_api_draw_elements(draw_mode, element_count, element_data_type, indices);
+}
+
+void platform_render_api_draw_triangle_fan(unsigned int vertex_count)
+{
+   opengl_render_api_draw_triangle_fan(vertex_count);
 }
 
 void platform_render_api_draw_lines(unsigned int vertex_count)

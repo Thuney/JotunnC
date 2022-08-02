@@ -35,14 +35,6 @@ static void window_set_metadata(struct window_data_t* metadata, int width, int h
 
 // Exposed functions
 
-#define NUM_WINDOW_QUADS 100
-static const float increment = 1.0f/(float)NUM_WINDOW_QUADS;
-
-static const unsigned int spacing = 10.0f, offset = 50.0f;
-
-fvector3 quad_positions[NUM_WINDOW_QUADS];
-fvector4 quad_colors[NUM_WINDOW_QUADS];
-
 int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent)
 {
     window_set_metadata(&window->metadata, width, height, tag, app_parent, &application_on_event);
@@ -57,18 +49,8 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     window_set_background_color(window, background_color);
 
-    // renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
-    renderer_2d_init(&window->renderer, "2DRenderer", -(float)width/2.0f, (float)width/2.0f, (float)height/2.0f, -(float)height/2.0f, -1.0f, 100.0f);
-
-    int r, c;
-    for (r = 0; r < NUM_WINDOW_QUADS % 10; r++)
-    {
-        for (c = 0; c < NUM_WINDOW_QUADS % 10; c++)
-        {
-            quad_positions[r*10 + c] = (fvector3) { { c*spacing + offset, r*spacing + offset, 0.0f } };
-            quad_colors[r*10 + c]    = (fvector4) { { c*increment, r*increment, 0.0f, 1.0f } };
-        }
-    }
+    renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
+    // renderer_2d_init(&window->renderer, "2DRenderer", -(float)width/2.0f, (float)width/2.0f, (float)height/2.0f, -(float)height/2.0f, -1.0f, 100.0f);
 
     return error;
 }
@@ -77,9 +59,38 @@ int window_run(struct window_t* window)
 {
     renderer_2d_begin_scene(&window->renderer);
 
-    for (int i = 0; i < NUM_WINDOW_QUADS; i++)
+    // const fvector3 circle_position = { 500.0f, 500.0f, 0.0f};
+    // const fvector4 circle_color    = { 1.0f, 0.0f, 0.0f, 1.0f };
+    // renderer_2d_draw_circle(&window->renderer, circle_position, circle_color);
+
+    const float spacing = 50.0f;
+    const float color_increment = 0.01;
+
+    unsigned int r, c; 
+
+    const unsigned int dim = 12;
+
+    const fvector3 grid_start_offset_position = { 100.0f, 100.0f, 0.0f };
+
+    for (r = 0; r <= dim; r++)
     {
-        renderer_2d_draw_quad(&window->renderer, quad_positions[i], &quad_colors[i]);
+        for (c = 0; c <= dim; c += 3)
+        {
+
+            const fvector3 quad_position     = { grid_start_offset_position.comp.x + (spacing*c)    , grid_start_offset_position.comp.y + (spacing*r), 0.0f};
+            const fvector3 triangle_position = { grid_start_offset_position.comp.x + (spacing*(c+1)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
+            const fvector3 circle_position   = { grid_start_offset_position.comp.x + (spacing*(c+2)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
+
+            const float val = (color_increment*(float)(r*dim + c));
+
+            const fvector4 quad_color     = {  val, 0.0f, 0.0f, 1.0f };
+            const fvector4 triangle_color = { 0.0f,  val, 0.0f, 1.0f };
+            const fvector4 circle_color   = { 0.0f, 0.0f,  val, 1.0f };
+
+            renderer_2d_draw_quad(&window->renderer, quad_position, quad_color);
+            renderer_2d_draw_triangle(&window->renderer, triangle_position, triangle_color);
+            renderer_2d_draw_circle(&window->renderer, circle_position, circle_color);
+        }
     }
 
     renderer_2d_end_scene(&window->renderer);

@@ -17,7 +17,7 @@ int application_init(struct application_t* app, char* app_name)
     app->name = (char*) malloc(name_length*sizeof(char));
     strcpy(app->name, app_name);
 
-    return window_init(&app->window, 800, 600, "JotunnWindow", app);
+    return window_init(&app->window, 1200, 1000, "JotunnWindow", app);
 }
 
 int application_start(struct application_t* app)

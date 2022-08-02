@@ -30,5 +30,6 @@ void render_api_init();
 void render_api_set_clear_color(const fvector4 color);
 void render_api_clear();
 void render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices);
+void render_api_draw_triangle_fan(unsigned int vertex_count);
 void render_api_draw_lines(unsigned int vertex_count);
 void render_api_set_line_width(const float width);

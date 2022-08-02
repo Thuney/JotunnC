@@ -7,8 +7,12 @@
 
 // Vertex data
 
+#define _RENDERABLE_2D_CIRCLE_RESOLUTION 16 // Number of triangles used to approximate circle
+#define _NUM_CIRCLE_2D_VERTICES (_RENDERABLE_2D_CIRCLE_RESOLUTION + 1)
+
 extern const fvector3 triangle_2d_position_data[3];
 extern const fvector3 quad_2d_position_data[4];
+extern fvector3 circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
 
 enum renderable_2d_triangle_vertex_attribute_t
 {
