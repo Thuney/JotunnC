@@ -50,16 +50,21 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
     window_set_background_color(window, background_color);
 
     renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
-    // renderer_2d_init(&window->renderer, "2DRenderer", -(float)width/2.0f, (float)width/2.0f, (float)height/2.0f, -(float)height/2.0f, -1.0f, 100.0f);
 
     texture_2d_create_from_file_path(&window->test_texture, "../../../Jotunn/res/textures/AaronShakespeare.png", 1);
 
     return error;
 }
 
-int window_run(struct window_t* window)
+// ---------------------------
+// ---------------------------
+// ---------------------------
+// ---------------------------
+// ---------------------------
+
+static void window_renderer_do_stuff(struct window_t* window)
 {
-    renderer_2d_begin_scene(&window->renderer);
+    // Grid of shapes (quad - triangle - circle)
 
     const float spacing = 50.0f;
     const float color_increment = 0.01;
@@ -71,7 +76,7 @@ int window_run(struct window_t* window)
     const fvector3 grid_start_offset_position = { 50.0f, 50.0f, 0.0f };
 
     const float scale_factor = 10.0f;
-    const fvector3 scale_factors      = (fvector3) { {scale_factor, scale_factor, scale_factor} };
+    const fvector3 scale_factors = (fvector3) { {scale_factor, scale_factor, scale_factor} };
 
     fmatrix_4x4 scale_matrix, transform_matrix;
     fmatrix_4x4_init(&scale_matrix);
@@ -104,6 +109,8 @@ int window_run(struct window_t* window)
         }
     }
 
+    // Textured Quad
+
     const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
 
     const float textured_quad_scale_factor = 200.0f;
@@ -117,11 +124,26 @@ int window_run(struct window_t* window)
 
     renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
 
+    // Line
+
     const fvector3 line_position_1 = { 1000.0f, 600.0f, 0.0f };
     const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
     const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
 
     renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
+}
+
+// ---------------------------
+// ---------------------------
+// ---------------------------
+// ---------------------------
+// ---------------------------
+
+int window_run(struct window_t* window)
+{
+    renderer_2d_begin_scene(&window->renderer);
+
+    window_renderer_do_stuff(window); // Temp
 
     renderer_2d_end_scene(&window->renderer);
 

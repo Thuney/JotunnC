@@ -11,13 +11,15 @@ CDEFINES := $(CDEFINES) -DBACKEND_OPENGL
 
 endif
 
-LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lpthread $(LD_GRAPHICS_FLAGS) -shared
+LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lfreetype -lpthread $(LD_GRAPHICS_FLAGS) -shared
+
+FREETYPE2_INCLUDE := -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-4
 
 BUILD    := ./.build
 OBJ_DIR  := $(BUILD)/objects
 LIB_DIR  := $(BUILD)/lib
 TARGET   := libjotunn.so
-INCLUDE  := -I./include -I./res
+INCLUDE  := -I./include -I./res $(FREETYPE2_INCLUDE)
 
 HDRS := \
 ./include/application.h               \
@@ -31,6 +33,7 @@ HDRS := \
 ./include/renderable_2d_primitive.h   \
 ./include/camera.h                    \
 \
+./include/font.h                      \
 ./include/shader.h                    \
 ./include/texture.h                   \
 ./include/vertexarray.h               \
@@ -53,6 +56,7 @@ CORE_SRC := \
 ./src/core/graphics/renderable_2d_primitive.c    \
 ./src/core/graphics/camera.c                     \
 \
+./src/core/graphics/datatypes/font.c             \
 ./src/core/graphics/datatypes/shader.c           \
 ./src/core/graphics/datatypes/texture.c          \
 ./src/core/graphics/datatypes/vertexarray.c      \

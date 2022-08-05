@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "fmatrix.h"
+#include "font.h"
 #include "renderable_2d_primitive.h"
 #include "renderer_2d.h"
 #include "shader.h"
@@ -178,6 +179,9 @@ static const unsigned int max_indices   = max_quads * 6;
 
 //
 
+static const char* ttf_file_path = "/usr/share/fonts/TTF/Hack-Regular.ttf";
+static struct typeface_t typeface;
+
 static void renderer_2d_data_init(struct renderer_2d_data_t* data)
 {
    unsigned int error = 0;
@@ -210,6 +214,10 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
    data->line_width = 3.0f;
+
+   font_init();
+
+   typeface_init(&typeface, ttf_file_path);
 }
 
 static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
@@ -227,6 +235,10 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
    shader_program_destroy(&data->line_shader);
 
    data->line_width = -1.0f;
+
+   typeface_cleanup(&typeface);
+
+   font_cleanup();
 }
 
 void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)

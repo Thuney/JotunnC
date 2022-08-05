@@ -92,7 +92,6 @@ static void opengl_render_api_set_clear_color(const fvector4 color)
 
 static void opengl_render_api_clear()
 {
-   // glClear(GL_COLOR_BUFFER_BIT);
    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
