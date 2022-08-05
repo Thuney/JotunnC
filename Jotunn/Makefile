@@ -32,6 +32,7 @@ HDRS := \
 ./include/camera.h                    \
 \
 ./include/shader.h                    \
+./include/texture.h                   \
 ./include/vertexarray.h               \
 ./include/vertexattribute.h           \
 ./include/vertexbuffer.h              \
@@ -53,6 +54,7 @@ CORE_SRC := \
 ./src/core/graphics/camera.c                     \
 \
 ./src/core/graphics/datatypes/shader.c           \
+./src/core/graphics/datatypes/texture.c          \
 ./src/core/graphics/datatypes/vertexarray.c      \
 ./src/core/graphics/datatypes/vertexattribute.c  \
 ./src/core/graphics/datatypes/vertexbuffer.c     \
@@ -68,6 +70,7 @@ PLATFORM_SRC := \
 ./src/platform/application/window_gl.c                 \
 ./src/platform/graphics/api/render_api_opengl.c        \
 ./src/platform/graphics/datatypes/shader_gl.c          \
+./src/platform/graphics/datatypes/texture_gl.c         \
 ./src/platform/graphics/datatypes/vertexarray_gl.c     \
 ./src/platform/graphics/datatypes/vertexattribute_gl.c \
 ./src/platform/graphics/datatypes/vertexbuffer_gl.c    \
@@ -77,6 +80,7 @@ else
 PLATFORM_SRC := \
 ./src/platform/application/window_no_backend.c                  \
 ./src/platform/graphics/api/render_api_no_backend.c             \
+./src/platform/graphics/datatypes/shader_no_backend.c           \
 ./src/platform/graphics/datatypes/shader_no_backend.c           \
 ./src/platform/graphics/datatypes/vertexarray_no_backend.c      \
 ./src/platform/graphics/datatypes/vertexattribute_no_backend.c  \

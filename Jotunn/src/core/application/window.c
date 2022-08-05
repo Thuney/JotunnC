@@ -52,16 +52,14 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
     renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
     // renderer_2d_init(&window->renderer, "2DRenderer", -(float)width/2.0f, (float)width/2.0f, (float)height/2.0f, -(float)height/2.0f, -1.0f, 100.0f);
 
+    texture_2d_create_from_file_path(&window->test_texture, "../../../Jotunn/res/textures/AaronShakespeare.png", 1);
+
     return error;
 }
 
 int window_run(struct window_t* window)
 {
     renderer_2d_begin_scene(&window->renderer);
-
-    // const fvector3 circle_position = { 500.0f, 500.0f, 0.0f};
-    // const fvector4 circle_color    = { 1.0f, 0.0f, 0.0f, 1.0f };
-    // renderer_2d_draw_circle(&window->renderer, circle_position, circle_color);
 
     const float spacing = 50.0f;
     const float color_increment = 0.01;
@@ -70,7 +68,7 @@ int window_run(struct window_t* window)
 
     const unsigned int dim = 12;
 
-    const fvector3 grid_start_offset_position = { 100.0f, 100.0f, 0.0f };
+    const fvector3 grid_start_offset_position = { 50.0f, 50.0f, 0.0f };
 
     for (r = 0; r <= dim; r++)
     {
@@ -81,17 +79,28 @@ int window_run(struct window_t* window)
             const fvector3 triangle_position = { grid_start_offset_position.comp.x + (spacing*(c+1)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
             const fvector3 circle_position   = { grid_start_offset_position.comp.x + (spacing*(c+2)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
 
-            const float val = (color_increment*(float)(r*dim + c));
+            const float val  = (color_increment*(float)(r*dim + c));
+            const float val2 = (color_increment*(float)(c*dim + r));
 
-            const fvector4 quad_color     = {  val, 0.0f, 0.0f, 1.0f };
-            const fvector4 triangle_color = { 0.0f,  val, 0.0f, 1.0f };
-            const fvector4 circle_color   = { 0.0f, 0.0f,  val, 1.0f };
+            const fvector4 quad_color     = {  val, val2, 0.0f, 1.0f };
+            const fvector4 triangle_color = { 0.0f,  val, val2, 1.0f };
+            const fvector4 circle_color   = { 0.0f, val2,  val, 1.0f };
 
             renderer_2d_draw_quad(&window->renderer, quad_position, quad_color);
             renderer_2d_draw_triangle(&window->renderer, triangle_position, triangle_color);
             renderer_2d_draw_circle(&window->renderer, circle_position, circle_color);
         }
     }
+
+    const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
+
+    renderer_2d_draw_textured_quad(&window->renderer, textured_quad_position, &window->test_texture);
+
+    // const fvector3 line_position_1 = { 1200.0f, 1200.0f, 0.0f };
+    // const fvector3 line_position_2 = { 1600.0f, 1200.0f, 0.0f };
+    // const fvector4 line_color      = { 100.0f, 100.0f, 0.0f, 0.0f };
+
+    // renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
 
     renderer_2d_end_scene(&window->renderer);
 
@@ -106,6 +115,8 @@ void window_cleanup(struct window_t* window)
     window->metadata.tag = 0;
 
     renderer_2d_cleanup(&window->renderer);
+
+    texture_2d_cleanup(&window->test_texture);
 
     window_graphics_cleanup(window);
 }

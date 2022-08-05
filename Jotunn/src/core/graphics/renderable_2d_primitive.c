@@ -43,6 +43,46 @@ const fvector3 quad_2d_position_data[4] =
    }
 };
 
+const fvector3 textured_quad_2d_position_data[4] =
+{ 
+   [0] = 
+   {
+      { 0.0f, 0.0f, 0.0f }
+   },
+   [1] = 
+   {
+      { 200.0f, 0.0f, 0.0f }
+   },
+   [2] = 
+   {
+      { 200.0f, 200.0f, 0.0f }
+   },
+   [3] = 
+   {
+      { 0.0f, 200.0f, 0.0f }
+   }
+};
+
+const fvector2 textured_quad_texture_coordinates[4] =
+{ 
+   [0] = 
+   {
+      { 0.0f, 0.0f }
+   },
+   [1] = 
+   {
+      { 1.0f, 0.0f }
+   },
+   [2] = 
+   {
+      { 1.0f, 1.0f }
+   },
+   [3] = 
+   {
+      { 0.0f, 1.0f }
+   }
+};
+
 fvector3 circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
 
 #define PI 3.14159f
@@ -123,6 +163,50 @@ static struct vertex_attribute_t quad_vertex_attributes[2] = {
    }
 };
 
+// Textured Quad 2D vertex attributes
+static struct vertex_attribute_t textured_quad_vertex_attributes[4] = {
+   [0] = 
+   {
+      .attribute_name       = "position",
+      .index                = (unsigned int)-1, // To be filled by shader program
+      .size                 = 3,
+      .data_type            = V_FLOAT,
+      .should_normalize     = 0,
+      .stride               = sizeof(struct renderable_2d_textured_quad_vertex_t),
+      .ptr_offset_to_attrib = 0
+   },
+   [1] = 
+   {
+      .attribute_name       = "texCoord",
+      .index                = (unsigned int)-1, // To be filled by shader program
+      .size                 = 2,
+      .data_type            = V_FLOAT,
+      .should_normalize     = 0,
+      .stride               = sizeof(struct renderable_2d_textured_quad_vertex_t),
+      .ptr_offset_to_attrib = (void*)sizeof(fvector3)
+   },
+   [2] = 
+   {
+      .attribute_name       = "texIndex",
+      .index                = (unsigned int)-1, // To be filled by shader program
+      .size                 = 1,
+      .data_type            = V_FLOAT,
+      .should_normalize     = 0,
+      .stride               = sizeof(struct renderable_2d_textured_quad_vertex_t),
+      .ptr_offset_to_attrib = (void*)(sizeof(fvector3) + sizeof(fvector2))
+   },
+   [3] = 
+   {
+      .attribute_name       = "tilingFactor",
+      .index                = (unsigned int)-1, // To be filled by shader program
+      .size                 = 1,
+      .data_type            = V_FLOAT,
+      .should_normalize     = 0,
+      .stride               = sizeof(struct renderable_2d_textured_quad_vertex_t),
+      .ptr_offset_to_attrib = (void*)(sizeof(fvector3) + sizeof(fvector2) + sizeof(float))
+   }
+};
+
 // Circle 2D vertex attributes
 static struct vertex_attribute_t circle_vertex_attributes[2] = {
    [0] = 
@@ -197,15 +281,15 @@ static void renderable_2d_primitive_data_init(struct vertex_array_t* vao, struct
       attribute_name = attributes[attribute_index].attribute_name;
       temp_shader_index = shader_program_get_attribute_location(shader_program, attribute_name);
 
-      #ifdef DEBUG
-         fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
-      #endif
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
+      // #endif
 
       attributes[attribute_index].index = temp_shader_index;
 
-      #ifdef DEBUG
-         vertex_attribute_print(&attributes[attribute_index]);
-      #endif
+      // #ifdef DEBUG
+      //    vertex_attribute_print(&attributes[attribute_index]);
+      // #endif
 
       vertex_array_set_attribute(vao, &attributes[attribute_index]);
    }
@@ -268,6 +352,38 @@ void renderable_2d_quad_data_init(struct renderable_2d_quad_data_t* quad_data, c
 
    element_buffer_buffer_data(&quad_data->ebo, quad_indices, max_indices*sizeof(unsigned int), STATIC_DRAW);
    vertex_buffer_buffer_data(&quad_data->vbo, (float*)quad_data->vertex_data_base, max_vertices*sizeof(struct renderable_2d_quad_vertex_t), DYNAMIC_DRAW);
+
+   vertex_array_unbind();
+}
+
+void renderable_2d_textured_quad_data_init(struct renderable_2d_textured_quad_data_t* textured_quad_data, const unsigned int max_count, struct shader_program_t* shader_program)
+{
+   const unsigned int max_vertices = 4*max_count;
+   const unsigned int max_indices  = 6*max_count;
+
+   renderable_2d_primitive_data_init(&textured_quad_data->vao, &textured_quad_data->vbo, &textured_quad_data->ebo, 1, textured_quad_vertex_attributes, _TEXTURED_QUAD_2D_ATTRIBUTE_NUM, shader_program);
+
+   textured_quad_data->vertex_data_base = (struct renderable_2d_textured_quad_vertex_t*) calloc(max_vertices, sizeof(struct renderable_2d_textured_quad_vertex_t));
+   textured_quad_data->vertex_data_ptr  = textured_quad_data->vertex_data_base;
+
+   unsigned int textured_quad_indices[max_indices];
+
+   unsigned int offset = 0;
+   for (unsigned int i = 0; i < max_indices; i += 6)
+   {
+      textured_quad_indices[i + 0] = offset + 0;
+      textured_quad_indices[i + 1] = offset + 1;
+      textured_quad_indices[i + 2] = offset + 2;
+
+      textured_quad_indices[i + 3] = offset + 0;
+      textured_quad_indices[i + 4] = offset + 3;
+      textured_quad_indices[i + 5] = offset + 2;
+
+      offset += 4;
+   }
+
+   element_buffer_buffer_data(&textured_quad_data->ebo, textured_quad_indices, max_indices*sizeof(unsigned int), STATIC_DRAW);
+   vertex_buffer_buffer_data(&textured_quad_data->vbo, (float*)textured_quad_data->vertex_data_base, max_vertices*sizeof(struct renderable_2d_textured_quad_data_t), DYNAMIC_DRAW);
 
    vertex_array_unbind();
 }
@@ -340,6 +456,15 @@ void renderable_2d_triangle_data_cleanup(struct renderable_2d_triangle_data_t* t
 }
 
 void renderable_2d_quad_data_cleanup(struct renderable_2d_quad_data_t* quad_data)
+{
+   vertex_array_destroy(&quad_data->vao, 1);
+   vertex_buffer_destroy(&quad_data->vbo, 1);
+   element_buffer_destroy(&quad_data->ebo, 1);
+
+   free(quad_data->vertex_data_base);
+}
+
+void renderable_2d_textured_quad_data_cleanup(struct renderable_2d_textured_quad_data_t* quad_data)
 {
    vertex_array_destroy(&quad_data->vao, 1);
    vertex_buffer_destroy(&quad_data->vbo, 1);

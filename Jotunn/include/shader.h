@@ -64,6 +64,7 @@ void shader_program_bind_fragment_data_location(struct shader_program_t* shader_
 int shader_program_get_attribute_location(struct shader_program_t* shader_program, const char* attribute_name);
 
 void shader_program_set_uniform_fmat4x4(struct shader_program_t* shader_program, const char* uniform_name, const fmatrix_4x4* matrix);
+void shader_program_set_uniform_float(struct shader_program_t* shader_program, const char* uniform_name, const float* val);
 
 void vertex_shader_destroy(struct vertex_shader_t* shader);
 void fragment_shader_destroy(struct fragment_shader_t* shader);

@@ -10,17 +10,24 @@
 #include "renderer_2d.h"
 #include "shader.h"
 
+#define _RENDERER_2D_MAX_TEXTURES 16
+
 struct renderer_2d_data_t
 {
    struct shader_program_t triangle_shader;
    struct shader_program_t quad_shader;
+   struct shader_program_t textured_quad_shader;
    struct shader_program_t circle_shader;
    struct shader_program_t line_shader;
    //
-   struct renderable_2d_triangle_data_t triangle_data;
-   struct renderable_2d_quad_data_t         quad_data;
-   struct renderable_2d_circle_data_t     circle_data;
-   struct renderable_2d_line_data_t         line_data;
+   const struct texture_2d_t* textures[_RENDERER_2D_MAX_TEXTURES];
+   unsigned int textures_index;
+   //
+   struct renderable_2d_triangle_data_t      triangle_data;
+   struct renderable_2d_quad_data_t          quad_data;
+   struct renderable_2d_textured_quad_data_t textured_quad_data;
+   struct renderable_2d_circle_data_t        circle_data;
+   struct renderable_2d_line_data_t          line_data;
    //
    float line_width;
 };
@@ -72,6 +79,30 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.quad_shader, "projection", &renderer->camera.base.projection_matrix);
 
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->quad_data.quad_index_count, ELEMENT_UNSIGNED_INT, 0);
+   }
+
+   if (data->textured_quad_data.textured_quad_index_count)
+   {
+      const unsigned int textured_quad_data_size = (unsigned int)((uint8_t*)data->textured_quad_data.vertex_data_ptr - (uint8_t*)data->textured_quad_data.vertex_data_base);
+
+      vertex_array_bind(&data->textured_quad_data.vao);
+      vertex_buffer_bind(&data->textured_quad_data.vbo);
+      element_buffer_bind(&data->textured_quad_data.ebo);
+
+      shader_program_use(&data->textured_quad_shader);
+
+      vertex_buffer_buffer_sub_data(&data->textured_quad_data.vbo, (float*)data->textured_quad_data.vertex_data_base, textured_quad_data_size);
+
+      shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "model", &model_matrix);
+      shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "view", &renderer->camera.base.view_matrix);
+      shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "projection", &renderer->camera.base.projection_matrix);
+
+      for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
+      {
+         texture_2d_bind(renderer_2d_data.textures[i], i);
+      }
+
+      render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->textured_quad_data.textured_quad_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
 
    if (data->circle_data.circle_index_count)
@@ -126,11 +157,16 @@ static void renderer_2d_start_batch(const struct renderer_2d_t* renderer)
    data->quad_data.quad_index_count = 0;
    data->quad_data.vertex_data_ptr  = data->quad_data.vertex_data_base;
 
+   data->textured_quad_data.textured_quad_index_count = 0;
+   data->textured_quad_data.vertex_data_ptr  = data->textured_quad_data.vertex_data_base;
+
    data->circle_data.circle_index_count = 0;
    data->circle_data.vertex_data_ptr    = data->circle_data.vertex_data_base;
 
    data->line_data.line_vertex_count = 0;
    data->line_data.vertex_data_ptr  = data->line_data.vertex_data_base;
+
+   data->textures_index = 0;
 }
 
 static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
@@ -139,7 +175,7 @@ static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads     = 100; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads     = 1000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices  = max_quads * 4;
 static const unsigned int max_indices   = max_quads * 6;
 
@@ -153,21 +189,26 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during triangle shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->quad_shader,     "../../../Jotunn/res/shaders/quad_2d_shader.vert", "../../../Jotunn/res/shaders/quad_2d_shader.frag");
+   error = shader_program_init_filepath(&data->quad_shader, "../../../Jotunn/res/shaders/quad_2d_shader.vert", "../../../Jotunn/res/shaders/quad_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during quad shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->circle_shader,   "../../../Jotunn/res/shaders/circle_2d_shader.vert", "../../../Jotunn/res/shaders/circle_2d_shader.frag");
+   error = shader_program_init_filepath(&data->textured_quad_shader, "../../../Jotunn/res/shaders/textured_quad_2d_shader.vert", "../../../Jotunn/res/shaders/textured_quad_2d_shader.frag");
+   #ifdef DEBUG
+      if (error) fprintf(stdout, "Error during quad shader init\n");
+   #endif
+   error = shader_program_init_filepath(&data->circle_shader, "../../../Jotunn/res/shaders/circle_2d_shader.vert", "../../../Jotunn/res/shaders/circle_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during circle shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->line_shader,     "../../../Jotunn/res/shaders/line_2d_shader.vert", "../../../Jotunn/res/shaders/line_2d_shader.frag");
+   error = shader_program_init_filepath(&data->line_shader, "../../../Jotunn/res/shaders/line_2d_shader.vert", "../../../Jotunn/res/shaders/line_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during line shader init\n");
    #endif
 
    renderable_2d_triangle_data_init(&data->triangle_data, max_vertices, &data->triangle_shader);
    renderable_2d_quad_data_init(&data->quad_data, max_vertices, &data->quad_shader);
+   renderable_2d_textured_quad_data_init(&data->textured_quad_data, max_vertices, &data->textured_quad_shader);
    renderable_2d_circle_data_init(&data->circle_data, max_vertices, &data->circle_shader);
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
@@ -178,11 +219,13 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
 {
    renderable_2d_triangle_data_cleanup(&data->triangle_data);
    renderable_2d_quad_data_cleanup(&data->quad_data);
+   renderable_2d_textured_quad_data_cleanup(&data->textured_quad_data);
    renderable_2d_circle_data_cleanup(&data->circle_data);
    renderable_2d_line_data_cleanup(&data->line_data);
 
    shader_program_destroy(&data->triangle_shader);
    shader_program_destroy(&data->quad_shader);
+   shader_program_destroy(&data->textured_quad_shader);
    shader_program_destroy(&data->circle_shader);
    shader_program_destroy(&data->line_shader);
 
@@ -288,6 +331,49 @@ void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 
    renderer_2d_data.quad_data.quad_index_count += 6;
 }
 
+void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const fvector3 position, const struct texture_2d_t* texture)
+{
+   const unsigned int quad_vertex_count = 4;
+
+   const float tiling_factor = 1.0f;
+
+   if (renderer_2d_data.quad_data.quad_index_count >= max_indices)
+      renderer_2d_next_batch(renderer);
+
+   float texture_index = 0.0f;
+   for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
+   {
+      if (renderer_2d_data.textures[i] == texture)
+      {
+         texture_index = (float)i;
+         break;
+      }
+   }
+
+   if (texture_index == 0.0f)
+   {
+      if (renderer_2d_data.textures_index >= _RENDERER_2D_MAX_TEXTURES)
+         renderer_2d_next_batch(renderer);
+
+      texture_index = (float)renderer_2d_data.textures_index;
+      renderer_2d_data.textures[renderer_2d_data.textures_index] = texture;
+      renderer_2d_data.textures_index++;
+   }
+
+   unsigned int i;
+   for (i = 0; i < quad_vertex_count; i++)
+   {
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = fvector3_add(&textured_quad_2d_position_data[i], &position);
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = textured_quad_texture_coordinates[i];
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_index       = texture_index;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->tiling_factor       = tiling_factor;
+      
+      renderer_2d_data.textured_quad_data.vertex_data_ptr++;
+   }
+
+   renderer_2d_data.textured_quad_data.textured_quad_index_count += 6;
+}
+
 void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
 {
    if (renderer_2d_data.circle_data.circle_index_count >= max_indices)
@@ -298,11 +384,6 @@ void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector
    {
 
       const fvector3 new_position = fvector3_add(&circle_2d_position_data[i], &position);
-      #ifdef DEBUG
-         static unsigned int done = 0;
-
-         if(!done++) fvector3_print(&new_position);
-      #endif
 
       renderer_2d_data.circle_data.vertex_data_ptr->position = new_position;
       renderer_2d_data.circle_data.vertex_data_ptr->color    = color;
@@ -311,23 +392,6 @@ void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector
    }
 
    renderer_2d_data.circle_data.circle_index_count += (3*(_RENDERABLE_2D_CIRCLE_RESOLUTION));
-
-   #ifdef DEBUG
-      static unsigned int done = 0;
-
-      struct renderable_2d_circle_vertex_t* debug_circle_data_base = renderer_2d_data.circle_data.vertex_data_base;
-
-      if (!done)
-      {
-         fprintf(stdout, "Index count = %u\n", renderer_2d_data.circle_data.circle_index_count);
-         for (unsigned int i = 0; i < 17; i++)
-         {
-            fvector3_print(&debug_circle_data_base->position);
-            debug_circle_data_base++;
-         }
-         done = 1;
-      }
-   #endif
 }
 
 void renderer_2d_draw_line(const struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4 color)
