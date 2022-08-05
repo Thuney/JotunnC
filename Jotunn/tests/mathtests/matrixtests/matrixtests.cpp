@@ -386,6 +386,44 @@ BOOST_AUTO_TEST_CASE(fmatrix_glm_tests, *boost::unit_test::tolerance(0.0001))
 
       BOOST_TEST( are_matrices_equal(glm_identity_scale_translation_matrix, &transform_matrix) );
    }
+
+   {
+      const float scale_factor = 50.0f;
+      const fvector3 scale_factors      = (fvector3) { {scale_factor, scale_factor, scale_factor} };
+      const fvector3 translation_coords = (fvector3) { {400.0f, 200.0f, 0.0f} };
+
+      // GLM
+      glm::vec3 glm_translation_coords = glm::vec3(translation_coords.comp.x, translation_coords.comp.y, translation_coords.comp.z);
+      glm::vec3 glm_scale_factors      = glm::vec3(scale_factor, scale_factor, scale_factor);
+
+      glm::mat4 glm_identity_matrix(1.0f);
+      glm::mat4 glm_scale_matrix(1.0f);
+      glm::mat4 glm_translation_matrix(1.0f);
+      glm::mat4 glm_identity_scale_translation_matrix(1.0f);
+
+      glm_scale_matrix = glm::scale(glm_identity_matrix, glm_scale_factors);
+      glm_translation_matrix = glm::translate(glm_identity_matrix, glm_translation_coords);
+
+      glm_identity_scale_translation_matrix = glm_translation_matrix * glm_scale_matrix * glm_identity_matrix;
+
+      // Ours
+      fmatrix_4x4 transform_matrix;
+      fmatrix_4x4_init(&transform_matrix);
+
+      transform_matrix = fmatrix_4x4_transform_scale(&transform_matrix, scale_factors);
+      transform_matrix = fmatrix_4x4_transform_translate(&transform_matrix, translation_coords);
+
+      const fvector3 original_point = (fvector3) { 100.0f, 50.0f, -20.0f };
+      glm::vec3 glm_original_point   = glm::vec3(100.0f, 50.0f, -20.0f);
+
+      glm::vec3 glm_transformed_point = glm_identity_scale_translation_matrix * glm::vec4(glm_original_point, 1.0f);
+
+      fvector3 our_transformed_point = fmatrix_4x4_transform_point(&transform_matrix, original_point);
+
+      BOOST_TEST( our_transformed_point.comp.x == glm_transformed_point.x );
+      BOOST_TEST( our_transformed_point.comp.y == glm_transformed_point.y );
+      BOOST_TEST( our_transformed_point.comp.z == glm_transformed_point.z );
+   }
 }
 
 BOOST_AUTO_TEST_CASE(TautologicalTests, *boost::unit_test::tolerance(0.0001))

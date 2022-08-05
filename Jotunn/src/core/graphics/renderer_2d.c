@@ -51,9 +51,9 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       vertex_buffer_bind(&data->triangle_data.vbo);
       element_buffer_bind(&data->triangle_data.ebo);
 
-      shader_program_use(&data->triangle_shader);
-
       vertex_buffer_buffer_sub_data(&data->triangle_data.vbo, (float*)data->triangle_data.vertex_data_base, triangle_data_size);
+
+      shader_program_use(&data->triangle_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.triangle_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.triangle_shader, "view", &renderer->camera.base.view_matrix);
@@ -70,9 +70,9 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       vertex_buffer_bind(&data->quad_data.vbo);
       element_buffer_bind(&data->quad_data.ebo);
 
-      shader_program_use(&data->quad_shader);
-
       vertex_buffer_buffer_sub_data(&data->quad_data.vbo, (float*)data->quad_data.vertex_data_base, quad_data_size);
+
+      shader_program_use(&data->quad_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.quad_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.quad_shader, "view", &renderer->camera.base.view_matrix);
@@ -89,9 +89,9 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       vertex_buffer_bind(&data->textured_quad_data.vbo);
       element_buffer_bind(&data->textured_quad_data.ebo);
 
-      shader_program_use(&data->textured_quad_shader);
-
       vertex_buffer_buffer_sub_data(&data->textured_quad_data.vbo, (float*)data->textured_quad_data.vertex_data_base, textured_quad_data_size);
+
+      shader_program_use(&data->textured_quad_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "view", &renderer->camera.base.view_matrix);
@@ -113,9 +113,9 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       vertex_buffer_bind(&data->circle_data.vbo);
       element_buffer_bind(&data->circle_data.ebo);
 
-      shader_program_use(&data->circle_shader);
-
       vertex_buffer_buffer_sub_data(&data->circle_data.vbo, (float*)data->circle_data.vertex_data_base, circle_data_size);
+
+      shader_program_use(&data->circle_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.circle_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.circle_shader, "view", &renderer->camera.base.view_matrix);
@@ -126,23 +126,20 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
    if (data->line_data.line_vertex_count)
    {
-      // #ifdef DEBUG
-      //    fprintf(stdout, "Flushing lines\n");
-      // #endif
-
       const unsigned int line_data_size = (unsigned int)((uint8_t*)data->line_data.vertex_data_ptr - (uint8_t*)data->line_data.vertex_data_base);
 
       vertex_array_bind(&data->line_data.vao);
       vertex_buffer_bind(&data->line_data.vbo);
 
-      shader_program_use(&data->line_shader);
-
       vertex_buffer_buffer_sub_data(&data->line_data.vbo, (float*)data->line_data.vertex_data_base, line_data_size);
+
+      shader_program_use(&data->line_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.line_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.line_shader, "view", &renderer->camera.base.view_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.line_shader, "projection", &renderer->camera.base.projection_matrix);
 
+      render_api_set_line_width(data->line_width);
       render_api_draw_lines(data->line_data.line_vertex_count);
    }
 }
@@ -212,7 +209,7 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    renderable_2d_circle_data_init(&data->circle_data, max_vertices, &data->circle_shader);
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
-   data->line_width = 10.0f;
+   data->line_width = 3.0f;
 }
 
 static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
@@ -264,9 +261,9 @@ void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const flo
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
 {
-   // #ifdef DEBUG
-   //      fprintf(stdout, "Cleaning up renderer 2D\n");
-   // #endif
+   #ifdef DEBUG
+        fprintf(stdout, "Cleaning up renderer 2D\n");
+   #endif
 
    free(renderer->tag);
    renderer->tag = 0;
@@ -292,7 +289,7 @@ void renderer_2d_end_scene(struct renderer_2d_t* renderer)
 
 //
 
-void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
+void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
    const unsigned int triangle_vertex_count = 3;
 
@@ -302,7 +299,7 @@ void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvect
    unsigned int i;
    for (i = 0; i < triangle_vertex_count; i++)
    {
-      renderer_2d_data.triangle_data.vertex_data_ptr->position = fvector3_add(&triangle_2d_position_data[i], &position);;
+      renderer_2d_data.triangle_data.vertex_data_ptr->position = fmatrix_4x4_transform_point(transform, triangle_2d_position_data[i]);
       renderer_2d_data.triangle_data.vertex_data_ptr->color    = color;
 
       renderer_2d_data.triangle_data.vertex_data_ptr++;
@@ -312,17 +309,19 @@ void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvect
 
 }
 
-void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
+void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
    const unsigned int quad_vertex_count = 4;
 
    if (renderer_2d_data.quad_data.quad_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
 
+   
+
    unsigned int i;
    for (i = 0; i < quad_vertex_count; i++)
    {
-      renderer_2d_data.quad_data.vertex_data_ptr->position = fvector3_add(&quad_2d_position_data[i], &position);
+      renderer_2d_data.quad_data.vertex_data_ptr->position = fmatrix_4x4_transform_point(transform, quad_2d_position_data[i]);
       renderer_2d_data.quad_data.vertex_data_ptr->color    = color;
       
       renderer_2d_data.quad_data.vertex_data_ptr++;
@@ -331,7 +330,7 @@ void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 
    renderer_2d_data.quad_data.quad_index_count += 6;
 }
 
-void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const fvector3 position, const struct texture_2d_t* texture)
+void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture)
 {
    const unsigned int quad_vertex_count = 4;
 
@@ -363,7 +362,7 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
    unsigned int i;
    for (i = 0; i < quad_vertex_count; i++)
    {
-      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = fvector3_add(&textured_quad_2d_position_data[i], &position);
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
       renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = textured_quad_texture_coordinates[i];
       renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_index       = texture_index;
       renderer_2d_data.textured_quad_data.vertex_data_ptr->tiling_factor       = tiling_factor;
@@ -374,7 +373,7 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
    renderer_2d_data.textured_quad_data.textured_quad_index_count += 6;
 }
 
-void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color)
+void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
    if (renderer_2d_data.circle_data.circle_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
@@ -382,10 +381,7 @@ void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector
    unsigned int i;
    for (i = 0; i < _NUM_CIRCLE_2D_VERTICES; i++)
    {
-
-      const fvector3 new_position = fvector3_add(&circle_2d_position_data[i], &position);
-
-      renderer_2d_data.circle_data.vertex_data_ptr->position = new_position;
+      renderer_2d_data.circle_data.vertex_data_ptr->position = fmatrix_4x4_transform_point(transform, circle_2d_position_data[i]);
       renderer_2d_data.circle_data.vertex_data_ptr->color    = color;
       
       renderer_2d_data.circle_data.vertex_data_ptr++;

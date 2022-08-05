@@ -15,11 +15,11 @@ const fvector3 triangle_2d_position_data[3] =
    },
    [1] = 
    {
-      { 5.0f, 10.0f, 0.0f }
+      { 0.5f, 1.0f, 0.0f }
    },
    [2] = 
    {
-      { 10.0f, 0.0f, 0.0f }
+      { 1.0f, 0.0f, 0.0f }
    }
 };
 
@@ -31,15 +31,15 @@ const fvector3 quad_2d_position_data[4] =
    },
    [1] = 
    {
-      { 10.0f, 0.0f, 0.0f }
+      { 1.0f, 0.0f, 0.0f }
    },
    [2] = 
    {
-      { 10.0f, 10.0f, 0.0f }
+      { 1.0f, 1.0f, 0.0f }
    },
    [3] = 
    {
-      { 0.0f, 10.0f, 0.0f }
+      { 0.0f, 1.0f, 0.0f }
    }
 };
 
@@ -51,15 +51,15 @@ const fvector3 textured_quad_2d_position_data[4] =
    },
    [1] = 
    {
-      { 200.0f, 0.0f, 0.0f }
+      { 1.0f, 0.0f, 0.0f }
    },
    [2] = 
    {
-      { 200.0f, 200.0f, 0.0f }
+      { 1.0f, 1.0f, 0.0f }
    },
    [3] = 
    {
-      { 0.0f, 200.0f, 0.0f }
+      { 0.0f, 1.0f, 0.0f }
    }
 };
 
@@ -89,7 +89,7 @@ fvector3 circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
 
 static void gen_circle_2d_position_data()
 {
-   const float angle_increment_degrees = (360.0f / (float)_RENDERABLE_2D_CIRCLE_RESOLUTION), r = 5.0f;
+   const float angle_increment_degrees = (360.0f / (float)_RENDERABLE_2D_CIRCLE_RESOLUTION);
 
    float angle_degrees = 0.0f;
 
@@ -99,15 +99,15 @@ static void gen_circle_2d_position_data()
 
    float x, y, angle_radians;
 
-   circle_2d_position_data[0] = (fvector3) { r*offset.comp.x, r*offset.comp.y, 0.0f }; // Origin / Center of circle
+   circle_2d_position_data[0] = (fvector3) { offset.comp.x, offset.comp.y, 0.0f }; // Origin / Center of circle
 
    // Generate vertices on circle
    for (v = 1; v < _NUM_CIRCLE_2D_VERTICES; v++)
    {
       angle_radians = (PI / 180.0f)*angle_degrees;
 
-      x = r*(cosf(angle_radians) + offset.comp.x);
-      y = r*(sinf(angle_radians) + offset.comp.y);
+      x = (cosf(angle_radians) + offset.comp.x);
+      y = (sinf(angle_radians) + offset.comp.y);
 
       circle_2d_position_data[v] = (fvector3) { x, y, 0.0f };
 
@@ -237,7 +237,7 @@ static struct vertex_attribute_t line_vertex_attributes[2] = {
    {
       .attribute_name       = "position",
       .index                = (unsigned int)-1, // To be filled by shader program
-      .size                 = 4,
+      .size                 = 3,
       .data_type            = V_FLOAT,
       .should_normalize     = 0,
       .stride               = sizeof(struct renderable_2d_line_vertex_t),

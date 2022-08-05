@@ -104,3 +104,5 @@ fmatrix_4x4 fmatrix_4x4_multiply(const fmatrix_4x4* matrix1, const fmatrix_4x4* 
 
 fmatrix_4x4 fmatrix_4x4_transform_translate(fmatrix_4x4* matrix, const fvector3 translation);
 fmatrix_4x4 fmatrix_4x4_transform_scale(fmatrix_4x4* matrix, const fvector3 scale_factors);
+
+fvector3 fmatrix_4x4_transform_point(const fmatrix_4x4* matrix, const fvector3 point);

@@ -17,10 +17,10 @@ void renderer_2d_cleanup(struct renderer_2d_t* renderer);
 void renderer_2d_begin_scene(struct renderer_2d_t* renderer);
 void renderer_2d_end_scene(struct renderer_2d_t* renderer);
 
-void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color);
-void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color);
-void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const fvector3 position, const struct texture_2d_t* texture);
-void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fvector3 position, const fvector4 color);
+void renderer_2d_draw_triangle(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
+void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
+void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture);
+void renderer_2d_draw_circle(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
 void renderer_2d_draw_line(const struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4 color);
 
 void renderer_2d_set_line_width(const struct renderer_2d_t* renderer, const float line_width);

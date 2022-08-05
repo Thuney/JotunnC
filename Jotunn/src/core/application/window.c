@@ -70,37 +70,58 @@ int window_run(struct window_t* window)
 
     const fvector3 grid_start_offset_position = { 50.0f, 50.0f, 0.0f };
 
+    const float scale_factor = 10.0f;
+    const fvector3 scale_factors      = (fvector3) { {scale_factor, scale_factor, scale_factor} };
+
+    fmatrix_4x4 scale_matrix, transform_matrix;
+    fmatrix_4x4_init(&scale_matrix);
+
+    scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+
+    fvector3 quad_position, triangle_position, circle_position;
+
     for (r = 0; r <= dim; r++)
     {
         for (c = 0; c <= dim; c += 3)
         {
-
-            const fvector3 quad_position     = { grid_start_offset_position.comp.x + (spacing*c)    , grid_start_offset_position.comp.y + (spacing*r), 0.0f};
-            const fvector3 triangle_position = { grid_start_offset_position.comp.x + (spacing*(c+1)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
-            const fvector3 circle_position   = { grid_start_offset_position.comp.x + (spacing*(c+2)), grid_start_offset_position.comp.y + (spacing*r), 0.0f};
+            quad_position     = (fvector3) { {grid_start_offset_position.comp.x + (spacing*c)    , grid_start_offset_position.comp.y + (spacing*r), 0.0f} };
+            triangle_position = (fvector3) { {grid_start_offset_position.comp.x + (spacing*(c+1)), grid_start_offset_position.comp.y + (spacing*r), 0.0f} };
+            circle_position   = (fvector3) { {grid_start_offset_position.comp.x + (spacing*(c+2)), grid_start_offset_position.comp.y + (spacing*r), 0.0f} };
 
             const float val  = (color_increment*(float)(r*dim + c));
             const float val2 = (color_increment*(float)(c*dim + r));
 
-            const fvector4 quad_color     = {  val, val2, 0.0f, 1.0f };
+            const fvector4 quad_color     = { val, val2, 0.0f, 1.0f  };
             const fvector4 triangle_color = { 0.0f,  val, val2, 1.0f };
             const fvector4 circle_color   = { 0.0f, val2,  val, 1.0f };
 
-            renderer_2d_draw_quad(&window->renderer, quad_position, quad_color);
-            renderer_2d_draw_triangle(&window->renderer, triangle_position, triangle_color);
-            renderer_2d_draw_circle(&window->renderer, circle_position, circle_color);
+            transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
+            renderer_2d_draw_quad(&window->renderer, &transform_matrix, quad_color);
+            transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
+            renderer_2d_draw_triangle(&window->renderer, &transform_matrix, triangle_color);
+            transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, circle_position);
+            renderer_2d_draw_circle(&window->renderer, &transform_matrix, circle_color);
         }
     }
 
     const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
 
-    renderer_2d_draw_textured_quad(&window->renderer, textured_quad_position, &window->test_texture);
+    const float textured_quad_scale_factor = 200.0f;
+    const fvector3 textured_quad_scale_factors      = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
 
-    // const fvector3 line_position_1 = { 1200.0f, 1200.0f, 0.0f };
-    // const fvector3 line_position_2 = { 1600.0f, 1200.0f, 0.0f };
-    // const fvector4 line_color      = { 100.0f, 100.0f, 0.0f, 0.0f };
+    fmatrix_4x4 textured_quad_transform_matrix;
+    fmatrix_4x4_init(&textured_quad_transform_matrix);
 
-    // renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
+
+    renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
+
+    const fvector3 line_position_1 = { 1000.0f, 600.0f, 0.0f };
+    const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
+    const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
+
+    renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
 
     renderer_2d_end_scene(&window->renderer);
 

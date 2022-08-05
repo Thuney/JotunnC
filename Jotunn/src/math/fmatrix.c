@@ -366,6 +366,22 @@ fmatrix_4x4 fmatrix_4x4_transform_scale(fmatrix_4x4* matrix, const fvector3 scal
    return fmatrix_4x4_multiply(matrix, &scale_matrix);
 }
 
+fvector3 fmatrix_4x4_transform_point(const fmatrix_4x4* matrix, const fvector3 point)
+{
+   fvector4 point_vec4 = { point.comp.x, point.comp.y, point.comp.z, 1.0f };
+   fvector4 resultant  = { 0.0f, 0.0f, 0.0f, 0.0f };
+
+   for (int p = 0; p < 4; p++)
+   {
+      for (int m_col = 0; m_col < 4; m_col++)
+      {
+         resultant.vec[p] += (matrix->mat[m_col][p])*(point_vec4.vec[m_col]);
+      }
+   }
+
+   return (fvector3) { {resultant.comp.w, resultant.comp.x, resultant.comp.y} };
+}
+
 /*************************
  * 
  *         DEBUG

@@ -41,6 +41,9 @@ static GLenum get_gl_draw_mode(enum render_api_draw_mode_t draw_mode)
       case DRAW_TYPE_LINE_LOOP:
          gl_draw_mode = GL_LINE_LOOP;
       break;
+      case DRAW_TYPE_LINES:
+         gl_draw_mode = GL_LINES;
+      break;
       case DRAW_TYPE_LINE_STRIP_ADJACENCY:
          gl_draw_mode = GL_LINE_STRIP_ADJACENCY;
       break;
@@ -69,7 +72,7 @@ static GLenum get_gl_draw_mode(enum render_api_draw_mode_t draw_mode)
          gl_draw_mode = GL_INVALID_ENUM;
       break;
    }
-   
+
    return gl_draw_mode;
 }
 
@@ -78,7 +81,8 @@ static void opengl_render_api_init()
    glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_DEPTH_TEST);
-   glFrontFace(GL_CW);
+
+   glEnable(GL_LINE_SMOOTH);
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)

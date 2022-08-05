@@ -39,6 +39,7 @@ struct texture_2d_t
 
 void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format);
 void texture_2d_cleanup(struct texture_2d_t* texture);
+
 void texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format);
 void texture_2d_create_from_file_path(struct texture_2d_t* texture, const char* filepath, const unsigned int flip_vertically);
 
