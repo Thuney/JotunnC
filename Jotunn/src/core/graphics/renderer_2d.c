@@ -106,6 +106,14 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "view", &renderer->camera.base.view_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "projection", &renderer->camera.base.projection_matrix);
 
+      char texture_uniform_name_buf[15];
+
+      for (unsigned int i = 0; i < _RENDERER_2D_MAX_TEXTURES; i++)
+      {
+         sprintf(texture_uniform_name_buf, "u_textures[%u]", i);
+         shader_program_set_uniform_int(&renderer_2d_data.textured_quad_shader, texture_uniform_name_buf, i);
+      }
+
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->textured_quad_data.textured_quad_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
 
@@ -176,7 +184,7 @@ static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads     = 100; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads     = 10; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices  = max_quads * 4;
 static const unsigned int max_indices   = max_quads * 6;
 
@@ -373,9 +381,9 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
       const float new_texture_index          = texture_index;
       const float new_tiling_factor          = tiling_factor;
 
-      #ifdef DEBUG
-         fprintf(stdout, "Texture Index = %f, Tiling Factor = %f\n", new_texture_index, new_tiling_factor);
-      #endif
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Texture Index = %f, Tiling Factor = %f\n", new_texture_index, new_tiling_factor);
+      // #endif
 
       renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = new_position;
       renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = new_texture_coordinates;

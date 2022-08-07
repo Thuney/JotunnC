@@ -6,7 +6,7 @@
 
 #include "texture.h"
 
-static const char _FONT_LOADED_GLYPHS_STRING[] = "!\"#$%%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^`abcdefghijklmnopqrstuvwxyz{|}~"; 
+static const char _FONT_LOADED_GLYPHS_STRING[] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"; 
 #define _FONT_LOADED_GLYPHS_STRING_LEN (sizeof(_FONT_LOADED_GLYPHS_STRING)-1)
 #define _FONT_LOADED_GLYPHS_FIRST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[0])
 #define _FONT_LOADED_GLYPHS_LAST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[_FONT_LOADED_GLYPHS_STRING_LEN-1])

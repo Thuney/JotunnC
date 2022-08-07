@@ -106,9 +106,14 @@ void shader_program_set_uniform_fmat4x4(struct shader_program_t* shader_program,
    platform_shader_program_set_uniform(shader_program, uniform_name, (void*)matrix, SHADER_FMAT4x4);
 }
 
-void shader_program_set_uniform_float(struct shader_program_t* shader_program, const char* uniform_name, const float* val)
+void shader_program_set_uniform_float(struct shader_program_t* shader_program, const char* uniform_name, float val)
 {
-   platform_shader_program_set_uniform(shader_program, uniform_name, (void*)val, SHADER_FLOAT);
+   platform_shader_program_set_uniform(shader_program, uniform_name, &val, SHADER_FLOAT);
+}
+
+void shader_program_set_uniform_int(struct shader_program_t* shader_program, const char* uniform_name, int val)
+{
+   platform_shader_program_set_uniform(shader_program, uniform_name, &val, SHADER_INT);
 }
 
 void vertex_shader_destroy(struct vertex_shader_t* shader)

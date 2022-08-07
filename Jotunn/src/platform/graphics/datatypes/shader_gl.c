@@ -109,7 +109,8 @@ static void gl_shader_program_set_uniform(struct shader_program_t* shader_progra
       break;
       case SHADER_INT:
       {
-         glUniform1i(uniform_location, *((int*)uniform_data));
+         int uniform_val = (*((int*)uniform_data));
+         glUniform1i(uniform_location, uniform_val);
       }
       break;
       case SHADER_FLOAT:

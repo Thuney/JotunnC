@@ -1,12 +1,12 @@
 #version 450 core
 
+out vec4 fColor;
+
 in vec2 v_textureCoordinate;
 in float v_textureIndex;
 in float v_tilingFactor;
 
 uniform sampler2D u_textures[16];
-
-out vec4 fColor;
 
 void main()
 {
