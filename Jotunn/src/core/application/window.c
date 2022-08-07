@@ -47,11 +47,16 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
 
     fvector4 background_color;
     fvector4_set(&background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+    // fvector4_set(&background_color, 1.0f, 1.0f, 1.0f, 1.0f);
     window_set_background_color(window, background_color);
 
     renderer_2d_init(&window->renderer, "2DRenderer", 0.0f, (float)width, (float)height, 0.0f, -1.0f, 100.0f);
 
     texture_2d_create_from_file_path(&window->test_texture, "../../../Jotunn/res/textures/AaronShakespeare.png", 1);
+
+    font_init();
+
+    typeface_init(&window->typeface, "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 4);
 
     return error;
 }
@@ -131,6 +136,13 @@ static void window_renderer_do_stuff(struct window_t* window)
     const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
 
     renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
+
+    // String of text
+
+    const fvector3 text_start_position = { 200.0f, 300.0f, 0.0f };
+
+    // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "ThisIsSomeSampleTextNoSpaces");
+    renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
 }
 
 // ---------------------------
@@ -143,7 +155,7 @@ int window_run(struct window_t* window)
 {
     renderer_2d_begin_scene(&window->renderer);
 
-    window_renderer_do_stuff(window); // Temp
+    window_renderer_do_stuff(window); // TODO: Replace this with some way for the client application to inject a 'window processing' function in here
 
     renderer_2d_end_scene(&window->renderer);
 
@@ -160,6 +172,10 @@ void window_cleanup(struct window_t* window)
     renderer_2d_cleanup(&window->renderer);
 
     texture_2d_cleanup(&window->test_texture);
+
+    typeface_cleanup(&window->typeface);
+
+    font_cleanup();
 
     window_graphics_cleanup(window);
 }

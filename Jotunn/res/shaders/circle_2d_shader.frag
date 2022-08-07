@@ -1,4 +1,4 @@
-#version 150
+#version 450 core
 
 in vec4 vColor;
 

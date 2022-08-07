@@ -35,9 +35,6 @@ struct renderer_2d_data_t
 
 static struct renderer_2d_data_t renderer_2d_data;
 
-#define PRIMITIVE_SCALE_FACTOR 50.0f
-static const fvector3 primitive_scale_factors = { {PRIMITIVE_SCALE_FACTOR, PRIMITIVE_SCALE_FACTOR, 0.0f} };
-
 static fmatrix_4x4 model_matrix;
 
 static void renderer_2d_flush(const struct renderer_2d_t* renderer)
@@ -92,16 +89,22 @@ static void renderer_2d_flush(const struct renderer_2d_t* renderer)
 
       vertex_buffer_buffer_sub_data(&data->textured_quad_data.vbo, (float*)data->textured_quad_data.vertex_data_base, textured_quad_data_size);
 
+      for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
+      {
+         const struct texture_2d_t* texture = renderer_2d_data.textures[i];
+
+         // #ifdef DEBUG
+         //    fprintf(stdout, "Binding texture with texture_id = %u to slot %u\n", texture->texture_id, i);
+         // #endif
+
+         texture_2d_bind(texture, i);
+      }
+
       shader_program_use(&data->textured_quad_shader);
 
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "model", &model_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "view", &renderer->camera.base.view_matrix);
       shader_program_set_uniform_fmat4x4(&renderer_2d_data.textured_quad_shader, "projection", &renderer->camera.base.projection_matrix);
-
-      for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
-      {
-         texture_2d_bind(renderer_2d_data.textures[i], i);
-      }
 
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->textured_quad_data.textured_quad_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
@@ -173,14 +176,11 @@ static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads     = 1000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads     = 100; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices  = max_quads * 4;
 static const unsigned int max_indices   = max_quads * 6;
 
 //
-
-static const char* ttf_file_path = "/usr/share/fonts/TTF/Hack-Regular.ttf";
-static struct typeface_t typeface;
 
 static void renderer_2d_data_init(struct renderer_2d_data_t* data)
 {
@@ -214,10 +214,6 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
    data->line_width = 3.0f;
-
-   font_init();
-
-   typeface_init(&typeface, ttf_file_path);
 }
 
 static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
@@ -235,10 +231,6 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
    shader_program_destroy(&data->line_shader);
 
    data->line_width = -1.0f;
-
-   typeface_cleanup(&typeface);
-
-   font_cleanup();
 }
 
 void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)
@@ -328,8 +320,6 @@ void renderer_2d_draw_quad(const struct renderer_2d_t* renderer, const fmatrix_4
    if (renderer_2d_data.quad_data.quad_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
 
-   
-
    unsigned int i;
    for (i = 0; i < quad_vertex_count; i++)
    {
@@ -354,7 +344,7 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
    float texture_index = 0.0f;
    for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
    {
-      if (renderer_2d_data.textures[i] == texture)
+      if ( ((renderer_2d_data.textures[i])->texture_id) == (texture->texture_id) )
       {
          texture_index = (float)i;
          break;
@@ -371,13 +361,26 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
       renderer_2d_data.textures_index++;
    }
 
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Queuing textured quad\n");
+   // #endif
+
    unsigned int i;
    for (i = 0; i < quad_vertex_count; i++)
    {
-      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
-      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = textured_quad_texture_coordinates[i];
-      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_index       = texture_index;
-      renderer_2d_data.textured_quad_data.vertex_data_ptr->tiling_factor       = tiling_factor;
+      const fvector3 new_position            = fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
+      const fvector2 new_texture_coordinates = textured_quad_texture_coordinates[i];
+      const float new_texture_index          = texture_index;
+      const float new_tiling_factor          = tiling_factor;
+
+      #ifdef DEBUG
+         fprintf(stdout, "Texture Index = %f, Tiling Factor = %f\n", new_texture_index, new_tiling_factor);
+      #endif
+
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = new_position;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = new_texture_coordinates;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_index       = new_texture_index;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->tiling_factor       = new_tiling_factor;
       
       renderer_2d_data.textured_quad_data.vertex_data_ptr++;
    }
@@ -415,6 +418,60 @@ void renderer_2d_draw_line(const struct renderer_2d_t* renderer, const fvector3 
    renderer_2d_data.line_data.vertex_data_ptr++;
 
    renderer_2d_data.line_data.line_vertex_count += 2;
+}
+
+void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct typeface_t* typeface, const fvector3 start_position, const char* draw_string)
+{
+   int error;
+
+   fmatrix_4x4 scale_matrix, translation_matrix, transform;
+   fmatrix_4x4_init(&scale_matrix);
+   fmatrix_4x4_init(&translation_matrix);
+
+   fvector3 string_current_render_position = { start_position.comp.x, start_position.comp.y, 0.0f };
+
+   fvector3 texture_dimensions_scale_factors, character_x_translation;
+
+   unsigned int num_chars = strlen(draw_string);
+
+   const struct texture_2d_t* character_texture;
+
+   unsigned int i;
+   for (i = 0; i < num_chars; i++)
+   {
+      char c = draw_string[i];
+
+      character_texture = typeface_get_texture_from_char(typeface, c);
+
+      fvector3_set(&texture_dimensions_scale_factors, ((float)((character_texture)->width)), ((float)((character_texture)->height)), 1.0f);
+      fvector3_set(&character_x_translation, ( (float)((character_texture)->width) ), 0.0f, 0.0f);
+
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Printing character '%c' as texture. Texture has width = %d, height = %d, channels = %d, texture_id = %u\n", c, character_texture->width, character_texture->height, character_texture->channels, character_texture->texture_id);
+      // #endif
+
+      scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, texture_dimensions_scale_factors);
+      translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, string_current_render_position);
+      transform = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Printing translation matrix\n");
+      //    fmatrix_4x4_print(&translation_matrix);
+
+      //    fprintf(stdout, "Printing scale matrix\n");
+      //    fmatrix_4x4_print(&scale_matrix);
+
+      //    fprintf(stdout, "Printing transform matrix\n");
+      //    fmatrix_4x4_print(&transform);
+      // #endif
+
+      renderer_2d_draw_textured_quad(renderer, &transform, character_texture);
+
+      string_current_render_position = fvector3_add(&string_current_render_position, &character_x_translation);
+
+      fmatrix_4x4_identity(&scale_matrix);
+      fmatrix_4x4_identity(&translation_matrix);
+   }
 }
 
 void renderer_2d_set_line_width(const struct renderer_2d_t* renderer, const float line_width)

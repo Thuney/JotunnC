@@ -1,4 +1,4 @@
-#version 150
+#version 450 core
 
 in vec3 position;
 in vec4 color;

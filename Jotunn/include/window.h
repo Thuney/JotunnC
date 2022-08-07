@@ -1,5 +1,6 @@
 #pragma once
 
+#include "font.h"
 #include "renderer_2d.h"
 
 struct application_t;
@@ -28,6 +29,8 @@ struct window_t
     struct window_context_data_t context_data;
     // 
     struct renderer_2d_t renderer;
+    //
+    struct typeface_t typeface;
     //
     struct texture_2d_t test_texture;
 };

@@ -15,45 +15,42 @@ extern void platform_texture_2d_bind(const struct texture_2d_t* texture, const u
 
 void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format)
 {
-   if (!texture->is_loaded)
+   texture->width    = width;
+   texture->height   = height;
+   
+   switch (internal_format)
    {
-      texture->width    = width;
-      texture->height   = height;
-      
-      switch (internal_format)
+      case TEXTURE_2D_INTERNAL_FORMAT_R8:
+      case TEXTURE_2D_INTERNAL_FORMAT_R16:
       {
-         case TEXTURE_2D_INTERNAL_FORMAT_R8:
-         case TEXTURE_2D_INTERNAL_FORMAT_R16:
-         {
-            
-            texture->channels = 1;
-         }
-         break;
-         case TEXTURE_2D_INTERNAL_FORMAT_RG8:
-         case TEXTURE_2D_INTERNAL_FORMAT_RG16:
-         {
-            texture->channels = 2;
-         }
-         break;
-         case TEXTURE_2D_INTERNAL_FORMAT_RGB8:
-         case TEXTURE_2D_INTERNAL_FORMAT_RGB10:
-         case TEXTURE_2D_INTERNAL_FORMAT_RGB12:
-         {
-            texture->channels = 3;
-         }
-         break;
-         case TEXTURE_2D_INTERNAL_FORMAT_RGBA8:
-         case TEXTURE_2D_INTERNAL_FORMAT_RGBA12:
-         {
-            texture->channels = 4;
-         }
-         break;
-         default:
-         {
-            
-         }
-         break;
+         
+         texture->channels = 1;
       }
+      break;
+      case TEXTURE_2D_INTERNAL_FORMAT_RG8:
+      case TEXTURE_2D_INTERNAL_FORMAT_RG16:
+      {
+         texture->channels = 2;
+      }
+      break;
+      case TEXTURE_2D_INTERNAL_FORMAT_RGB8:
+      case TEXTURE_2D_INTERNAL_FORMAT_RGB10:
+      case TEXTURE_2D_INTERNAL_FORMAT_RGB12:
+      {
+         texture->channels = 3;
+      }
+      break;
+      case TEXTURE_2D_INTERNAL_FORMAT_RGBA8:
+      case TEXTURE_2D_INTERNAL_FORMAT_RGBA12:
+      {
+         texture->channels = 4;
+      }
+      break;
+      default:
+      {
+         
+      }
+      break;
    }
 
    platform_texture_2d_init(texture, internal_format);
@@ -61,9 +58,13 @@ void texture_2d_init(struct texture_2d_t* texture, const int width, const int he
 
 void texture_2d_cleanup(struct texture_2d_t* texture)
 {
-   platform_texture_2d_cleanup(texture);
+   #ifdef DEBUG
+        fprintf(stdout, "Cleaning up texture_2d\n");
+   #endif
 
-   stbi_image_free(texture->data);
+   if (texture->is_loaded) platform_texture_2d_cleanup(texture);
+
+   if (texture->data) stbi_image_free(texture->data);
    
    texture->data_size_bytes = -1;
    texture->texture_id      = -1;
@@ -74,9 +75,24 @@ void texture_2d_cleanup(struct texture_2d_t* texture)
    texture->internal_format = -1;
 }
 
-void texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format)
+void texture_2d_set_data(struct texture_2d_t* texture, unsigned char* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format)
 {
+   if (data_size_bytes != (texture->width*texture->height*texture->channels))
+   {
+      #ifdef DEBUG
+         fprintf(stdout, "Provided data_size_bytes does not equal expected (computed) data_size_bytes\n");
+      #endif
+
+      return;
+   }
+
+   texture->data            = data;
+   texture->data_size_bytes = data_size_bytes;
+   texture->data_format     = data_format;
+
    platform_texture_2d_set_data(texture, data, data_size_bytes, data_format);
+
+   texture->is_loaded = 1;
 }
 
 void texture_2d_create_from_file_path(struct texture_2d_t* texture, const char* filepath, const unsigned int flip_vertically)
