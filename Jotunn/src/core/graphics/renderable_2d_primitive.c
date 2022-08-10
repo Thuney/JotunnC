@@ -281,9 +281,9 @@ static void renderable_2d_primitive_data_init(struct vertex_array_t* vao, struct
       attribute_name = attributes[attribute_index].attribute_name;
       temp_shader_index = shader_program_get_attribute_location(shader_program, attribute_name);
 
-      #ifdef DEBUG
-         fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
-      #endif
+      // #ifdef DEBUG
+      //    fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
+      // #endif
 
       attributes[attribute_index].index = temp_shader_index;
 

@@ -116,18 +116,18 @@ static void window_renderer_do_stuff(struct window_t* window)
 
     // Textured Quad
 
-    const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
+    // const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
 
-    const float textured_quad_scale_factor     = 200.0f;
-    const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
+    // const float textured_quad_scale_factor     = 200.0f;
+    // const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
 
-    fmatrix_4x4 textured_quad_transform_matrix;
-    fmatrix_4x4_init(&textured_quad_transform_matrix);
+    // fmatrix_4x4 textured_quad_transform_matrix;
+    // fmatrix_4x4_init(&textured_quad_transform_matrix);
 
-    textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
-    textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
+    // textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
+    // textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
 
-    renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
+    // renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
 
     // Line
 
@@ -138,10 +138,9 @@ static void window_renderer_do_stuff(struct window_t* window)
     renderer_2d_draw_line(&window->renderer, line_position_1, line_position_2, line_color);
 
     // String of text
+    const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
 
-    const fvector3 text_start_position = { 200.0f, 300.0f, 0.0f };
-
-    renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "ThisIsSomeSampleTextNoSpaces");
+    renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "This Is Some Sample Text With Spaces");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }

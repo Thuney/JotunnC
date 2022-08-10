@@ -184,7 +184,7 @@ static void renderer_2d_next_batch(const struct renderer_2d_t* renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads     = 10; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads     = 1000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices  = max_quads * 4;
 static const unsigned int max_indices   = max_quads * 6;
 
@@ -478,7 +478,7 @@ void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct 
 
    fvector3 string_current_render_position = { start_position.comp.x, start_position.comp.y, 0.0f };
 
-   fvector3 texture_dimensions_scale_factors, character_x_translation;
+   fvector3 texture_dimensions_scale_factors, character_x_translation, character_local_translation;
 
    unsigned int num_chars = strlen(draw_string);
 
@@ -492,35 +492,18 @@ void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct 
       character_glyph = typeface_get_glyph_from_char(typeface, c);
 
       fvector3_set(&texture_dimensions_scale_factors, ((float)(character_glyph->width)), ((float)(character_glyph->height)), 1.0f);
-      fvector3_set(&character_x_translation, ( (float)(character_glyph->width) ), 0.0f, 0.0f);
+      fvector3_set(&character_local_translation, (float)character_glyph->offset_x, -1.0f*(float)character_glyph->offset_y, 0.0f);
 
-      // #ifdef DEBUG
-      //    fprintf(stdout, "Printing character '%c' as texture. Texture has width = %d, height = %d, channels = %d, texture_id = %u\n", c, character_texture->width, character_texture->height, character_texture->channels, character_texture->texture_id);
-      // #endif
+      translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, character_local_translation);
+      translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, string_current_render_position);
 
       scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, texture_dimensions_scale_factors);
-      translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, string_current_render_position);
+
       transform = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
-
-      // #ifdef DEBUG
-      //    fprintf(stdout, "Printing translation matrix\n");
-      //    fmatrix_4x4_print(&translation_matrix);
-
-      //    fprintf(stdout, "Printing scale matrix\n");
-      //    fmatrix_4x4_print(&scale_matrix);
-
-      //    fprintf(stdout, "Printing transform matrix\n");
-      //    fmatrix_4x4_print(&transform);
-      // #endif
 
       const fvector2 *p0, *p1;
       p0 = &(character_glyph->glyph_texture.subtexture_coordinates[0]);
       p1 = &(character_glyph->glyph_texture.subtexture_coordinates[1]);
-
-      #ifdef DEBUG
-         fvector2_print(p0);
-         fvector2_print(p1);
-      #endif
 
       const fvector2 subtexture_coords[4] = 
       {
@@ -530,16 +513,9 @@ void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct 
          { p0->comp.x, p0->comp.y }
       };
 
-      // const fvector2 subtexture_coords[4] = 
-      // {
-      //    { 0.0f, 0.0f }, 
-      //    { 1.0f, 0.0f }, 
-      //    { 1.0f, 1.0f }, 
-      //    { 0.0f, 1.0f }
-      // };
-
       renderer_2d_draw_subtextured_quad(renderer, &transform, character_glyph->glyph_texture.parent_texture, subtexture_coords);
 
+      fvector3_set(&character_x_translation, ( (float)(character_glyph->advance_x) ), 0.0f, 0.0f);
       string_current_render_position = fvector3_add(&string_current_render_position, &character_x_translation);
 
       fmatrix_4x4_identity(&scale_matrix);

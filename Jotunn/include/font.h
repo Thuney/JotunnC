@@ -6,7 +6,7 @@
 
 #include "texture.h"
 
-static const char _FONT_LOADED_GLYPHS_STRING[] = "!\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"; 
+static const char _FONT_LOADED_GLYPHS_STRING[] = " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~"; 
 #define _FONT_LOADED_GLYPHS_STRING_LEN (sizeof(_FONT_LOADED_GLYPHS_STRING)-1)
 #define _FONT_LOADED_GLYPHS_FIRST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[0])
 #define _FONT_LOADED_GLYPHS_LAST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[_FONT_LOADED_GLYPHS_STRING_LEN-1])
@@ -16,8 +16,8 @@ struct glyph_t
    char character_representation;
    struct subtexture_2d_t glyph_texture;
    unsigned int width, height;
-   unsigned int offset_x, offset_y;
-   unsigned int advance_x;
+   int offset_x, offset_y;
+   int advance_x;
 };
 
 struct typeface_t

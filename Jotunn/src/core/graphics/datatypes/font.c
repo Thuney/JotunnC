@@ -118,12 +118,12 @@ static int typeface_load_glyph_atlas(struct typeface_t* typeface)
 {
    int error = 0;
 
-   const int glyph_height_estimate = ((typeface->typeface->size->metrics.height >> 6) + 1);
    // Guess at the dimension of the texture atlas
+   const int glyph_height_estimate = ((typeface->typeface->size->metrics.height >> 6) + 1);
    const int max_dimension = (glyph_height_estimate) * ceilf(sqrtf(_FONT_LOADED_GLYPHS_STRING_LEN));
-   // Starting at 1, multiply width by two until we exceed our guess
+
    int texture_atlas_width = 1;
-   while (texture_atlas_width < max_dimension) texture_atlas_width <<= 1;
+   while (texture_atlas_width < max_dimension) texture_atlas_width <<= 1; // Starting at 1, multiply width by 2 until we exceed our guess
    int texture_atlas_height = texture_atlas_width;
 
    struct texture_2d_t* texture_atlas_texture = &(typeface->glyph_atlas);
@@ -165,7 +165,7 @@ static int typeface_load_glyph_atlas(struct typeface_t* typeface)
       texture_atlas_glyphs[i].width                    = char_bitmap->width;
       texture_atlas_glyphs[i].height                   = char_bitmap->rows;
       texture_atlas_glyphs[i].offset_x                 = typeface->typeface->glyph->bitmap_left;
-      texture_atlas_glyphs[i].offset_y                 = typeface->typeface->glyph->bitmap_top;
+      texture_atlas_glyphs[i].offset_y                 = (char_bitmap->rows - typeface->typeface->glyph->bitmap_top);
       texture_atlas_glyphs[i].advance_x                = (typeface->typeface->glyph->advance.x >> 6);
 
       float x0, y0, x1, y1;
