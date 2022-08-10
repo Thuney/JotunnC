@@ -58,10 +58,6 @@ void texture_2d_init(struct texture_2d_t* texture, const int width, const int he
 
 void texture_2d_cleanup(struct texture_2d_t* texture)
 {
-   #ifdef DEBUG
-        fprintf(stdout, "Cleaning up texture_2d\n");
-   #endif
-
    if (texture->is_loaded) platform_texture_2d_cleanup(texture);
 
    if (texture->data) stbi_image_free(texture->data);

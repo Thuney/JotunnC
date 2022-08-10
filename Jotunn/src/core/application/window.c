@@ -56,7 +56,7 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
 
     font_init();
 
-    typeface_init(&window->typeface, "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 4);
+    typeface_init(&window->typeface, "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 2);
 
     return error;
 }
@@ -118,8 +118,8 @@ static void window_renderer_do_stuff(struct window_t* window)
 
     const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
 
-    const float textured_quad_scale_factor = 200.0f;
-    const fvector3 textured_quad_scale_factors      = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
+    const float textured_quad_scale_factor     = 200.0f;
+    const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
 
     fmatrix_4x4 textured_quad_transform_matrix;
     fmatrix_4x4_init(&textured_quad_transform_matrix);
@@ -141,9 +141,9 @@ static void window_renderer_do_stuff(struct window_t* window)
 
     const fvector3 text_start_position = { 200.0f, 300.0f, 0.0f };
 
-    // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "ThisIsSomeSampleTextNoSpaces");
+    renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "ThisIsSomeSampleTextNoSpaces");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
-    renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
+    // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
 // ---------------------------

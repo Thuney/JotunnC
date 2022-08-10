@@ -1,5 +1,7 @@
 #pragma once
 
+#include "fvector.h"
+
 enum texture_2d_internal_format_t
 {
    TEXTURE_2D_INTERNAL_FORMAT_R8 = 0x00,
@@ -36,6 +38,12 @@ struct texture_2d_t
    enum texture_2d_data_format_t data_format;
    //
    unsigned int is_loaded;
+};
+
+struct subtexture_2d_t
+{
+   struct texture_2d_t* parent_texture;
+   fvector2 subtexture_coordinates[2];
 };
 
 void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format);

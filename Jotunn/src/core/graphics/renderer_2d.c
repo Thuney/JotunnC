@@ -369,10 +369,6 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
       renderer_2d_data.textures_index++;
    }
 
-   // #ifdef DEBUG
-   //    fprintf(stdout, "Queuing textured quad\n");
-   // #endif
-
    unsigned int i;
    for (i = 0; i < quad_vertex_count; i++)
    {
@@ -380,10 +376,54 @@ void renderer_2d_draw_textured_quad(const struct renderer_2d_t* renderer, const 
       const fvector2 new_texture_coordinates = textured_quad_texture_coordinates[i];
       const float new_texture_index          = texture_index;
       const float new_tiling_factor          = tiling_factor;
+      
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = new_position;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = new_texture_coordinates;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_index       = new_texture_index;
+      renderer_2d_data.textured_quad_data.vertex_data_ptr->tiling_factor       = new_tiling_factor;
+      
+      renderer_2d_data.textured_quad_data.vertex_data_ptr++;
+   }
 
-      // #ifdef DEBUG
-      //    fprintf(stdout, "Texture Index = %f, Tiling Factor = %f\n", new_texture_index, new_tiling_factor);
-      // #endif
+   renderer_2d_data.textured_quad_data.textured_quad_index_count += 6;
+}
+
+void renderer_2d_draw_subtextured_quad(const struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture, const fvector2 subtexture_coords[4])
+{
+   const unsigned int quad_vertex_count = 4;
+
+   const float tiling_factor = 1.0f;
+
+   if (renderer_2d_data.quad_data.quad_index_count >= max_indices)
+      renderer_2d_next_batch(renderer);
+
+   float texture_index = 0.0f;
+   for (unsigned int i = 0; i < renderer_2d_data.textures_index; i++)
+   {
+      if ( ((renderer_2d_data.textures[i])->texture_id) == (texture->texture_id) )
+      {
+         texture_index = (float)i;
+         break;
+      }
+   }
+
+   if (texture_index == 0.0f)
+   {
+      if (renderer_2d_data.textures_index >= _RENDERER_2D_MAX_TEXTURES)
+         renderer_2d_next_batch(renderer);
+
+      texture_index = (float)renderer_2d_data.textures_index;
+      renderer_2d_data.textures[renderer_2d_data.textures_index] = texture;
+      renderer_2d_data.textures_index++;
+   }
+
+   unsigned int i;
+   for (i = 0; i < quad_vertex_count; i++)
+   {
+      const fvector3 new_position            = fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
+      const fvector2 new_texture_coordinates = subtexture_coords[i];
+      const float new_texture_index          = texture_index;
+      const float new_tiling_factor          = tiling_factor;
 
       renderer_2d_data.textured_quad_data.vertex_data_ptr->position            = new_position;
       renderer_2d_data.textured_quad_data.vertex_data_ptr->texture_coordinate  = new_texture_coordinates;
@@ -442,17 +482,17 @@ void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct 
 
    unsigned int num_chars = strlen(draw_string);
 
-   const struct texture_2d_t* character_texture;
+   const struct glyph_t* character_glyph;
 
    unsigned int i;
    for (i = 0; i < num_chars; i++)
    {
       char c = draw_string[i];
 
-      character_texture = typeface_get_texture_from_char(typeface, c);
+      character_glyph = typeface_get_glyph_from_char(typeface, c);
 
-      fvector3_set(&texture_dimensions_scale_factors, ((float)((character_texture)->width)), ((float)((character_texture)->height)), 1.0f);
-      fvector3_set(&character_x_translation, ( (float)((character_texture)->width) ), 0.0f, 0.0f);
+      fvector3_set(&texture_dimensions_scale_factors, ((float)(character_glyph->width)), ((float)(character_glyph->height)), 1.0f);
+      fvector3_set(&character_x_translation, ( (float)(character_glyph->width) ), 0.0f, 0.0f);
 
       // #ifdef DEBUG
       //    fprintf(stdout, "Printing character '%c' as texture. Texture has width = %d, height = %d, channels = %d, texture_id = %u\n", c, character_texture->width, character_texture->height, character_texture->channels, character_texture->texture_id);
@@ -473,7 +513,32 @@ void renderer_2d_draw_string(const struct renderer_2d_t* renderer, const struct 
       //    fmatrix_4x4_print(&transform);
       // #endif
 
-      renderer_2d_draw_textured_quad(renderer, &transform, character_texture);
+      const fvector2 *p0, *p1;
+      p0 = &(character_glyph->glyph_texture.subtexture_coordinates[0]);
+      p1 = &(character_glyph->glyph_texture.subtexture_coordinates[1]);
+
+      #ifdef DEBUG
+         fvector2_print(p0);
+         fvector2_print(p1);
+      #endif
+
+      const fvector2 subtexture_coords[4] = 
+      {
+         { p0->comp.x, p1->comp.y }, 
+         { p1->comp.x, p1->comp.y }, 
+         { p1->comp.x, p0->comp.y }, 
+         { p0->comp.x, p0->comp.y }
+      };
+
+      // const fvector2 subtexture_coords[4] = 
+      // {
+      //    { 0.0f, 0.0f }, 
+      //    { 1.0f, 0.0f }, 
+      //    { 1.0f, 1.0f }, 
+      //    { 0.0f, 1.0f }
+      // };
+
+      renderer_2d_draw_subtextured_quad(renderer, &transform, character_glyph->glyph_texture.parent_texture, subtexture_coords);
 
       string_current_render_position = fvector3_add(&string_current_render_position, &character_x_translation);
 
