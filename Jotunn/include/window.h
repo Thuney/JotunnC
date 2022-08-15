@@ -8,12 +8,14 @@ struct application_t;
 struct window_data_t
 {
     char* tag;
-
+    //
     int width;
     int height;
-
+    //
     int signaled_close;
-
+    //
+    double window_time_sec;
+    //
     struct application_t* parent_application;
     void (*function_event_notify)(struct application_t* application, struct event_base_t* event);
 };
@@ -36,6 +38,9 @@ struct window_t
 };
 
 int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent);
+
+void window_show(struct window_t* window);
+void window_hide(struct window_t* window);
 
 int window_run(struct window_t* window);
 

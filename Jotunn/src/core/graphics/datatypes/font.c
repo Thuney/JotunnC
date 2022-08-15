@@ -114,6 +114,55 @@ static int typeface_render_char(struct typeface_t* typeface, const char charcode
    return error;
 }
 
+static int typeface_add_bitmap_to_glyph_atlas(struct typeface_t* typeface, struct texture_2d_t* ptr_texture_atlas_texture, struct glyph_t* char_glyph_info, unsigned char* texture_atlas_data_bitmap, const int texture_atlas_width, const int texture_atlas_height, int* pen_x, int* pen_y, const char char_code, const FT_Bitmap* char_bitmap)
+{
+   int error = 0;
+
+   int row, col;
+   for (row = 0; row < char_bitmap->rows; ++row)
+   {
+      for (col = 0; col < char_bitmap->width; ++col)
+      {
+         int x = (*pen_x) + col;
+         int y = (*pen_y) + row;
+
+         texture_atlas_data_bitmap[(y*texture_atlas_width) + x] = char_bitmap->buffer[(row*char_bitmap->pitch) + col];
+      }
+   }
+
+   char_glyph_info->character_representation = char_code;
+   char_glyph_info->width                    = char_bitmap->width;
+   char_glyph_info->height                   = char_bitmap->rows;
+   char_glyph_info->offset_x                 = typeface->typeface->glyph->bitmap_left;
+   char_glyph_info->offset_y                 = (char_bitmap->rows - typeface->typeface->glyph->bitmap_top);
+   char_glyph_info->advance_x                = (typeface->typeface->glyph->advance.x >> 6);
+
+   // Compute texture coordinates for glyph on atlas (in range [0.0f, 1.0f])
+   {
+      float x0, y0, x1, y1;
+
+      x0 = ((float) (*pen_x) / (float)texture_atlas_width);
+      y0 = ((float) (*pen_y) / (float)texture_atlas_height);
+
+      x1 = ((float)( (*pen_x) + char_bitmap->width) / (float)texture_atlas_width);
+      y1 = ((float)( (*pen_y) + char_bitmap->rows) / (float)texture_atlas_height);
+
+      char_glyph_info->glyph_texture = (struct subtexture_2d_t) 
+         {
+            .parent_texture = ptr_texture_atlas_texture,
+            .subtexture_coordinates = 
+               { 
+                  { x0, y0 }, 
+                  { x1, y1 } 
+               }
+         };
+   }
+
+   (*pen_x) += (char_bitmap->width + 1);
+
+   return error;
+}
+
 static int typeface_load_glyph_atlas(struct typeface_t* typeface)
 {
    int error = 0;
@@ -149,44 +198,7 @@ static int typeface_load_glyph_atlas(struct typeface_t* typeface)
          pen_y += glyph_height_estimate;
       }
 
-      int row, col;
-      for (row = 0; row < char_bitmap->rows; ++row)
-      {
-         for (col = 0; col < char_bitmap->width; ++col)
-         {
-            int x = pen_x + col;
-            int y = pen_y + row;
-
-            pixel_data_bitmap[(y*texture_atlas_width) + x] = char_bitmap->buffer[(row*char_bitmap->pitch) + col];
-         }
-      }
-
-      texture_atlas_glyphs[i].character_representation = cur_char;
-      texture_atlas_glyphs[i].width                    = char_bitmap->width;
-      texture_atlas_glyphs[i].height                   = char_bitmap->rows;
-      texture_atlas_glyphs[i].offset_x                 = typeface->typeface->glyph->bitmap_left;
-      texture_atlas_glyphs[i].offset_y                 = (char_bitmap->rows - typeface->typeface->glyph->bitmap_top);
-      texture_atlas_glyphs[i].advance_x                = (typeface->typeface->glyph->advance.x >> 6);
-
-      float x0, y0, x1, y1;
-
-      x0 = ((float)pen_x / (float)texture_atlas_width);
-      y0 = ((float)pen_y / (float)texture_atlas_height);
-
-      x1 = ((float)(pen_x + char_bitmap->width) / (float)texture_atlas_width);
-      y1 = ((float)(pen_y + char_bitmap->rows) / (float)texture_atlas_height);
-
-      texture_atlas_glyphs[i].glyph_texture = (struct subtexture_2d_t) 
-         {
-            .parent_texture = texture_atlas_texture,
-            .subtexture_coordinates = 
-               { 
-                  { x0, y0 }, 
-                  { x1, y1 } 
-               }
-         };
-
-      pen_x += (char_bitmap->width + 1);
+      typeface_add_bitmap_to_glyph_atlas(typeface, texture_atlas_texture, &(texture_atlas_glyphs[i]), pixel_data_bitmap, texture_atlas_width, texture_atlas_height, &pen_x, &pen_y, cur_char, char_bitmap);
    }
 
    unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
@@ -213,7 +225,7 @@ static int typeface_cleanup_glyph_atlas(struct typeface_t* typeface)
       glyph->glyph_texture.parent_texture = 0;
    }
 
-   texture_2d_cleanup(&typeface->glyph_atlas);
+   if (&typeface->glyph_atlas.is_loaded) texture_2d_cleanup(&typeface->glyph_atlas);
 
    return error;
 }

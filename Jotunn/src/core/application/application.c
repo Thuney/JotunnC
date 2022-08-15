@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int application_init(struct application_t* app, char* app_name)
+int application_init(struct application_t* app, char* app_name, const enum application_tick_rate_t app_tick_rate)
 {
     #ifdef DEBUG
         fprintf(stdout, "Initializing application\n");
@@ -16,6 +16,8 @@ int application_init(struct application_t* app, char* app_name)
     int name_length = strlen(app_name);
     app->name = (char*) malloc(name_length*sizeof(char));
     strcpy(app->name, app_name);
+
+    app->tick_rate = app_tick_rate;
 
     return window_init(&app->window, 1200, 1000, "JotunnWindow", app);
 }

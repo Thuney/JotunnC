@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
     struct application_t* app_ptr = &jotunn_app; 
 
-    int init_error = application_init(app_ptr, "JotunnTestApp");
+    int init_error = application_init(app_ptr, "JotunnTestApp", APP_TICKRATE_1_HZ);
     if (!init_error)
     {
         application_start(app_ptr);

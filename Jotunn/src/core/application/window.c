@@ -56,7 +56,7 @@ int window_init(struct window_t* window, int width, int height, char* tag, struc
 
     font_init();
 
-    typeface_init(&window->typeface, "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 2);
+    typeface_init(&window->typeface, "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 1);
 
     return error;
 }
@@ -116,22 +116,22 @@ static void window_renderer_do_stuff(struct window_t* window)
 
     // Textured Quad
 
-    // const fvector3 textured_quad_position = { 500.0f, 700.0f, 0.0f };
+    const fvector3 textured_quad_position = { 900.0f, 500.0f, 0.0f };
 
-    // const float textured_quad_scale_factor     = 200.0f;
-    // const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
+    const float textured_quad_scale_factor     = 200.0f;
+    const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
 
-    // fmatrix_4x4 textured_quad_transform_matrix;
-    // fmatrix_4x4_init(&textured_quad_transform_matrix);
+    fmatrix_4x4 textured_quad_transform_matrix;
+    fmatrix_4x4_init(&textured_quad_transform_matrix);
 
-    // textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
-    // textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
 
-    // renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
+    renderer_2d_draw_textured_quad(&window->renderer, &textured_quad_transform_matrix, &window->test_texture);
 
     // Line
 
-    const fvector3 line_position_1 = { 1000.0f, 600.0f, 0.0f };
+    const fvector3 line_position_1 = { 1000.0f, 400.0f, 0.0f };
     const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
     const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
 
