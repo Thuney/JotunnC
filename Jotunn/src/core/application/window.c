@@ -52,10 +52,12 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
         if (error) fprintf(stdout, "Error during window_graphics_init\n");
     #endif
 
-    fvector4 background_color;
-    fvector4_set(&background_color, 1.0f, 0.1f, 0.1f, 1.0f);
+    // fvector4 background_color;
+    // fvector4_set(&background_color, 1.0f, 0.1f, 0.1f, 1.0f);
 
-    window_set_background_color(window, background_color);
+    // window_set_background_color(window, background_color);
+
+    renderer_2d_init(&window->metadata.renderer_2d, "renderer_2d", 0, width, height, 0, -3.0f, 100.0f);
 
     return error;
 }
@@ -72,12 +74,16 @@ uint8_t window_run(struct window_t* window)
     //     fprintf(stdout, "Running window\n");
     // #endif
 
-    render_api_clear();
+    window_set_context(window);
+    
+    renderer_2d_begin_scene(&window->metadata.renderer_2d);
 
     if (window->metadata.function_custom_window_run)
     {
         window->metadata.function_custom_window_run(window);
     }
+
+    renderer_2d_end_scene(&window->metadata.renderer_2d);
 
     window_graphics_run(window);
 
@@ -88,6 +94,8 @@ void window_cleanup(struct window_t* window)
 {
     free(window->metadata.tag);
     window->metadata.tag = 0;
+
+    renderer_2d_cleanup(&window->metadata.renderer_2d);
 
     window_graphics_cleanup(window);
 }

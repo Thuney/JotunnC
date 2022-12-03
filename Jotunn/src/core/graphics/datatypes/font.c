@@ -163,54 +163,6 @@ static int typeface_add_bitmap_to_glyph_atlas(struct typeface_t* typeface, struc
    return error;
 }
 
-static int typeface_load_glyph_atlas(struct typeface_t* typeface)
-{
-   int error = 0;
-
-   // Guess at the dimension of the texture atlas
-   const int glyph_height_estimate = ((typeface->typeface->size->metrics.height >> 6) + 1);
-   const int max_dimension = (glyph_height_estimate) * ceilf(sqrtf(_FONT_LOADED_GLYPHS_STRING_LEN));
-
-   int texture_atlas_width = 1;
-   while (texture_atlas_width < max_dimension) texture_atlas_width <<= 1; // Starting at 1, multiply width by 2 until we exceed our guess
-   int texture_atlas_height = texture_atlas_width;
-
-   struct texture_2d_t* texture_atlas_texture = &(typeface->glyph_atlas);
-   struct glyph_t*      texture_atlas_glyphs  = &(typeface->glyphs[0]);
-
-   unsigned char* pixel_data_bitmap = (unsigned char*)calloc(texture_atlas_width*texture_atlas_height, 1);
-   int pen_x = 0, pen_y = 0;
-
-   char cur_char;
-   FT_Bitmap* char_bitmap;
-
-   unsigned int i;
-   for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++)
-   {
-      cur_char = _FONT_LOADED_GLYPHS_STRING[i];
-      error   |= typeface_render_char(typeface, cur_char); // Load glyph into glyph slot
-
-      char_bitmap = &(typeface->typeface->glyph->bitmap);
-
-      if (pen_x + char_bitmap->width >= texture_atlas_width)
-      {
-         pen_x = 0;
-         pen_y += glyph_height_estimate;
-      }
-
-      typeface_add_bitmap_to_glyph_atlas(typeface, texture_atlas_texture, &(texture_atlas_glyphs[i]), pixel_data_bitmap, texture_atlas_width, texture_atlas_height, &pen_x, &pen_y, cur_char, char_bitmap);
-   }
-
-   unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
-
-   texture_2d_init(texture_atlas_texture, texture_atlas_width, texture_atlas_height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8);
-   texture_2d_set_data(texture_atlas_texture, pixel_data_rgba, (texture_atlas_width*texture_atlas_height*4), TEXTURE_2D_FORMAT_RGBA);
-
-   free(pixel_data_bitmap);
-
-   return error;
-}
-
 static int typeface_cleanup_glyph_atlas(struct typeface_t* typeface)
 {
    int error = 0;
@@ -261,8 +213,7 @@ void typeface_init(struct typeface_t* typeface, const char* ttf_file_path, const
          // #endif
 
          typeface_set_char_size(typeface, size_points);
-
-         error = typeface_load_glyph_atlas(typeface);
+         int typeface_load_glyph_atlas(struct typeface_t* typeface);
          if (!error) typeface->is_loaded = 1;
       }
    }
@@ -286,6 +237,54 @@ void typeface_cleanup(struct typeface_t* typeface)
          typeface->is_loaded = 0;
       }
    }
+}
+
+int typeface_load_glyph_atlas(struct typeface_t* typeface)
+{
+   int error = 0;
+
+   // Guess at the dimension of the texture atlas
+   const int glyph_height_estimate = ((typeface->typeface->size->metrics.height >> 6) + 1);
+   const int max_dimension = (glyph_height_estimate) * ceilf(sqrtf(_FONT_LOADED_GLYPHS_STRING_LEN));
+
+   int texture_atlas_width = 1;
+   while (texture_atlas_width < max_dimension) texture_atlas_width <<= 1; // Starting at 1, multiply width by 2 until we exceed our guess
+   int texture_atlas_height = texture_atlas_width;
+
+   struct texture_2d_t* texture_atlas_texture = &(typeface->glyph_atlas);
+   struct glyph_t*      texture_atlas_glyphs  = &(typeface->glyphs[0]);
+
+   unsigned char* pixel_data_bitmap = (unsigned char*)calloc(texture_atlas_width*texture_atlas_height, 1);
+   int pen_x = 0, pen_y = 0;
+
+   char cur_char;
+   FT_Bitmap* char_bitmap;
+
+   unsigned int i;
+   for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++)
+   {
+      cur_char = _FONT_LOADED_GLYPHS_STRING[i];
+      error   |= typeface_render_char(typeface, cur_char); // Load glyph into glyph slot
+
+      char_bitmap = &(typeface->typeface->glyph->bitmap);
+
+      if (pen_x + char_bitmap->width >= texture_atlas_width)
+      {
+         pen_x = 0;
+         pen_y += glyph_height_estimate;
+      }
+
+      typeface_add_bitmap_to_glyph_atlas(typeface, texture_atlas_texture, &(texture_atlas_glyphs[i]), pixel_data_bitmap, texture_atlas_width, texture_atlas_height, &pen_x, &pen_y, cur_char, char_bitmap);
+   }
+
+   unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
+
+   texture_2d_init(texture_atlas_texture, texture_atlas_width, texture_atlas_height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8);
+   texture_2d_set_data(texture_atlas_texture, pixel_data_rgba, (texture_atlas_width*texture_atlas_height*4), TEXTURE_2D_FORMAT_RGBA);
+
+   free(pixel_data_bitmap);
+
+   return error;
 }
 
 const struct glyph_t* typeface_get_glyph_from_char(const struct typeface_t* typeface, const char charcode)

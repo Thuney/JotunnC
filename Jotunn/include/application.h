@@ -6,6 +6,8 @@
 
 struct application_t
 {
+    struct typeface_t app_typeface;
+    //
     char* name;
     //
     struct window_t* current_window;
@@ -16,6 +18,7 @@ struct application_t
     uint8_t running;
     //
     void (*custom_event_function)(struct event_base_t*);
+    //
 };
 
 uint8_t application_init(struct application_t* app, const char* app_name, const uint8_t max_windows);

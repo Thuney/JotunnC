@@ -1,4 +1,5 @@
 #include "application.h"
+#include "render_api.h"
 
 #include <memory.h>
 #include <stdio.h>
@@ -25,6 +26,9 @@ uint8_t application_init(struct application_t* app, const char* app_name, const 
     app->current_window = app->windows;
 
     app->custom_event_function = 0;
+
+    font_init();
+    typeface_init(&(app->app_typeface), "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 1);
 
     return error;
 }
@@ -98,6 +102,8 @@ void application_cleanup(struct application_t* app)
         }
     }
 
+    font_cleanup();
+
     app->max_windows = 0;
     app->num_windows = 0;
 }
@@ -115,7 +121,7 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             new_width  = window_resize_event->width;
             new_height = window_resize_event->height;
             
-            // camera_set_projection_orthographic(&app->current_window->renderer.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+            camera_set_projection_orthographic(&app->current_window->metadata.renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
         }
         break;
 
@@ -128,8 +134,10 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             {
 
                 app->current_window = window_focus_event->window_handle;
-                window_set_context(window_focus_event->window_handle);
+                // window_set_context(window_focus_event->window_handle);
             }
+
+
         }
         break;
 
@@ -146,7 +154,7 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
 
         default:
         {
-            
+
         }
         break;
     }
@@ -182,7 +190,7 @@ uint8_t application_add_window(struct application_t* app, struct window_t new_wi
     }
     else
     {
-        error = 1U;
+        error |= 1U;
     }
 
     return error;

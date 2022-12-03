@@ -21,6 +21,8 @@ struct window_data_t
     void (*function_event_notify)(struct application_t* application, struct event_base_t* event);
     //
     void (*function_custom_window_run)(struct window_t* window);
+    //
+    struct renderer_2d_t renderer_2d;
 };
 
 struct window_context_data_t
