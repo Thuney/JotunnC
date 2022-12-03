@@ -19,10 +19,6 @@ struct window_data_t
     //
     struct application_t* parent_application;
     void (*function_event_notify)(struct application_t* application, struct event_base_t* event);
-    //
-    void (*function_custom_window_run)(struct window_t* window);
-    //
-    struct renderer_2d_t renderer_2d;
 };
 
 struct window_context_data_t
@@ -34,6 +30,10 @@ struct window_t
 {
     struct window_data_t metadata;
     struct window_context_data_t context_data;
+    //
+    void (*function_custom_window_run)(struct window_t* window);
+    //
+    struct renderer_2d_t renderer_2d;
 };
 
 uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
@@ -46,6 +46,7 @@ uint8_t window_run(struct window_t* window);
 void window_cleanup(struct window_t* window);
 
 void window_set_context(struct window_t* window);
+void window_release_context();
 
 void window_set_background_color(struct window_t* window, const fvector4 color);
 

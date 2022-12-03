@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "window.h"
+
 void renderer_2d_flush(struct renderer_2d_t* renderer)
 {
    struct renderer_2d_data_t* data = &renderer->render_data;
@@ -128,9 +130,9 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
 
 static void renderer_2d_start_batch(struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D starting batch\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D starting batch\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -166,29 +168,27 @@ static const unsigned int max_indices   = max_quads * 6;
 
 static void renderer_2d_data_init(struct renderer_2d_data_t* data)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D data init\n");
-   #endif
+   const char* res_path = "/home/loki/Repos/JotunnC/Jotunn/res/";
 
    unsigned int error = 0;
 
-   error = shader_program_init_filepath(&data->triangle_shader, "../../../Jotunn/res/shaders/triangle_2d_shader.vert", "../../../Jotunn/res/shaders/triangle_2d_shader.frag");
+   error = shader_program_init_filepath(&data->triangle_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during triangle shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->quad_shader, "../../../Jotunn/res/shaders/quad_2d_shader.vert", "../../../Jotunn/res/shaders/quad_2d_shader.frag");
+   error = shader_program_init_filepath(&data->quad_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/quad_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/quad_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during quad shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->textured_quad_shader, "../../../Jotunn/res/shaders/textured_quad_2d_shader.vert", "../../../Jotunn/res/shaders/textured_quad_2d_shader.frag");
+   error = shader_program_init_filepath(&data->textured_quad_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during quad shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->circle_shader, "../../../Jotunn/res/shaders/circle_2d_shader.vert", "../../../Jotunn/res/shaders/circle_2d_shader.frag");
+   error = shader_program_init_filepath(&data->circle_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/circle_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/circle_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during circle shader init\n");
    #endif
-   error = shader_program_init_filepath(&data->line_shader, "../../../Jotunn/res/shaders/line_2d_shader.vert", "../../../Jotunn/res/shaders/line_2d_shader.frag");
+   error = shader_program_init_filepath(&data->line_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/line_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/line_2d_shader.frag");
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during line shader init\n");
    #endif
@@ -223,8 +223,10 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
    data->line_width = -1.0f;
 }
 
-void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)
+void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_window, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)
 {
+   renderer->parent_window = parent_window;
+
    fmatrix_4x4_init(&renderer->render_data.model_matrix);
    // renderer->render_data.model_matrix = fmatrix_4x4_transform_scale(&renderer->render_data.model_matrix, primitive_scale_factors);
 
@@ -232,11 +234,11 @@ void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const flo
       fprintf(stdout, "Initializing renderer_2d\n");
    #endif
 
-   memset(renderer, 0, sizeof(struct renderer_2d_t));
-
    int tag_length = strlen(tag);
    renderer->tag = (char*) malloc(tag_length*sizeof(char));    
    strcpy(renderer->tag, tag);
+
+   window_set_context(renderer->parent_window);
 
    render_api_init();
 
@@ -251,6 +253,8 @@ void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const flo
    // Batch stuff
    renderer_2d_data_init(&renderer->render_data);
    renderer_2d_set_line_width(renderer, renderer->render_data.line_width);
+
+   window_release_context();
 }
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
@@ -269,9 +273,9 @@ void renderer_2d_cleanup(struct renderer_2d_t* renderer)
 
 void renderer_2d_begin_scene(struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D beginning scene\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D beginning scene\n");
+   // #endif
 
    render_api_clear();
 
@@ -280,9 +284,9 @@ void renderer_2d_begin_scene(struct renderer_2d_t* renderer)
 
 void renderer_2d_end_scene(struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D ending scene\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D ending scene\n");
+   // #endif
 
    renderer_2d_flush(renderer);
 
@@ -293,9 +297,9 @@ void renderer_2d_end_scene(struct renderer_2d_t* renderer)
 
 void renderer_2d_draw_triangle(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing triangle\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing triangle\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -319,9 +323,9 @@ void renderer_2d_draw_triangle(struct renderer_2d_t* renderer, const fmatrix_4x4
 
 void renderer_2d_draw_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing quad\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing quad\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
    
@@ -344,9 +348,9 @@ void renderer_2d_draw_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* tr
 
 void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing textured quad\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing textured quad\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -398,9 +402,9 @@ void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatri
 
 void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture, const fvector2 subtexture_coords[4])
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing subtextured quad\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing subtextured quad\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -452,9 +456,9 @@ void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fma
 
 void renderer_2d_draw_circle(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing circle\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing circle\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -475,9 +479,9 @@ void renderer_2d_draw_circle(struct renderer_2d_t* renderer, const fmatrix_4x4* 
 
 void renderer_2d_draw_line(struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4 color)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing line\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing line\n");
+   // #endif
 
    struct renderer_2d_data_t* data = &renderer->render_data;
 
@@ -496,9 +500,9 @@ void renderer_2d_draw_line(struct renderer_2d_t* renderer, const fvector3 pos_1,
 
 void renderer_2d_draw_string(struct renderer_2d_t* renderer, const struct typeface_t* typeface, const fvector3 start_position, const char* draw_string)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing string\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing string\n");
+   // #endif
 
    int error;
 

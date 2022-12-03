@@ -35,9 +35,6 @@ void gl_window_size_callback(GLFWwindow* window, int width, int height)
    metadata->width  = width;
    metadata->height = height;
 
-   // Set the GL viewport to the size of the window
-   glViewport(0, 0, metadata->width, metadata->height);
-
    struct event_window_resize_t resize_event = 
       (struct event_window_resize_t)
       {
@@ -255,6 +252,9 @@ uint8_t window_gl_init(struct window_t* window)
       is_glew_initialized = (glewInit() == GLEW_OK);
    }
 
+   // Release context
+   glfwMakeContextCurrent(NULL);
+
    return !(is_glfw_initialized && is_glew_initialized);
 }
 
@@ -316,6 +316,11 @@ void window_graphics_cleanup(struct window_t* window)
 void window_graphics_set_context(struct window_t* window)
 {
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
+}
+
+void window_graphics_release_context()
+{
+   glfwMakeContextCurrent(NULL);
 }
 
 void window_graphics_set_background_color(struct window_t* window, const fvector4 color)

@@ -12,6 +12,7 @@ extern uint8_t window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 extern void window_graphics_set_context(struct window_t* window);
+extern void window_graphics_release_context();
 extern void window_graphics_set_background_color(struct window_t* window, const fvector4 color);
 
 // Window Callbacks
@@ -34,8 +35,6 @@ static void window_set_metadata(struct window_data_t* metadata, const uint32_t w
 
     metadata->parent_application    = app_parent;
     metadata->function_event_notify = function_event_notify;
-
-    metadata->function_custom_window_run = 0;
 }
 
 // Exposed functions
@@ -57,7 +56,9 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
 
     // window_set_background_color(window, background_color);
 
-    renderer_2d_init(&window->metadata.renderer_2d, "renderer_2d", 0, width, height, 0, -3.0f, 100.0f);
+    window->function_custom_window_run = 0;
+
+    renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0, width, height, 0, -3.0f, 100.0f);
 
     return error;
 }
@@ -76,16 +77,18 @@ uint8_t window_run(struct window_t* window)
 
     window_set_context(window);
     
-    renderer_2d_begin_scene(&window->metadata.renderer_2d);
+    renderer_2d_begin_scene(&window->renderer_2d);
 
-    if (window->metadata.function_custom_window_run)
+    if (window->function_custom_window_run)
     {
-        window->metadata.function_custom_window_run(window);
+        window->function_custom_window_run(window);
     }
 
-    renderer_2d_end_scene(&window->metadata.renderer_2d);
+    renderer_2d_end_scene(&window->renderer_2d);
 
     window_graphics_run(window);
+
+    window_release_context();
 
     return window->metadata.signaled_close;
 }
@@ -95,7 +98,7 @@ void window_cleanup(struct window_t* window)
     free(window->metadata.tag);
     window->metadata.tag = 0;
 
-    renderer_2d_cleanup(&window->metadata.renderer_2d);
+    renderer_2d_cleanup(&window->renderer_2d);
 
     window_graphics_cleanup(window);
 }
@@ -105,12 +108,19 @@ void window_set_context(struct window_t* window)
     window_graphics_set_context(window);
 }
 
+void window_release_context()
+{
+    window_graphics_release_context();
+}
+
 void window_set_background_color(struct window_t* window, const fvector4 color)
 {
+    window_set_context(window);
     window_graphics_set_background_color(window, color);
+    window_release_context();
 }
 
 void window_set_function_custom_window_run(struct window_t* window, void (*function_custom_window_run)(struct window_t* window))
 {
-    window->metadata.function_custom_window_run = function_custom_window_run;
+    window->function_custom_window_run = function_custom_window_run;
 }

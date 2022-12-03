@@ -1,5 +1,7 @@
 #pragma once
 
+struct window_t;
+
 #include "camera.h"
 #include "fmatrix.h"
 #include "font.h"
@@ -34,6 +36,8 @@ struct renderer_2d_data_t
 
 struct renderer_2d_t
 {
+   struct window_t* parent_window;
+   //
    char* tag;
    //
    struct camera_ortho_t camera;
@@ -41,7 +45,7 @@ struct renderer_2d_t
    struct renderer_2d_data_t render_data;
 };
 
-void renderer_2d_init(struct renderer_2d_t* renderer, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane);
+void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_window, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane);
 void renderer_2d_cleanup(struct renderer_2d_t* renderer);
 
 void renderer_2d_begin_scene(struct renderer_2d_t* renderer);

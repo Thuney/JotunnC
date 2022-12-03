@@ -117,11 +117,28 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             // Should be safe cast from base to derived form with base as first element
             struct event_window_resize_t* window_resize_event = (struct event_window_resize_t*)event;
 
+            // #ifdef DEBUG
+            //     if (app->num_windows)
+            //     {
+            //         // Pointer to first window, to be iterated over
+            //         struct window_t* cur_window = app->windows;
+            //         for (uint8_t i = 0U; i < app->num_windows; i++)
+            //         {
+            //             if (cur_window->context_data.window_handle == window_resize_event->window_handle)
+            //             {
+            //                 fprintf(stdout, "Resizing window - %s\n", cur_window->metadata.tag);
+            //             }
+
+            //             cur_window++;
+            //         }
+            //     }
+            // #endif
+
             uint32_t new_width, new_height;
             new_width  = window_resize_event->width;
             new_height = window_resize_event->height;
             
-            camera_set_projection_orthographic(&app->current_window->metadata.renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+            camera_set_projection_orthographic(&app->current_window->renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
         }
         break;
 
@@ -133,8 +150,25 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             if (window_focus_event->focused)
             {
 
+                #ifdef DEBUG
+                    if (app->num_windows)
+                    {
+                        // Pointer to first window, to be iterated over
+                        struct window_t* cur_window = app->windows;
+                        for (uint8_t i = 0U; i < app->num_windows; i++)
+                        {
+                            if (cur_window->context_data.window_handle == window_focus_event->window_handle)
+                            {
+                                fprintf(stdout, "Refocusing window - %s\n", cur_window->metadata.tag);
+                            }
+
+                            cur_window++;
+                        }
+                    }
+                #endif
+
                 app->current_window = window_focus_event->window_handle;
-                // window_set_context(window_focus_event->window_handle);
+                window_set_context(window_focus_event->window_handle);
             }
 
 
