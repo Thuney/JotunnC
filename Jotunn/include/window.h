@@ -1,9 +1,9 @@
 #pragma once
 
-#include "font.h"
 #include "renderer_2d.h"
 
 struct application_t;
+struct window_t;
 
 struct window_data_t
 {
@@ -19,6 +19,8 @@ struct window_data_t
     //
     struct application_t* parent_application;
     void (*function_event_notify)(struct application_t* application, struct event_base_t* event);
+    //
+    void (*function_custom_window_run)(struct window_t* window);
 };
 
 struct window_context_data_t
@@ -30,15 +32,9 @@ struct window_t
 {
     struct window_data_t metadata;
     struct window_context_data_t context_data;
-    // 
-    struct renderer_2d_t renderer;
-    //
-    struct typeface_t typeface;
-    //
-    struct texture_2d_t test_texture;
 };
 
-uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, const char* tag, struct application_t* app_parent);
+uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);
@@ -50,3 +46,5 @@ void window_cleanup(struct window_t* window);
 void window_set_context(struct window_t* window);
 
 void window_set_background_color(struct window_t* window, const fvector4 color);
+
+void window_set_function_custom_window_run(struct window_t* window, void (*function_custom_window_run)(struct window_t* window));
