@@ -10,13 +10,16 @@
 extern uint8_t window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
+
+extern void window_graphics_set_context(struct window_t* window);
+
 extern void window_graphics_set_background_color(struct window_t* window, const fvector4 color);
 
 // Window Callbacks
 
 // Helpers
 
-static void window_set_metadata(struct window_data_t* metadata, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent, void (*function_event_notify)(struct application_t*, struct event_base_t*))
+static void window_set_metadata(struct window_data_t* metadata, uint32_t width, uint32_t height, const char* tag, struct application_t* app_parent, void (*function_event_notify)(struct application_t*, struct event_base_t*))
 {
     // Store our window tag
     int tag_length = strlen(tag);
@@ -28,7 +31,7 @@ static void window_set_metadata(struct window_data_t* metadata, uint32_t width, 
     metadata->height = height;
 
     metadata->signaled_close = 0;
-    metadata->visible = 0;
+    metadata->visible = 1;
 
     metadata->parent_application    = app_parent;
     metadata->function_event_notify = function_event_notify;
@@ -36,7 +39,7 @@ static void window_set_metadata(struct window_data_t* metadata, uint32_t width, 
 
 // Exposed functions
 
-uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent)
+uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, const char* tag, struct application_t* app_parent)
 {
     window_set_metadata(&window->metadata, width, height, tag, app_parent, &application_on_event);
 
@@ -179,6 +182,11 @@ void window_cleanup(struct window_t* window)
     font_cleanup();
 
     window_graphics_cleanup(window);
+}
+
+void window_set_context(struct window_t* window)
+{
+    window_graphics_set_context(window);
 }
 
 void window_set_background_color(struct window_t* window, const fvector4 color)

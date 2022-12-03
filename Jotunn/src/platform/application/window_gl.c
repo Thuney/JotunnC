@@ -160,6 +160,32 @@ void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double
    metadata->function_event_notify(metadata->parent_application, &(mouse_moved_event.base));
 }
 
+void gl_window_focus_callback(GLFWwindow* window, int focused)
+{
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+   #ifdef DEBUG
+      if (focused)
+      {
+         fprintf(stdout, "Window focus changed to %s\n", metadata->tag);
+      }
+   #endif
+
+   struct event_window_focus_t window_focus_event = 
+      (struct event_window_focus_t)
+      {
+         .base          = (struct event_base_t)
+         {
+            .event_type = EVENT_MOUSE_MOVED,
+            .handled    = 0
+         },
+         .window_handle = (void*)window,
+         .focused = focused
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(window_focus_event.base));
+}
+
 void gl_window_error_callback(int error_code, const char* description)
 {
    #ifdef DEBUG
@@ -183,6 +209,7 @@ void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
    glfwSetMouseButtonCallback(glfw_window_ptr, (GLFWmousebuttonfun)&gl_window_mouse_button_callback);
    glfwSetScrollCallback(glfw_window_ptr,      (GLFWscrollfun)&gl_window_scroll_callback);
    glfwSetCursorPosCallback(glfw_window_ptr,   (GLFWcursorposfun)&gl_window_cursor_position_callback);
+   glfwSetWindowFocusCallback(glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
 uint8_t window_gl_init(struct window_t* window)
@@ -218,7 +245,7 @@ uint8_t window_gl_init(struct window_t* window)
 
    window_gl_set_callbacks(gl_window_ptr);
 
-   glfwMakeContextCurrent(gl_window_ptr);
+   glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
    // Set the GL viewport to the size of the window
    glViewport(0, 0, window->metadata.width, window->metadata.height);
 
@@ -284,6 +311,11 @@ void window_graphics_run(struct window_t* window)
 void window_graphics_cleanup(struct window_t* window)
 {
    window_gl_cleanup(window);
+}
+
+void window_graphics_set_context(struct window_t* window)
+{
+   glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 }
 
 void window_graphics_set_background_color(struct window_t* window, const fvector4 color)

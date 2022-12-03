@@ -38,7 +38,7 @@ struct window_t
     struct texture_2d_t test_texture;
 };
 
-uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent);
+uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, const char* tag, struct application_t* app_parent);
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);
@@ -46,5 +46,7 @@ void window_hide(struct window_t* window);
 uint8_t window_run(struct window_t* window);
 
 void window_cleanup(struct window_t* window);
+
+void window_set_context(struct window_t* window);
 
 void window_set_background_color(struct window_t* window, const fvector4 color);

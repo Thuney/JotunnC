@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-uint8_t application_init(struct application_t* app, char* app_name, const uint8_t num_windows)
+uint8_t application_init(struct application_t* app, const char* app_name, const uint8_t num_windows)
 {
     #ifdef DEBUG
         fprintf(stdout, "Initializing application\n");
@@ -22,13 +22,17 @@ uint8_t application_init(struct application_t* app, char* app_name, const uint8_
 
     uint8_t error = 0;
 
+    char cur_window_tag[32];
     // Pointer to first window, to be iterated over
     struct window_t* cur_window = app->windows;
     for (uint8_t i = 0U; i < app->num_windows; i++)
     {
-        error |= window_init(cur_window, 400, 600, "JotunnWindow", app);
+        sprintf(cur_window_tag, "JotunnWindow_%d", (int)i);
+        error |= window_init(cur_window, 600, 400, cur_window_tag, app);
         cur_window++;
     }
+
+    app->current_window = (cur_window - 1); // 'Cause iteration
 
     return error;
 }
@@ -50,26 +54,19 @@ void application_run(struct application_t* app)
     struct window_t* cur_window = app->windows;
     for (uint8_t i = 0U; i < app->num_windows; i++)
     {
-        uint8_t signaled_close = window_run(cur_window);
-        if(signaled_close)
+        if (cur_window->metadata.visible)
         {
-            app->running = 0;
+            uint8_t signaled_close = window_run(cur_window);
+            if(signaled_close)
+            {
+                app->running = 0;
 
-            #ifdef DEBUG
-                fprintf(stdout, "Window signaled to close\n");
-            #endif
+                #ifdef DEBUG
+                    fprintf(stdout, "Window signaled to close\n");
+                #endif
+            }
         }
         cur_window++;
-    }
-
-    uint8_t signaled_close = window_run(&app->window);
-    if(signaled_close)
-    {
-        app->running = 0;
-
-        #ifdef DEBUG
-            fprintf(stdout, "Window signaled to close\n");
-        #endif
     }
 }
 
@@ -117,18 +114,32 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             new_width  = window_resize_event->width;
             new_height = window_resize_event->height;
             
-            // TODO: FIX THIS SHIT
-            camera_set_projection_orthographic(&app->windows[0].renderer.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+            camera_set_projection_orthographic(&app->current_window->renderer.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+        }
+        break;
+
+        case EVENT_WINDOW_FOCUS:
+        {
+            // Should be safe cast from base to derived form with base as first element
+            struct event_window_focus_t* window_focus_event = (struct event_window_focus_t*)event;
+
+            if (window_focus_event->focused)
+            {
+
+                app->current_window = window_focus_event->window_handle;
+                window_set_context(window_focus_event->window_handle);
+            }
         }
         break;
 
         case EVENT_MOUSE_MOVED:
         {
+            // Should be safe cast from base to derived form with base as first element
             struct event_mouse_moved_t* mouse_moved_event = (struct event_mouse_moved_t*)event;
 
             float x, y;
             x = mouse_moved_event->x;
-            y = (app->windows[0].metadata.height - mouse_moved_event->y);
+            y = (app->current_window->metadata.height - mouse_moved_event->y);
         }
         break;
 

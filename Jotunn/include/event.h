@@ -43,11 +43,12 @@ struct event_window_resize_t
    int width, height;
 };
 
-// struct event_window_focus_t
-// {
-//    struct event_base_t base;
-//    void* window_handle;
-// };
+struct event_window_focus_t
+{
+   struct event_base_t base;
+   void* window_handle;
+   int focused;
+};
 
 // struct event_window_lost_focus_t
 // {

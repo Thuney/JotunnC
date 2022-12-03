@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 {
     struct application_t* app_ptr = &jotunn_app; 
 
-    uint8_t init_error = application_init(app_ptr, "JotunnTestApp", 2);
+    uint8_t init_error = application_init(app_ptr, "JotunnTestApp", 1);
     if (!init_error)
     {
         application_start(app_ptr);

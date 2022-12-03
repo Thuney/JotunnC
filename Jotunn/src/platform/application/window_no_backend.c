@@ -24,6 +24,11 @@ void window_graphics_cleanup(struct window_t* window)
    return;
 }
 
+void window_graphics_set_context(struct window_t* window)
+{
+   return;
+}
+
 void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
 {
    return;
