@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-int application_init(struct application_t* app, char* app_name, const enum application_tick_rate_t app_tick_rate)
+uint8_t application_init(struct application_t* app, char* app_name, const uint8_t num_windows)
 {
     #ifdef DEBUG
         fprintf(stdout, "Initializing application\n");
@@ -17,12 +17,23 @@ int application_init(struct application_t* app, char* app_name, const enum appli
     app->name = (char*) malloc(name_length*sizeof(char));
     strcpy(app->name, app_name);
 
-    app->tick_rate = app_tick_rate;
+    app->num_windows = num_windows;
+    app->windows = (struct window_t*) malloc(app->num_windows*sizeof(struct window_t));
 
-    return window_init(&app->window, 1200, 1000, "JotunnWindow", app);
+    uint8_t error = 0;
+
+    // Pointer to first window, to be iterated over
+    struct window_t* cur_window = app->windows;
+    for (uint8_t i = 0U; i < app->num_windows; i++)
+    {
+        error |= window_init(cur_window, 400, 600, "JotunnWindow", app);
+        cur_window++;
+    }
+
+    return error;
 }
 
-int application_start(struct application_t* app)
+uint8_t application_start(struct application_t* app)
 {
     #ifdef DEBUG
         fprintf(stdout, "Starting application\n");
@@ -35,7 +46,23 @@ int application_start(struct application_t* app)
 
 void application_run(struct application_t* app)
 {
-    int signaled_close = window_run(&app->window);
+    // Pointer to first window, to be iterated over
+    struct window_t* cur_window = app->windows;
+    for (uint8_t i = 0U; i < app->num_windows; i++)
+    {
+        uint8_t signaled_close = window_run(cur_window);
+        if(signaled_close)
+        {
+            app->running = 0;
+
+            #ifdef DEBUG
+                fprintf(stdout, "Window signaled to close\n");
+            #endif
+        }
+        cur_window++;
+    }
+
+    uint8_t signaled_close = window_run(&app->window);
     if(signaled_close)
     {
         app->running = 0;
@@ -46,7 +73,7 @@ void application_run(struct application_t* app)
     }
 }
 
-int application_stop(struct application_t* app)
+uint8_t application_stop(struct application_t* app)
 {
     #ifdef DEBUG
         fprintf(stdout, "Stopping application\n");
@@ -68,7 +95,13 @@ void application_cleanup(struct application_t* app)
     free(app->name);
     app->name = 0;
 
-    window_cleanup(&app->window);
+    // Pointer to first window, to be iterated over
+    struct window_t* cur_window = app->windows;
+    for (uint8_t i = 0U; i < app->num_windows; i++)
+    {
+        window_cleanup(cur_window);
+        cur_window++;
+    }
 }
 
 void application_on_event(struct application_t* app, struct event_base_t* event)
@@ -80,11 +113,12 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             // Should be safe cast from base to derived form with base as first element
             struct event_window_resize_t* window_resize_event = (struct event_window_resize_t*)event;
 
-            int new_width, new_height;
+            uint32_t new_width, new_height;
             new_width  = window_resize_event->width;
             new_height = window_resize_event->height;
-
-            camera_set_projection_orthographic(&app->window.renderer.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+            
+            // TODO: FIX THIS SHIT
+            camera_set_projection_orthographic(&app->windows[0].renderer.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
         }
         break;
 
@@ -94,7 +128,7 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
 
             float x, y;
             x = mouse_moved_event->x;
-            y = (app->window.metadata.height - mouse_moved_event->y);
+            y = (app->windows[0].metadata.height - mouse_moved_event->y);
         }
         break;
 

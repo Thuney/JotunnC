@@ -4,11 +4,16 @@
 
 struct application_t jotunn_app;
 
+// static void jotunn_app_init(struct application_t* app)
+// {
+
+// }
+
 int main(int argc, char** argv)
 {
     struct application_t* app_ptr = &jotunn_app; 
 
-    int init_error = application_init(app_ptr, "JotunnTestApp", APP_TICKRATE_1_HZ);
+    uint8_t init_error = application_init(app_ptr, "JotunnTestApp", 2);
     if (!init_error)
     {
         application_start(app_ptr);

@@ -7,7 +7,7 @@
 #include <stdlib.h> 
 #include <string.h>
 
-extern int window_graphics_init(struct window_t* window);
+extern uint8_t window_graphics_init(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 extern void window_graphics_set_background_color(struct window_t* window, const fvector4 color);
@@ -16,7 +16,7 @@ extern void window_graphics_set_background_color(struct window_t* window, const 
 
 // Helpers
 
-static void window_set_metadata(struct window_data_t* metadata, int width, int height, char* tag, struct application_t* app_parent, void (*function_event_notify)(struct application_t*, struct event_base_t*))
+static void window_set_metadata(struct window_data_t* metadata, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent, void (*function_event_notify)(struct application_t*, struct event_base_t*))
 {
     // Store our window tag
     int tag_length = strlen(tag);
@@ -28,6 +28,7 @@ static void window_set_metadata(struct window_data_t* metadata, int width, int h
     metadata->height = height;
 
     metadata->signaled_close = 0;
+    metadata->visible = 0;
 
     metadata->parent_application    = app_parent;
     metadata->function_event_notify = function_event_notify;
@@ -35,11 +36,11 @@ static void window_set_metadata(struct window_data_t* metadata, int width, int h
 
 // Exposed functions
 
-int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent)
+uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent)
 {
     window_set_metadata(&window->metadata, width, height, tag, app_parent, &application_on_event);
 
-    int error = window_graphics_init(window);
+    uint8_t error = window_graphics_init(window);
 
     #ifdef DEBUG
         if (error) fprintf(stdout, "Error during window_graphics_init\n");
@@ -151,7 +152,7 @@ static void window_renderer_do_stuff(struct window_t* window)
 // ---------------------------
 // ---------------------------
 
-int window_run(struct window_t* window)
+uint8_t window_run(struct window_t* window)
 {
     renderer_2d_begin_scene(&window->renderer);
 

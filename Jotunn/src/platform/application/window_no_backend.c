@@ -3,7 +3,7 @@
 #include "window.h"
 
 // Extern function definitions
-int window_graphics_init(struct window_t* window)
+uint8_t window_graphics_init(struct window_t* window)
 {
    #ifdef DEBUG
       printf("No graphics backend!\n");

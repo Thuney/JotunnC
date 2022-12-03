@@ -16,8 +16,8 @@
  * 
  **************************************************/
 
-static int is_glfw_initialized = 0;
-static int is_glew_initialized = 0;
+static uint8_t is_glfw_initialized = 0;
+static uint8_t is_glew_initialized = 0;
 
 /**************************************************
  * 
@@ -185,7 +185,7 @@ void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
    glfwSetCursorPosCallback(glfw_window_ptr,   (GLFWcursorposfun)&gl_window_cursor_position_callback);
 }
 
-int window_gl_init(struct window_t* window)
+uint8_t window_gl_init(struct window_t* window)
 {
    #ifdef DEBUG
       fprintf(stdout, "Initializing OpenGL Window\n");
@@ -267,7 +267,7 @@ void window_gl_cleanup(struct window_t* window)
  *  Extern window function definitions
  * 
  **************************************************/
-int window_graphics_init(struct window_t* window)
+uint8_t window_graphics_init(struct window_t* window)
 {
    #ifdef DEBUG
       fprintf(stdout, "Found OpenGL Backend\n");

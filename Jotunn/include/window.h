@@ -9,10 +9,11 @@ struct window_data_t
 {
     char* tag;
     //
-    int width;
-    int height;
+    uint32_t width;
+    uint32_t height;
     //
-    int signaled_close;
+    uint8_t signaled_close;
+    uint8_t visible;
     //
     double window_time_sec;
     //
@@ -37,12 +38,12 @@ struct window_t
     struct texture_2d_t test_texture;
 };
 
-int window_init(struct window_t* window, int width, int height, char* tag, struct application_t* app_parent);
+uint8_t window_init(struct window_t* window, uint32_t width, uint32_t height, char* tag, struct application_t* app_parent);
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);
 
-int window_run(struct window_t* window);
+uint8_t window_run(struct window_t* window);
 
 void window_cleanup(struct window_t* window);
 
