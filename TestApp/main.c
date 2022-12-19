@@ -60,7 +60,7 @@ void window1_run(struct window_t* window)
         }
     }
 
-    // // Textured Quad
+    // Textured Quad
 
     // const fvector3 textured_quad_position = { 900.0f, 500.0f, 0.0f };
 
@@ -73,22 +73,22 @@ void window1_run(struct window_t* window)
     // textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
     // textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
 
-    // // renderer_2d_draw_textured_quad(renderer, &textured_quad_transform_matrix, &window->test_texture);
+    // renderer_2d_draw_textured_quad(renderer, &textured_quad_transform_matrix, &window->test_texture);
 
-    // // Line
+    // Line
 
-    // const fvector3 line_position_1 = { 1000.0f, 400.0f, 0.0f };
-    // const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
-    // const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
+    const fvector3 line_position_1 = { 1000.0f, 400.0f, 0.0f };
+    const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
+    const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
 
-    // renderer_2d_draw_line(renderer, line_position_1, line_position_2, line_color);
+    renderer_2d_draw_line(renderer, line_position_1, line_position_2, line_color);
 
-    // // String of text
-    // const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
+    // String of text
+    const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
 
-    // renderer_2d_draw_string(renderer, &window->metadata.parent_application->app_typeface, text_start_position, "This Is Some Sample Text With Spaces");
-    // // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
-    // // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
+    renderer_2d_draw_string(renderer, &window->metadata.parent_application->app_typeface, text_start_position, "This Is Some Sample Text With Spaces");
+    // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
+    // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
 void window2_run(struct window_t* window)
@@ -173,6 +173,8 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
 
 int main(int argc, char** argv)
 {
+    const uint8_t max_windows = 2;
+
     struct application_t* app_ptr = &jotunn_app;
     struct window_t *window1_ptr = &window1;
     struct window_t *window2_ptr = &window2;
@@ -182,7 +184,7 @@ int main(int argc, char** argv)
     init_window1(app_ptr, window1_ptr);
     init_window2(app_ptr, window2_ptr);
 
-    error |= application_init(app_ptr, "JotunnTestApp", 2);
+    error |= application_init(app_ptr, "JotunnTestApp", max_windows);
 
     window_set_function_custom_window_run(window1_ptr, &window1_run);
     window_set_function_custom_window_run(window2_ptr, &window2_run);

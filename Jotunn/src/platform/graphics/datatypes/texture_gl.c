@@ -1,5 +1,7 @@
 #include "texture.h"
 
+#include <stdio.h>
+
 #include <GL/glew.h>
 
 static GLenum gl_get_texture_data_format(enum texture_2d_data_format_t data_format)
@@ -100,6 +102,10 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_
 	 */
    glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
    glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+   #ifdef DEBUG
+      fprintf(stdout, "Texture initialized with ID %d\n", texture->texture_id);
+   #endif
 }
 
 static void gl_texture_2d_cleanup(struct texture_2d_t* texture)

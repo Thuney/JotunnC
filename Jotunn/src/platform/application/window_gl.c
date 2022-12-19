@@ -173,7 +173,7 @@ void gl_window_focus_callback(GLFWwindow* window, int focused)
       {
          .base          = (struct event_base_t)
          {
-            .event_type = EVENT_MOUSE_MOVED,
+            .event_type = EVENT_WINDOW_FOCUS,
             .handled    = 0
          },
          .window_handle = (void*)window,

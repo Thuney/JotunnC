@@ -58,7 +58,7 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
 
     window->function_custom_window_run = 0;
 
-    renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0, width, height, 0, -3.0f, 100.0f);
+    renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0.0f, (float)width, (float)height, 0.0f, -3.0f, 100.0f);
 
     return error;
 }

@@ -213,7 +213,7 @@ void typeface_init(struct typeface_t* typeface, const char* ttf_file_path, const
          // #endif
 
          typeface_set_char_size(typeface, size_points);
-         int typeface_load_glyph_atlas(struct typeface_t* typeface);
+         error |= typeface_load_glyph_atlas(typeface);
          if (!error) typeface->is_loaded = 1;
       }
    }

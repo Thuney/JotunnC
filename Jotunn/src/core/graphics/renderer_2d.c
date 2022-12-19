@@ -168,8 +168,6 @@ static const unsigned int max_indices   = max_quads * 6;
 
 static void renderer_2d_data_init(struct renderer_2d_data_t* data)
 {
-   const char* res_path = "/home/loki/Repos/JotunnC/Jotunn/res/";
-
    unsigned int error = 0;
 
    error = shader_program_init_filepath(&data->triangle_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.frag");
@@ -200,6 +198,8 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
    data->line_width = 3.0f;
+
+   data->textures_index = 0;
 }
 
 static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
@@ -346,7 +346,7 @@ void renderer_2d_draw_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* tr
    data->quad_data.quad_index_count += 6;
 }
 
-void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture)
+void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, struct texture_2d_t* texture)
 {
    // #ifdef DEBUG
    //    fprintf(stdout, "Renderer 2D drawing textured quad\n");
@@ -400,7 +400,7 @@ void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatri
    data->textured_quad_data.textured_quad_index_count += 6;
 }
 
-void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture, const fvector2 subtexture_coords[4])
+void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, struct texture_2d_t* texture, const fvector2 subtexture_coords[4])
 {
    // #ifdef DEBUG
    //    fprintf(stdout, "Renderer 2D drawing subtextured quad\n");

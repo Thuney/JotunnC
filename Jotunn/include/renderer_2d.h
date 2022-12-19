@@ -22,7 +22,7 @@ struct renderer_2d_data_t
    struct shader_program_t circle_shader;
    struct shader_program_t line_shader;
    //
-   const struct texture_2d_t* textures[_RENDERER_2D_MAX_TEXTURES];
+   struct texture_2d_t* textures[_RENDERER_2D_MAX_TEXTURES];
    unsigned int textures_index;
    //
    struct renderable_2d_triangle_data_t      triangle_data;
@@ -55,8 +55,8 @@ void renderer_2d_flush(struct renderer_2d_t* renderer);
 
 void renderer_2d_draw_triangle(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
 void renderer_2d_draw_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
-void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture);
-void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const struct texture_2d_t* texture, const fvector2 subtexture_coords[4]);
+void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, struct texture_2d_t* texture);
+void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, struct texture_2d_t* texture, const fvector2 subtexture_coords[4]);
 void renderer_2d_draw_circle(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color);
 void renderer_2d_draw_line(struct renderer_2d_t* renderer, const fvector3 pos_1, const fvector3 pos_2, const fvector4 color);
 void renderer_2d_draw_string(struct renderer_2d_t* renderer, const struct typeface_t* typeface, const fvector3 start_position, const char* draw_string);
