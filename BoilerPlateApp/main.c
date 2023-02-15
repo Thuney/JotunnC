@@ -70,7 +70,11 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
     fvector4 window1_background_color;
     fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
 
+    window_set_context(window1);
+
     window_set_background_color(window1, window1_background_color);
+
+    window_release_context();
 
     return error;
 }

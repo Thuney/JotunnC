@@ -2,6 +2,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <stdio.h>
 
 static GLenum get_gl_element_data_type(enum render_api_element_data_type_t data_type)
 {
@@ -78,6 +79,10 @@ static GLenum get_gl_draw_mode(enum render_api_draw_mode_t draw_mode)
 
 static void opengl_render_api_init()
 {
+   #ifdef DEBUG
+      fprintf(stdout, "Initializing OpenGL Render API\n");
+   #endif
+
    glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
    glEnable(GL_DEPTH_TEST);

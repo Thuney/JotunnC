@@ -1,5 +1,5 @@
 C        := -gcc
-CFLAGS   := -pedantic-errors -Wall -Wextra -fPIC
+CFLAGS   := -pedantic-errors -Wall -Wextra -fPIC -g
 CDEFINES := 
 
 GRAPHICS_BACKEND := OPENGL

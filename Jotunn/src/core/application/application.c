@@ -1,6 +1,7 @@
 #include "application.h"
 #include "render_api.h"
 
+#include <font.h>
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,7 +29,6 @@ uint8_t application_init(struct application_t* app, const char* app_name, const 
     app->custom_event_function = 0;
 
     font_init();
-    typeface_init(&(app->app_typeface), "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 1);
 
     return error;
 }
@@ -52,6 +52,10 @@ void application_run(struct application_t* app)
         struct window_t* cur_window = app->windows;
         for (uint8_t i = 0U; i < app->num_windows; i++)
         {
+            // #ifdef DEBUG
+            //     fprintf(stdout, "Running Window %s\n", cur_window->metadata.tag);
+            // #endif
+
             if (cur_window->metadata.visible)
             {
                 uint8_t signaled_close = window_run(cur_window);
@@ -117,23 +121,6 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
             // Should be safe cast from base to derived form with base as first element
             struct event_window_resize_t* window_resize_event = (struct event_window_resize_t*)event;
 
-            // #ifdef DEBUG
-            //     if (app->num_windows)
-            //     {
-            //         // Pointer to first window, to be iterated over
-            //         struct window_t* cur_window = app->windows;
-            //         for (uint8_t i = 0U; i < app->num_windows; i++)
-            //         {
-            //             if (cur_window->context_data.window_handle == window_resize_event->window_handle)
-            //             {
-            //                 fprintf(stdout, "Resizing window - %s\n", cur_window->metadata.tag);
-            //             }
-
-            //             cur_window++;
-            //         }
-            //     }
-            // #endif
-
             uint32_t new_width, new_height;
             new_width  = window_resize_event->width;
             new_height = window_resize_event->height;
@@ -150,7 +137,10 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
                             fprintf(stdout, "Resizing window - %s\n", cur_window->metadata.tag);
                         #endif
 
-                        camera_set_projection_orthographic(&cur_window->renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+                        // camera_set_projection_orthographic(&cur_window->renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
+                        cur_window->metadata.width   = new_width;
+                        cur_window->metadata.height  = new_height;
+                        cur_window->metadata.resized = 1;
                     }
 
                     cur_window++;
@@ -237,6 +227,12 @@ uint8_t application_add_window(struct application_t* app, struct window_t new_wi
         *window_ptr = new_window;
         app->current_window = window_ptr;
         app->num_windows++;
+
+        window_set_context(window_ptr);
+
+        typeface_init(&(window_ptr->renderer_2d.typeface), "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
+
+        window_release_context();
     }
     else
     {

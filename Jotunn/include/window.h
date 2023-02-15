@@ -12,6 +12,7 @@ struct window_data_t
     uint32_t width;
     uint32_t height;
     //
+    uint8_t resized;
     uint8_t signaled_close;
     uint8_t visible;
     //
@@ -47,6 +48,8 @@ void window_cleanup(struct window_t* window);
 
 void window_set_context(struct window_t* window);
 void window_release_context();
+
+void window_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 void window_set_background_color(struct window_t* window, const fvector4 color);
 

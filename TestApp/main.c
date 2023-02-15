@@ -4,8 +4,12 @@
 #include "application.h"
 #include "fvector.h"
 
-struct application_t jotunn_app;
-struct window_t window1, window2;
+#include "texture.h"
+
+static struct application_t jotunn_app;
+static struct window_t window1, window2;
+
+static struct texture_2d_t aaron_shakespeare_texture;
 
 void window1_run(struct window_t* window)
 {
@@ -62,18 +66,18 @@ void window1_run(struct window_t* window)
 
     // Textured Quad
 
-    // const fvector3 textured_quad_position = { 900.0f, 500.0f, 0.0f };
+    const fvector3 textured_quad_position = { 900.0f, 500.0f, 0.0f };
 
-    // const float textured_quad_scale_factor     = 200.0f;
-    // const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
+    const float textured_quad_scale_factor     = 200.0f;
+    const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
 
-    // fmatrix_4x4 textured_quad_transform_matrix;
-    // fmatrix_4x4_init(&textured_quad_transform_matrix);
+    fmatrix_4x4 textured_quad_transform_matrix;
+    fmatrix_4x4_init(&textured_quad_transform_matrix);
 
-    // textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
-    // textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
+    textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
 
-    // renderer_2d_draw_textured_quad(renderer, &textured_quad_transform_matrix, &window->test_texture);
+    renderer_2d_draw_textured_quad(renderer, &textured_quad_transform_matrix, &aaron_shakespeare_texture);
 
     // Line
 
@@ -83,10 +87,11 @@ void window1_run(struct window_t* window)
 
     renderer_2d_draw_line(renderer, line_position_1, line_position_2, line_color);
 
-    // String of text
+    // // String of text
     const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
-
-    renderer_2d_draw_string(renderer, &window->metadata.parent_application->app_typeface, text_start_position, "This Is Some Sample Text With Spaces");
+    
+    // renderer_2d_draw_string(renderer, &window->renderer_2d.typeface, text_start_position, "A");
+    renderer_2d_draw_string(renderer, &window->renderer_2d.typeface, text_start_position, "This Is Some Sample Text With Spaces");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
@@ -151,8 +156,15 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 
     fvector4 window1_background_color;
     fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+    // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+
+    window_set_context(window1);
+
+    texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
 
     window_set_background_color(window1, window1_background_color);
+
+    window_release_context();
 
     return error;
 }
@@ -165,8 +177,13 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
 
     fvector4 window2_background_color;
     fvector4_set(&window2_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+    // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+
+    window_set_context(window2);
 
     window_set_background_color(window2, window2_background_color);
+
+    window_release_context();
 
     return error;
 }

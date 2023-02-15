@@ -1,5 +1,6 @@
 #pragma once
 
+struct typeface_t;
 struct window_t;
 
 #include "camera.h"
@@ -41,6 +42,8 @@ struct renderer_2d_t
    char* tag;
    //
    struct camera_ortho_t camera;
+   //
+   struct typeface_t typeface;
    //
    struct renderer_2d_data_t render_data;
 };

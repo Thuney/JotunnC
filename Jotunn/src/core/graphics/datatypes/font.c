@@ -214,6 +214,7 @@ void typeface_init(struct typeface_t* typeface, const char* ttf_file_path, const
 
          typeface_set_char_size(typeface, size_points);
          error |= typeface_load_glyph_atlas(typeface);
+
          if (!error) typeface->is_loaded = 1;
       }
    }
@@ -313,14 +314,5 @@ const struct glyph_t* typeface_get_glyph_from_char(const struct typeface_t* type
 
 void typeface_set_char_size(const struct typeface_t* typeface, const unsigned int char_height_points)
 {
-   const unsigned int width  = 1200;
-   const unsigned int height = 1000;
-
-   /* 0 - handle to face object           */
-   /* 1 - char_width in 1/64th of points  */
-   /* 2 - char_height in 1/64th of points */
-   /* 3 - horizontal device resolution    */
-   /* 4 - vertical device resolution      */
-
-   int error = FT_Set_Char_Size(typeface->typeface, 0, (char_height_points*64U), width, height);
+   int error = FT_Set_Pixel_Sizes(typeface->typeface, 0, char_height_points);
 }

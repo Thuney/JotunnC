@@ -13,6 +13,15 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
 {
    struct renderer_2d_data_t* data = &renderer->render_data;
 
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Flushing renderer - \n");
+   //    fprintf(stdout, "Triangle Index Count = %d\n", data->triangle_data.triangle_index_count);
+   //    fprintf(stdout, "Quad Index Count = %d\n", data->quad_data.quad_index_count);
+   //    fprintf(stdout, "Textured Quad Index Count = %d\n", data->textured_quad_data.textured_quad_index_count);
+   //    fprintf(stdout, "Circle Index Count = %d\n", data->circle_data.circle_index_count);
+   //    fprintf(stdout, "Line Index Count = %d\n\n", data->line_data.line_vertex_count);
+   // #endif
+
    if (data->triangle_data.triangle_index_count)
    {
       const unsigned int triangle_data_size = (unsigned int)((uint8_t*)data->triangle_data.vertex_data_ptr - (uint8_t*)data->triangle_data.vertex_data_base);
@@ -61,24 +70,24 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
 
       vertex_buffer_buffer_sub_data(&data->textured_quad_data.vbo, (float*)data->textured_quad_data.vertex_data_base, textured_quad_data_size);
 
+      shader_program_use(&data->textured_quad_shader);
+
       for (unsigned int i = 0; i < data->textures_index; i++)
       {
          const struct texture_2d_t* texture = data->textures[i];
 
-         // #ifdef DEBUG
-         //    fprintf(stdout, "Binding texture with texture_id = %u to slot %u\n", texture->texture_id, i);
-         // #endif
+         #ifdef DEBUG
+            fprintf(stdout, "Binding texture with texture_id = %u to slot %u\n", texture->texture_id, i);
+         #endif
 
          texture_2d_bind(texture, i);
       }
-
-      shader_program_use(&data->textured_quad_shader);
 
       shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "model", &renderer->render_data.model_matrix);
       shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "view", &renderer->camera.base.view_matrix);
       shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "projection", &renderer->camera.base.projection_matrix);
 
-      char texture_uniform_name_buf[15];
+      char texture_uniform_name_buf[16];
 
       for (unsigned int i = 0; i < _RENDERER_2D_MAX_TEXTURES; i++)
       {
@@ -160,7 +169,7 @@ static void renderer_2d_next_batch(struct renderer_2d_t* renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads     = 1000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads     = 10000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices  = max_quads * 4;
 static const unsigned int max_indices   = max_quads * 6;
 
@@ -190,6 +199,8 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
    #ifdef DEBUG
       if (error) fprintf(stdout, "Error during line shader init\n");
    #endif
+
+   fmatrix_4x4_init(&data->model_matrix);
 
    renderable_2d_triangle_data_init(&data->triangle_data, max_vertices, &data->triangle_shader);
    renderable_2d_quad_data_init(&data->quad_data, max_vertices, &data->quad_shader);
@@ -227,9 +238,6 @@ void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_wi
 {
    renderer->parent_window = parent_window;
 
-   fmatrix_4x4_init(&renderer->render_data.model_matrix);
-   // renderer->render_data.model_matrix = fmatrix_4x4_transform_scale(&renderer->render_data.model_matrix, primitive_scale_factors);
-
    #ifdef DEBUG
       fprintf(stdout, "Initializing renderer_2d\n");
    #endif
@@ -238,9 +246,10 @@ void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_wi
    renderer->tag = (char*) malloc(tag_length*sizeof(char));    
    strcpy(renderer->tag, tag);
 
-   window_set_context(renderer->parent_window);
-
    render_api_init();
+
+   // font_init();
+   // typeface_init(&(renderer->typeface), "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 10);
 
    // Camera stuff
    const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -253,8 +262,6 @@ void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_wi
    // Batch stuff
    renderer_2d_data_init(&renderer->render_data);
    renderer_2d_set_line_width(renderer, renderer->render_data.line_width);
-
-   window_release_context();
 }
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
@@ -262,6 +269,8 @@ void renderer_2d_cleanup(struct renderer_2d_t* renderer)
    #ifdef DEBUG
         fprintf(stdout, "Cleaning up renderer 2D\n");
    #endif
+
+   typeface_cleanup(&(renderer->typeface));
 
    free(renderer->tag);
    renderer->tag = 0;
@@ -361,17 +370,19 @@ void renderer_2d_draw_textured_quad(struct renderer_2d_t* renderer, const fmatri
    if (data->quad_data.quad_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
 
-   float texture_index = 0.0f;
+   float texture_index = -1.0f;
    for (unsigned int i = 0; i < data->textures_index; i++)
    {
-      if ( ((data->textures[i])->texture_id) == (texture->texture_id) )
+      const unsigned int this_texture_id = (data->textures[i])->texture_id;
+
+      if ( (this_texture_id) == (texture->texture_id) )
       {
          texture_index = (float)i;
          break;
       }
    }
 
-   if (texture_index == 0.0f)
+   if (texture_index < 0)
    {
       if (data->textures_index >= _RENDERER_2D_MAX_TEXTURES)
          renderer_2d_next_batch(renderer);
@@ -415,17 +426,19 @@ void renderer_2d_draw_subtextured_quad(struct renderer_2d_t* renderer, const fma
    if (data->quad_data.quad_index_count >= max_indices)
       renderer_2d_next_batch(renderer);
 
-   float texture_index = 0.0f;
+   float texture_index = -1.0f;
    for (unsigned int i = 0; i < data->textures_index; i++)
    {
-      if ( ((data->textures[i])->texture_id) == (texture->texture_id) )
+      const unsigned int this_texture_id = (data->textures[i])->texture_id;
+
+      if ( (this_texture_id) == (texture->texture_id) )
       {
          texture_index = (float)i;
          break;
       }
    }
 
-   if (texture_index == 0.0f)
+   if (texture_index < 0)
    {
       if (data->textures_index >= _RENDERER_2D_MAX_TEXTURES)
          renderer_2d_next_batch(renderer);
@@ -500,9 +513,9 @@ void renderer_2d_draw_line(struct renderer_2d_t* renderer, const fvector3 pos_1,
 
 void renderer_2d_draw_string(struct renderer_2d_t* renderer, const struct typeface_t* typeface, const fvector3 start_position, const char* draw_string)
 {
-   // #ifdef DEBUG
-   //    fprintf(stdout, "Renderer 2D drawing string\n");
-   // #endif
+   #ifdef DEBUG
+      fprintf(stdout, "Renderer 2D drawing string\n");
+   #endif
 
    int error;
 

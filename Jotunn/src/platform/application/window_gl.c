@@ -32,8 +32,9 @@ void gl_window_size_callback(GLFWwindow* window, int width, int height)
    #endif
 
    struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
-   metadata->width  = width;
-   metadata->height = height;
+   metadata->width   = width;
+   metadata->height  = height;
+   metadata->resized = 1;
 
    struct event_window_resize_t resize_event = 
       (struct event_window_resize_t)
@@ -62,7 +63,7 @@ void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
    metadata->height = height;
 
    // Set the GL viewport to the size of the window
-   glViewport(0, 0, metadata->width, metadata->height);
+   // glViewport(0, 0, metadata->width, metadata->height);
 }
 
 void gl_window_close_callback(GLFWwindow* window)
@@ -219,17 +220,18 @@ uint8_t window_gl_init(struct window_t* window)
    if (!is_glfw_initialized)
    {
       is_glfw_initialized = glfwInit();
-      if (is_glfw_initialized)
-      {
-         glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
+   }
 
-         //Set some GLFW settings such as GL context version, modern core profile for the context, etc.
-         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-         glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
-      }
+   if (is_glfw_initialized)
+   {
+      glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
+
+      //Set some GLFW settings such as GL context version, modern core profile for the context, etc.
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+      glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+      glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+      glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+      glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
    }
 
    // Create window via GLFW
@@ -315,12 +317,25 @@ void window_graphics_cleanup(struct window_t* window)
 
 void window_graphics_set_context(struct window_t* window)
 {
+   #ifdef DEBUG
+      fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
+   #endif
+
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 }
 
 void window_graphics_release_context()
 {
+   #ifdef DEBUG
+      fprintf(stdout, "Releasing Context\n");
+   #endif
+
    glfwMakeContextCurrent(NULL);
+}
+
+void window_graphics_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+   glViewport(x, y, width, height);
 }
 
 void window_graphics_set_background_color(struct window_t* window, const fvector4 color)

@@ -1,12 +1,10 @@
 #pragma once
 
 #include "event.h"
-#include "font.h"
 #include "window.h"
 
 struct application_t
 {
-    struct typeface_t app_typeface;
     //
     char* name;
     //

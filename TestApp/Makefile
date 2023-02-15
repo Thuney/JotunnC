@@ -1,5 +1,5 @@
 C      := -gcc
-CFLAGS := -pedantic-errors -Wall -Wextra
+CFLAGS := -pedantic-errors -Wall -Wextra -g
 
 RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../Jotunn/.build/lib/
 

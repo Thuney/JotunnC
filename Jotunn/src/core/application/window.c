@@ -13,6 +13,7 @@ extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 extern void window_graphics_set_context(struct window_t* window);
 extern void window_graphics_release_context();
+extern void window_graphics_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 extern void window_graphics_set_background_color(struct window_t* window, const fvector4 color);
 
 // Window Callbacks
@@ -56,9 +57,16 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
 
     // window_set_background_color(window, background_color);
 
-    window->function_custom_window_run = 0;
+    if (!error)
+    {
+        window->function_custom_window_run = 0;
 
-    renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0.0f, (float)width, (float)height, 0.0f, -3.0f, 100.0f);
+        window_set_context(window);
+
+        renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0.0f, (float)width, (float)height, 0.0f, -3.0f, 100.0f);
+
+        window_release_context();
+    }
 
     return error;
 }
@@ -76,6 +84,13 @@ uint8_t window_run(struct window_t* window)
     // #endif
 
     window_set_context(window);
+
+    if (window->metadata.resized)
+    {
+        window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
+        camera_set_projection_orthographic(&window->renderer_2d.camera, 0.0f, (float)window->metadata.width, (float)window->metadata.height, 0.0f, -3.0f, 100.0f);
+        window->metadata.resized = 0;
+    }
     
     renderer_2d_begin_scene(&window->renderer_2d);
 
@@ -113,11 +128,14 @@ void window_release_context()
     window_graphics_release_context();
 }
 
+void window_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height)
+{
+    window_graphics_set_viewport(x, y, width, height);
+}
+
 void window_set_background_color(struct window_t* window, const fvector4 color)
 {
-    window_set_context(window);
     window_graphics_set_background_color(window, color);
-    window_release_context();
 }
 
 void window_set_function_custom_window_run(struct window_t* window, void (*function_custom_window_run)(struct window_t* window))
