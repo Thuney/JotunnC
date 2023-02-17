@@ -52,23 +52,20 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
         if (error) fprintf(stdout, "Error during window_graphics_init\n");
     #endif
 
-    // fvector4 background_color;
-    // fvector4_set(&background_color, 1.0f, 0.1f, 0.1f, 1.0f);
-
-    // window_set_background_color(window, background_color);
-
     if (!error)
     {
         window->function_custom_window_run = 0;
-
-        window_set_context(window);
-
-        renderer_2d_init(&window->renderer_2d, window, "renderer_2d", 0.0f, (float)width, (float)height, 0.0f, -3.0f, 100.0f);
-
-        window_release_context();
+        window->camera   = 0;
+        window->renderer = 0;
     }
 
     return error;
+}
+
+void window_set_renderer(struct window_t* window, struct renderer_base_t* renderer, struct camera_base_t* camera)
+{
+    window->renderer = renderer;
+    window->camera   = camera;
 }
 
 // ---------------------------
@@ -88,18 +85,18 @@ uint8_t window_run(struct window_t* window)
     if (window->metadata.resized)
     {
         window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
-        camera_set_projection_orthographic(&window->renderer_2d.camera, 0.0f, (float)window->metadata.width, (float)window->metadata.height, 0.0f, -3.0f, 100.0f);
+        window->camera->camera_reproject(window->camera, (float)window->metadata.width, (float)window->metadata.height, window->camera->near_plane, window->camera->far_plane);
         window->metadata.resized = 0;
     }
     
-    renderer_2d_begin_scene(&window->renderer_2d);
+    renderer_base_begin_scene(window->renderer);
 
     if (window->function_custom_window_run)
     {
         window->function_custom_window_run(window);
     }
 
-    renderer_2d_end_scene(&window->renderer_2d);
+    renderer_base_end_scene(window->renderer);
 
     window_graphics_run(window);
 
@@ -112,8 +109,6 @@ void window_cleanup(struct window_t* window)
 {
     free(window->metadata.tag);
     window->metadata.tag = 0;
-
-    renderer_2d_cleanup(&window->renderer_2d);
 
     window_graphics_cleanup(window);
 }

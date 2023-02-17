@@ -317,18 +317,18 @@ void window_graphics_cleanup(struct window_t* window)
 
 void window_graphics_set_context(struct window_t* window)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
+   // #endif
 
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 }
 
 void window_graphics_release_context()
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Releasing Context\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Releasing Context\n");
+   // #endif
 
    glfwMakeContextCurrent(NULL);
 }

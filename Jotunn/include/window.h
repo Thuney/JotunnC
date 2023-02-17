@@ -3,6 +3,8 @@
 #include "renderer_2d.h"
 
 struct application_t;
+struct camera_base_t;
+struct renderer_base_t;
 struct window_t;
 
 struct window_data_t
@@ -34,10 +36,12 @@ struct window_t
     //
     void (*function_custom_window_run)(struct window_t* window);
     //
-    struct renderer_2d_t renderer_2d;
+    struct camera_base_t* camera;
+    struct renderer_base_t* renderer;
 };
 
 uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
+void window_set_renderer(struct window_t* window, struct renderer_base_t* renderer, struct camera_base_t* camera);
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);

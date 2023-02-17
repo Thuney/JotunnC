@@ -4,6 +4,25 @@
    #include <stdio.h>
 #endif
 
+static void camera_reproject(struct camera_base_t* camera, float window_width, float window_height, float near_plane, float far_plane)
+{
+   switch (camera->projection_type)
+   {
+      case CAMERA_ORTHOGRAPHIC:
+      {
+         struct camera_ortho_t* camera_ortho = (struct camera_ortho_t*)camera;
+         camera_set_projection_orthographic(camera_ortho, 0.0f, window_width, window_height, 0.0f, near_plane, far_plane);
+      }
+      break;
+      case CAMERA_PERSPECTIVE:
+      {
+         struct camera_perspective_t* camera_perspective = (struct camera_perspective_t*)camera;
+         camera_set_projection_perspective(camera_perspective, (window_width/window_height), near_plane, far_plane);
+      }
+      break;
+   }
+}
+
 static fmatrix_4x4 position_as_matrix(const fvector3 position)
 {
    fmatrix_4x4 position_as_matrix;
@@ -61,6 +80,8 @@ static void camera_init(struct camera_base_t* camera, const fvector3 position, c
 
    camera->view_matrix = calculate_look_at_matrix(position, target, up);
    camera_recalculate_view_projection_matrix(camera);
+
+   camera->camera_reproject = &camera_reproject;
 }
 
 void camera_init_orthographic(struct camera_ortho_t* camera, const fvector3 position, const fvector3 up, const fvector3 front)
@@ -77,13 +98,13 @@ void camera_set_projection_orthographic(struct camera_ortho_t* ortho_camera, con
 {
    struct camera_base_t* camera_base = &ortho_camera->base;
 
+   camera_base->near_plane = near_plane;
+   camera_base->far_plane  = far_plane;
+
    ortho_camera->left       = left;
    ortho_camera->right      = right;
    ortho_camera->top        = top;
    ortho_camera->bottom     = bottom;
-
-   ortho_camera->near_plane = near_plane;
-   ortho_camera->far_plane  = far_plane;
 
    camera_base->projection_type = CAMERA_ORTHOGRAPHIC;
 
@@ -107,9 +128,10 @@ void camera_set_projection_perspective(struct camera_perspective_t* perspective_
 {
    struct camera_base_t* camera_base = &perspective_camera->base;
 
+   camera_base->near_plane = near_plane;
+   camera_base->far_plane  = far_plane;
+
    perspective_camera->aspect_ratio = aspect_ratio;
-   perspective_camera->near_plane   = near_plane;
-   perspective_camera->far_plane    = far_plane;
 
    camera_base->projection_type = CAMERA_PERSPECTIVE;
 

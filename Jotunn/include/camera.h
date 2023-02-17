@@ -21,28 +21,28 @@ struct camera_base_t
    fvector3 position;
    fvector3 up;
    fvector3 front;
+
+   float near_plane;
+   float far_plane;
+   //
+   void (*camera_reproject)(struct camera_base_t* camera, float window_width, float window_height, float near_plane, float far_plane);
 };
 
 struct camera_ortho_t
 {
+   struct camera_base_t base;
+   //
    float left;
    float right;
    float top;
    float bottom;
-
-   float near_plane;
-   float far_plane;
-
-   struct camera_base_t base;
 };
 
 struct camera_perspective_t
 {
-   float aspect_ratio;
-   float near_plane;
-   float far_plane;
-
    struct camera_base_t base;
+   //
+   float aspect_ratio;
 };
 
 void camera_init_orthographic(struct camera_ortho_t* camera, const fvector3 position, const fvector3 up, const fvector3 front);

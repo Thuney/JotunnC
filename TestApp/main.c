@@ -2,22 +2,29 @@
 #include <stdio.h>
 
 #include "application.h"
+#include "camera.h"
 #include "fvector.h"
+#include "renderer_2d.h"
 
 #include "texture.h"
 
 static struct application_t jotunn_app;
 static struct window_t window1, window2;
 
+static struct camera_ortho_t window1_camera_ortho;
+static struct renderer_2d_t window1_renderer_2d;
+
+static struct camera_ortho_t window2_camera_ortho;
+static struct renderer_2d_t window2_renderer_2d;
+
 static struct texture_2d_t aaron_shakespeare_texture;
+
 
 void window1_run(struct window_t* window)
 {
     // #ifdef DEBUG
     //     fprintf(stdout, "Running Window 1 Custom Function\n");
     // #endif
-
-    struct renderer_2d_t* renderer = &window->renderer_2d;
 
     // Grid of shapes (quad - triangle - circle)
 
@@ -56,11 +63,11 @@ void window1_run(struct window_t* window)
             const fvector4 circle_color   = { 0.0f, val2,  val, 1.0f };
 
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
-            renderer_2d_draw_quad(renderer, &transform_matrix, quad_color);
+            renderer_2d_draw_quad(&window1_renderer_2d, &transform_matrix, quad_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
-            renderer_2d_draw_triangle(renderer, &transform_matrix, triangle_color);
+            renderer_2d_draw_triangle(&window1_renderer_2d, &transform_matrix, triangle_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, circle_position);
-            renderer_2d_draw_circle(renderer, &transform_matrix, circle_color);
+            renderer_2d_draw_circle(&window1_renderer_2d, &transform_matrix, circle_color);
         }
     }
 
@@ -77,7 +84,7 @@ void window1_run(struct window_t* window)
     textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
     textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
 
-    renderer_2d_draw_textured_quad(renderer, &textured_quad_transform_matrix, &aaron_shakespeare_texture);
+    renderer_2d_draw_textured_quad(&window1_renderer_2d, &textured_quad_transform_matrix, &aaron_shakespeare_texture);
 
     // Line
 
@@ -85,21 +92,19 @@ void window1_run(struct window_t* window)
     const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
     const fvector4 line_color      = { 255.0f, 255.0f, 0.0f, 1.0f };
 
-    renderer_2d_draw_line(renderer, line_position_1, line_position_2, line_color);
+    renderer_2d_draw_line(&window1_renderer_2d, line_position_1, line_position_2, line_color);
 
-    // // String of text
+    // String of text
     const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
     
     // renderer_2d_draw_string(renderer, &window->renderer_2d.typeface, text_start_position, "A");
-    renderer_2d_draw_string(renderer, &window->renderer_2d.typeface, text_start_position, "This Is Some Sample Text With Spaces");
+    renderer_2d_draw_string(&window1_renderer_2d, &window1_renderer_2d.typeface, text_start_position, "This Is Some Sample Text With Spaces");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
 void window2_run(struct window_t* window)
 {
-    struct renderer_2d_t* renderer = &window->renderer_2d;
-
     // Grid of shapes (triangle - circle)
 
     const float spacing = 50.0f;
@@ -141,24 +146,58 @@ void window2_run(struct window_t* window)
             // transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
             // renderer_2d_draw_quad(renderer, &transform_matrix, quad_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
-            renderer_2d_draw_triangle(renderer, &transform_matrix, triangle_color);
+            renderer_2d_draw_triangle(&window2_renderer_2d, &transform_matrix, triangle_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, circle_position);
-            renderer_2d_draw_circle(renderer, &transform_matrix, circle_color);
+            renderer_2d_draw_circle(&window2_renderer_2d, &transform_matrix, circle_color);
         }
     }
+
+    // Line
+
+    const fvector3 line_position_1 = { 1000.0f, 400.0f, 0.0f };
+    const fvector3 line_position_2 = { 850.0f, 100.0f, 0.0f };
+    const fvector4 line_color      = { 127.0f, 33.0f, 127.0f, 1.0f };
+
+    renderer_2d_draw_line(&window2_renderer_2d, line_position_1, line_position_2, line_color);
+
+    // String of text
+    const fvector3 text_start_position = { 100.0f, 900.0f, 0.0f };
+    
+    renderer_2d_draw_string(&window2_renderer_2d, &(window1_renderer_2d.typeface), text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
 uint8_t init_window1(struct application_t* app, struct window_t* window1)
 {
     uint8_t error = 0U;
 
-    error |= window_init(window1, 600, 400, "JotunnWindow1", app);
+    const uint32_t width  = 1200;
+    const uint32_t height = 1200;
+
+    error |= window_init(window1, width, height, "JotunnWindow1", app);
+    window_set_renderer(window1, (struct renderer_base_t*)&window1_renderer_2d, (struct camera_base_t*)&window1_camera_ortho);
 
     fvector4 window1_background_color;
     fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
+    // Camera stuff
+    const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
+    const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
+    const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
+
+    const float ortho_left   = 0.0f; 
+    const float ortho_right  = (float)width;
+    const float ortho_top    = (float)height;
+    const float ortho_bottom = 0.0f;
+    const float ortho_near_plane = -3.0f;
+    const float ortho_far_plane  = 100.0f;
+
     window_set_context(window1);
+
+    camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
+    camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
+
+    renderer_2d_init(&window1_renderer_2d, window1->camera, window1, "renderer_2d");
 
     texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
 
@@ -173,13 +212,34 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
 {
     uint8_t error = 0U;
 
-    error |= window_init(window2, 200, 200, "JotunnWindow2", app);
+    const uint32_t width  = 1000;
+    const uint32_t height = 1000;
+
+    error |= window_init(window2, width, height, "JotunnWindow2", app);
+    window_set_renderer(window2, (struct renderer_base_t*)&window2_renderer_2d, (struct camera_base_t*)&window2_camera_ortho);
 
     fvector4 window2_background_color;
     fvector4_set(&window2_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
     // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
+    // Camera stuff
+    const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
+    const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
+    const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
+
+    const float ortho_left   = 0.0f; 
+    const float ortho_right  = (float)width;
+    const float ortho_top    = (float)height;
+    const float ortho_bottom = 0.0f;
+    const float ortho_near_plane = -3.0f;
+    const float ortho_far_plane  = 100.0f;
+
     window_set_context(window2);
+
+    camera_init_orthographic(&window2_camera_ortho, camera_position, camera_up, camera_front);
+    camera_set_projection_orthographic(&window2_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
+
+    renderer_2d_init(&window2_renderer_2d, window2->camera, window2, "renderer_2d");
 
     window_set_background_color(window2, window2_background_color);
 
@@ -198,10 +258,10 @@ int main(int argc, char** argv)
 
     uint8_t error = 0U;
 
+    error |= application_init(app_ptr, "JotunnTestApp", max_windows);
+
     init_window1(app_ptr, window1_ptr);
     init_window2(app_ptr, window2_ptr);
-
-    error |= application_init(app_ptr, "JotunnTestApp", max_windows);
 
     window_set_function_custom_window_run(window1_ptr, &window1_run);
     window_set_function_custom_window_run(window2_ptr, &window2_run);
@@ -224,6 +284,11 @@ int main(int argc, char** argv)
 
         application_stop(app_ptr);
         application_cleanup(app_ptr);
+
+        renderer_2d_cleanup(&window1_renderer_2d);
+        renderer_2d_cleanup(&window2_renderer_2d);
+
+        texture_2d_cleanup(&aaron_shakespeare_texture);
     }
 #ifdef DEBUG
     else

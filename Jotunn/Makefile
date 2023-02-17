@@ -23,12 +23,13 @@ INCLUDE  := -I./include -I./res $(FREETYPE2_INCLUDE)
 
 HDRS := \
 ./include/application.h               \
-./include/event.h               		  \
+./include/event.h                     \
 ./include/window.h                    \
 \
 ./include/util.h                      \
 \
 ./include/render_api.h                \
+./include/renderer.h                  \
 ./include/renderer_2d.h               \
 ./include/renderable_2d_primitive.h   \
 ./include/camera.h                    \
@@ -52,6 +53,7 @@ CORE_SRC := \
 ./src/core/utils/util.c                          \
 \
 ./src/core/graphics/api/render_api.c             \
+./src/core/graphics/renderer.c                   \
 ./src/core/graphics/renderer_2d.c                \
 ./src/core/graphics/renderable_2d_primitive.c    \
 ./src/core/graphics/camera.c                     \

@@ -137,7 +137,6 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
                             fprintf(stdout, "Resizing window - %s\n", cur_window->metadata.tag);
                         #endif
 
-                        // camera_set_projection_orthographic(&cur_window->renderer_2d.camera, 0.0f, (float)new_width, (float)new_height, 0.0f, -1.0f, 100.0f);
                         cur_window->metadata.width   = new_width;
                         cur_window->metadata.height  = new_height;
                         cur_window->metadata.resized = 1;
@@ -227,12 +226,6 @@ uint8_t application_add_window(struct application_t* app, struct window_t new_wi
         *window_ptr = new_window;
         app->current_window = window_ptr;
         app->num_windows++;
-
-        window_set_context(window_ptr);
-
-        typeface_init(&(window_ptr->renderer_2d.typeface), "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
-
-        window_release_context();
     }
     else
     {

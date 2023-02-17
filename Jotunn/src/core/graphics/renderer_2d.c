@@ -9,9 +9,11 @@
 
 #include "window.h"
 
-void renderer_2d_flush(struct renderer_2d_t* renderer)
+static void renderer_2d_flush(struct renderer_2d_t* renderer)
 {
    struct renderer_2d_data_t* data = &renderer->render_data;
+
+   struct camera_ortho_t* camera_ortho = (struct camera_ortho_t*)renderer->base.camera;
 
    // #ifdef DEBUG
    //    fprintf(stdout, "Flushing renderer - \n");
@@ -35,8 +37,8 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
       shader_program_use(&data->triangle_shader);
 
       shader_program_set_uniform_fmat4x4(&data->triangle_shader, "model", &renderer->render_data.model_matrix);
-      shader_program_set_uniform_fmat4x4(&data->triangle_shader, "view", &renderer->camera.base.view_matrix);
-      shader_program_set_uniform_fmat4x4(&data->triangle_shader, "projection", &renderer->camera.base.projection_matrix);
+      shader_program_set_uniform_fmat4x4(&data->triangle_shader, "view", &renderer->base.camera->view_matrix);
+      shader_program_set_uniform_fmat4x4(&data->triangle_shader, "projection", &renderer->base.camera->projection_matrix);
 
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->triangle_data.triangle_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
@@ -54,8 +56,8 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
       shader_program_use(&data->quad_shader);
 
       shader_program_set_uniform_fmat4x4(&data->quad_shader, "model", &renderer->render_data.model_matrix);
-      shader_program_set_uniform_fmat4x4(&data->quad_shader, "view", &renderer->camera.base.view_matrix);
-      shader_program_set_uniform_fmat4x4(&data->quad_shader, "projection", &renderer->camera.base.projection_matrix);
+      shader_program_set_uniform_fmat4x4(&data->quad_shader, "view", &renderer->base.camera->view_matrix);
+      shader_program_set_uniform_fmat4x4(&data->quad_shader, "projection", &renderer->base.camera->projection_matrix);
 
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->quad_data.quad_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
@@ -76,16 +78,16 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
       {
          const struct texture_2d_t* texture = data->textures[i];
 
-         #ifdef DEBUG
-            fprintf(stdout, "Binding texture with texture_id = %u to slot %u\n", texture->texture_id, i);
-         #endif
+         // #ifdef DEBUG
+         //    fprintf(stdout, "Binding texture with texture_id = %u to slot %u\n", texture->texture_id, i);
+         // #endif
 
          texture_2d_bind(texture, i);
       }
 
       shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "model", &renderer->render_data.model_matrix);
-      shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "view", &renderer->camera.base.view_matrix);
-      shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "projection", &renderer->camera.base.projection_matrix);
+      shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "view", &renderer->base.camera->view_matrix);
+      shader_program_set_uniform_fmat4x4(&data->textured_quad_shader, "projection", &renderer->base.camera->projection_matrix);
 
       char texture_uniform_name_buf[16];
 
@@ -111,8 +113,8 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
       shader_program_use(&data->circle_shader);
 
       shader_program_set_uniform_fmat4x4(&data->circle_shader, "model", &renderer->render_data.model_matrix);
-      shader_program_set_uniform_fmat4x4(&data->circle_shader, "view", &renderer->camera.base.view_matrix);
-      shader_program_set_uniform_fmat4x4(&data->circle_shader, "projection", &renderer->camera.base.projection_matrix);
+      shader_program_set_uniform_fmat4x4(&data->circle_shader, "view", &renderer->base.camera->view_matrix);
+      shader_program_set_uniform_fmat4x4(&data->circle_shader, "projection", &renderer->base.camera->projection_matrix);
 
       render_api_draw_elements(DRAW_TYPE_TRIANGLES, data->circle_data.circle_index_count, ELEMENT_UNSIGNED_INT, 0);
    }
@@ -129,8 +131,8 @@ void renderer_2d_flush(struct renderer_2d_t* renderer)
       shader_program_use(&data->line_shader);
 
       shader_program_set_uniform_fmat4x4(&data->line_shader, "model", &renderer->render_data.model_matrix);
-      shader_program_set_uniform_fmat4x4(&data->line_shader, "view", &renderer->camera.base.view_matrix);
-      shader_program_set_uniform_fmat4x4(&data->line_shader, "projection", &renderer->camera.base.projection_matrix);
+      shader_program_set_uniform_fmat4x4(&data->line_shader, "view", &renderer->base.camera->view_matrix);
+      shader_program_set_uniform_fmat4x4(&data->line_shader, "projection", &renderer->base.camera->projection_matrix);
 
       render_api_set_line_width(data->line_width);
       render_api_draw_lines(data->line_data.line_vertex_count);
@@ -215,9 +217,9 @@ static void renderer_2d_data_init(struct renderer_2d_data_t* data)
 
 static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D data cleanup\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D data cleanup\n");
+   // #endif
 
    renderable_2d_triangle_data_cleanup(&data->triangle_data);
    renderable_2d_quad_data_cleanup(&data->quad_data);
@@ -234,30 +236,20 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t* data)
    data->line_width = -1.0f;
 }
 
-void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_window, const char* tag, const float left, const float right, const float top, const float bottom, const float near_plane, const float far_plane)
+void renderer_2d_init(struct renderer_2d_t* renderer, struct camera_base_t* camera, struct window_t* parent_window, const char* tag)
 {
-   renderer->parent_window = parent_window;
+   renderer_base_init(&renderer->base, camera, parent_window, tag);
+
+   renderer->base.renderer_begin_scene = &renderer_2d_begin_scene;
+   renderer->base.renderer_end_scene   = &renderer_2d_end_scene;
 
    #ifdef DEBUG
       fprintf(stdout, "Initializing renderer_2d\n");
    #endif
 
-   int tag_length = strlen(tag);
-   renderer->tag = (char*) malloc(tag_length*sizeof(char));    
-   strcpy(renderer->tag, tag);
-
    render_api_init();
 
-   // font_init();
-   // typeface_init(&(renderer->typeface), "/usr/share/fonts/noto/NotoSerif-Bold.ttf", 10);
-
-   // Camera stuff
-   const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
-   const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
-   const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
-
-   camera_init_orthographic(&(renderer->camera), camera_position, camera_up, camera_front);
-   camera_set_projection_orthographic(&(renderer->camera), left, right, top, bottom, near_plane, far_plane);
+   typeface_init(&renderer->typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
 
    // Batch stuff
    renderer_2d_data_init(&renderer->render_data);
@@ -266,38 +258,37 @@ void renderer_2d_init(struct renderer_2d_t* renderer, struct window_t* parent_wi
 
 void renderer_2d_cleanup(struct renderer_2d_t* renderer)
 {
-   #ifdef DEBUG
-        fprintf(stdout, "Cleaning up renderer 2D\n");
-   #endif
+   // #ifdef DEBUG
+   //      fprintf(stdout, "Cleaning up renderer 2D\n");
+   // #endif
 
    typeface_cleanup(&(renderer->typeface));
-
-   free(renderer->tag);
-   renderer->tag = 0;
 
    vertex_array_unbind();
 
    renderer_2d_data_cleanup(&renderer->render_data);
 }
 
-void renderer_2d_begin_scene(struct renderer_2d_t* renderer)
+void renderer_2d_begin_scene(void* renderer)
 {
+   struct renderer_2d_t* renderer_2d = (struct renderer_2d_t*)renderer;
    // #ifdef DEBUG
    //    fprintf(stdout, "Renderer 2D beginning scene\n");
    // #endif
 
    render_api_clear();
 
-   renderer_2d_start_batch(renderer);
+   renderer_2d_start_batch(renderer_2d);
 }
 
-void renderer_2d_end_scene(struct renderer_2d_t* renderer)
+void renderer_2d_end_scene(void* renderer)
 {
+   struct renderer_2d_t* renderer_2d = (struct renderer_2d_t*)renderer;
    // #ifdef DEBUG
    //    fprintf(stdout, "Renderer 2D ending scene\n");
    // #endif
 
-   renderer_2d_flush(renderer);
+   renderer_2d_flush(renderer_2d);
 
    vertex_array_unbind();
 }
@@ -513,9 +504,9 @@ void renderer_2d_draw_line(struct renderer_2d_t* renderer, const fvector3 pos_1,
 
 void renderer_2d_draw_string(struct renderer_2d_t* renderer, const struct typeface_t* typeface, const fvector3 start_position, const char* draw_string)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Renderer 2D drawing string\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing string\n");
+   // #endif
 
    int error;
 
