@@ -19,6 +19,7 @@ static struct renderer_2d_t window2_renderer_2d;
 
 static struct texture_2d_t aaron_shakespeare_texture;
 
+//
 
 void window1_run(struct window_t* window)
 {
@@ -170,8 +171,8 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 {
     uint8_t error = 0U;
 
-    const uint32_t width  = 1200;
-    const uint32_t height = 1200;
+    const uint32_t width  = 600;
+    const uint32_t height = 400;
 
     error |= window_init(window1, width, height, "JotunnWindow1", app);
     window_set_renderer(window1, (struct renderer_base_t*)&window1_renderer_2d, (struct camera_base_t*)&window1_camera_ortho);
@@ -212,8 +213,8 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
 {
     uint8_t error = 0U;
 
-    const uint32_t width  = 1000;
-    const uint32_t height = 1000;
+    const uint32_t width  = 200;
+    const uint32_t height = 200;
 
     error |= window_init(window2, width, height, "JotunnWindow2", app);
     window_set_renderer(window2, (struct renderer_base_t*)&window2_renderer_2d, (struct camera_base_t*)&window2_camera_ortho);

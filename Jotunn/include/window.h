@@ -34,10 +34,10 @@ struct window_t
     struct window_data_t metadata;
     struct window_context_data_t context_data;
     //
-    void (*function_custom_window_run)(struct window_t* window);
-    //
     struct camera_base_t* camera;
     struct renderer_base_t* renderer;
+    //
+    void (*function_custom_window_run)(struct window_t* window);
 };
 
 uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
