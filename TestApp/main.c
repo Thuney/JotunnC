@@ -1,5 +1,9 @@
 #include <memory.h>
 #include <stdio.h>
+#ifdef DEBUG
+    #include <time.h>
+#endif
+// #include <unistd.h>
 
 #include "application.h"
 #include "camera.h"
@@ -260,15 +264,14 @@ int main(int argc, char** argv)
     uint8_t error = 0U;
 
     error |= application_init(app_ptr, "JotunnTestApp", max_windows);
-
     init_window1(app_ptr, window1_ptr);
     init_window2(app_ptr, window2_ptr);
 
     window_set_function_custom_window_run(window1_ptr, &window1_run);
     window_set_function_custom_window_run(window2_ptr, &window2_run);
 
-    error |= application_add_window(app_ptr, window1);
-    error |= application_add_window(app_ptr, window2);
+    error |= application_add_window(app_ptr, window1_ptr);
+    error |= application_add_window(app_ptr, window2_ptr);
 
     if (!error)
     {

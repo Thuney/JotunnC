@@ -18,8 +18,6 @@ struct window_data_t
     uint8_t signaled_close;
     uint8_t visible;
     //
-    double window_time_sec;
-    //
     struct application_t* parent_application;
     void (*function_event_notify)(struct application_t* application, struct event_base_t* event);
 };
@@ -38,10 +36,14 @@ struct window_t
     struct renderer_base_t* renderer;
     //
     void (*function_custom_window_run)(struct window_t* window);
+    //
+    void (*function_event_react)(struct window_t* window, struct event_base_t* event);
 };
 
 uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
 void window_set_renderer(struct window_t* window, struct renderer_base_t* renderer, struct camera_base_t* camera);
+
+void window_bind_custom_events(struct window_t* window, void (*custom_event_function)(struct window_t*, struct event_base_t*));
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);

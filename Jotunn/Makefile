@@ -24,6 +24,7 @@ INCLUDE  := -I./include -I./res $(FREETYPE2_INCLUDE)
 HDRS := \
 ./include/application.h               \
 ./include/event.h                     \
+./include/timestep.h                  \
 ./include/window.h                    \
 \
 ./include/util.h                      \
@@ -48,6 +49,7 @@ HDRS := \
 # Platform independent application sources
 CORE_SRC := \
 ./src/core/application/application.c             \
+./src/core/application/timestep.c                \
 ./src/core/application/window.c                  \
 \
 ./src/core/utils/util.c                          \

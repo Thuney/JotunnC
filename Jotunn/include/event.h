@@ -65,10 +65,11 @@ struct event_window_focus_t
 
 // App events
 
-// struct event_app_tick_t
-// {
-//    struct event_base_t base;
-// };
+struct event_app_tick_t
+{
+   struct event_base_t base;
+   float delta_time_seconds;
+};
 
 // struct event_app_update_t
 // {

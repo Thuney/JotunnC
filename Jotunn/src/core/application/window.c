@@ -9,6 +9,7 @@
 #include <string.h>
 
 extern uint8_t window_graphics_init(struct window_t* window);
+extern void window_graphics_poll_events(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 extern void window_graphics_set_context(struct window_t* window);
@@ -55,6 +56,7 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
     if (!error)
     {
         window->function_custom_window_run = 0;
+        window->function_event_react = 0;
         window->camera   = 0;
         window->renderer = 0;
     }
@@ -68,6 +70,11 @@ void window_set_renderer(struct window_t* window, struct renderer_base_t* render
     window->camera   = camera;
 }
 
+void window_bind_custom_events(struct window_t* window, void (*custom_event_function)(struct window_t*, struct event_base_t*))
+{
+    window->function_event_react = custom_event_function;
+}
+
 // ---------------------------
 // ---------------------------
 // ---------------------------
@@ -79,6 +86,8 @@ uint8_t window_run(struct window_t* window)
     // #ifdef DEBUG
     //     fprintf(stdout, "Running window\n");
     // #endif
+
+    window_graphics_poll_events(window);
 
     window_set_context(window);
 

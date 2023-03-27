@@ -14,6 +14,11 @@ uint8_t window_graphics_init(struct window_t* window)
    return 1;
 }
 
+void window_graphics_poll_events(struct window_t* window)
+{
+   return;
+}
+
 void window_graphics_run(struct window_t* window)
 {
    return;

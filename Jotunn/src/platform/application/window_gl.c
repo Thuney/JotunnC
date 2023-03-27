@@ -25,7 +25,7 @@ static uint8_t is_glew_initialized = 0;
  * 
  **************************************************/
 
-void gl_window_size_callback(GLFWwindow* window, int width, int height)
+static void gl_window_size_callback(GLFWwindow* window, int width, int height)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Window Resize - W: %d H: %d\n", width, height);
@@ -52,7 +52,7 @@ void gl_window_size_callback(GLFWwindow* window, int width, int height)
    metadata->function_event_notify(metadata->parent_application, &(resize_event.base));
 }
 
-void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
+static void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Framebuffer Resize - W: %d H: %d\n", width, height);
@@ -66,7 +66,7 @@ void gl_framebuffer_size_callback(GLFWwindow* window, int width, int height)
    // glViewport(0, 0, metadata->width, metadata->height);
 }
 
-void gl_window_close_callback(GLFWwindow* window)
+static void gl_window_close_callback(GLFWwindow* window)
 {
    // #ifdef DEBUG
    //    fprintf(stdout, "Event - Window Close\n");
@@ -90,28 +90,28 @@ void gl_window_close_callback(GLFWwindow* window)
    metadata->function_event_notify(metadata->parent_application, &(window_close_event.base));
 }
 
-void gl_window_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+static void gl_window_key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Key - Key: %c Scancode: %d Action: %d Mods: %d\n", key, scancode, action, mods);
    #endif
 }
 
-void gl_window_char_callback(GLFWwindow* window, unsigned int codepoint)
+static void gl_window_char_callback(GLFWwindow* window, unsigned int codepoint)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
    #endif
 }
 
-void gl_window_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+static void gl_window_mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Mouse Button - Button %d Action %d Mods %d\n", button, action, mods);
    #endif
 }
 
-void gl_window_scroll_callback(GLFWwindow* window, double x_offset, double y_offset)
+static void gl_window_scroll_callback(GLFWwindow* window, double x_offset, double y_offset)
 {
    #ifdef DEBUG
       fprintf(stdout, "Event - Scroll Wheel - X: %lf Y: %lf\n", x_offset, y_offset);
@@ -134,7 +134,7 @@ void gl_window_scroll_callback(GLFWwindow* window, double x_offset, double y_off
    metadata->function_event_notify(metadata->parent_application, &(mouse_scrolled_event.base));
 }
 
-void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double y_pos)
+static void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double y_pos)
 {
    // #ifdef DEBUG
    //    fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos, y_pos);
@@ -158,7 +158,7 @@ void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos, double
    metadata->function_event_notify(metadata->parent_application, &(mouse_moved_event.base));
 }
 
-void gl_window_focus_callback(GLFWwindow* window, int focused)
+static void gl_window_focus_callback(GLFWwindow* window, int focused)
 {
    struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
 
@@ -184,7 +184,7 @@ void gl_window_focus_callback(GLFWwindow* window, int focused)
    metadata->function_event_notify(metadata->parent_application, &(window_focus_event.base));
 }
 
-void gl_window_error_callback(int error_code, const char* description)
+static void gl_window_error_callback(int error_code, const char* description)
 {
    #ifdef DEBUG
       fprintf(stdout, "Error Callback - Code: %d, Description: %s\n", error_code, description);
@@ -196,7 +196,7 @@ void gl_window_error_callback(int error_code, const char* description)
  *  Internal GL window functions
  * 
  **************************************************/
-void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
+static void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
 {
    // Window action callback assignment
    glfwSetWindowSizeCallback(glfw_window_ptr,  (GLFWwindowsizefun)&gl_window_size_callback);
@@ -210,7 +210,7 @@ void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
    glfwSetWindowFocusCallback(glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
-uint8_t window_gl_init(struct window_t* window)
+static uint8_t window_gl_init(struct window_t* window)
 {
    #ifdef DEBUG
       fprintf(stdout, "Initializing OpenGL Window\n");
@@ -260,16 +260,20 @@ uint8_t window_gl_init(struct window_t* window)
    return !(is_glfw_initialized && is_glew_initialized);
 }
 
-void window_gl_run(struct window_t* window)
+static void window_gl_poll_events(struct window_t* window)
+{
+   glfwPollEvents();
+}
+
+static void window_gl_run(struct window_t* window)
 {
    GLFWwindow* gl_window_ptr;
    gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
 
-   glfwPollEvents();
    glfwSwapBuffers(gl_window_ptr);
 }
 
-void window_gl_cleanup(struct window_t* window)
+static void window_gl_cleanup(struct window_t* window)
 {
    #ifdef DEBUG
       fprintf(stdout, "Cleaning up OpenGL Window\n");
@@ -303,6 +307,11 @@ uint8_t window_graphics_init(struct window_t* window)
    #endif
 
    return window_gl_init(window);
+}
+
+void window_graphics_poll_events(struct window_t* window)
+{
+   window_gl_poll_events(window);
 }
 
 void window_graphics_run(struct window_t* window)
