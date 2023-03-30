@@ -61,10 +61,10 @@ void application_run(struct application_t* app)
         };
         application_on_event(app, &(app_tick_event.base));
 
-        #ifdef DEBUG
-            fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app->timer.delta_time_seconds);
-            fflush(stdout);
-        #endif
+        // #ifdef DEBUG
+        //     fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app->timer.delta_time_seconds);
+        //     fflush(stdout);
+        // #endif
 
         // Pointer to first window, to be iterated over
         struct window_t** cur_window = app->windows;

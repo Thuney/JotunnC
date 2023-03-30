@@ -109,6 +109,23 @@ static void gl_window_mouse_button_callback(GLFWwindow* window, int button, int 
    #ifdef DEBUG
       fprintf(stdout, "Event - Mouse Button - Button %d Action %d Mods %d\n", button, action, mods);
    #endif
+
+   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+   struct event_mouse_button_t mouse_button_event = 
+      (struct event_mouse_button_t)
+      {
+         .base = (struct event_base_t)
+         {
+            .event_type = EVENT_MOUSE_BUTTON,
+            .handled    = 0
+         },
+         .button = button,
+         .action = action,
+         .mods   = mods
+      };
+
+   metadata->function_event_notify(metadata->parent_application, &(mouse_button_event.base));
 }
 
 static void gl_window_scroll_callback(GLFWwindow* window, double x_offset, double y_offset)

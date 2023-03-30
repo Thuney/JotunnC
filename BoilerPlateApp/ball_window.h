@@ -5,6 +5,8 @@
 #include "fvector.h"
 #include "renderer_2d.h"
 
+#include <stdbool.h>
+
 struct ball_t
 {
     float ball_radius;
@@ -12,6 +14,8 @@ struct ball_t
     fvector2 ball_velocity;
     //
     fvector4 ball_color;
+    //
+    bool held;
 };
 
 struct ball_window_t

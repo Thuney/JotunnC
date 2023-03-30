@@ -2,11 +2,13 @@
 
 struct timestep_t
 {
-    float current_time_seconds;
+    double current_time_seconds;
     // Time from last step
-    float delta_time_seconds;
-    // Underlying clock cycle count
-    clock_t current_clock;
+    double delta_time_seconds;
+    // Underlying time structs
+    struct timespec current_time;
+    struct timespec last_time;
+    struct timespec start_time;
 };
 
 void timestep_init(struct timestep_t* timestep);

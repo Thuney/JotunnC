@@ -16,8 +16,7 @@ enum event_type_t
    EVENT_KEY_RELEASED,
    EVENT_KEY_TYPED,
 
-   EVENT_MOUSE_BUTTON_PRESSED,
-   EVENT_MOUSE_BUTTON_RELEASED,
+   EVENT_MOUSE_BUTTON,
    EVENT_MOUSE_MOVED,
    EVENT_MOUSE_SCROLLED
 };
@@ -103,17 +102,11 @@ struct event_app_tick_t
 
 // Mouse events
 
-// struct event_mouse_button_pressed_t
-// {
-//    struct event_base_t base;
-//    int button, action, mods;
-// };
-
-// struct event_mouse_button_released_t
-// {
-//    struct event_base_t base;
-//    int button, action, mods;
-// };
+struct event_mouse_button_t
+{
+   struct event_base_t base;
+   int button, action, mods;
+};
 
 struct event_mouse_moved_t
 {

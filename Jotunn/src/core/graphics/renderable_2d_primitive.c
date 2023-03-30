@@ -95,7 +95,7 @@ static void gen_circle_2d_position_data()
 
    unsigned int v;
 
-   const fvector2 offset = { 1.0f, 1.0f };
+   const fvector2 offset = { 0.0f, 0.0f };
 
    float x, y, angle_radians;
 

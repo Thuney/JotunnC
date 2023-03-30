@@ -88,6 +88,9 @@ static void opengl_render_api_init()
    glEnable(GL_DEPTH_TEST);
 
    glEnable(GL_LINE_SMOOTH);
+
+   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)

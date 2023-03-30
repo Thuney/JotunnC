@@ -1,6 +1,8 @@
 #include "ball_window.h"
 
+#include <math.h>
 #include <memory.h>
+#include <stdio.h>
 
 static void ball_init(struct ball_t* ball)
 {
@@ -8,7 +10,7 @@ static void ball_init(struct ball_t* ball)
 
     ball->ball_radius   = 20.0f;
     ball->ball_position = (fvector2) {200.0f, 200.0f};
-    ball->ball_velocity = (fvector2) {400.0f, 600.0f};
+    ball->ball_velocity = (fvector2) {0.0f, 0.0f};
 }
 
 uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t* ball_window)
@@ -80,10 +82,34 @@ static void ball_update(struct ball_t* ball, const float delta_time_seconds, con
     ball->ball_position.comp.y = new_y;
 }
 
+static bool mouse_intersects_ball(const fvector2 mouse_pos, struct ball_t* ball, fvector2* mouse_diff)
+{
+    fvector2 ball_center = (fvector2) { (ball->ball_position.comp.x),  (ball->ball_position.comp.y)};
+
+    #ifdef DEBUG
+        fprintf(stdout, "Checking intersection at Ball Center: x = %f, y = %f\n", ball_center.comp.x, ball_center.comp.y);
+    #endif
+
+    float diff_x = (mouse_pos.comp.x - ball_center.comp.x);
+    float diff_y = (mouse_pos.comp.y - ball_center.comp.y);
+
+    mouse_diff->comp.x = diff_x;
+    mouse_diff->comp.y = diff_y;
+
+    float hypotenuse = sqrtf((diff_x*diff_x) + (diff_y*diff_y));
+
+    return (hypotenuse < ball->ball_radius);
+}
+
 void ball_window_on_event(struct window_t* window, struct event_base_t* event)
 {
     struct ball_window_t* ball_window = (struct ball_window_t*)window;
     struct ball_t* ball = &(ball_window->ball);
+
+    static fvector2 cur_mouse;
+    static fvector2 delta_mouse;
+
+    static fvector2 intersection_diff;
 
     switch (event->event_type)
     {
@@ -91,11 +117,63 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
         {
             struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)event;
 
-            float delta_time_seconds = app_tick_event->delta_time_seconds;
+            double delta_time_seconds = app_tick_event->delta_time_seconds;
 
-            ball_update(ball, delta_time_seconds, ball_window->window.metadata.width, ball_window->window.metadata.height);
+            // ball_update(ball, delta_time_seconds, ball_window->window.metadata.width, ball_window->window.metadata.height);
 
             event->handled = 1U;
+        }
+        break;
+
+        case EVENT_MOUSE_MOVED:
+        {
+            struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
+
+            float mouse_x = event_mouse_moved->x;
+            float mouse_y = (ball_window->window.metadata.height - event_mouse_moved->y);
+
+            delta_mouse.comp.x = (cur_mouse.comp.x - mouse_x);
+            delta_mouse.comp.y = (cur_mouse.comp.y - mouse_y);
+
+            cur_mouse.comp.x = mouse_x;
+            cur_mouse.comp.y = mouse_y;
+
+            if (ball->held)
+            {
+                ball->ball_position.comp.x = (cur_mouse.comp.x - intersection_diff.comp.x);
+                ball->ball_position.comp.y = (cur_mouse.comp.y - intersection_diff.comp.y);
+            }
+        }
+        break;
+
+        case EVENT_MOUSE_BUTTON:
+        {
+            struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)event;
+
+            if (event_mouse_button->button == 0)
+            {
+                switch(event_mouse_button->action)
+                {
+                    // Pressed
+                    case 1:
+                    {
+                        if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
+                        {
+                            ball->held = true;
+                        }
+                    }
+                    break;
+                    // Released
+                    case 0:
+                    {
+                        if (ball->held)
+                        {
+                            ball->held = false;
+                        }
+                    }
+                    break;
+                }
+            }
         }
         break;
 

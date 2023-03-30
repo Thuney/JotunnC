@@ -1,5 +1,5 @@
 C        := -gcc
-CFLAGS   := -pedantic-errors -Wall -Wextra -fPIC -g
+CFLAGS   := -g -pedantic-errors -Wall -std=gnu99 -D_POSIX_SOURCE -D_GNU_SOURCE -Wextra -fPIC
 CDEFINES := 
 
 GRAPHICS_BACKEND := OPENGL
@@ -11,7 +11,7 @@ CDEFINES := $(CDEFINES) -DBACKEND_OPENGL
 
 endif
 
-LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lfreetype -lpthread $(LD_GRAPHICS_FLAGS) -shared
+LDFLAGS  := -L/usr/lib/ -lm -lfreetype -lpthread -lrt $(LD_GRAPHICS_FLAGS) -shared
 
 FREETYPE2_INCLUDE := -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-4
 
