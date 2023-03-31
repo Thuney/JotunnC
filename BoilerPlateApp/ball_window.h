@@ -12,6 +12,7 @@ struct ball_t
     float ball_radius;
     fvector2 ball_position;
     fvector2 ball_velocity;
+    fvector2 ball_acceleration;
     //
     fvector4 ball_color;
     //

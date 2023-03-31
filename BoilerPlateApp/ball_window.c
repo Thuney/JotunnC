@@ -11,6 +11,7 @@ static void ball_init(struct ball_t* ball)
     ball->ball_radius   = 20.0f;
     ball->ball_position = (fvector2) {200.0f, 200.0f};
     ball->ball_velocity = (fvector2) {0.0f, 0.0f};
+    ball->ball_acceleration = (fvector2) {0.0f, -400.0f};
 }
 
 uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t* ball_window)
@@ -63,19 +64,22 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 
 static void ball_update(struct ball_t* ball, const float delta_time_seconds, const uint32_t window_width, const uint32_t window_height)
 {
-    float new_x = ball->ball_position.comp.x + (ball->ball_velocity.comp.x * delta_time_seconds);
-    float new_y = ball->ball_position.comp.y + (ball->ball_velocity.comp.y * delta_time_seconds);
+    ball->ball_velocity.comp.x += (ball->ball_acceleration.comp.x * delta_time_seconds);
+    ball->ball_velocity.comp.y += (ball->ball_acceleration.comp.y * delta_time_seconds);
 
-    if ( (new_x <= 0) || ((new_x + (2.0f*ball->ball_radius)) >= window_width) )
+    float new_x = ball->ball_position.comp.x + (ball->ball_velocity.comp.x * delta_time_seconds) + (0.5f)*(ball->ball_acceleration.comp.x * (delta_time_seconds*delta_time_seconds));
+    float new_y = ball->ball_position.comp.y + (ball->ball_velocity.comp.y * delta_time_seconds) + (0.5f)*(ball->ball_acceleration.comp.y * (delta_time_seconds*delta_time_seconds));
+
+    if ( ((new_x - ball->ball_radius) <= 0) || ((new_x + (ball->ball_radius)) >= window_width) )
     {
-        ball->ball_velocity.comp.x *= -1.0f;
-        new_x = ball->ball_position.comp.x + (ball->ball_velocity.comp.x * delta_time_seconds);
+        ball->ball_velocity.comp.x *= -0.6f;
+        new_x = ball->ball_position.comp.x + (ball->ball_velocity.comp.x * delta_time_seconds) + (ball->ball_acceleration.comp.x * (delta_time_seconds*delta_time_seconds));
     }
 
-    if ( (new_y <= 0) || ((new_y + (2.0f*ball->ball_radius)) >= window_height) )
+    if ( ((new_y - ball->ball_radius) <= 0) || ((new_y + ball->ball_radius) >= window_height) )
     {
-        ball->ball_velocity.comp.y *= -1.0f;
-        new_y = ball->ball_position.comp.y + (ball->ball_velocity.comp.y * delta_time_seconds);
+        ball->ball_velocity.comp.y *= -0.6f;
+        new_y = ball->ball_position.comp.y + (ball->ball_velocity.comp.y * delta_time_seconds) + (ball->ball_acceleration.comp.y * (delta_time_seconds*delta_time_seconds));
     }
 
     ball->ball_position.comp.x = new_x;
@@ -85,10 +89,6 @@ static void ball_update(struct ball_t* ball, const float delta_time_seconds, con
 static bool mouse_intersects_ball(const fvector2 mouse_pos, struct ball_t* ball, fvector2* mouse_diff)
 {
     fvector2 ball_center = (fvector2) { (ball->ball_position.comp.x),  (ball->ball_position.comp.y)};
-
-    #ifdef DEBUG
-        fprintf(stdout, "Checking intersection at Ball Center: x = %f, y = %f\n", ball_center.comp.x, ball_center.comp.y);
-    #endif
 
     float diff_x = (mouse_pos.comp.x - ball_center.comp.x);
     float diff_y = (mouse_pos.comp.y - ball_center.comp.y);
@@ -119,7 +119,7 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
 
             double delta_time_seconds = app_tick_event->delta_time_seconds;
 
-            // ball_update(ball, delta_time_seconds, ball_window->window.metadata.width, ball_window->window.metadata.height);
+            if (!ball->held) ball_update(ball, delta_time_seconds, ball_window->window.metadata.width, ball_window->window.metadata.height);
 
             event->handled = 1U;
         }
@@ -160,6 +160,9 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
                         {
                             ball->held = true;
+
+                            ball->ball_velocity.comp.x = 0.0f;
+                            ball->ball_velocity.comp.y = 0.0f;
                         }
                     }
                     break;
@@ -169,6 +172,9 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         if (ball->held)
                         {
                             ball->held = false;
+
+                            ball->ball_velocity.comp.x = (-delta_mouse.comp.x * 300.0f);
+                            ball->ball_velocity.comp.y = (-delta_mouse.comp.y * 300.0f);
                         }
                     }
                     break;
