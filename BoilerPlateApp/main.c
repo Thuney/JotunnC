@@ -20,15 +20,7 @@ int main(int argc, char** argv)
 
     error |= application_init(app_ptr, "JotunnTestApp", max_windows);
 
-    #ifdef DEBUG
-        fprintf(stdout, "Initializing Ball Window\n");
-    #endif
-
     ball_window_init(app_ptr, &ball_window);
-
-    #ifdef DEBUG
-        fprintf(stdout, "Setting Window Function\n");
-    #endif
 
     window_set_function_custom_window_run(base_window_ptr, &ball_window_run);
 
@@ -37,10 +29,6 @@ int main(int argc, char** argv)
     if (!error)
     {
         application_start(app_ptr);
-
-        #ifdef DEBUG
-            fprintf(stdout, "Running application\n");
-        #endif
 
         while (app_ptr->running)
         {

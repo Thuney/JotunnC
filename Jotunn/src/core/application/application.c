@@ -7,6 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+static struct event_app_tick_t app_tick_event;
+
 uint8_t application_init(struct application_t* app, const char* app_name, const uint8_t max_windows)
 {
     #ifdef DEBUG
@@ -30,6 +32,16 @@ uint8_t application_init(struct application_t* app, const char* app_name, const 
 
     timestep_init(&app->timer);
 
+    app_tick_event = (struct event_app_tick_t)
+    {
+        .base = (struct event_base_t)
+        {
+            .event_type = EVENT_APP_TICK,
+            .handled = 0U
+        },
+        .delta_time_seconds = 0.0f
+    };
+
     return error;
 }
 
@@ -47,46 +59,47 @@ uint8_t application_start(struct application_t* app)
 
 void application_run(struct application_t* app)
 {
+    const float seconds_between_frames = 0.01f;
+
     if (app->num_windows && app->running)
     {
         timestep_step(&app->timer);
-        struct event_app_tick_t app_tick_event = (struct event_app_tick_t)
+        app_tick_event.delta_time_seconds += app->timer.delta_time_seconds;
+        app_tick_event.base.handled = 0U;
+
+        #ifdef DEBUG
+            fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app_tick_event.delta_time_seconds);
+            fflush(stdout);
+        #endif
+
+        if (app_tick_event.delta_time_seconds >= seconds_between_frames)
         {
-            .base = (struct event_base_t)
+            application_on_event(app, &(app_tick_event.base));
+
+            // Pointer to first window, to be iterated over
+            struct window_t** cur_window = app->windows;
+            for (uint8_t i = 0U; i < app->num_windows; i++)
             {
-                .event_type = EVENT_APP_TICK,
-                .handled = 0U
-            },
-            .delta_time_seconds = app->timer.delta_time_seconds
-        };
-        application_on_event(app, &(app_tick_event.base));
+                // #ifdef DEBUG
+                //     fprintf(stdout, "Running Window %s\n", cur_window->metadata.tag);
+                // #endif
 
-        // #ifdef DEBUG
-        //     fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app->timer.delta_time_seconds);
-        //     fflush(stdout);
-        // #endif
-
-        // Pointer to first window, to be iterated over
-        struct window_t** cur_window = app->windows;
-        for (uint8_t i = 0U; i < app->num_windows; i++)
-        {
-            // #ifdef DEBUG
-            //     fprintf(stdout, "Running Window %s\n", cur_window->metadata.tag);
-            // #endif
-
-            if ((*cur_window)->metadata.visible)
-            {
-                uint8_t signaled_close = window_run((*cur_window));
-                if(signaled_close)
+                if ((*cur_window)->metadata.visible)
                 {
-                    app->running = 0;
+                    uint8_t signaled_close = window_run((*cur_window));
+                    if(signaled_close)
+                    {
+                        app->running = 0;
 
-                    #ifdef DEBUG
-                        fprintf(stdout, "Window signaled to close\n");
-                    #endif
+                        #ifdef DEBUG
+                            fprintf(stdout, "Window signaled to close\n");
+                        #endif
+                    }
                 }
+                cur_window++;
             }
-            cur_window++;
+
+            app_tick_event.delta_time_seconds = 0.0f;
         }
     }
 }

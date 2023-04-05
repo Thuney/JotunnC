@@ -17,6 +17,7 @@ struct ball_t
     fvector4 ball_color;
     //
     bool held;
+    bool grounded;
 };
 
 struct ball_window_t
