@@ -67,10 +67,10 @@ void application_run(struct application_t* app)
         app_tick_event.delta_time_seconds += app->timer.delta_time_seconds;
         app_tick_event.base.handled = 0U;
 
-        #ifdef DEBUG
-            fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app_tick_event.delta_time_seconds);
-            fflush(stdout);
-        #endif
+        // #ifdef DEBUG
+        //     fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app_tick_event.delta_time_seconds);
+        //     fflush(stdout);
+        // #endif
 
         if (app_tick_event.delta_time_seconds >= seconds_between_frames)
         {

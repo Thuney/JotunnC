@@ -2,6 +2,8 @@
 
 #include "fvector.h"
 
+#include <stdbool.h>
+
 enum texture_2d_internal_format_t
 {
    TEXTURE_2D_INTERNAL_FORMAT_R8 = 0x00,
@@ -46,7 +48,7 @@ struct subtexture_2d_t
    fvector2 subtexture_coordinates[2];
 };
 
-void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format);
+void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format, bool wrap);
 void texture_2d_cleanup(struct texture_2d_t* texture);
 
 void texture_2d_set_data(struct texture_2d_t* texture, unsigned char* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format);

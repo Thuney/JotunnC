@@ -1,5 +1,6 @@
 #pragma once
 
+#include "framebuffer.h"
 #include "renderer_2d.h"
 
 struct application_t;

@@ -4,7 +4,11 @@
 #include "window.h"
 
 #include <memory.h>
-#include <stdio.h>
+
+#ifdef DEBUG
+    #include <stdio.h>
+#endif
+
 #include <stdlib.h> 
 #include <string.h>
 

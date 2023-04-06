@@ -83,7 +83,7 @@ static GLenum gl_get_texture_internal_format(enum texture_2d_internal_format_t i
    return gl_internal_format;
 }
 
-static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format)
+static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
    glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
    glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(internal_format), texture->width, texture->height);
@@ -96,12 +96,16 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_
    glTextureParameteri(texture->texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTextureParameteri(texture->texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-   /*
-	 * Specify how the texture will wrap when texture coordinates are out of the normal range
-	 * In this case, the texture will 'repeat' for S and T texture coordinates
-	 */
-   glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-   glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+   if (wrap)
+   {
+      /*
+      * Specify how the texture will wrap when texture coordinates are out of the normal range
+      * In this case, the texture will 'repeat' for S and T texture coordinates
+      */
+      glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+   }
 
    #ifdef DEBUG
       fprintf(stdout, "Texture initialized with ID %d\n", texture->texture_id);
@@ -127,9 +131,9 @@ static void gl_texture_2d_set_data(const struct texture_2d_t* texture, void* dat
 //
 //
 
-void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format)
+void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
-   gl_texture_2d_init(texture, internal_format);
+   gl_texture_2d_init(texture, internal_format, wrap);
 }
 
 void platform_texture_2d_cleanup(struct texture_2d_t* texture)

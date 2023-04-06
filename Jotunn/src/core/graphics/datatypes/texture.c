@@ -9,13 +9,13 @@
    #include <stdio.h>
 #endif
 
-extern void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format);
+extern void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap);
 extern void platform_texture_2d_cleanup(struct texture_2d_t* texture);
 extern void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format);
 
 extern void platform_texture_2d_bind(const struct texture_2d_t* texture, const unsigned int texture_slot);
 
-void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format)
+void texture_2d_init(struct texture_2d_t* texture, const int width, const int height, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
    texture->width    = width;
    texture->height   = height;
@@ -55,13 +55,14 @@ void texture_2d_init(struct texture_2d_t* texture, const int width, const int he
       break;
    }
 
-   platform_texture_2d_init(texture, internal_format);
+   platform_texture_2d_init(texture, internal_format, wrap);
 }
 
 void texture_2d_cleanup(struct texture_2d_t* texture)
 {
    if (texture->is_loaded) platform_texture_2d_cleanup(texture);
 
+   // If you opt to be the owner of this texture's data, unbind the data pointer before calling texture cleanup
    if (texture->data) stbi_image_free(texture->data);
    
    texture->data_size_bytes = -1;
@@ -134,7 +135,7 @@ void texture_2d_create_from_file_path(struct texture_2d_t* texture, const char* 
    {
       texture->is_loaded = 1; // Indicate that we are already loaded so we don't needlessly re-set fields
 
-      texture_2d_init(texture, texture->width, texture->height, texture->internal_format);
+      texture_2d_init(texture, texture->width, texture->height, texture->internal_format, true);
       texture_2d_set_data(texture, texture->data, texture->data_size_bytes, texture->data_format);
    } 
 }

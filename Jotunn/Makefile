@@ -36,6 +36,7 @@ HDRS := \
 ./include/camera.h                    \
 \
 ./include/font.h                      \
+./include/framebuffer.h               \
 ./include/shader.h                    \
 ./include/texture.h                   \
 ./include/vertexarray.h               \
@@ -61,6 +62,7 @@ CORE_SRC := \
 ./src/core/graphics/camera.c                     \
 \
 ./src/core/graphics/datatypes/font.c             \
+./src/core/graphics/datatypes/framebuffer.c      \
 ./src/core/graphics/datatypes/shader.c           \
 ./src/core/graphics/datatypes/texture.c          \
 ./src/core/graphics/datatypes/vertexarray.c      \
@@ -77,6 +79,7 @@ ifeq ($(GRAPHICS_BACKEND), OPENGL)
 PLATFORM_SRC := \
 ./src/platform/application/window_gl.c                 \
 ./src/platform/graphics/api/render_api_opengl.c        \
+./src/platform/graphics/datatypes/framebuffer_gl.c     \
 ./src/platform/graphics/datatypes/shader_gl.c          \
 ./src/platform/graphics/datatypes/texture_gl.c         \
 ./src/platform/graphics/datatypes/vertexarray_gl.c     \
@@ -88,6 +91,7 @@ else
 PLATFORM_SRC := \
 ./src/platform/application/window_no_backend.c                  \
 ./src/platform/graphics/api/render_api_no_backend.c             \
+./src/platform/graphics/datatypes/framebuffer_no_backend.c      \
 ./src/platform/graphics/datatypes/shader_no_backend.c           \
 ./src/platform/graphics/datatypes/shader_no_backend.c           \
 ./src/platform/graphics/datatypes/vertexarray_no_backend.c      \

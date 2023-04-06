@@ -1,6 +1,6 @@
 #include "texture.h"
 
-void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format)
+void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
    
 }

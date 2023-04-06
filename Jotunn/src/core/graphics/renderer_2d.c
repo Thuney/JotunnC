@@ -1,13 +1,14 @@
 #include "renderer_2d.h"
 
+#include "framebuffer.h"
+#include "window.h"
+
 #include <memory.h>
 #ifdef DEBUG
    #include <stdio.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
-
-#include "window.h"
 
 static void renderer_2d_flush(struct renderer_2d_t* renderer)
 {
@@ -291,6 +292,8 @@ void renderer_2d_end_scene(void* renderer)
    renderer_2d_flush(renderer_2d);
 
    vertex_array_unbind();
+
+   framebuffer_unbind();
 }
 
 //
