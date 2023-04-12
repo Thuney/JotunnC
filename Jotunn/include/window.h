@@ -2,6 +2,7 @@
 
 #include "framebuffer.h"
 #include "renderer_2d.h"
+#include "renderer_window_layer.h"
 
 struct application_t;
 struct camera_base_t;
@@ -32,6 +33,8 @@ struct window_t
 {
     struct window_data_t metadata;
     struct window_context_data_t context_data;
+
+    struct renderer_window_layer_t window_layer_renderer;
     //
     struct camera_base_t* camera;
     struct renderer_base_t* renderer;

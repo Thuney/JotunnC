@@ -55,18 +55,18 @@ int shader_program_init_filepath(struct shader_program_t* shader_program, const 
    int error;
 
    error = vertex_shader_init_filepath(&vertex_shader, vertex_shader_filepath);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d vertex shader init - Filepath = %s\n", vertex_shader_filepath);
+   if (error) fprintf(stdout, "Error occurred during vertex shader init - Filepath = %s\n", vertex_shader_filepath);
 
    error = fragment_shader_init_filepath(&fragment_shader, fragment_shader_filepath);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d fragment shader init - Filepath = %s\n", fragment_shader_filepath);
+   if (error) fprintf(stdout, "Error occurred during fragment shader init - Filepath = %s\n", fragment_shader_filepath);
 
    error = shader_program_init(shader_program, &vertex_shader, &fragment_shader);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program init");
+   if (error) fprintf(stdout, "Error occurred during shader program init\n");
 
    shader_program_bind_fragment_data_location(shader_program, 0, "fColor");
 
    error = shader_program_link(shader_program);
-   if (error) fprintf(stdout, "Error occurred during renderable_2d shader program linkage");
+   if (error) fprintf(stdout, "Error occurred during shader program linkage\n");
 
    vertex_shader_destroy(&vertex_shader);
    fragment_shader_destroy(&fragment_shader);

@@ -63,6 +63,12 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
         window->function_event_react = 0;
         window->camera   = 0;
         window->renderer = 0;
+
+        window_set_context(window);
+
+        renderer_window_layer_init(&window->window_layer_renderer, NULL, window, "Window Renderer");
+
+        window_release_context();
     }
 
     return error;
@@ -122,6 +128,8 @@ void window_cleanup(struct window_t* window)
 {
     free(window->metadata.tag);
     window->metadata.tag = 0;
+
+    renderer_window_layer_cleanup(&(window->window_layer_renderer));
 
     window_graphics_cleanup(window);
 }

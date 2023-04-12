@@ -77,20 +77,44 @@ static GLenum get_gl_draw_mode(enum render_api_draw_mode_t draw_mode)
    return gl_draw_mode;
 }
 
-static void opengl_render_api_init()
+static void opengl_render_api_init(struct render_api_implementation_t* render_api)
 {
    #ifdef DEBUG
       fprintf(stdout, "Initializing OpenGL Render API\n");
    #endif
 
-   glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-   glEnable(GL_DEPTH_TEST);
-
    glEnable(GL_LINE_SMOOTH);
+}
 
-   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-   glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+static void opengl_render_api_bind(struct render_api_implementation_t* render_api)
+{
+   if ((render_api->active_render_flags & BLEND_FLAG))
+   {
+      glEnable(GL_BLEND);
+	   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+   }
+   else
+   {
+      glDisable(GL_BLEND);
+   }
+//
+   if ((render_api->active_render_flags & DEPTH_FLAG))
+   { 
+      glEnable(GL_DEPTH_TEST);
+   }
+   else 
+   {
+      glDisable(GL_DEPTH_TEST);
+   }
+//
+   if ((render_api->active_render_flags & WIREFRAME_FLAG))
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+   }
+   else
+   {
+      glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+   }
 }
 
 static void opengl_render_api_set_clear_color(const fvector4 color)
@@ -98,9 +122,14 @@ static void opengl_render_api_set_clear_color(const fvector4 color)
    glClearColor(color.comp.w, color.comp.x, color.comp.y, color.comp.z);
 }
 
-static void opengl_render_api_clear()
+static void opengl_render_api_clear(struct render_api_implementation_t* render_api)
 {
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+   GLbitfield flags = 0x0000;
+
+   if ( (render_api->active_render_flags & COLOR_FLAG) ) flags |= GL_COLOR_BUFFER_BIT;
+   if ( (render_api->active_render_flags & DEPTH_FLAG) ) flags |= GL_DEPTH_BUFFER_BIT;
+
+   glClear(flags);
 }
 
 static void opengl_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)
@@ -125,9 +154,14 @@ static void opengl_render_api_set_line_width(float line_width)
 
 //
 
-void platform_render_api_init()
+void platform_render_api_init(struct render_api_implementation_t* render_api)
 {
-   opengl_render_api_init();
+   opengl_render_api_init(render_api);
+}
+
+void platform_render_api_bind(struct render_api_implementation_t* render_api)
+{
+   opengl_render_api_bind(render_api);
 }
 
 void platform_render_api_set_clear_color(const fvector4 color)
@@ -135,9 +169,9 @@ void platform_render_api_set_clear_color(const fvector4 color)
    opengl_render_api_set_clear_color(color);
 }
 
-void platform_render_api_clear()
+void platform_render_api_clear(struct render_api_implementation_t* render_api)
 {
-   opengl_render_api_clear();
+   opengl_render_api_clear(render_api);
 }
 
 void platform_render_api_draw_elements(enum render_api_draw_mode_t draw_mode, unsigned int element_count, const enum render_api_element_data_type_t element_data_type, const void* indices)
