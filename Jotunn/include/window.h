@@ -34,19 +34,21 @@ struct window_t
     struct window_data_t metadata;
     struct window_context_data_t context_data;
 
+    struct window_layer_t** layers;
+    uint8_t num_layers;
+    uint8_t max_layers;
+
     struct renderer_window_layer_t window_layer_renderer;
     //
     struct camera_base_t* camera;
     struct renderer_base_t* renderer;
     //
-    void (*function_custom_window_run)(struct window_t* window);
-    //
     void (*function_event_react)(struct window_t* window, struct event_base_t* event);
 };
 
-uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
-void window_set_renderer(struct window_t* window, struct renderer_base_t* renderer, struct camera_base_t* camera);
+uint8_t window_init(struct window_t* window, const uint8_t max_window_layers, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
 
+uint8_t window_add_layer(struct window_t* window, struct window_layer_t* new_window_layer);
 void window_bind_custom_events(struct window_t* window, void (*custom_event_function)(struct window_t*, struct event_base_t*));
 
 void window_show(struct window_t* window);

@@ -142,6 +142,7 @@ void application_cleanup(struct application_t* app)
 
     app->max_windows = 0;
     app->num_windows = 0;
+    free(app->windows);
 }
 
 void application_on_event(struct application_t* app, struct event_base_t* event)

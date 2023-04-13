@@ -1,9 +1,5 @@
 #include <memory.h>
 #include <stdio.h>
-#ifdef DEBUG
-    #include <time.h>
-#endif
-// #include <unistd.h>
 
 #include "application.h"
 #include "camera.h"
@@ -14,6 +10,8 @@
 
 static struct application_t jotunn_app;
 static struct window_t window1, window2;
+static struct window_layer_t window1_layer, window2_layer;
+static struct framebuffer_t window1_framebuffer, window2_framebuffer;
 
 static struct camera_ortho_t window1_camera_ortho;
 static struct renderer_2d_t window1_renderer_2d;
@@ -25,7 +23,7 @@ static struct texture_2d_t aaron_shakespeare_texture;
 
 //
 
-void window1_run(struct window_t* window)
+void window1_run(struct window_layer_t* window_layer)
 {
     // #ifdef DEBUG
     //     fprintf(stdout, "Running Window 1 Custom Function\n");
@@ -108,7 +106,7 @@ void window1_run(struct window_t* window)
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
-void window2_run(struct window_t* window)
+void window2_run(struct window_layer_t* window_layer)
 {
     // Grid of shapes (triangle - circle)
 
@@ -177,38 +175,45 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 
     const uint32_t width  = 600;
     const uint32_t height = 400;
+    const uint8_t num_layers = 1;
 
-    error |= window_init(window1, width, height, "JotunnWindow1", app);
-    window_set_renderer(window1, (struct renderer_base_t*)&window1_renderer_2d, (struct camera_base_t*)&window1_camera_ortho);
+    error |= window_init(window1, num_layers, width, height, "JotunnWindow1", app);
 
-    fvector4 window1_background_color;
-    fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
-    // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+    if (!error)
+    {
+        framebuffer_init(&window1_framebuffer, width, height);
+        window_layer_init(&window1_layer, &window1_framebuffer, (struct camera_base_t*)&window1_camera_ortho, (struct renderer_base_t*)&window1_renderer_2d);
+        window_add_layer(window1, &window1_layer);
 
-    // Camera stuff
-    const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
-    const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
-    const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
+        fvector4 window1_background_color;
+        fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+        // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
-    const float ortho_left   = 0.0f; 
-    const float ortho_right  = (float)width;
-    const float ortho_top    = (float)height;
-    const float ortho_bottom = 0.0f;
-    const float ortho_near_plane = -3.0f;
-    const float ortho_far_plane  = 100.0f;
+        // Camera stuff
+        const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
+        const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
+        const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
 
-    window_set_context(window1);
+        const float ortho_left   = 0.0f; 
+        const float ortho_right  = (float)width;
+        const float ortho_top    = (float)height;
+        const float ortho_bottom = 0.0f;
+        const float ortho_near_plane = -3.0f;
+        const float ortho_far_plane  = 100.0f;
 
-    camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
-    camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
+        window_set_context(window1);
 
-    renderer_2d_init(&window1_renderer_2d, window1->camera, window1, "renderer_2d");
+        camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
+        camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
 
-    texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
+        renderer_2d_init(&window1_renderer_2d, window1_layer.camera, window1, "renderer_2d");
 
-    window_set_background_color(window1, window1_background_color);
+        texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
 
-    window_release_context();
+        window_set_background_color(window1, window1_background_color);
+
+        window_release_context();
+    }
 
     return error;
 }
@@ -219,36 +224,43 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
 
     const uint32_t width  = 200;
     const uint32_t height = 200;
+    const uint8_t num_layers = 1;
 
-    error |= window_init(window2, width, height, "JotunnWindow2", app);
-    window_set_renderer(window2, (struct renderer_base_t*)&window2_renderer_2d, (struct camera_base_t*)&window2_camera_ortho);
+    error |= window_init(window2, num_layers, width, height, "JotunnWindow2", app);
 
-    fvector4 window2_background_color;
-    fvector4_set(&window2_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
-    // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+    if (!error)
+    {
+        framebuffer_init(&window2_framebuffer, width, height);
+        window_layer_init(&window2_layer, &window2_framebuffer, (struct camera_base_t*)&window2_camera_ortho, (struct renderer_base_t*)&window2_renderer_2d);
+        window_add_layer(window2, &window2_layer);
 
-    // Camera stuff
-    const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
-    const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
-    const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
+        fvector4 window2_background_color;
+        fvector4_set(&window2_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+        // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
-    const float ortho_left   = 0.0f; 
-    const float ortho_right  = (float)width;
-    const float ortho_top    = (float)height;
-    const float ortho_bottom = 0.0f;
-    const float ortho_near_plane = -3.0f;
-    const float ortho_far_plane  = 100.0f;
+        // Camera stuff
+        const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
+        const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
+        const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
 
-    window_set_context(window2);
+        const float ortho_left   = 0.0f; 
+        const float ortho_right  = (float)width;
+        const float ortho_top    = (float)height;
+        const float ortho_bottom = 0.0f;
+        const float ortho_near_plane = -3.0f;
+        const float ortho_far_plane  = 100.0f;
 
-    camera_init_orthographic(&window2_camera_ortho, camera_position, camera_up, camera_front);
-    camera_set_projection_orthographic(&window2_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
+        window_set_context(window2);
 
-    renderer_2d_init(&window2_renderer_2d, window2->camera, window2, "renderer_2d");
+        camera_init_orthographic(&window2_camera_ortho, camera_position, camera_up, camera_front);
+        camera_set_projection_orthographic(&window2_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
 
-    window_set_background_color(window2, window2_background_color);
+        renderer_2d_init(&window2_renderer_2d, window2_layer.camera, window2, "renderer_2d");
 
-    window_release_context();
+        window_set_background_color(window2, window2_background_color);
+
+        window_release_context();
+    }
 
     return error;
 }
@@ -267,8 +279,8 @@ int main(int argc, char** argv)
     init_window1(app_ptr, window1_ptr);
     init_window2(app_ptr, window2_ptr);
 
-    window_set_function_custom_window_run(window1_ptr, &window1_run);
-    window_set_function_custom_window_run(window2_ptr, &window2_run);
+    window_layer_set_custom_layer_run(&window1_layer, &window1_run);
+    window_layer_set_custom_layer_run(&window2_layer, &window2_run);
 
     error |= application_add_window(app_ptr, window1_ptr);
     error |= application_add_window(app_ptr, window2_ptr);
@@ -291,6 +303,9 @@ int main(int argc, char** argv)
 
         renderer_2d_cleanup(&window1_renderer_2d);
         renderer_2d_cleanup(&window2_renderer_2d);
+
+        framebuffer_cleanup(&(window1_framebuffer));
+        framebuffer_cleanup(&(window2_framebuffer));
 
         texture_2d_cleanup(&aaron_shakespeare_texture);
     }

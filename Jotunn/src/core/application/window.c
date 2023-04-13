@@ -45,7 +45,7 @@ static void window_set_metadata(struct window_data_t* metadata, const uint32_t w
 
 // Exposed functions
 
-uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent)
+uint8_t window_init(struct window_t* window, const uint8_t max_window_layers, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent)
 {
     memset((void*)window, 0, sizeof(struct window_t));
 
@@ -59,25 +59,47 @@ uint8_t window_init(struct window_t* window, const uint32_t width, const uint32_
 
     if (!error)
     {
-        window->function_custom_window_run = 0;
         window->function_event_react = 0;
-        window->camera   = 0;
-        window->renderer = 0;
 
         window_set_context(window);
 
-        renderer_window_layer_init(&window->window_layer_renderer, NULL, window, "Window Renderer");
+        renderer_window_layer_init(&window->window_layer_renderer, window, "Window Renderer");
 
         window_release_context();
+
+        window->max_layers = max_window_layers;
+        window->num_layers = 0;
+        window->layers = (struct window_layer_t**) malloc(window->max_layers*sizeof(struct window_layer_t*));
     }
 
     return error;
 }
 
-void window_set_renderer(struct window_t* window, struct renderer_base_t* renderer, struct camera_base_t* camera)
+uint8_t window_add_layer(struct window_t* window, struct window_layer_t* new_window_layer)
 {
-    window->renderer = renderer;
-    window->camera   = camera;
+    #ifdef DEBUG
+        fprintf(stdout, "Adding layer to window\n");
+    #endif  
+
+    uint8_t error = 0U;
+
+    if (window->num_layers < window->max_layers)
+    {
+        struct window_layer_t** layer_ptr;
+        layer_ptr = (window->layers + window->num_layers);
+        *layer_ptr = new_window_layer;
+        window->num_layers++;
+    }
+    else
+    {
+        error |= 1U;
+
+        #ifdef DEBUG
+            fprintf(stdout, "Error adding layer to window\n");
+        #endif  
+    }
+
+    return error;
 }
 
 void window_bind_custom_events(struct window_t* window, void (*custom_event_function)(struct window_t*, struct event_base_t*))
@@ -101,21 +123,45 @@ uint8_t window_run(struct window_t* window)
 
     window_set_context(window);
 
+    struct window_layer_t** current_layer;
+
+    // Render our layers to their respective framebuffers, bottom to top
+    current_layer = window->layers;
+    for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
+    {
+        framebuffer_bind(((*current_layer)->framebuffer));
+
+        if (window->metadata.resized)
+        {
+            (*current_layer)->camera->camera_reproject((*current_layer)->camera, (float)window->metadata.width, (float)window->metadata.height, (*current_layer)->camera->near_plane, (*current_layer)->camera->far_plane);
+        }
+
+        renderer_base_begin_scene(((*current_layer)->renderer));
+
+        if ((*current_layer)->function_custom_window_layer_run)
+        {
+            (*current_layer)->function_custom_window_layer_run(*(current_layer));
+        }
+
+        renderer_base_end_scene(((*current_layer)->renderer));
+    }
+
     if (window->metadata.resized)
     {
-        window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
-        window->camera->camera_reproject(window->camera, (float)window->metadata.width, (float)window->metadata.height, window->camera->near_plane, window->camera->far_plane);
         window->metadata.resized = 0;
     }
     
-    renderer_base_begin_scene(window->renderer);
+    // Render our layers to the default (window) framebuffer, bottom to top
 
-    if (window->function_custom_window_run)
+    renderer_window_layer_begin_scene(&(window->window_layer_renderer));
+
+    current_layer = window->layers;
+    for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
     {
-        window->function_custom_window_run(window);
+        renderer_window_layer_draw_layer(&(window->window_layer_renderer), (*current_layer));
     }
 
-    renderer_base_end_scene(window->renderer);
+    renderer_window_layer_end_scene(&(window->window_layer_renderer));
 
     window_graphics_run(window);
 
@@ -130,6 +176,10 @@ void window_cleanup(struct window_t* window)
     window->metadata.tag = 0;
 
     renderer_window_layer_cleanup(&(window->window_layer_renderer));
+
+    window->max_layers = 0;
+    window->num_layers = 0;
+    free(window->layers);
 
     window_graphics_cleanup(window);
 }
@@ -152,9 +202,4 @@ void window_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height
 void window_set_background_color(struct window_t* window, const fvector4 color)
 {
     window_graphics_set_background_color(window, color);
-}
-
-void window_set_function_custom_window_run(struct window_t* window, void (*function_custom_window_run)(struct window_t* window))
-{
-    window->function_custom_window_run = function_custom_window_run;
 }

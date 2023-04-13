@@ -7,7 +7,8 @@
 enum camera_projection_t
 {
    CAMERA_ORTHOGRAPHIC,
-   CAMERA_PERSPECTIVE
+   CAMERA_PERSPECTIVE,
+   CAMERA_UNPROJECTED
 };
 
 struct camera_base_t
@@ -45,6 +46,7 @@ struct camera_perspective_t
    float aspect_ratio;
 };
 
+void camera_init_unprojected(struct camera_base_t* camera);
 void camera_init_orthographic(struct camera_ortho_t* camera, const fvector3 position, const fvector3 up, const fvector3 front);
 void camera_init_perspective(struct camera_perspective_t* camera, const fvector3 position, const fvector3 up, const fvector3 front);
 

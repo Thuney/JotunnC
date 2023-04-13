@@ -19,6 +19,10 @@ static void camera_reproject(struct camera_base_t* camera, float window_width, f
          struct camera_perspective_t* camera_perspective = (struct camera_perspective_t*)camera;
          camera_set_projection_perspective(camera_perspective, (window_width/window_height), near_plane, far_plane);
       }
+      case CAMERA_UNPROJECTED:
+      {
+
+      }
       break;
    }
 }
@@ -80,6 +84,17 @@ static void camera_init(struct camera_base_t* camera, const fvector3 position, c
 
    camera->view_matrix = calculate_look_at_matrix(position, target, up);
    camera_recalculate_view_projection_matrix(camera);
+
+   camera->camera_reproject = &camera_reproject;
+}
+
+void camera_init_unprojected(struct camera_base_t* camera)
+{
+   camera->projection_type = CAMERA_UNPROJECTED;
+
+   fmatrix_4x4_init(&camera->projection_matrix);
+   fmatrix_4x4_init(&camera->view_matrix);
+   fmatrix_4x4_init(&camera->view_projection_matrix);
 
    camera->camera_reproject = &camera_reproject;
 }
