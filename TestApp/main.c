@@ -23,7 +23,7 @@ static struct texture_2d_t aaron_shakespeare_texture;
 
 //
 
-void window1_run(struct window_layer_t* window_layer)
+void window1_run(struct window_t* parent_window, struct window_layer_t* window_layer)
 {
     // #ifdef DEBUG
     //     fprintf(stdout, "Running Window 1 Custom Function\n");
@@ -106,7 +106,7 @@ void window1_run(struct window_layer_t* window_layer)
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
-void window2_run(struct window_layer_t* window_layer)
+void window2_run(struct window_t* parent_window, struct window_layer_t* window_layer)
 {
     // Grid of shapes (triangle - circle)
 

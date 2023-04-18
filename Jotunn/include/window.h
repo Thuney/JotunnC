@@ -40,9 +40,6 @@ struct window_t
 
     struct renderer_window_layer_t window_layer_renderer;
     //
-    struct camera_base_t* camera;
-    struct renderer_base_t* renderer;
-    //
     void (*function_event_react)(struct window_t* window, struct event_base_t* event);
 };
 
@@ -64,5 +61,3 @@ void window_release_context();
 void window_set_viewport(uint32_t x, uint32_t y, uint32_t width, uint32_t height);
 
 void window_set_background_color(struct window_t* window, const fvector4 color);
-
-void window_set_function_custom_window_run(struct window_t* window, void (*function_custom_window_run)(struct window_t* window));

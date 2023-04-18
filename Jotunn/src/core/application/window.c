@@ -140,7 +140,7 @@ uint8_t window_run(struct window_t* window)
 
         if ((*current_layer)->function_custom_window_layer_run)
         {
-            (*current_layer)->function_custom_window_layer_run(*(current_layer));
+            (*current_layer)->function_custom_window_layer_run(window, *(current_layer));
         }
 
         renderer_base_end_scene(((*current_layer)->renderer));

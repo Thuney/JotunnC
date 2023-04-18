@@ -25,6 +25,10 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
     const uint32_t height    = 400;
     const uint8_t num_layers = 1;
 
+    ball_window->clicked_indicator_radius = 4.0f;
+    ball_window->last_clicked = (fvector2) { 0.0f, 0.0f };
+    ball_window->clicked_color = (fvector4) {0.0f, 1.0f, 0.0f, 1.0f};
+
     struct window_t* window_ptr = &(ball_window->window);
     struct camera_base_t* camera_base_ptr = (struct camera_base_t*)&(ball_window->camera_ortho);
     struct renderer_base_t* renderer_base_ptr = (struct renderer_base_t*)&(ball_window->renderer_2d);
@@ -178,6 +182,13 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                     // Pressed
                     case 1:
                     {
+                        ball_window->last_clicked.comp.x = cur_mouse.comp.x;
+                        ball_window->last_clicked.comp.y = cur_mouse.comp.y;
+
+                        #ifdef DEBUG
+                            fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
+                        #endif
+
                         if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
                         {
                             ball->held = true;
@@ -232,13 +243,37 @@ static const fmatrix_4x4 ball_calculate_transform(struct ball_t* ball)
     return transform_matrix;
 }
 
-void ball_window_run(struct window_layer_t* window_layer)
+static const fmatrix_4x4 click_calculate_transform(struct ball_window_t* ball_window)
 {
-    struct ball_window_t* ball_window = (struct ball_window_t*)window_layer->renderer->parent_window;
+    fmatrix_4x4 transform_matrix;
+    {
+        fmatrix_4x4 scale_matrix, translation_matrix;
 
-    const fmatrix_4x4 transform = ball_calculate_transform(&(ball_window->ball));
+        const fvector3 scale_factors = (fvector3) { {ball_window->clicked_indicator_radius, ball_window->clicked_indicator_radius, ball_window->clicked_indicator_radius} };
+        const fvector3 translation_vector = (fvector3) { {ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y, 0.0f} };
 
-    renderer_2d_draw_circle(&(ball_window->renderer_2d), &(transform), ball_window->ball.ball_color);
+        fmatrix_4x4_init(&scale_matrix);
+        fmatrix_4x4_init(&translation_matrix);
+        fmatrix_4x4_init(&transform_matrix);
+
+        scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+        translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+        transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+    }
+    return transform_matrix;
+}
+
+void ball_window_run(struct window_t* parent_window, struct window_layer_t* window_layer)
+{
+    struct ball_window_t* ball_window = (struct ball_window_t*)parent_window;
+
+    const fmatrix_4x4 ball_transform = ball_calculate_transform(&(ball_window->ball));
+
+    const fmatrix_4x4 click_transform = click_calculate_transform(ball_window);
+
+    renderer_2d_draw_circle(&(ball_window->renderer_2d), &(ball_transform), ball_window->ball.ball_color);
+
+    renderer_2d_draw_circle(&(ball_window->renderer_2d), &(click_transform), ball_window->clicked_color);
 }
 
 void ball_window_cleanup(struct ball_window_t* ball_window)
