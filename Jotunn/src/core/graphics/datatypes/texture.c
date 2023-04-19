@@ -10,6 +10,7 @@
 #endif
 
 extern void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap);
+extern void platform_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height);
 extern void platform_texture_2d_cleanup(struct texture_2d_t* texture);
 extern void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format);
 
@@ -72,6 +73,13 @@ void texture_2d_cleanup(struct texture_2d_t* texture)
    texture->data            = 0;
    texture->data_format     = -1;
    texture->internal_format = -1;
+}
+
+void texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
+{
+   texture->width  = new_width;
+   texture->height = new_height;
+   platform_texture_2d_resize(texture, new_width, new_height);
 }
 
 void texture_2d_set_data(struct texture_2d_t* texture, unsigned char* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format)

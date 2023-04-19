@@ -41,6 +41,13 @@ void framebuffer_init(struct framebuffer_t* frame_buffer, const int width, const
     framebuffer_unbind();
 }
 
+void framebuffer_resize(struct framebuffer_t* frame_buffer, const int new_width, const int new_height)
+{
+    texture_2d_resize(&(frame_buffer->color_buffer.texture), new_width, new_height);
+    texture_2d_resize(&(frame_buffer->depth_buffer.texture), new_width, new_height);
+    texture_2d_resize(&(frame_buffer->stencil_buffer.texture), new_width, new_height);
+}
+
 void framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer)
 {
     platform_framebuffer_attach_color_buffer(frame_buffer, color_buffer);
@@ -86,7 +93,6 @@ void color_buffer_init(struct color_buffer_t* color_buffer, const int width, con
     texture_2d_init(&color_buffer->texture, width, height, TEXTURE_2D_INTERNAL_FORMAT_RGB8, false);
     uint32_t buffer_size_bytes = (height*width*color_buffer->texture.channels);
     color_buffer->texture.data = (unsigned char*) calloc(buffer_size_bytes, sizeof(unsigned char));
-    memset(color_buffer->texture.data, 0U, buffer_size_bytes);
 }
 
 void depth_buffer_init(struct depth_buffer_t* depth_buffer, const int width, const int height)
@@ -98,7 +104,6 @@ void depth_buffer_init(struct depth_buffer_t* depth_buffer, const int width, con
     texture_2d_init(&depth_buffer->texture, width, height, TEXTURE_2D_FORMAT_DEPTH_COMPONENT, false);
     uint32_t buffer_size_bytes = (height*width*depth_buffer->texture.channels);
     depth_buffer->texture.data = (unsigned char*) calloc(buffer_size_bytes, sizeof(unsigned char));
-    memset(depth_buffer->texture.data, 0U, buffer_size_bytes);
 }
 
 void stencil_buffer_init(struct stencil_buffer_t* stencil_buffer, const int width, const int height)
@@ -110,7 +115,6 @@ void stencil_buffer_init(struct stencil_buffer_t* stencil_buffer, const int widt
     texture_2d_init(&stencil_buffer->texture, width, height, TEXTURE_2D_FORMAT_STENCIL_INDEX, false);
     uint32_t buffer_size_bytes = (height*width*stencil_buffer->texture.channels);
     stencil_buffer->texture.data = (unsigned char*) calloc(buffer_size_bytes, sizeof(unsigned char));
-    memset(stencil_buffer->texture.data, 0U, buffer_size_bytes);
 }
 
 void color_buffer_cleanup(struct color_buffer_t* color_buffer)

@@ -227,6 +227,31 @@ static void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
    glfwSetWindowFocusCallback(glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
+// ChatGPT wrote this function
+static void printOpenGLInfo(GLFWwindow* window) {
+    // Get the OpenGL context version string
+    const char* version = (const char*) glGetString(GL_VERSION);
+    printf("OpenGL version: %s\n", version);
+
+    // Get the OpenGL renderer string
+    const char* renderer = (const char*) glGetString(GL_RENDERER);
+    printf("Renderer: %s\n", renderer);
+
+    // Get the OpenGL vendor string
+    const char* vendor = (const char*) glGetString(GL_VENDOR);
+    printf("Vendor: %s\n", vendor);
+
+    // Get the GLFW version string
+    int major, minor, rev;
+    glfwGetVersion(&major, &minor, &rev);
+    printf("GLFW version: %d.%d.%d\n", major, minor, rev);
+
+    // Get the GLFW window size
+    int width, height;
+    glfwGetWindowSize(window, &width, &height);
+    printf("Window size: %d x %d\n", width, height);
+}
+
 static uint8_t window_gl_init(struct window_t* window)
 {
    #ifdef DEBUG
@@ -253,6 +278,7 @@ static uint8_t window_gl_init(struct window_t* window)
 
    // Create window via GLFW
    GLFWwindow* gl_window_ptr = glfwCreateWindow(window->metadata.width, window->metadata.height, window->metadata.tag, NULL, NULL);
+
    // Assign to our window handle as void*
    window->context_data.window_handle = (void*)gl_window_ptr;
 
@@ -262,6 +288,9 @@ static uint8_t window_gl_init(struct window_t* window)
    window_gl_set_callbacks(gl_window_ptr);
 
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
+
+   printOpenGLInfo(gl_window_ptr);
+
    // Set the GL viewport to the size of the window
    glViewport(0, 0, window->metadata.width, window->metadata.height);
 

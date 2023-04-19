@@ -87,6 +87,7 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_
 {
    glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
    glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(internal_format), texture->width, texture->height);
+   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
 
    /*
 	 * Set the modes for texture filtering
@@ -112,6 +113,12 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_
    #endif
 }
 
+static void gl_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
+{
+   // glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(texture->internal_format), new_width, new_width);
+   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(texture->internal_format), new_width, new_height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
+}
+
 static void gl_texture_2d_cleanup(struct texture_2d_t* texture)
 {
    glDeleteTextures(1, &texture->texture_id);
@@ -134,6 +141,11 @@ static void gl_texture_2d_set_data(const struct texture_2d_t* texture, void* dat
 void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
    gl_texture_2d_init(texture, internal_format, wrap);
+}
+
+void platform_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
+{
+   gl_texture_2d_resize(texture, new_width, new_height);
 }
 
 void platform_texture_2d_cleanup(struct texture_2d_t* texture)

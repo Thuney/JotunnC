@@ -38,6 +38,9 @@ struct framebuffer_t
 
 void framebuffer_init(struct framebuffer_t* frame_buffer, const int width, const int height);
 
+// Probably doesn't work tbh
+void framebuffer_resize(struct framebuffer_t* frame_buffer, const int new_width, const int new_height);
+
 void framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer);
 void framebuffer_attach_depth_buffer(struct framebuffer_t* frame_buffer, struct depth_buffer_t* depth_buffer);
 void framebuffer_attach_stencil_buffer(struct framebuffer_t* frame_buffer, struct stencil_buffer_t* stencil_buffer);
