@@ -119,13 +119,12 @@ uint8_t window_run(struct window_t* window)
     //     fprintf(stdout, "Running window\n");
     // #endif
 
-    window_graphics_poll_events(window);
-
     window_set_context(window);
+    window_graphics_poll_events(window);
 
     struct window_layer_t** current_layer;
 
-    // Render our layers to their respective framebuffers, bottom to top
+    // Render our layers to their respective framebuffers, bottom to top    
     current_layer = window->layers;
     for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
     {

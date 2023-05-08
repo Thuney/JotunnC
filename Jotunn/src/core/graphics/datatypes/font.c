@@ -281,7 +281,7 @@ int typeface_load_glyph_atlas(struct typeface_t* typeface)
    unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
 
    texture_2d_init(texture_atlas_texture, texture_atlas_width, texture_atlas_height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8, false);
-   texture_2d_set_data(texture_atlas_texture, pixel_data_rgba, (texture_atlas_width*texture_atlas_height*4), TEXTURE_2D_FORMAT_RGBA);
+   texture_2d_set_data(texture_atlas_texture, pixel_data_rgba, (texture_atlas_width*texture_atlas_height*4));
 
    free(pixel_data_bitmap);
 

@@ -153,9 +153,9 @@ void platform_texture_2d_cleanup(struct texture_2d_t* texture)
    gl_texture_2d_cleanup(texture);
 }
 
-void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format)
+void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes)
 {
-   gl_texture_2d_set_data(texture, data, data_size_bytes, data_format);
+   gl_texture_2d_set_data(texture, data, data_size_bytes, texture->data_format);
 }
 
 void platform_texture_2d_bind(const struct texture_2d_t* texture, const unsigned int texture_slot)

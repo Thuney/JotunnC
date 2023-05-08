@@ -90,7 +90,7 @@ void color_buffer_init(struct color_buffer_t* color_buffer, const int width, con
         fprintf(stdout, "Initializing color buffer\n");
     #endif
 
-    texture_2d_init(&color_buffer->texture, width, height, TEXTURE_2D_INTERNAL_FORMAT_RGB8, false);
+    texture_2d_init(&color_buffer->texture, width, height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8, false);
     uint32_t buffer_size_bytes = (height*width*color_buffer->texture.channels);
     color_buffer->texture.data = (unsigned char*) calloc(buffer_size_bytes, sizeof(unsigned char));
 }

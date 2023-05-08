@@ -53,7 +53,7 @@ void texture_2d_cleanup(struct texture_2d_t* texture);
 
 void texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height);
 
-void texture_2d_set_data(struct texture_2d_t* texture, unsigned char* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format);
+void texture_2d_set_data(struct texture_2d_t* texture, unsigned char* data, const unsigned int data_size_bytes);
 void texture_2d_create_from_file_path(struct texture_2d_t* texture, const char* filepath, const unsigned int flip_vertically);
 
 void texture_2d_bind(const struct texture_2d_t* texture, const unsigned int texture_slot);

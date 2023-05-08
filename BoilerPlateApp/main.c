@@ -23,6 +23,7 @@ int main(int argc, char** argv)
     ball_window_init(app_ptr, &ball_window);
 
     window_layer_set_custom_layer_run(&(ball_window.window_layer), &ball_window_run);
+    window_layer_set_custom_layer_run(&(ball_window.ui_window_layer), &ball_ui_window_run);
 
     error |= application_add_window(app_ptr, base_window_ptr);
 
