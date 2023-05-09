@@ -1,19 +1,38 @@
 #include "renderer_window_layer.h"
 
+#include <memory.h>
+
 #ifdef DEBUG
 #include <stdio.h>
 #endif
 
-static float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions   // texCoords
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-        -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+#define NUM_FRAMEBUFFER_VERTICES ((3+2)*6)
 
-        -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-         1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-         1.0f,  1.0f, 0.0f,  1.0f, 1.0f
+// static float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+//         // positions   // texCoords
+//         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+//         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+//          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+
+//         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+//          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+//          1.0f,  1.0f, 0.0f,  1.0f, 1.0f
+//     };
+
+static void get_framebuffer_vertices_for_layer(float vertices[NUM_FRAMEBUFFER_VERTICES], uint8_t layer)
+{
+    float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+        // positions                 // texCoords
+        -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
+        -1.0f, -1.0f, (float)layer,  0.0f, 0.0f,
+         1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
+        -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
+         1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
+         1.0f,  1.0f, (float)layer,  1.0f, 1.0f
     };
+
+    memcpy(vertices, framebuffer_vertices, NUM_FRAMEBUFFER_VERTICES);
+}
 
 struct framebuffer_vertex_t
 {
@@ -141,7 +160,7 @@ void renderer_window_layer_end_scene(void *renderer)
     framebuffer_unbind();
 }
 
-void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, struct window_layer_t *window_layer)
+void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, struct window_layer_t *window_layer, uint8_t layer_number)
 {
     shader_program_use(&(renderer->render_data.framebuffer_shader));
 
@@ -151,10 +170,14 @@ void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, 
     vertex_buffer_bind(&data->vbo);
     element_buffer_bind(&data->ebo);
 
-    const unsigned int texture_data_size = (unsigned int)(sizeof(framebuffer_vertices));
+    static float layer_framebuffer_vertices[NUM_FRAMEBUFFER_VERTICES];
+
+    get_framebuffer_vertices_for_layer(layer_framebuffer_vertices, layer_number);
+
+    static const unsigned int texture_data_size = (unsigned int)(NUM_FRAMEBUFFER_VERTICES*sizeof(float));
 
     // Fill vertex buffer
-    vertex_buffer_buffer_data(&data->vbo, framebuffer_vertices,texture_data_size, STATIC_READ);
+    vertex_buffer_buffer_data(&data->vbo, layer_framebuffer_vertices, texture_data_size, STATIC_READ);
 
     shader_program_use(&data->framebuffer_shader);
 

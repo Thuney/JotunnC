@@ -23,7 +23,7 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 
     const uint32_t width     = 600;
     const uint32_t height    = 400;
-    const uint8_t num_layers = 1;
+    const uint8_t num_layers = 2;
 
     ball_window->clicked_indicator_radius = 4.0f;
     ball_window->last_clicked = (fvector2) { 0.0f, 0.0f };
@@ -48,7 +48,7 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
         fvector4 window_background_color;
-        fvector4_set(&window_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+        fvector4_set(&window_background_color, 0.1f, 0.1f, 0.1f, 0.0f);
         // fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
         // Camera stuff

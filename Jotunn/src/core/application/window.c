@@ -162,7 +162,7 @@ uint8_t window_run(struct window_t* window)
     current_layer = window->layers;
     for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
     {
-        renderer_window_layer_draw_layer(&(window->window_layer_renderer), (*current_layer));
+        renderer_window_layer_draw_layer(&(window->window_layer_renderer), (*current_layer), i);
     }
 
     renderer_window_layer_end_scene(&(window->window_layer_renderer));

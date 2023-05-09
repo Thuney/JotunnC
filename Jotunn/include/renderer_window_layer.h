@@ -34,4 +34,4 @@ void renderer_window_layer_cleanup(struct renderer_window_layer_t* renderer);
 void renderer_window_layer_begin_scene(void* renderer);
 void renderer_window_layer_end_scene(void* renderer);
 
-void renderer_window_layer_draw_layer(struct renderer_window_layer_t* renderer, struct window_layer_t *window_layer);
+void renderer_window_layer_draw_layer(struct renderer_window_layer_t* renderer, struct window_layer_t *window_layer, uint8_t layer_number);

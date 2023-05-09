@@ -276,11 +276,19 @@ static uint8_t window_gl_init(struct window_t* window)
       glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
    }
 
+   #ifdef DEBUG
+      fprintf(stdout, "Creating Window\n");
+   #endif
+
    // Create window via GLFW
    GLFWwindow* gl_window_ptr = glfwCreateWindow(window->metadata.width, window->metadata.height, window->metadata.tag, NULL, NULL);
 
    // Assign to our window handle as void*
    window->context_data.window_handle = (void*)gl_window_ptr;
+
+   #ifdef DEBUG
+      fprintf(stdout, "Got past that part\n");
+   #endif
 
    // Set a pointer in GLFW to our window data
    glfwSetWindowUserPointer(gl_window_ptr, (void*)&(window->metadata));
@@ -300,6 +308,9 @@ static uint8_t window_gl_init(struct window_t* window)
       is_glew_initialized = (glewInit() == GLEW_OK);
    }
 
+   #ifdef DEBUG
+      fprintf(stdout, "Releasing context\n");
+   #endif
    // Release context
    glfwMakeContextCurrent(NULL);
 
@@ -372,18 +383,18 @@ void window_graphics_cleanup(struct window_t* window)
 
 void window_graphics_set_context(struct window_t* window)
 {
-   // #ifdef DEBUG
-   //    fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
-   // #endif
+   #ifdef DEBUG
+      fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
+   #endif
 
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 }
 
 void window_graphics_release_context()
 {
-   // #ifdef DEBUG
-   //    fprintf(stdout, "Releasing Context\n");
-   // #endif
+   #ifdef DEBUG
+      fprintf(stdout, "Releasing Context\n");
+   #endif
 
    glfwMakeContextCurrent(NULL);
 }
