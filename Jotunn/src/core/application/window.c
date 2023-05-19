@@ -131,8 +131,8 @@ uint8_t window_run(struct window_t* window)
         if (window->metadata.resized)
         {
             // framebuffer_unbind();
-            // framebuffer_resize(((*current_layer)->framebuffer), window->metadata.width, window->metadata.height);
             // framebuffer_bind(((*current_layer)->framebuffer));
+            framebuffer_resize(((*current_layer)->framebuffer), window->metadata.width, window->metadata.height);
             
             window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
             (*current_layer)->camera->camera_reproject((*current_layer)->camera, (float)window->metadata.width, (float)window->metadata.height, (*current_layer)->camera->near_plane, (*current_layer)->camera->far_plane);
