@@ -9,19 +9,22 @@
 struct color_buffer_t
 {
     // Underlying texture storage
-    struct texture_2d_t texture;
+    // struct texture_2d_t texture;
+    unsigned int texture_id;
 };
 
 struct depth_buffer_t
 {
     // Underlying texture storage
-    struct texture_2d_t texture;
+    // struct texture_2d_t texture;
+    unsigned int texture_id;
 };
 
 struct stencil_buffer_t
 {
     // Underlying texture storage
-    struct texture_2d_t texture;
+    // struct texture_2d_t texture;
+    unsigned int texture_id;
 };
 
 //
@@ -29,6 +32,7 @@ struct stencil_buffer_t
 struct framebuffer_t
 {
    unsigned int frame_buffer;
+   unsigned int rbo;
    struct color_buffer_t color_buffer;
    struct depth_buffer_t depth_buffer;
    struct stencil_buffer_t stencil_buffer;

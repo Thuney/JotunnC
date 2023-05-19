@@ -1,38 +1,55 @@
 #include "renderer_window_layer.h"
 
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
 #include <memory.h>
 
 #ifdef DEBUG
-#include <stdio.h>
+    #include <stdio.h>
 #endif
 
 #define NUM_FRAMEBUFFER_VERTICES ((3+2)*6)
 
-// static float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-//         // positions   // texCoords
+static float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+    // positions         // texCoords
+    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+    -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
+     1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
+
+    -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
+     1.0f,  1.0f, 0.0f,  1.0f, 1.0f,
+     1.0f, -1.0f, 0.0f,  1.0f, 0.0f
+};
+
+static unsigned int framebuffer_indices[] = {
+    0, 1, 2,
+    3, 4, 5
+};
+
+// static void get_framebuffer_vertices_for_layer(float vertices[NUM_FRAMEBUFFER_VERTICES], uint8_t layer)
+// {
+//     // float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+//     //     // positions                 // texCoords
+//     //     -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
+//     //     -1.0f, -1.0f, (float)layer,  0.0f, 0.0f,
+//     //      1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
+//     //     -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
+//     //      1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
+//     //      1.0f,  1.0f, (float)layer,  1.0f, 1.0f
+//     // };
+
+//     float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
+//         // positions                 // texCoords
 //         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
 //         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
 //          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-
 //         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
 //          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
 //          1.0f,  1.0f, 0.0f,  1.0f, 1.0f
 //     };
 
-static void get_framebuffer_vertices_for_layer(float vertices[NUM_FRAMEBUFFER_VERTICES], uint8_t layer)
-{
-    float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-        // positions                 // texCoords
-        -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
-        -1.0f, -1.0f, (float)layer,  0.0f, 0.0f,
-         1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
-        -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
-         1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
-         1.0f,  1.0f, (float)layer,  1.0f, 1.0f
-    };
-
-    memcpy(vertices, framebuffer_vertices, NUM_FRAMEBUFFER_VERTICES);
-}
+//     memcpy(vertices, framebuffer_vertices, NUM_FRAMEBUFFER_VERTICES);
+// }
 
 struct framebuffer_vertex_t
 {
@@ -97,15 +114,15 @@ static void renderer_window_layer_data_init(struct renderer_window_layer_data_t 
         attribute_name = attributes[attribute_index].attribute_name;
         temp_shader_index = shader_program_get_attribute_location(&(data->framebuffer_shader), attribute_name);
 
-        // #ifdef DEBUG
-        //    fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
-        // #endif
+        #ifdef DEBUG
+           fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
+        #endif
 
         attributes[attribute_index].index = temp_shader_index;
 
-        // #ifdef DEBUG
-        //    vertex_attribute_print(&attributes[attribute_index]);
-        // #endif
+        #ifdef DEBUG
+           vertex_attribute_print(&attributes[attribute_index]);
+        #endif
 
         vertex_array_set_attribute(&(data->vao), &attributes[attribute_index]);
     }
@@ -149,6 +166,9 @@ void renderer_window_layer_begin_scene(void *renderer)
     struct renderer_window_layer_t *renderer_window_layer = (struct renderer_window_layer_t *)renderer;
 
     framebuffer_unbind();
+
+    render_api_bind(&(renderer_window_layer->base.render_api));
+    render_api_clear(&(renderer_window_layer->base.render_api));
 }
 
 void renderer_window_layer_end_scene(void *renderer)
@@ -162,7 +182,7 @@ void renderer_window_layer_end_scene(void *renderer)
 
 void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, struct window_layer_t *window_layer, uint8_t layer_number)
 {
-    shader_program_use(&(renderer->render_data.framebuffer_shader));
+    // shader_program_use(&(renderer->render_data.framebuffer_shader));
 
     struct renderer_window_layer_data_t *data = &(renderer->render_data);
 
@@ -170,18 +190,23 @@ void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, 
     vertex_buffer_bind(&data->vbo);
     element_buffer_bind(&data->ebo);
 
-    static float layer_framebuffer_vertices[NUM_FRAMEBUFFER_VERTICES];
+    // static float layer_framebuffer_vertices[NUM_FRAMEBUFFER_VERTICES];
 
-    get_framebuffer_vertices_for_layer(layer_framebuffer_vertices, layer_number);
+    // get_framebuffer_vertices_for_layer(layer_framebuffer_vertices, layer_number);
 
-    static const unsigned int texture_data_size = (unsigned int)(NUM_FRAMEBUFFER_VERTICES*sizeof(float));
+    // static const unsigned int texture_data_size = (unsigned int)(NUM_FRAMEBUFFER_VERTICES*sizeof(float));
 
     // Fill vertex buffer
-    vertex_buffer_buffer_data(&data->vbo, layer_framebuffer_vertices, texture_data_size, STATIC_READ);
+    // vertex_buffer_buffer_data(&data->vbo, layer_framebuffer_vertices, texture_data_size, STATIC_READ);
+    element_buffer_buffer_data(&data->ebo, framebuffer_indices, sizeof(framebuffer_indices), STATIC_DRAW);
+    vertex_buffer_buffer_data(&data->vbo, framebuffer_vertices, sizeof(framebuffer_vertices), STATIC_READ);
 
     shader_program_use(&data->framebuffer_shader);
 
-    texture_2d_bind(&(window_layer->framebuffer->color_buffer.texture), 0);
+    // texture_2d_bind(&(window_layer->framebuffer->color_buffer.texture), 0);
+
+    glBindTextureUnit(0, (window_layer->framebuffer->color_buffer.texture_id));
+
     shader_program_set_uniform_int(&data->framebuffer_shader, "u_textures[0]", 0);
 
     render_api_draw_elements(DRAW_TYPE_TRIANGLES, 6, ELEMENT_UNSIGNED_INT, 0);

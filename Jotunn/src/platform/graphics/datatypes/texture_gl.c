@@ -85,7 +85,11 @@ static GLenum gl_get_texture_internal_format(enum texture_2d_internal_format_t i
 
 static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
 {
-   glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
+   // glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
+
+   glGenTextures(1, &texture->texture_id);
+   glBindTexture(GL_TEXTURE_2D, texture->texture_id);
+
    glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(internal_format), texture->width, texture->height);
    glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
 

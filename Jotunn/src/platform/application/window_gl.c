@@ -227,30 +227,30 @@ static void window_gl_set_callbacks(GLFWwindow* glfw_window_ptr)
    glfwSetWindowFocusCallback(glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
-// ChatGPT wrote this function
-static void printOpenGLInfo(GLFWwindow* window) {
-    // Get the OpenGL context version string
-    const char* version = (const char*) glGetString(GL_VERSION);
-    printf("OpenGL version: %s\n", version);
+// // ChatGPT wrote this function
+// static void printOpenGLInfo(GLFWwindow* window) {
+//     // Get the OpenGL context version string
+//     const char* version = (const char*) glGetString(GL_VERSION);
+//     printf("OpenGL version: %s\n", version);
 
-    // Get the OpenGL renderer string
-    const char* renderer = (const char*) glGetString(GL_RENDERER);
-    printf("Renderer: %s\n", renderer);
+//     // Get the OpenGL renderer string
+//     const char* renderer = (const char*) glGetString(GL_RENDERER);
+//     printf("Renderer: %s\n", renderer);
 
-    // Get the OpenGL vendor string
-    const char* vendor = (const char*) glGetString(GL_VENDOR);
-    printf("Vendor: %s\n", vendor);
+//     // Get the OpenGL vendor string
+//     const char* vendor = (const char*) glGetString(GL_VENDOR);
+//     printf("Vendor: %s\n", vendor);
 
-    // Get the GLFW version string
-    int major, minor, rev;
-    glfwGetVersion(&major, &minor, &rev);
-    printf("GLFW version: %d.%d.%d\n", major, minor, rev);
+//     // Get the GLFW version string
+//     int major, minor, rev;
+//     glfwGetVersion(&major, &minor, &rev);
+//     printf("GLFW version: %d.%d.%d\n", major, minor, rev);
 
-    // Get the GLFW window size
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-    printf("Window size: %d x %d\n", width, height);
-}
+//     // Get the GLFW window size
+//     int width, height;
+//     glfwGetWindowSize(window, &width, &height);
+//     printf("Window size: %d x %d\n", width, height);
+// }
 
 static uint8_t window_gl_init(struct window_t* window)
 {
@@ -268,16 +268,20 @@ static uint8_t window_gl_init(struct window_t* window)
    {
       glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
 
-      //Set some GLFW settings such as GL context version, modern core profile for the context, etc.
+      // Set some GLFW settings such as GL context version, modern core profile for the context, etc.
       glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
       glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
       glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
       glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
       glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
    }
-
    #ifdef DEBUG
-      fprintf(stdout, "Creating Window\n");
+   else
+   {
+      fprintf(stdout, "GLFW initialization failed\n");
+   }
+      
+   fprintf(stdout, "Creating Window\n");
    #endif
 
    // Create window via GLFW
@@ -297,7 +301,7 @@ static uint8_t window_gl_init(struct window_t* window)
 
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 
-   printOpenGLInfo(gl_window_ptr);
+   // printOpenGLInfo(gl_window_ptr);
 
    // Set the GL viewport to the size of the window
    glViewport(0, 0, window->metadata.width, window->metadata.height);
@@ -383,18 +387,18 @@ void window_graphics_cleanup(struct window_t* window)
 
 void window_graphics_set_context(struct window_t* window)
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
+   // #endif
 
    glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
 }
 
 void window_graphics_release_context()
 {
-   #ifdef DEBUG
-      fprintf(stdout, "Releasing Context\n");
-   #endif
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Releasing Context\n");
+   // #endif
 
    glfwMakeContextCurrent(NULL);
 }

@@ -20,6 +20,7 @@ static struct camera_ortho_t window2_camera_ortho;
 static struct renderer_2d_t window2_renderer_2d;
 
 static struct texture_2d_t aaron_shakespeare_texture;
+static struct texture_2d_t lenna_texture;
 
 //
 
@@ -74,20 +75,35 @@ void window1_run(struct window_t* parent_window, struct window_layer_t* window_l
         }
     }
 
-    // Textured Quad
+    // Textured Quads
 
-    const fvector3 textured_quad_position = { 900.0f, 500.0f, 0.0f };
+    const fvector3 aaron_textured_quad_position = { 900.0f, 500.0f, 0.0f };
 
-    const float textured_quad_scale_factor     = 200.0f;
-    const fvector3 textured_quad_scale_factors = (fvector3) { {textured_quad_scale_factor, textured_quad_scale_factor, textured_quad_scale_factor} };
+    const float aaron_textured_quad_scale_factor     = 200.0f;
+    const fvector3 aaron_textured_quad_scale_factors = (fvector3) { {aaron_textured_quad_scale_factor, aaron_textured_quad_scale_factor, aaron_textured_quad_scale_factor} };
 
-    fmatrix_4x4 textured_quad_transform_matrix;
-    fmatrix_4x4_init(&textured_quad_transform_matrix);
+    fmatrix_4x4 aaron_textured_quad_transform_matrix;
+    fmatrix_4x4_init(&aaron_textured_quad_transform_matrix);
 
-    textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&textured_quad_transform_matrix, textured_quad_scale_factors);
-    textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&textured_quad_transform_matrix, textured_quad_position);
+    aaron_textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&aaron_textured_quad_transform_matrix, aaron_textured_quad_scale_factors);
+    aaron_textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&aaron_textured_quad_transform_matrix, aaron_textured_quad_position);
 
-    renderer_2d_draw_textured_quad(&window1_renderer_2d, &textured_quad_transform_matrix, &aaron_shakespeare_texture);
+    renderer_2d_draw_textured_quad(&window1_renderer_2d, &aaron_textured_quad_transform_matrix, &aaron_shakespeare_texture);
+
+    //
+
+    const fvector3 lenna_textured_quad_position = { 400.0f, 800.0f, 0.0f };
+
+    const float lenna_textured_quad_scale_factor     = 350.0f;
+    const fvector3 lenna_textured_quad_scale_factors = (fvector3) { {lenna_textured_quad_scale_factor, lenna_textured_quad_scale_factor, lenna_textured_quad_scale_factor} };
+
+    fmatrix_4x4 lenna_textured_quad_transform_matrix;
+    fmatrix_4x4_init(&lenna_textured_quad_transform_matrix);
+
+    lenna_textured_quad_transform_matrix = fmatrix_4x4_transform_scale(&lenna_textured_quad_transform_matrix, lenna_textured_quad_scale_factors);
+    lenna_textured_quad_transform_matrix = fmatrix_4x4_transform_translate(&lenna_textured_quad_transform_matrix, lenna_textured_quad_position);
+
+    renderer_2d_draw_textured_quad(&window1_renderer_2d, &lenna_textured_quad_transform_matrix, &lenna_texture);
 
     // Line
 
@@ -209,6 +225,7 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
         renderer_2d_init(&window1_renderer_2d, window1_layer.camera, window1, "renderer_2d");
 
         texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
+        texture_2d_create_from_file_path(&lenna_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/lenna.png", 1);
 
         window_set_background_color(window1, window1_background_color);
 
@@ -308,6 +325,7 @@ int main(int argc, char** argv)
         framebuffer_cleanup(&(window2_framebuffer));
 
         texture_2d_cleanup(&aaron_shakespeare_texture);
+        texture_2d_cleanup(&lenna_texture);
     }
 #ifdef DEBUG
     else

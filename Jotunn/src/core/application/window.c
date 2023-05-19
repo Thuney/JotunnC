@@ -65,8 +65,6 @@ uint8_t window_init(struct window_t* window, const uint8_t max_window_layers, co
 
         renderer_window_layer_init(&window->window_layer_renderer, window, "Window Renderer");
 
-        window_release_context();
-
         window->max_layers = max_window_layers;
         window->num_layers = 0;
         window->layers = (struct window_layer_t**) malloc(window->max_layers*sizeof(struct window_layer_t*));
@@ -171,7 +169,7 @@ uint8_t window_run(struct window_t* window)
 
     window_release_context();
 
-    return window->metadata.signaled_close;
+    return (window->metadata.signaled_close);
 }
 
 void window_cleanup(struct window_t* window)
