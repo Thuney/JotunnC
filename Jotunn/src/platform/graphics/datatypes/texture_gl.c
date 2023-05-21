@@ -83,15 +83,15 @@ static GLenum gl_get_texture_internal_format(enum texture_2d_internal_format_t i
    return gl_internal_format;
 }
 
-static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
+static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
 {
    // glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
 
    glGenTextures(1, &texture->texture_id);
    glBindTexture(GL_TEXTURE_2D, texture->texture_id);
 
-   glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(internal_format), texture->width, texture->height);
-   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
+   glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height);
+   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
 
    /*
 	 * Set the modes for texture filtering
@@ -100,7 +100,6 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, const enum texture_
 	 */
    glTextureParameteri(texture->texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
    glTextureParameteri(texture->texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
 
    if (wrap)
    {
@@ -133,18 +132,18 @@ static void gl_texture_2d_bind(const struct texture_2d_t* texture, const unsigne
    glBindTextureUnit(texture_slot, texture->texture_id);
 }
 
-static void gl_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes, const enum texture_2d_data_format_t data_format)
+static void gl_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes)
 {
-   glTextureSubImage2D(texture->texture_id, 0, 0, 0, texture->width, texture->height, gl_get_texture_data_format(data_format), GL_UNSIGNED_BYTE, data);
+   glTextureSubImage2D(texture->texture_id, 0, 0, 0, texture->width, texture->height, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, data);
 }
 
 //
 //
 //
 
-void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap)
+void platform_texture_2d_init(struct texture_2d_t* texture, bool wrap)
 {
-   gl_texture_2d_init(texture, internal_format, wrap);
+   gl_texture_2d_init(texture, wrap);
 }
 
 void platform_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
@@ -159,7 +158,7 @@ void platform_texture_2d_cleanup(struct texture_2d_t* texture)
 
 void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes)
 {
-   gl_texture_2d_set_data(texture, data, data_size_bytes, texture->data_format);
+   gl_texture_2d_set_data(texture, data, data_size_bytes);
 }
 
 void platform_texture_2d_bind(const struct texture_2d_t* texture, const unsigned int texture_slot)

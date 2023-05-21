@@ -9,7 +9,7 @@
    #include <stdio.h>
 #endif
 
-extern void platform_texture_2d_init(struct texture_2d_t* texture, const enum texture_2d_internal_format_t internal_format, bool wrap);
+extern void platform_texture_2d_init(struct texture_2d_t* texture, bool wrap);
 extern void platform_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height);
 extern void platform_texture_2d_cleanup(struct texture_2d_t* texture);
 extern void platform_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes);
@@ -60,7 +60,7 @@ void texture_2d_init(struct texture_2d_t* texture, const int width, const int he
       break;
    }
 
-   platform_texture_2d_init(texture, internal_format, wrap);
+   platform_texture_2d_init(texture, wrap);
 }
 
 void texture_2d_cleanup(struct texture_2d_t* texture)
