@@ -37,14 +37,17 @@ void framebuffer_init(struct framebuffer_t* frame_buffer, const int width, const
 
     color_buffer_init(&(frame_buffer->color_buffer), width, height);
     framebuffer_attach_color_buffer(frame_buffer, &(frame_buffer->color_buffer));
+
     render_buffer_init(&(frame_buffer->depth_stencil_buffer), width, height);
+    framebuffer_attach_render_buffer(frame_buffer, &(frame_buffer->depth_stencil_buffer));
+
     framebuffer_unbind();
 }
 
 void framebuffer_resize(struct framebuffer_t* frame_buffer, const int new_width, const int new_height)
 {
-    platform_color_buffer_resize(&(frame_buffer->color_buffer), new_width, new_height);
-    platform_render_buffer_resize(&(frame_buffer->depth_stencil_buffer), new_width, new_height);
+    color_buffer_resize(&(frame_buffer->color_buffer), new_width, new_height);
+    render_buffer_resize(&(frame_buffer->depth_stencil_buffer), new_width, new_height);
 }
 
 void framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer)
@@ -83,7 +86,9 @@ void color_buffer_init(struct color_buffer_t* color_buffer, const int width, con
         fprintf(stdout, "Initializing color buffer\n");
     #endif
 
-    platform_color_buffer_init(color_buffer, width, height);
+    texture_2d_init(&(color_buffer->texture), width, height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8, false);
+
+    // platform_color_buffer_init(color_buffer, width, height);
 }
 
 void render_buffer_init(struct render_buffer_t* render_buffer, const int width, const int height)
@@ -97,12 +102,12 @@ void render_buffer_init(struct render_buffer_t* render_buffer, const int width, 
 
 void color_buffer_resize(struct color_buffer_t* color_buffer, const int new_width, const int new_height)
 {
-
+    platform_color_buffer_resize(color_buffer, new_width, new_height);
 }
 
-void render_buffer_resize(struct render_buffer_t* color_buffer, const int new_width, const int new_height)
+void render_buffer_resize(struct render_buffer_t* render_buffer, const int new_width, const int new_height)
 {
-
+    platform_render_buffer_resize(render_buffer, new_width, new_height);
 }
 
 void color_buffer_cleanup(struct color_buffer_t* color_buffer)

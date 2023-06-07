@@ -120,6 +120,11 @@ uint8_t window_run(struct window_t* window)
     window_set_context(window);
     window_graphics_poll_events(window);
 
+    if (window->metadata.resized)
+    {
+        window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
+    }
+
     struct window_layer_t** current_layer;
 
     // Render our layers to their respective framebuffers, bottom to top    
@@ -130,11 +135,7 @@ uint8_t window_run(struct window_t* window)
 
         if (window->metadata.resized)
         {
-            // framebuffer_unbind();
-            // framebuffer_bind(((*current_layer)->framebuffer));
             framebuffer_resize(((*current_layer)->framebuffer), window->metadata.width, window->metadata.height);
-            
-            window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
             (*current_layer)->camera->camera_reproject((*current_layer)->camera, (float)window->metadata.width, (float)window->metadata.height, (*current_layer)->camera->near_plane, (*current_layer)->camera->far_plane);
         }
 

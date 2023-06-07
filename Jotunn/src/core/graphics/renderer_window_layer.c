@@ -1,9 +1,5 @@
 #include "renderer_window_layer.h"
 
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
-#include <memory.h>
-
 #ifdef DEBUG
     #include <stdio.h>
 #endif
@@ -25,31 +21,6 @@ static unsigned int framebuffer_indices[] = {
     0, 1, 2,
     3, 4, 5
 };
-
-// static void get_framebuffer_vertices_for_layer(float vertices[NUM_FRAMEBUFFER_VERTICES], uint8_t layer)
-// {
-//     // float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-//     //     // positions                 // texCoords
-//     //     -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
-//     //     -1.0f, -1.0f, (float)layer,  0.0f, 0.0f,
-//     //      1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
-//     //     -1.0f,  1.0f, (float)layer,  0.0f, 1.0f,
-//     //      1.0f, -1.0f, (float)layer,  1.0f, 0.0f,
-//     //      1.0f,  1.0f, (float)layer,  1.0f, 1.0f
-//     // };
-
-//     float framebuffer_vertices[] = { // vertex attributes for a quad that fills the entire screen in Normalized Device Coordinates.
-//         // positions                 // texCoords
-//         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-//         -1.0f, -1.0f, 0.0f,  0.0f, 0.0f,
-//          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-//         -1.0f,  1.0f, 0.0f,  0.0f, 1.0f,
-//          1.0f, -1.0f, 0.0f,  1.0f, 0.0f,
-//          1.0f,  1.0f, 0.0f,  1.0f, 1.0f
-//     };
-
-//     memcpy(vertices, framebuffer_vertices, NUM_FRAMEBUFFER_VERTICES);
-// }
 
 struct framebuffer_vertex_t
 {
@@ -190,22 +161,13 @@ void renderer_window_layer_draw_layer(struct renderer_window_layer_t *renderer, 
     vertex_buffer_bind(&data->vbo);
     element_buffer_bind(&data->ebo);
 
-    // static float layer_framebuffer_vertices[NUM_FRAMEBUFFER_VERTICES];
-
-    // get_framebuffer_vertices_for_layer(layer_framebuffer_vertices, layer_number);
-
-    // static const unsigned int texture_data_size = (unsigned int)(NUM_FRAMEBUFFER_VERTICES*sizeof(float));
-
     // Fill vertex buffer
-    // vertex_buffer_buffer_data(&data->vbo, layer_framebuffer_vertices, texture_data_size, STATIC_READ);
     element_buffer_buffer_data(&data->ebo, framebuffer_indices, sizeof(framebuffer_indices), STATIC_DRAW);
     vertex_buffer_buffer_data(&data->vbo, framebuffer_vertices, sizeof(framebuffer_vertices), STATIC_READ);
 
     shader_program_use(&data->framebuffer_shader);
 
-    // texture_2d_bind(&(window_layer->framebuffer->color_buffer.texture), 0);
-
-    glBindTextureUnit(0, (window_layer->framebuffer->color_buffer.texture_id));
+    texture_2d_bind(&(window_layer->framebuffer->color_buffer.texture), 0);
 
     shader_program_set_uniform_int(&data->framebuffer_shader, "u_textures[0]", 0);
 

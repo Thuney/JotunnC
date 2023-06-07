@@ -14,15 +14,7 @@ void platform_framebuffer_init(struct framebuffer_t* frame_buffer)
 
 void platform_color_buffer_init(struct color_buffer_t* color_buffer, const int width, const int height)
 {
-    glGenTextures(1, &color_buffer->texture_id);
-    glBindTexture(GL_TEXTURE_2D, color_buffer->texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    #ifdef DEBUG
-        fprintf(stdout, "Initialized color buffer texture with ID: %d\n", color_buffer->texture_id);
-    #endif
+    
 }
 
 void platform_render_buffer_init(struct render_buffer_t* render_buffer, const int width, const int height)
@@ -34,7 +26,7 @@ void platform_render_buffer_init(struct render_buffer_t* render_buffer, const in
 
 void platform_color_buffer_resize(struct color_buffer_t* color_buffer, const int new_width, const int new_height)
 {
-    glBindTexture(GL_TEXTURE_2D, color_buffer->texture_id);
+    glBindTexture(GL_TEXTURE_2D, color_buffer->texture.texture_id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, new_width, new_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
 }
 
@@ -46,7 +38,7 @@ void platform_render_buffer_resize(struct render_buffer_t* render_buffer, const 
 
 void platform_framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer)
 {
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer->texture_id, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, color_buffer->texture.texture_id, 0);
 
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)

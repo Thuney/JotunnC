@@ -90,9 +90,6 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
    glGenTextures(1, &texture->texture_id);
    glBindTexture(GL_TEXTURE_2D, texture->texture_id);
 
-   glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height);
-   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
-
    /*
 	 * Set the modes for texture filtering
     * 'Minimizing' filter for down-scaling textures
@@ -111,6 +108,8 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
       glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
    }
 
+   glTexImage2D(GL_TEXTURE_2D, 0,  gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
+
    #ifdef DEBUG
       fprintf(stdout, "Texture initialized with ID %d\n", texture->texture_id);
    #endif
@@ -118,7 +117,6 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
 
 static void gl_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
 {
-   // glTextureStorage2D(texture->texture_id, 1, gl_get_texture_internal_format(texture->internal_format), new_width, new_width);
    glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(texture->internal_format), new_width, new_height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
 }
 
@@ -135,6 +133,7 @@ static void gl_texture_2d_bind(const struct texture_2d_t* texture, const unsigne
 static void gl_texture_2d_set_data(const struct texture_2d_t* texture, void* data, const unsigned int data_size_bytes)
 {
    glTextureSubImage2D(texture->texture_id, 0, 0, 0, texture->width, texture->height, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, data);
+   // glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 //
