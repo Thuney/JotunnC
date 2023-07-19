@@ -1,5 +1,7 @@
 #include "renderer_window_layer.h"
 
+#include "window_layer.h"
+
 #ifdef DEBUG
     #include <stdio.h>
 #endif

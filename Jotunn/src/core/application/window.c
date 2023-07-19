@@ -2,6 +2,7 @@
 #include "fvector.h"
 #include "render_api.h"
 #include "window.h"
+#include "window_layer.h"
 
 #include <memory.h>
 
@@ -143,7 +144,7 @@ uint8_t window_run(struct window_t* window)
 
         if ((*current_layer)->function_custom_window_layer_run)
         {
-            (*current_layer)->function_custom_window_layer_run(window, *(current_layer));
+            (*current_layer)->function_custom_window_layer_run(*(current_layer));
         }
 
         renderer_base_end_scene(((*current_layer)->renderer));

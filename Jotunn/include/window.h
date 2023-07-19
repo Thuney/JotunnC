@@ -1,13 +1,14 @@
 #pragma once
 
-#include "framebuffer.h"
-#include "renderer_2d.h"
-#include "renderer_window_layer.h"
-
 struct application_t;
 struct camera_base_t;
+struct event_base_t;
 struct renderer_base_t;
 struct window_t;
+
+#include "renderer_window_layer.h"
+
+#include <stdint.h>
 
 struct window_data_t
 {

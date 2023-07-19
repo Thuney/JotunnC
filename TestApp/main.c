@@ -24,7 +24,7 @@ static struct texture_2d_t lenna_texture;
 
 //
 
-void window1_run(struct window_t* parent_window, struct window_layer_t* window_layer)
+void window1_run(struct window_layer_t* window_layer)
 {
     // #ifdef DEBUG
     //     fprintf(stdout, "Running Window 1 Custom Function\n");
@@ -122,7 +122,7 @@ void window1_run(struct window_t* parent_window, struct window_layer_t* window_l
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
-void window2_run(struct window_t* parent_window, struct window_layer_t* window_layer)
+void window2_run(struct window_layer_t* window_layer)
 {
     // Grid of shapes (triangle - circle)
 
@@ -198,7 +198,7 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
     if (!error)
     {
         framebuffer_init(&window1_framebuffer, width, height);
-        window_layer_init(&window1_layer, &window1_framebuffer, (struct camera_base_t*)&window1_camera_ortho, (struct renderer_base_t*)&window1_renderer_2d);
+        window_layer_init(window1, &window1_layer, &window1_framebuffer, (struct camera_base_t*)&window1_camera_ortho, (struct renderer_base_t*)&window1_renderer_2d);
         window_add_layer(window1, &window1_layer);
 
         fvector4 window1_background_color;
@@ -248,7 +248,7 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
     if (!error)
     {
         framebuffer_init(&window2_framebuffer, width, height);
-        window_layer_init(&window2_layer, &window2_framebuffer, (struct camera_base_t*)&window2_camera_ortho, (struct renderer_base_t*)&window2_renderer_2d);
+        window_layer_init(window2, &window2_layer, &window2_framebuffer, (struct camera_base_t*)&window2_camera_ortho, (struct renderer_base_t*)&window2_renderer_2d);
         window_add_layer(window2, &window2_layer);
 
         fvector4 window2_background_color;

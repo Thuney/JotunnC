@@ -37,13 +37,14 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 
     if (!error)
     {
+        window_set_context(window_ptr);
+
         framebuffer_init(&ball_window->framebuffer, width, height);
-        window_layer_init(&ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
+        window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
         window_add_layer(&ball_window->window, &ball_window->window_layer);
 
-        framebuffer_init(&ball_window->ui_framebuffer, width, height);
-        window_layer_init(&ball_window->ui_window_layer, &ball_window->ui_framebuffer, camera_base_ptr, renderer_base_ptr);
-        window_add_layer(&ball_window->window, &ball_window->ui_window_layer);
+        ui_layer_init(window_ptr, &ball_window->ui_layer, width, height);
+        window_add_layer(&ball_window->window, &ball_window->ui_layer.ui_window_layer);
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
@@ -62,8 +63,6 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         const float ortho_bottom = 0.0f;
         const float ortho_near_plane = -3.0f;
         const float ortho_far_plane  = 100.0f;
-
-        window_set_context(window_ptr);
 
         camera_init_orthographic(&(ball_window->camera_ortho), camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&(ball_window->camera_ortho), ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
@@ -267,9 +266,9 @@ static const fmatrix_4x4 click_calculate_transform(struct ball_window_t* ball_wi
     return transform_matrix;
 }
 
-void ball_window_run(struct window_t* parent_window, struct window_layer_t* window_layer)
+void ball_window_run(struct window_layer_t* window_layer)
 {
-    struct ball_window_t* ball_window = (struct ball_window_t*)parent_window;
+    struct ball_window_t* ball_window = (struct ball_window_t*)window_layer->parent_window;
 
     const fmatrix_4x4 ball_transform = ball_calculate_transform(&(ball_window->ball));
 
@@ -308,5 +307,5 @@ void ball_window_cleanup(struct ball_window_t* ball_window)
     renderer_2d_cleanup(&(ball_window->renderer_2d));
 
     framebuffer_cleanup(&(ball_window->framebuffer));
-    framebuffer_cleanup(&(ball_window->ui_framebuffer));
+    ui_layer_cleanup(&(ball_window->ui_layer));
 }
