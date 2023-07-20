@@ -5,6 +5,7 @@
 #include "camera.h"
 #include "fvector.h"
 #include "renderer_2d.h"
+#include "window_layer.h"
 
 #include "texture.h"
 

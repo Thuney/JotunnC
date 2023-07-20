@@ -236,12 +236,7 @@ void application_on_event(struct application_t* app, struct event_base_t* event)
         struct window_t** cur_window = app->windows;
         for (uint8_t i = 0U; i < app->num_windows; i++)
         {
-            if((*cur_window)->function_event_react)
-            {
-                (*cur_window)->function_event_react((*cur_window), event);
-
-                if(event->handled) return;
-            }
+            window_handle_event(*cur_window, event);
 
             cur_window++;
         }   

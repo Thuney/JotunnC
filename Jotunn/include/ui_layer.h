@@ -1,42 +1,14 @@
 #pragma once
 
 #include "renderer_2d.h"
+#include "ui_element.h"
 #include "window_layer.h"
 
-#include <stdint.h>
-
+#define MAX_UI_CONTAINERS 16
 // -- 4x4 grid OR
 // -- 16 vertical / horizontal stretch 
 // -- Seems reasonable for now, per container
 #define MAX_UI_CONTAINER_ELEMENTS 16
-
-// Types implementing a "UI element"
-enum ui_element_type_t
-{
-    UI_ELEMENT_STATIC_TEXT,
-    UI_ELEMENT_SLIDER,
-    UI_ELEMENT_BUTTON,
-    UI_ELEMENT_CHECKBOX,
-    UI_ELEMENT_DROPDOWN,
-    UI_ELEMENT_GRAPH,
-    UI_ELEMENT_INPUT_BOX
-};
-
-// The core structure for UI elements
-struct ui_element_t
-{
-    // Type that this UI element is implementing
-    enum ui_element_type_t element_type;
-
-    // Total width and height of all sub-shapes composing the UI element
-    uint16_t width;
-    uint16_t height;
-
-    void (*function_ui_element_render)(struct ui_element_t* ui_element,
-                                       uint16_t origin_x,
-                                       uint16_t origin_y);
-};
-
 
 // Layout types of a UI container
 enum ui_container_layout_t
@@ -89,19 +61,11 @@ struct ui_layer_t
     struct camera_ortho_t ui_camera_ortho;
     struct renderer_2d_t ui_renderer_2d;
 
+    struct ui_theme_t ui_theme;
+
     uint16_t num_containers;
-    struct ui_container_t* ui_containers;
+    struct ui_container_t* ui_containers[MAX_UI_CONTAINERS];
 };
-
-//
-void ui_element_init(struct ui_element_t* ui_element,
-                     enum ui_element_type_t element_type,
-                     uint16_t width, 
-                     uint16_t height, 
-                     void (*function_ui_element_render)(struct ui_element_t* ui_element,
-                                                        uint16_t origin_x,
-                                                        uint16_t origin_y) );
-
 
 //
 void ui_theme_init(struct ui_theme_t* ui_theme,
@@ -119,11 +83,12 @@ void ui_container_init(struct ui_container_t* ui_container,
 
 void ui_container_render(struct ui_container_t* ui_container);
 
-void ui_container_add_element(struct ui_container_t* ui_container,
-                              struct ui_element_t* ui_element);
-
 //
-void ui_layer_init(struct window_t* parent_window, struct ui_layer_t* ui_layer, uint32_t width, uint32_t height);
+void ui_layer_init(struct window_t* parent_window,
+                   struct ui_layer_t* ui_layer,
+                   uint32_t width,
+                   uint32_t height,
+                   struct ui_theme_t theme);
 
 void ui_layer_cleanup(struct ui_layer_t* ui_layer);
 

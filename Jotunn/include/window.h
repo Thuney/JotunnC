@@ -47,7 +47,9 @@ struct window_t
 uint8_t window_init(struct window_t* window, const uint8_t max_window_layers, const uint32_t width, const uint32_t height, const char* tag, struct application_t* app_parent);
 
 uint8_t window_add_layer(struct window_t* window, struct window_layer_t* new_window_layer);
+
 void window_bind_custom_events(struct window_t* window, void (*custom_event_function)(struct window_t*, struct event_base_t*));
+void window_handle_event(struct window_t* window, struct event_base_t* event);
 
 void window_show(struct window_t* window);
 void window_hide(struct window_t* window);

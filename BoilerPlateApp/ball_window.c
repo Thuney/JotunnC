@@ -43,7 +43,13 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
         window_add_layer(&ball_window->window, &ball_window->window_layer);
 
-        ui_layer_init(window_ptr, &ball_window->ui_layer, width, height);
+        struct ui_theme_t theme;
+        ui_theme_init(&theme, 
+                      (fvector4){ 255.0, 255.0, 255.0 },
+                      (fvector4){ 255.0, 255.0, 255.0 },
+                      (fvector4){ 255.0, 255.0, 255.0 });
+
+        ui_layer_init(window_ptr, &ball_window->ui_layer, width, height, theme);
         window_add_layer(&ball_window->window, &ball_window->ui_layer.ui_window_layer);
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
