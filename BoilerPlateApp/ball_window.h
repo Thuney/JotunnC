@@ -4,7 +4,7 @@
 #include "fmatrix.h"
 #include "fvector.h"
 #include "renderer_2d.h"
-#include "ui_layer.h"
+#include "ball_ui.h"
 
 #include <stdbool.h>
 
@@ -29,7 +29,7 @@ struct ball_window_t
     struct window_layer_t window_layer;
     struct framebuffer_t framebuffer;
     //
-    struct ui_layer_t ui_layer;
+    struct ball_ui_layer_t ball_ui_layer;
     //
     struct camera_ortho_t camera_ortho;
     struct renderer_2d_t renderer_2d;

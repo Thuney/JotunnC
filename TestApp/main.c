@@ -203,7 +203,7 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
         window_add_layer(window1, &window1_layer);
 
         fvector4 window1_background_color;
-        fvector4_set(&window1_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+        fvector4_set(&window1_background_color, 0.9f, 0.9f, 0.9f, 1.0f);
         // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
         // Camera stuff
@@ -253,7 +253,7 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
         window_add_layer(window2, &window2_layer);
 
         fvector4 window2_background_color;
-        fvector4_set(&window2_background_color, 0.1f, 0.1f, 0.1f, 1.0f);
+        fvector4_set(&window2_background_color, 0.9f, 0.9f, 0.9f, 1.0f);
         // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
         // Camera stuff

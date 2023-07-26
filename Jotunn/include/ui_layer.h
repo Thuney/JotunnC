@@ -81,7 +81,11 @@ void ui_container_init(struct ui_container_t* ui_container,
                        uint16_t width,
                        uint16_t height);
 
-void ui_container_render(struct ui_container_t* ui_container);
+void ui_container_add_element(struct ui_container_t* ui_container,
+                              struct ui_element_t* ui_element);
+
+void ui_container_render(struct renderer_2d_t* renderer_2d,
+                         struct ui_container_t* ui_container);
 
 //
 void ui_layer_init(struct window_t* parent_window,

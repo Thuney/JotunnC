@@ -14,8 +14,10 @@ TARGET   := BoilerPlateApp
 INCLUDE  := -I$(CURDIR)/../Jotunn/include/ $(FREETYPE2_INCLUDE)
 
 HDRS     := ball_window.h \
+			ball_ui.h 	  \
 
 SRC      := ball_window.c \
+			ball_ui.c 	  \
 			main.c 		  \
 
 OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)

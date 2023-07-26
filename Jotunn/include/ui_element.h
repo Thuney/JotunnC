@@ -1,6 +1,8 @@
 #pragma once 
 
 struct event_base_t;
+struct renderer_2d_t;
+struct ui_layer_t;
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -27,7 +29,8 @@ struct ui_element_t
     uint16_t width;
     uint16_t height;
 
-    void (*function_ui_element_render)(struct ui_element_t* ui_element,
+    void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
+                                       struct ui_element_t* ui_element,
                                        uint16_t origin_x,
                                        uint16_t origin_y);
 
@@ -65,9 +68,20 @@ void ui_element_init(struct ui_element_t* ui_element,
                      enum ui_element_type_t element_type,
                      uint16_t width, 
                      uint16_t height, 
-                     void (*function_ui_element_render)(struct ui_element_t* ui_element,
+                     void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
+                                                        struct ui_element_t* ui_element,
                                                         uint16_t origin_x,
                                                         uint16_t origin_y),
                      void (*function_ui_element_event_react)(struct ui_element_t* ui_element, 
                                                              struct event_base_t* event) );
 
+void ui_element_static_text_init(struct ui_element_static_text_t* text_element, 
+                                 char* static_text);
+
+void ui_element_slider_init(struct ui_element_slider_t* slider_element,
+                            float starting_position);
+
+void ui_element_button_init(struct ui_element_button_t* button_element);
+
+void ui_element_checkbox_init(struct ui_element_checkbox_t* checkbox_element,
+                              bool start_checked);

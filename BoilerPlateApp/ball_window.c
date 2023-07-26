@@ -41,21 +41,16 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 
         framebuffer_init(&ball_window->framebuffer, width, height);
         window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
-        window_add_layer(&ball_window->window, &ball_window->window_layer);
+        window_add_layer(&ball_window->window, &(ball_window->window_layer));
 
-        struct ui_theme_t theme;
-        ui_theme_init(&theme, 
-                      (fvector4){ 255.0, 255.0, 255.0 },
-                      (fvector4){ 255.0, 255.0, 255.0 },
-                      (fvector4){ 255.0, 255.0, 255.0 });
-
-        ui_layer_init(window_ptr, &ball_window->ui_layer, width, height, theme);
-        window_add_layer(&ball_window->window, &ball_window->ui_layer.ui_window_layer);
+        ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
+        
+        window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
         fvector4 window_background_color;
-        fvector4_set(&window_background_color, 0.1f, 0.1f, 0.1f, 0.0f);
+        fvector4_set(&window_background_color, 0.9f, 0.9f, 0.9f, 0.0f);
         // fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
         // Camera stuff
@@ -313,5 +308,6 @@ void ball_window_cleanup(struct ball_window_t* ball_window)
     renderer_2d_cleanup(&(ball_window->renderer_2d));
 
     framebuffer_cleanup(&(ball_window->framebuffer));
-    ui_layer_cleanup(&(ball_window->ui_layer));
+
+    ball_ui_layer_cleanup(&(ball_window->ball_ui_layer));
 }
