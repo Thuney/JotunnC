@@ -16,13 +16,14 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
     ui_theme->background_color = background_color;
 }
 
+#define UI_CONTAINER_MIN_WIDTH 20
+#define UI_CONTAINER_MIN_HEIGHT 20
+
 //
 void ui_container_init(struct ui_container_t* ui_container,
                        enum ui_container_layout_t layout,
                        uint16_t origin_x, 
-                       uint16_t origin_y,
-                       uint16_t width,
-                       uint16_t height)
+                       uint16_t origin_y)
 {
     memset(ui_container, 0, sizeof(struct ui_container_t));
 
@@ -31,8 +32,8 @@ void ui_container_init(struct ui_container_t* ui_container,
     ui_container->origin_x = origin_x;
     ui_container->origin_y = origin_y;
 
-    ui_container->width  = width;
-    ui_container->height = height;
+    ui_container->width  = UI_CONTAINER_MIN_WIDTH;
+    ui_container->height = UI_CONTAINER_MIN_HEIGHT;
 
     ui_container->num_elements = 0;
 }
@@ -59,13 +60,15 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
 
     renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->background_color);
 
+    fvector2 pen_position = { ui_container->origin_x, ui_container->origin_y + ui_container->height };
+
     for (int i = 0; i < ui_container->num_elements; i++)
     {
         struct ui_element_t* element = ui_container->contained_elements[i].element;
 
         if(element->function_ui_element_render)
         {
-            element->function_ui_element_render(renderer_2d, element, ui_container->origin_x, ui_container->origin_y, theme);
+            element->function_ui_element_render(renderer_2d, element, pen_position.comp.x, pen_position.comp.y, theme);
         }
     }
 }
@@ -78,6 +81,17 @@ void ui_container_add_element(struct ui_container_t* ui_container,
         uint16_t index = ui_container->num_elements++;
 
         ui_container->contained_elements[index].element = ui_element;
+
+        if (ui_container->width < ui_element->width)
+        {
+            ui_container->width = ui_element->width;
+        }
+
+        if (ui_container->height < ui_element->height)
+        {
+            ui_container->height = ui_element->height;
+        }
+
 
         switch (ui_container->layout)
         {

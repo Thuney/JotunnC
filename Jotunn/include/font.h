@@ -39,3 +39,5 @@ void typeface_cleanup(struct typeface_t* typeface);
 int typeface_load_glyph_atlas(struct typeface_t* typeface);
 const struct glyph_t* typeface_get_glyph_from_char(const struct typeface_t* typeface, const char charcode);
 void typeface_set_char_size(const struct typeface_t* typeface, const unsigned int char_height_points);
+
+fvector2 typeface_calculate_string_dimensions(struct typeface_t* typeface, const char* string, int string_length);

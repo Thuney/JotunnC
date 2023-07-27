@@ -77,9 +77,7 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
 void ui_container_init(struct ui_container_t* ui_container,
                        enum ui_container_layout_t layout,
                        uint16_t origin_x, 
-                       uint16_t origin_y,
-                       uint16_t width,
-                       uint16_t height);
+                       uint16_t origin_y);
 
 void ui_container_add_element(struct ui_container_t* ui_container,
                               struct ui_element_t* ui_element);

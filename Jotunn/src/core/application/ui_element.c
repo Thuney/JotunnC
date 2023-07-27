@@ -1,6 +1,7 @@
 #include "ui_element.h"
 
 #include "renderer_2d.h"
+#include "string.h"
 
 //
 void ui_element_init(struct ui_element_t* ui_element,
@@ -36,20 +37,25 @@ static void ui_element_static_text_render(struct renderer_2d_t* renderer_2d,
 
     struct ui_element_static_text_t* static_text_element = (struct ui_element_static_text_t*)ui_element;
 
-    renderer_2d_draw_string(renderer_2d, &(renderer_2d->typeface), (fvector3) { origin_x, origin_y, 0.1f }, static_text_element->static_text);
+    renderer_2d_draw_string(renderer_2d, static_text_element->typeface, (fvector3) { origin_x, origin_y - ui_element->height, 0.1f }, static_text_element->static_text);
 }
 
 void ui_element_static_text_init(struct ui_element_static_text_t* text_element, 
-                                 char* static_text)
+                                 char* static_text,
+                                 struct typeface_t* typeface)
 {
+    int text_length = strlen(static_text);
+    fvector2 text_dimensions = typeface_calculate_string_dimensions(typeface, static_text, text_length);
+
     ui_element_init(&(text_element->base_element),
                     UI_ELEMENT_STATIC_TEXT,
-                    100,
-                    100,
+                    text_dimensions.comp.x,
+                    text_dimensions.comp.y,
                     ui_element_static_text_render,
                     (void*)0);
 
     text_element->static_text = static_text;
+    text_element->typeface    = typeface;
 }
 
 void ui_element_slider_init(struct ui_element_slider_t* slider_element, 

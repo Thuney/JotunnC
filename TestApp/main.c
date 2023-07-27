@@ -23,6 +23,9 @@ static struct renderer_2d_t window2_renderer_2d;
 static struct texture_2d_t aaron_shakespeare_texture;
 static struct texture_2d_t lenna_texture;
 
+struct typeface_t window1_typeface;
+struct typeface_t window2_typeface;
+
 //
 
 void window1_run(struct window_layer_t* window_layer)
@@ -118,7 +121,7 @@ void window1_run(struct window_layer_t* window_layer)
     const fvector3 text_start_position = { 200.0f, 700.0f, 0.0f };
     
     // renderer_2d_draw_string(renderer, &window->renderer_2d.typeface, text_start_position, "A");
-    renderer_2d_draw_string(&window1_renderer_2d, &window1_renderer_2d.typeface, text_start_position, "This Is Some Sample Text With Spaces");
+    renderer_2d_draw_string(&window1_renderer_2d, &window1_typeface, text_start_position, "This Is Some Sample Text With Spaces");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, "!XA!CDEUVXW981902FFF");
     // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
@@ -183,7 +186,7 @@ void window2_run(struct window_layer_t* window_layer)
     // String of text
     const fvector3 text_start_position = { 100.0f, 900.0f, 0.0f };
     
-    renderer_2d_draw_string(&window2_renderer_2d, &(window1_renderer_2d.typeface), text_start_position, _FONT_LOADED_GLYPHS_STRING);
+    renderer_2d_draw_string(&window2_renderer_2d, &(window2_typeface), text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
 uint8_t init_window1(struct application_t* app, struct window_t* window1)
@@ -219,6 +222,8 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
         const float ortho_far_plane  = 100.0f;
 
         window_set_context(window1);
+
+        typeface_init(&window1_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
 
         camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
@@ -269,6 +274,8 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
         const float ortho_far_plane  = 100.0f;
 
         window_set_context(window2);
+
+        typeface_init(&window2_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
 
         camera_init_orthographic(&window2_camera_ortho, camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&window2_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
@@ -327,6 +334,9 @@ int main(int argc, char** argv)
 
         texture_2d_cleanup(&aaron_shakespeare_texture);
         texture_2d_cleanup(&lenna_texture);
+
+        typeface_cleanup(&(window1_typeface));
+        typeface_cleanup(&(window2_typeface));
     }
 #ifdef DEBUG
     else

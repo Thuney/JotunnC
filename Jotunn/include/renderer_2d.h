@@ -38,8 +38,6 @@ struct renderer_2d_t
 {
    struct renderer_base_t base;
    //
-   struct typeface_t typeface;
-   //
    struct renderer_2d_data_t render_data;
 };
 

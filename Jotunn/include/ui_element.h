@@ -2,6 +2,7 @@
 
 struct event_base_t;
 struct renderer_2d_t;
+struct typeface_t;
 struct ui_layer_t;
 struct ui_theme_t;
 
@@ -45,6 +46,7 @@ struct ui_element_static_text_t
 {
     struct ui_element_t base_element;
     char* static_text;
+    struct typeface_t* typeface;
 };
 
 struct ui_element_slider_t
@@ -79,7 +81,8 @@ void ui_element_init(struct ui_element_t* ui_element,
                                                              struct event_base_t* event) );
 
 void ui_element_static_text_init(struct ui_element_static_text_t* text_element, 
-                                 char* static_text);
+                                 char* static_text,
+                                 struct typeface_t* typeface);
 
 void ui_element_slider_init(struct ui_element_slider_t* slider_element,
                             float starting_position);

@@ -316,3 +316,25 @@ void typeface_set_char_size(const struct typeface_t* typeface, const unsigned in
 {
    int error = FT_Set_Pixel_Sizes(typeface->typeface, 0, char_height_points);
 }
+
+fvector2 typeface_calculate_string_dimensions(struct typeface_t* typeface, const char* string, int string_length)
+{
+   static fvector2 string_dimensions;
+   string_dimensions = (fvector2) { 0.0f, 0.0f };
+
+   for (int i = 0; i < string_length; i++)
+   {
+      char c = string[i];
+
+      const struct glyph_t* glyph = typeface_get_glyph_from_char(typeface, c);
+
+      string_dimensions.comp.x += (glyph->advance_x);
+
+      if (glyph->height > string_dimensions.comp.y)
+      {
+         string_dimensions.comp.y = glyph->height;
+      }
+   }
+
+   return string_dimensions;
+}

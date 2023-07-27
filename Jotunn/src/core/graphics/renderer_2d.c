@@ -255,8 +255,6 @@ void renderer_2d_init(struct renderer_2d_t *renderer, struct camera_base_t *came
    fprintf(stdout, "Initializing renderer_2d\n");
 #endif
 
-   typeface_init(&renderer->typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
-
    // Batch stuff
    renderer_2d_data_init(&renderer->render_data);
    renderer_2d_set_line_width(renderer, renderer->render_data.line_width);
@@ -267,8 +265,6 @@ void renderer_2d_cleanup(struct renderer_2d_t *renderer)
    // #ifdef DEBUG
    //      fprintf(stdout, "Cleaning up renderer 2D\n");
    // #endif
-
-   typeface_cleanup(&(renderer->typeface));
 
    vertex_array_unbind();
 
