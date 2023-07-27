@@ -11,7 +11,11 @@ struct ball_ui_layer_t
 
     struct ui_container_t ui_container_1;
 
-    struct ui_element_static_text_t ball_ui_text_element; 
+    struct ui_element_static_text_t ball_ui_text_element;
+
+    struct ui_container_t ui_container_2;
+
+    struct ui_element_static_text_t ball_ui_text_element_2; 
 
 };
 

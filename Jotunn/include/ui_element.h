@@ -3,6 +3,7 @@
 struct event_base_t;
 struct renderer_2d_t;
 struct ui_layer_t;
+struct ui_theme_t;
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -32,7 +33,8 @@ struct ui_element_t
     void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
                                        struct ui_element_t* ui_element,
                                        uint16_t origin_x,
-                                       uint16_t origin_y);
+                                       uint16_t origin_y,
+                                       struct ui_theme_t* theme);
 
     void (*function_ui_element_event_react)(struct ui_element_t* ui_element, 
                                             struct event_base_t* event);
@@ -71,7 +73,8 @@ void ui_element_init(struct ui_element_t* ui_element,
                      void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
                                                         struct ui_element_t* ui_element,
                                                         uint16_t origin_x,
-                                                        uint16_t origin_y),
+                                                        uint16_t origin_y,
+                                                        struct ui_theme_t* ui_theme),
                      void (*function_ui_element_event_react)(struct ui_element_t* ui_element, 
                                                              struct event_base_t* event) );
 

@@ -38,14 +38,15 @@ void ui_container_init(struct ui_container_t* ui_container,
 }
 
 void ui_container_render(struct renderer_2d_t* renderer_2d,
-                         struct ui_container_t* ui_container)
+                         struct ui_container_t* ui_container,
+                         struct ui_theme_t* theme)
 {
     fmatrix_4x4 transform_matrix;
     {
         fmatrix_4x4 scale_matrix, translation_matrix;
 
         const fvector3 scale_factors = (fvector3) { {ui_container->width, ui_container->height, 1.0} };
-        const fvector3 translation_vector = (fvector3) { {ui_container->origin_x, ui_container->origin_y, 0.0f} };
+        const fvector3 translation_vector = (fvector3) { {ui_container->origin_x, ui_container->origin_y, -0.1f} };
 
         fmatrix_4x4_init(&scale_matrix);
         fmatrix_4x4_init(&translation_matrix);
@@ -56,7 +57,7 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
         transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
     }
 
-    renderer_2d_draw_quad(renderer_2d, &transform_matrix, (fvector4){ {0.1, 0.1, 0.1, 0.9} });
+    renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->background_color);
 
     for (int i = 0; i < ui_container->num_elements; i++)
     {
@@ -64,7 +65,7 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
 
         if(element->function_ui_element_render)
         {
-            element->function_ui_element_render(renderer_2d, element, ui_container->origin_x, ui_container->origin_y);
+            element->function_ui_element_render(renderer_2d, element, ui_container->origin_x, ui_container->origin_y, theme);
         }
     }
 }
@@ -179,6 +180,6 @@ static void ui_layer_run(struct window_layer_t* window_layer)
     {
         struct ui_container_t* container = ui_layer->ui_containers[i];
 
-        ui_container_render(&(ui_layer->ui_renderer_2d), container);
+        ui_container_render(&(ui_layer->ui_renderer_2d), container, &(ui_layer->ui_theme));
     }
 }
