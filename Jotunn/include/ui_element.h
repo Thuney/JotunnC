@@ -31,6 +31,9 @@ struct ui_element_t
     uint16_t width;
     uint16_t height;
 
+    uint16_t padding_x;
+    uint16_t padding_y;
+
     void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
                                        struct ui_element_t* ui_element,
                                        uint16_t origin_x,
@@ -52,7 +55,11 @@ struct ui_element_static_text_t
 struct ui_element_slider_t
 {
     struct ui_element_t base_element;
+
     float slider_position;
+
+    float lower_bound;
+    float upper_bound;
 };
 
 struct ui_element_button_t
@@ -85,7 +92,9 @@ void ui_element_static_text_init(struct ui_element_static_text_t* text_element,
                                  struct typeface_t* typeface);
 
 void ui_element_slider_init(struct ui_element_slider_t* slider_element,
-                            float starting_position);
+                            float starting_position,
+                            float lower_bound,
+                            float upper_bound);
 
 void ui_element_button_init(struct ui_element_button_t* button_element);
 

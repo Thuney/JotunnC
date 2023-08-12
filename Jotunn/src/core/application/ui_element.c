@@ -18,8 +18,11 @@ void ui_element_init(struct ui_element_t* ui_element,
 {
     ui_element->element_type = element_type;
 
-    ui_element->width        = width;
-    ui_element->height       = height;
+    ui_element->width   = width;
+    ui_element->height  = height;
+
+    ui_element->padding_x = 0;
+    ui_element->padding_y = 0;
 
     if (function_ui_element_render)
         ui_element->function_ui_element_render = function_ui_element_render;
@@ -37,7 +40,14 @@ static void ui_element_static_text_render(struct renderer_2d_t* renderer_2d,
 
     struct ui_element_static_text_t* static_text_element = (struct ui_element_static_text_t*)ui_element;
 
-    renderer_2d_draw_string(renderer_2d, static_text_element->typeface, (fvector3) { origin_x, origin_y - ui_element->height, 0.1f }, static_text_element->static_text);
+    renderer_2d_draw_string(renderer_2d, 
+                            static_text_element->typeface, 
+                            (fvector3) { 
+                                         origin_x + ui_element->padding_x,
+                                         origin_y - ui_element->height - ui_element->padding_y,
+                                         0.1f 
+                                       }, 
+                            static_text_element->static_text);
 }
 
 void ui_element_static_text_init(struct ui_element_static_text_t* text_element, 
@@ -56,10 +66,15 @@ void ui_element_static_text_init(struct ui_element_static_text_t* text_element,
 
     text_element->static_text = static_text;
     text_element->typeface    = typeface;
+
+    text_element->base_element.padding_x = 10;
+    text_element->base_element.padding_y = 3;
 }
 
 void ui_element_slider_init(struct ui_element_slider_t* slider_element, 
-                            float starting_position)
+                            float starting_position,
+                            float lower_bound,
+                            float upper_bound)
 {
     ui_element_init(&(slider_element->base_element),
                     UI_ELEMENT_SLIDER,
@@ -67,6 +82,11 @@ void ui_element_slider_init(struct ui_element_slider_t* slider_element,
                     100,
                     (void*)0,
                     (void*)0);
+
+    slider_element->slider_position = starting_position;
+
+    slider_element->lower_bound = lower_bound;
+    slider_element->upper_bound = upper_bound;
 }
 
 void ui_element_button_init(struct ui_element_button_t* button_element)

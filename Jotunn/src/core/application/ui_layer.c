@@ -22,7 +22,7 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
 //
 void ui_container_init(struct ui_container_t* ui_container,
                        enum ui_container_layout_t layout,
-                       uint16_t origin_x, 
+                       uint16_t origin_x,
                        uint16_t origin_y)
 {
     memset(ui_container, 0, sizeof(struct ui_container_t));
@@ -35,6 +35,8 @@ void ui_container_init(struct ui_container_t* ui_container,
     ui_container->width  = UI_CONTAINER_MIN_WIDTH;
     ui_container->height = UI_CONTAINER_MIN_HEIGHT;
 
+    ui_container->padding = 5;
+
     ui_container->num_elements = 0;
 }
 
@@ -42,12 +44,27 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
                          struct ui_container_t* ui_container,
                          struct ui_theme_t* theme)
 {
+    struct ui_element_t* element = ui_container->contained_elements[0].element;
+
     fmatrix_4x4 transform_matrix;
     {
         fmatrix_4x4 scale_matrix, translation_matrix;
 
-        const fvector3 scale_factors = (fvector3) { {ui_container->width, ui_container->height, 1.0} };
-        const fvector3 translation_vector = (fvector3) { {ui_container->origin_x, ui_container->origin_y, -0.1f} };
+        const fvector3 scale_factors = (fvector3) 
+            { 
+                {   ui_container->width  + 2*ui_container->padding, 
+                    ui_container->height + 2*ui_container->padding + 2*element->padding_y,
+                    1.0 
+                } 
+            };
+
+        const fvector3 translation_vector = (fvector3) 
+            { 
+                {   ui_container->origin_x, 
+                    ui_container->origin_y, 
+                    -0.1f
+                } 
+            };
 
         fmatrix_4x4_init(&scale_matrix);
         fmatrix_4x4_init(&translation_matrix);
@@ -60,16 +77,57 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
 
     renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->background_color);
 
-    fvector2 pen_position = { ui_container->origin_x, ui_container->origin_y + ui_container->height };
-
-    for (int i = 0; i < ui_container->num_elements; i++)
+    switch (ui_container->layout)
     {
-        struct ui_element_t* element = ui_container->contained_elements[i].element;
-
-        if(element->function_ui_element_render)
+        case UI_LAYOUT_VERTICAL:
         {
-            element->function_ui_element_render(renderer_2d, element, pen_position.comp.x, pen_position.comp.y, theme);
+            fvector2 pen_position = { (ui_container->origin_x + ui_container->padding), 
+                                      (ui_container->origin_y + ui_container->height + ui_container->padding + element->padding_y) };
+
+            for (int i = 0; i < ui_container->num_elements; i++)
+            {
+                element = ui_container->contained_elements[i].element;
+
+                if(element->function_ui_element_render)
+                {
+                    element->function_ui_element_render(renderer_2d,
+                                                        element, 
+                                                        pen_position.comp.x, 
+                                                        pen_position.comp.y, 
+                                                        theme);
+                }
+
+                pen_position.comp.y -= (element->height + 2*element->padding_y);
+            }
         }
+        break;
+        case UI_LAYOUT_HORIZONTAL:
+        {
+            fvector2 pen_position = { (ui_container->origin_x + ui_container->padding), 
+                                      (ui_container->origin_y + ui_container->height + ui_container->padding + element->padding_y) };
+
+            for (int i = 0; i < ui_container->num_elements; i++)
+            {
+                element = ui_container->contained_elements[i].element;
+
+                if(element->function_ui_element_render)
+                {
+                    element->function_ui_element_render(renderer_2d,
+                                                        element, 
+                                                        pen_position.comp.x, 
+                                                        pen_position.comp.y, 
+                                                        theme);
+                }
+
+                pen_position.comp.x += (element->width + 2*element->padding_x);
+            }
+        }
+        break;
+        case UI_LAYOUT_GRID:
+        {
+
+        }
+        break;
     }
 }
 
@@ -82,27 +140,44 @@ void ui_container_add_element(struct ui_container_t* ui_container,
 
         ui_container->contained_elements[index].element = ui_element;
 
-        if (ui_container->width < ui_element->width)
-        {
-            ui_container->width = ui_element->width;
-        }
-
-        if (ui_container->height < ui_element->height)
-        {
-            ui_container->height = ui_element->height;
-        }
-
-
         switch (ui_container->layout)
         {
             case UI_LAYOUT_VERTICAL:
             {
+                uint16_t total_element_width = (ui_element->width + 2*ui_element->padding_x);
+
+                if (total_element_width > ui_container->width) 
+                    ui_container->width  = total_element_width;
+
+                if (ui_container->num_elements == 1)
+                {                    
+                    ui_container->height = (ui_element->height + 2*ui_element->padding_y);
+                }
+                else
+                {    
+                    ui_container->height += (ui_element->height + 2*ui_element->padding_y);
+                }
+
                 ui_container->contained_elements[index].row = index;
             }
             break;
 
             case UI_LAYOUT_HORIZONTAL:
             {
+                uint16_t total_element_height = (ui_element->height + 2*ui_element->padding_y);
+
+                if (total_element_height > ui_container->height) 
+                    ui_container->height  = total_element_height;
+
+                if (ui_container->num_elements == 1)
+                {                    
+                    ui_container->width = (ui_element->width + 2*ui_element->padding_x);
+                }
+                else
+                {    
+                    ui_container->width += (ui_element->width + 2*ui_element->padding_x);
+                }
+
                 ui_container->contained_elements[index].column = index;
             }
             break;

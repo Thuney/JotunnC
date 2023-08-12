@@ -32,6 +32,8 @@ struct ui_container_t
     uint16_t width;
     uint16_t height;
 
+    uint16_t padding;
+
     // Number of elements currently stored in this container 
     uint16_t num_elements;
 

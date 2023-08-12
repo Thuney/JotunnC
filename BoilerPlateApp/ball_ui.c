@@ -2,8 +2,11 @@
 
 #include "font.h"
 
-static char* BALL_UI_STATIC_TEXT_CONTENTS = "Ball UI Layer Test Element";
-static char* BALL_UI_STATIC_TEXT_CONTENTS_2 = "Test";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_1 = "Ball";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_2 = "Ball";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_3 = "Ball Mid";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_4 = "Ball";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_5 = "Balls";
 
 
 static struct typeface_t ball_ui_typeface;
@@ -32,32 +35,51 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
                       200,
                       200);
 
-    ui_element_static_text_init(&(ball_layer->ball_ui_text_element),
-                                BALL_UI_STATIC_TEXT_CONTENTS,
-                                &ball_ui_typeface);
-
-    ui_container_add_element(&(ball_layer->ui_container_1),
-                             &(ball_layer->ball_ui_text_element.base_element));
-
-    ui_layer_add_container(&(ball_layer->ui_layer),
-                           &(ball_layer->ui_container_1));
+    ball_layer->ui_container_1.padding = 2;
 
     //
 
-    ui_container_init(&ball_layer->ui_container_2, 
-                      UI_LAYOUT_HORIZONTAL,
-                      600,
-                      75);
+    ui_element_static_text_init(&(ball_layer->ball_ui_text_element1),
+                                BALL_UI_STATIC_TEXT_CONTENTS_1,
+                                &ball_ui_typeface);
 
-    ui_element_static_text_init(&(ball_layer->ball_ui_text_element_2),
+    ui_element_static_text_init(&(ball_layer->ball_ui_text_element2),
                                 BALL_UI_STATIC_TEXT_CONTENTS_2,
                                 &ball_ui_typeface);
 
-    ui_container_add_element(&(ball_layer->ui_container_2),
-                             &(ball_layer->ball_ui_text_element_2.base_element));
+    ui_element_static_text_init(&(ball_layer->ball_ui_text_element3),
+                                BALL_UI_STATIC_TEXT_CONTENTS_3,
+                                &ball_ui_typeface);
+
+    ui_element_static_text_init(&(ball_layer->ball_ui_text_element4),
+                                BALL_UI_STATIC_TEXT_CONTENTS_4,
+                                &ball_ui_typeface);
+
+    ui_element_static_text_init(&(ball_layer->ball_ui_text_element5),
+                                BALL_UI_STATIC_TEXT_CONTENTS_5,
+                                &ball_ui_typeface);
+
+    //
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->ball_ui_text_element1.base_element));
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->ball_ui_text_element2.base_element));
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->ball_ui_text_element3.base_element));
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->ball_ui_text_element4.base_element));
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->ball_ui_text_element5.base_element));
+
+    //
 
     ui_layer_add_container(&(ball_layer->ui_layer),
-                           &(ball_layer->ui_container_2));
+                           &(ball_layer->ui_container_1));
 
 }
 
