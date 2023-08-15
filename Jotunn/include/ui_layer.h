@@ -1,5 +1,6 @@
 #pragma once
 
+#include "event.h"
 #include "renderer_2d.h"
 #include "ui_element.h"
 #include "window_layer.h"
@@ -45,6 +46,9 @@ struct ui_container_t
         uint16_t column;
 
     } contained_elements[MAX_UI_CONTAINER_ELEMENTS];
+
+    void (*function_ui_container_event_react)(struct ui_container_t* ui_container, 
+                                              struct event_base_t* event);
 };
 
 // Theming - coloring and whatnot

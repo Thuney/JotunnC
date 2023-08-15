@@ -9,6 +9,13 @@ struct ui_theme_t;
 #include <stdbool.h>
 #include <stdint.h>
 
+enum ui_element_centering_t
+{
+    UI_ELEMENT_ALIGN_LEFT,
+    UI_ELEMENT_ALIGN_RIGHT,
+    UI_ELEMENT_ALIGN_CENTER
+};
+
 // Types implementing a "UI element"
 enum ui_element_type_t
 {
@@ -26,6 +33,9 @@ struct ui_element_t
 {
     // Type that this UI element is implementing
     enum ui_element_type_t element_type;
+
+    // Centering of this element within its allocated container space
+    enum ui_element_centering_t element_centering;
 
     // Total width and height of all sub-shapes composing the UI element
     uint16_t width;

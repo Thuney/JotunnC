@@ -18,6 +18,8 @@ void ui_element_init(struct ui_element_t* ui_element,
 {
     ui_element->element_type = element_type;
 
+    ui_element->element_centering = UI_ELEMENT_ALIGN_LEFT;
+
     ui_element->width   = width;
     ui_element->height  = height;
 

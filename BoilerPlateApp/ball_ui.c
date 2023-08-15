@@ -2,12 +2,11 @@
 
 #include "font.h"
 
-static char* BALL_UI_STATIC_TEXT_CONTENTS_1 = "Ball";
-static char* BALL_UI_STATIC_TEXT_CONTENTS_2 = "Ball";
-static char* BALL_UI_STATIC_TEXT_CONTENTS_3 = "Ball Mid";
-static char* BALL_UI_STATIC_TEXT_CONTENTS_4 = "Ball";
-static char* BALL_UI_STATIC_TEXT_CONTENTS_5 = "Balls";
-
+static char* BALL_UI_STATIC_TEXT_CONTENTS_1 = "Tennessee's embrace,";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_2 = "Phase sways to K-pop's rhythm,";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_3 = "Heart and Seoul entwined.";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_4 = "A Haiku By:";
+static char* BALL_UI_STATIC_TEXT_CONTENTS_5 = "ChatGPT";
 
 static struct typeface_t ball_ui_typeface;
 

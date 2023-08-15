@@ -2,6 +2,8 @@
 
 #include <memory.h>
 
+static void ui_container_event_handle(struct ui_container_t* ui_container, struct event_base_t* event);
+
 static void ui_layer_event_handle(struct window_t* parent_window, struct window_layer_t* window_layer, struct event_base_t* event);
 static void ui_layer_run(struct window_layer_t* ui_layer);
 
@@ -38,6 +40,8 @@ void ui_container_init(struct ui_container_t* ui_container,
     ui_container->padding = 5;
 
     ui_container->num_elements = 0;
+
+    ui_container->function_ui_container_event_react = ui_container_event_handle;
 }
 
 void ui_container_render(struct renderer_2d_t* renderer_2d,
@@ -192,6 +196,98 @@ void ui_container_add_element(struct ui_container_t* ui_container,
     }
 }
 
+static bool point_intersects_ui_container(struct ui_container_t* ui_container, const fvector2 position)
+{
+    bool does_intersect = false;
+
+    if (position.comp.x > ui_container->origin_x &&
+        position.comp.x < (ui_container->origin_x + ui_container->width + ui_container->padding) &&
+
+        position.comp.y < ui_container->origin_y &&
+        position.comp.y > (ui_container->origin_y - ui_container->height - ui_container->padding))
+    {
+        does_intersect = true;       
+    }   
+    
+    return does_intersect;
+}
+
+//
+
+static void ui_container_event_handle(struct ui_container_t* ui_container, struct event_base_t* event)
+{
+    static fvector2 cur_mouse = { 0.0f, 0.0f };
+
+    switch (event->event_type)
+    {
+        case EVENT_APP_TICK:
+        {
+            struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)event;
+
+        }
+        break;
+
+        case EVENT_MOUSE_MOVED:
+        {
+            struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
+
+            float mouse_x = event_mouse_moved->x;
+            float mouse_y = event_mouse_moved->y;
+
+            cur_mouse.comp.x = mouse_x;
+            cur_mouse.comp.y = mouse_y;
+        }
+        break;
+
+        case EVENT_MOUSE_BUTTON:
+        {
+            struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)event;
+
+            if (event_mouse_button->button == 0)
+            {
+                switch(event_mouse_button->action)
+                {
+                    // Pressed
+                    case 1:
+                    {
+                        if (point_intersects_ui_container(ui_container, cur_mouse ))
+                        {
+                            fprintf(stdout, "Mouse clicked UI container\n");
+                        }
+                    }
+                    break;
+                    // Released
+                    case 0:
+                    {
+
+                    }
+                    break;
+                }
+            }
+        }
+        break;
+
+        default:
+        {
+
+        }
+        break;
+    }
+
+    if (!event->handled)
+    {
+        for (int j = 0; j < ui_container->num_elements; j++)
+        {
+            struct ui_element_t* element = (ui_container->contained_elements[j].element);
+            
+            if (element->function_ui_element_event_react)
+            {
+                element->function_ui_element_event_react(element, event);
+            }
+        }
+    }
+}
+
 //
 void ui_layer_init(struct window_t* parent_window, 
                    struct ui_layer_t* ui_layer, 
@@ -241,6 +337,8 @@ void ui_layer_add_container(struct ui_layer_t* ui_layer,
     }
 }
 
+//
+
 static void ui_layer_event_handle(struct window_t* parent_window, struct window_layer_t* window_layer, struct event_base_t* event)
 {
     struct ui_layer_t* ui_layer = (struct ui_layer_t*)window_layer;
@@ -249,15 +347,7 @@ static void ui_layer_event_handle(struct window_t* parent_window, struct window_
     {
         struct ui_container_t* container = ui_layer->ui_containers[i];
 
-        for (int j = 0; j < container->num_elements; j++)
-        {
-            struct ui_element_t* element = (container->contained_elements[j].element);
-            
-            if (element->function_ui_element_event_react)
-            {
-                element->function_ui_element_event_react(element, event);
-            }
-        }
+        container->function_ui_container_event_react(container, event);
     }
 }
 
