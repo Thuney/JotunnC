@@ -61,7 +61,7 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
         const fvector3 scale_factors = (fvector3) 
             { 
                 {   ui_container->width  + 2*ui_container->padding,
-                    ui_container->height + 2*ui_container->padding + 2*element->padding_y,
+                    ui_container->height + 2*ui_container->padding,
                     1.0 
                 } 
             };
@@ -90,7 +90,7 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
         case UI_LAYOUT_VERTICAL:
         {
             fvector2 pen_position = { (ui_container->origin_x + ui_container->padding), 
-                                      (ui_container->origin_y + ui_container->height + ui_container->padding + element->padding_y) };
+                                      (ui_container->origin_y + ui_container->height + ui_container->padding) };
 
             for (int i = 0; i < ui_container->num_elements; i++)
             {
@@ -204,10 +204,10 @@ static bool point_intersects_ui_container(struct ui_container_t* ui_container, c
 {
     bool does_intersect = false;
 
-    if (position.comp.x > ui_container->origin_x &&
+    if (position.comp.x > (ui_container->origin_x) &&
         position.comp.x < (ui_container->origin_x + ui_container->width + ui_container->padding) &&
 
-        position.comp.y > ui_container->origin_y &&
+        position.comp.y > (ui_container->origin_y) &&
         position.comp.y < (ui_container->origin_y + ui_container->height + ui_container->padding))
     {
         does_intersect = true;
@@ -218,46 +218,30 @@ static bool point_intersects_ui_container(struct ui_container_t* ui_container, c
 
 static void ui_container_update_movement(struct ui_container_t* ui_container, const fvector2 cur_mouse, const fvector2 delta_mouse_instant)
 {
-    static fvector2 delta_mouse_accum = { 0.0f, 0.0f };
-    static uint8_t samples = 0;
-    static const uint8_t NUM_SAMPLES = 1;
-
     if (ui_container->held)
     {
-        if (samples >= NUM_SAMPLES)
+        float new_furthest_left_x  = ((ui_container->origin_x) + delta_mouse_instant.comp.x);
+        float new_furthest_right_x = ((ui_container->origin_x + (float)(ui_container->width + ui_container->padding)) + delta_mouse_instant.comp.x);
+
+        float new_furthest_down_y = ((ui_container->origin_y) + delta_mouse_instant.comp.y);
+        float new_furthest_up_y   = ((ui_container->origin_y + (float)(ui_container->height + 2*ui_container->padding)) + delta_mouse_instant.comp.y);
+
+        float new_origin_x = (ui_container->origin_x + delta_mouse_instant.comp.x);
+        float new_origin_y = (ui_container->origin_y + delta_mouse_instant.comp.y);
+
+        ui_container->origin_x = (new_furthest_left_x < ui_container->parent_layer->ui_camera_ortho.left)   ? (0.0f) :
+                                 (new_furthest_right_x > ui_container->parent_layer->ui_camera_ortho.right) ? (ui_container->parent_layer->ui_camera_ortho.right - (ui_container->width + ui_container->padding)) : 
+                                 (new_origin_x);
+
+        ui_container->origin_y = (new_furthest_down_y < ui_container->parent_layer->ui_camera_ortho.bottom) ? (0.0f) :
+                                 (new_furthest_up_y > ui_container->parent_layer->ui_camera_ortho.top)      ? (ui_container->parent_layer->ui_camera_ortho.top - (ui_container->height + 2*ui_container->padding)) : 
+                                 (new_origin_y);
+
+        printf("New Furthest Left X = %4f, New Furthest Down Y = %4f \n", new_furthest_left_x, new_furthest_down_y);
+
+        if (!point_intersects_ui_container(ui_container, cur_mouse))
         {
-            float new_furthest_left_x  = ((ui_container->origin_x - (float)ui_container->padding) + delta_mouse_accum.comp.x);
-            float new_furthest_right_x = ((ui_container->origin_x + (float)(ui_container->width + ui_container->padding)) + delta_mouse_accum.comp.x);
-
-            float new_furthest_down_y = ((ui_container->origin_y - (float)ui_container->padding) + delta_mouse_accum.comp.y);
-            float new_furthest_up_y   = ((ui_container->origin_y + (float)(ui_container->height + ui_container->padding)) + delta_mouse_accum.comp.y);
-
-            float new_origin_x = (ui_container->origin_x + delta_mouse_accum.comp.x);
-            float new_origin_y = (ui_container->origin_y + delta_mouse_accum.comp.y);
-
-            ui_container->origin_x = (new_furthest_left_x < ui_container->parent_layer->ui_camera_ortho.left)   ? (0.0f) :
-                                     (new_furthest_right_x > ui_container->parent_layer->ui_camera_ortho.right) ? (ui_container->parent_layer->ui_camera_ortho.right - (ui_container->width + ui_container->padding)) : 
-                                     (new_origin_x);
-
-            ui_container->origin_y = (new_furthest_down_y < ui_container->parent_layer->ui_camera_ortho.bottom) ? (0.0f) :
-                                     (new_furthest_up_y > ui_container->parent_layer->ui_camera_ortho.top)      ? (ui_container->parent_layer->ui_camera_ortho.top - (ui_container->height + ui_container->padding)) : 
-                                     (new_origin_y);
-
-            if (!point_intersects_ui_container(ui_container, cur_mouse))
-            {
-                ui_container->held = false;
-            }
-
-            delta_mouse_accum.comp.x = delta_mouse_instant.comp.x;
-            delta_mouse_accum.comp.y = delta_mouse_instant.comp.y;
-
-            samples = 0;
-        }
-        else
-        {
-            delta_mouse_accum.comp.x += delta_mouse_instant.comp.x;
-            delta_mouse_accum.comp.y += delta_mouse_instant.comp.y;
-            samples++;
+            ui_container->held = false;
         }
     }
 }
@@ -266,7 +250,6 @@ static void ui_container_update_movement(struct ui_container_t* ui_container, co
 
 static void ui_container_event_handle(struct ui_container_t* ui_container, struct event_base_t* event)
 {
-    
     static float delta_time = 0.0f;
 
     static fvector2 cur_mouse = { 0.0f, 0.0f };
@@ -294,6 +277,8 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
 
             cur_mouse.comp.x = mouse_x;
             cur_mouse.comp.y = mouse_y;
+
+            ui_container_update_movement(ui_container, cur_mouse, delta_mouse);
         }
         break;
 
@@ -334,8 +319,6 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
         }
         break;
     }
-
-    ui_container_update_movement(ui_container, cur_mouse, delta_mouse);
 
     if (!event->handled)
     {
