@@ -58,6 +58,11 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
                                 BALL_UI_STATIC_TEXT_CONTENTS_5,
                                 &ball_ui_typeface);
 
+    ui_element_slider_init(&(ball_layer->slider_element_1),
+                           50.0f,
+                           0.0f,
+                           100.0f);
+
     //
 
     ui_container_add_element(&(ball_layer->ui_container_1),
@@ -74,6 +79,9 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
 
     ui_container_add_element(&(ball_layer->ui_container_1),
                              &(ball_layer->ball_ui_text_element5.base_element));
+
+    ui_container_add_element(&(ball_layer->ui_container_1),
+                             &(ball_layer->slider_element_1.base_element));
 
     //
 

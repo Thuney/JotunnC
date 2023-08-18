@@ -2,6 +2,7 @@
 
 #include "renderer_2d.h"
 #include "string.h"
+#include "ui_layer.h"
 
 //
 void ui_element_init(struct ui_element_t* ui_element,
@@ -33,13 +34,14 @@ void ui_element_init(struct ui_element_t* ui_element,
         ui_element->function_ui_element_event_react = function_ui_element_event_react;
 }
 
+// ------------------------------------------------------------------------------------------------------------
+
 static void ui_element_static_text_render(struct renderer_2d_t* renderer_2d,
                                           struct ui_element_t* ui_element,
                                           uint16_t origin_x,
                                           uint16_t origin_y,
                                           struct ui_theme_t* theme)
 {
-
     struct ui_element_static_text_t* static_text_element = (struct ui_element_static_text_t*)ui_element;
 
     renderer_2d_draw_string(renderer_2d, 
@@ -73,6 +75,36 @@ void ui_element_static_text_init(struct ui_element_static_text_t* text_element,
     text_element->base_element.padding_y = 3;
 }
 
+// ------------------------------------------------------------------------------------------------------------
+
+static void ui_element_slider_render(struct renderer_2d_t* renderer_2d,
+                                          struct ui_element_t* ui_element,
+                                          uint16_t origin_x,
+                                          uint16_t origin_y,
+                                          struct ui_theme_t* theme)
+{
+
+    struct ui_element_slider_t* slider_element = (struct ui_element_slider_t*)ui_element;
+
+    fmatrix_4x4 transform_matrix;
+    {
+        fmatrix_4x4 scale_matrix, translation_matrix;
+
+        const fvector3 scale_factors = (fvector3) { {ui_element->width, ui_element->height, 1.0f} };
+        const fvector3 translation_vector = (fvector3) { {origin_x + ui_element->padding_x, origin_y - (ui_element->height + ui_element->padding_y), 0.1f} };
+
+        fmatrix_4x4_init(&scale_matrix);
+        fmatrix_4x4_init(&translation_matrix);
+        fmatrix_4x4_init(&transform_matrix);
+
+        scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+        translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+        transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+    }
+
+    renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->accent_color);
+}
+
 void ui_element_slider_init(struct ui_element_slider_t* slider_element, 
                             float starting_position,
                             float lower_bound,
@@ -80,16 +112,21 @@ void ui_element_slider_init(struct ui_element_slider_t* slider_element,
 {
     ui_element_init(&(slider_element->base_element),
                     UI_ELEMENT_SLIDER,
-                    100,
-                    100,
-                    (void*)0,
+                    200,
+                    30,
+                    ui_element_slider_render,
                     (void*)0);
 
     slider_element->slider_position = starting_position;
 
     slider_element->lower_bound = lower_bound;
     slider_element->upper_bound = upper_bound;
+
+    slider_element->base_element.padding_x = 10;
+    slider_element->base_element.padding_y = 3;
 }
+
+// ------------------------------------------------------------------------------------------------------------
 
 void ui_element_button_init(struct ui_element_button_t* button_element)
 {

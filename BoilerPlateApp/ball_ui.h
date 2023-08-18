@@ -17,6 +17,8 @@ struct ball_ui_layer_t
     struct ui_element_static_text_t ball_ui_text_element4;
     struct ui_element_static_text_t ball_ui_text_element5;
 
+    struct ui_element_slider_t slider_element_1;
+
 };
 
 void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint16_t height, struct window_t* parent_window);

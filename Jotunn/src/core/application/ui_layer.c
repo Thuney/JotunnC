@@ -237,8 +237,6 @@ static void ui_container_update_movement(struct ui_container_t* ui_container, co
                                  (new_furthest_up_y > ui_container->parent_layer->ui_camera_ortho.top)      ? (ui_container->parent_layer->ui_camera_ortho.top - (ui_container->height + 2*ui_container->padding)) : 
                                  (new_origin_y);
 
-        printf("New Furthest Left X = %4f, New Furthest Down Y = %4f \n", new_furthest_left_x, new_furthest_down_y);
-
         if (!point_intersects_ui_container(ui_container, cur_mouse))
         {
             ui_container->held = false;
