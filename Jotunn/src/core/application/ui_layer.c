@@ -24,10 +24,12 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
 //
 void ui_container_init(struct ui_container_t* ui_container,
                        enum ui_container_layout_t layout,
-                       uint16_t origin_x,
-                       uint16_t origin_y)
+                       float origin_x,
+                       float origin_y)
 {
     memset(ui_container, 0, sizeof(struct ui_container_t));
+
+    ui_container->held = false;
 
     ui_container->layout = layout;
 
@@ -42,6 +44,8 @@ void ui_container_init(struct ui_container_t* ui_container,
     ui_container->num_elements = 0;
 
     ui_container->function_ui_container_event_react = ui_container_event_handle;
+
+    ui_container->parent_layer = NULL;
 }
 
 void ui_container_render(struct renderer_2d_t* renderer_2d,
@@ -56,7 +60,7 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
 
         const fvector3 scale_factors = (fvector3) 
             { 
-                {   ui_container->width  + 2*ui_container->padding, 
+                {   ui_container->width  + 2*ui_container->padding,
                     ui_container->height + 2*ui_container->padding + 2*element->padding_y,
                     1.0 
                 } 
@@ -203,20 +207,70 @@ static bool point_intersects_ui_container(struct ui_container_t* ui_container, c
     if (position.comp.x > ui_container->origin_x &&
         position.comp.x < (ui_container->origin_x + ui_container->width + ui_container->padding) &&
 
-        position.comp.y < ui_container->origin_y &&
-        position.comp.y > (ui_container->origin_y - ui_container->height - ui_container->padding))
+        position.comp.y > ui_container->origin_y &&
+        position.comp.y < (ui_container->origin_y + ui_container->height + ui_container->padding))
     {
-        does_intersect = true;       
-    }   
+        does_intersect = true;
+    }
     
     return does_intersect;
+}
+
+static void ui_container_update_movement(struct ui_container_t* ui_container, const fvector2 cur_mouse, const fvector2 delta_mouse_instant)
+{
+    static fvector2 delta_mouse_accum = { 0.0f, 0.0f };
+    static uint8_t samples = 0;
+    static const uint8_t NUM_SAMPLES = 1;
+
+    if (ui_container->held)
+    {
+        if (samples >= NUM_SAMPLES)
+        {
+            float new_furthest_left_x  = ((ui_container->origin_x - (float)ui_container->padding) + delta_mouse_accum.comp.x);
+            float new_furthest_right_x = ((ui_container->origin_x + (float)(ui_container->width + ui_container->padding)) + delta_mouse_accum.comp.x);
+
+            float new_furthest_down_y = ((ui_container->origin_y - (float)ui_container->padding) + delta_mouse_accum.comp.y);
+            float new_furthest_up_y   = ((ui_container->origin_y + (float)(ui_container->height + ui_container->padding)) + delta_mouse_accum.comp.y);
+
+            float new_origin_x = (ui_container->origin_x + delta_mouse_accum.comp.x);
+            float new_origin_y = (ui_container->origin_y + delta_mouse_accum.comp.y);
+
+            ui_container->origin_x = (new_furthest_left_x < ui_container->parent_layer->ui_camera_ortho.left)   ? (0.0f) :
+                                     (new_furthest_right_x > ui_container->parent_layer->ui_camera_ortho.right) ? (ui_container->parent_layer->ui_camera_ortho.right - (ui_container->width + ui_container->padding)) : 
+                                     (new_origin_x);
+
+            ui_container->origin_y = (new_furthest_down_y < ui_container->parent_layer->ui_camera_ortho.bottom) ? (0.0f) :
+                                     (new_furthest_up_y > ui_container->parent_layer->ui_camera_ortho.top)      ? (ui_container->parent_layer->ui_camera_ortho.top - (ui_container->height + ui_container->padding)) : 
+                                     (new_origin_y);
+
+            if (!point_intersects_ui_container(ui_container, cur_mouse))
+            {
+                ui_container->held = false;
+            }
+
+            delta_mouse_accum.comp.x = delta_mouse_instant.comp.x;
+            delta_mouse_accum.comp.y = delta_mouse_instant.comp.y;
+
+            samples = 0;
+        }
+        else
+        {
+            delta_mouse_accum.comp.x += delta_mouse_instant.comp.x;
+            delta_mouse_accum.comp.y += delta_mouse_instant.comp.y;
+            samples++;
+        }
+    }
 }
 
 //
 
 static void ui_container_event_handle(struct ui_container_t* ui_container, struct event_base_t* event)
 {
+    
+    static float delta_time = 0.0f;
+
     static fvector2 cur_mouse = { 0.0f, 0.0f };
+    static fvector2 delta_mouse = { 0.0f, 0.0f };
 
     switch (event->event_type)
     {
@@ -224,6 +278,7 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
         {
             struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)event;
 
+            delta_time = app_tick_event->delta_time_seconds;
         }
         break;
 
@@ -233,6 +288,9 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
 
             float mouse_x = event_mouse_moved->x;
             float mouse_y = event_mouse_moved->y;
+
+            delta_mouse.comp.x = (mouse_x - cur_mouse.comp.x);
+            delta_mouse.comp.y = (mouse_y - cur_mouse.comp.y);
 
             cur_mouse.comp.x = mouse_x;
             cur_mouse.comp.y = mouse_y;
@@ -250,16 +308,19 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
                     // Pressed
                     case 1:
                     {
-                        if (point_intersects_ui_container(ui_container, cur_mouse ))
+                        if (point_intersects_ui_container(ui_container, cur_mouse))
                         {
-                            fprintf(stdout, "Mouse clicked UI container\n");
+                            ui_container->held = true;
                         }
                     }
                     break;
                     // Released
                     case 0:
                     {
-
+                        if (ui_container->held) 
+                        {
+                            ui_container->held = false;
+                        }
                     }
                     break;
                 }
@@ -273,6 +334,8 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
         }
         break;
     }
+
+    ui_container_update_movement(ui_container, cur_mouse, delta_mouse);
 
     if (!event->handled)
     {
@@ -334,6 +397,7 @@ void ui_layer_add_container(struct ui_layer_t* ui_layer,
     if ((ui_layer->num_containers + 1) < MAX_UI_CONTAINERS)
     {
         ui_layer->ui_containers[ui_layer->num_containers++] = ui_container;
+        ui_container->parent_layer = ui_layer;
     }
 }
 

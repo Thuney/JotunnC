@@ -160,10 +160,10 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
             struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
 
             float mouse_x = event_mouse_moved->x;
-            float mouse_y = (ball_window->window.metadata.height - event_mouse_moved->y);
+            float mouse_y = event_mouse_moved->y;
 
-            delta_mouse.comp.x = (cur_mouse.comp.x - mouse_x);
-            delta_mouse.comp.y = (cur_mouse.comp.y - mouse_y);
+            delta_mouse.comp.x = (mouse_x - cur_mouse.comp.x);
+            delta_mouse.comp.y = (mouse_y - cur_mouse.comp.y);
 
             cur_mouse.comp.x = mouse_x;
             cur_mouse.comp.y = mouse_y;
@@ -210,8 +210,8 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         {
                             ball->held = false;
 
-                            ball->ball_velocity.comp.x = (-delta_mouse.comp.x * 300.0f);
-                            ball->ball_velocity.comp.y = (-delta_mouse.comp.y * 300.0f);
+                            ball->ball_velocity.comp.x = (delta_mouse.comp.x * 300.0f);
+                            ball->ball_velocity.comp.y = (delta_mouse.comp.y * 300.0f);
                         }
                     }
                     break;

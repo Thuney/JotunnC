@@ -25,9 +25,11 @@ struct ui_container_t
     // Internal layout of elements in this container
     enum ui_container_layout_t layout;
 
+    bool held;
+
     // "Origin" being the bottom left of the container
-    uint16_t origin_x;
-    uint16_t origin_y;
+    float origin_x;
+    float origin_y;
 
     // Total width and height of all UI elements in the container
     uint16_t width;
@@ -49,6 +51,8 @@ struct ui_container_t
 
     void (*function_ui_container_event_react)(struct ui_container_t* ui_container, 
                                               struct event_base_t* event);
+
+    struct ui_layer_t* parent_layer;
 };
 
 // Theming - coloring and whatnot
@@ -82,8 +86,8 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
 //
 void ui_container_init(struct ui_container_t* ui_container,
                        enum ui_container_layout_t layout,
-                       uint16_t origin_x, 
-                       uint16_t origin_y);
+                       float origin_x, 
+                       float origin_y);
 
 void ui_container_add_element(struct ui_container_t* ui_container,
                               struct ui_element_t* ui_element);

@@ -31,8 +31,8 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
 
     ui_container_init(&ball_layer->ui_container_1, 
                       UI_LAYOUT_VERTICAL,
-                      200,
-                      200);
+                      200.0f,
+                      200.0f);
 
     ball_layer->ui_container_1.padding = 2;
 
