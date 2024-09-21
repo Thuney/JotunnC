@@ -13,17 +13,17 @@ static struct typeface_t ball_ui_typeface;
 //
 void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint16_t height, struct window_t* parent_window)
 {
-    typeface_init(&ball_ui_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 20);
+    typeface_init(&ball_ui_typeface, "/usr/share/fonts/noto/NotoSansMono-Regular.ttf", 20);
 
     // ui_theme_init(&ball_layer->ui_theme, 
     //                   (fvector4){ 0.3f, 0.3f, 0.3f, 0.7f },
     //                   (fvector4){ 0.27f, 0.33f, 0.32f, 0.7f },
     //                   (fvector4){ 0.16f, 0.3f, 0.3f, 0.7f });
 
-    ui_theme_init(&ball_layer->ui_theme, 
-                      (fvector4){ 0.3f, 0.3f, 0.3f, 0.7f },
-                      (fvector4){ 0.27f, 0.33f, 0.32f, 0.7f },
-                      (fvector4){ 1.0f, 0.0f, 0.0f, 0.7f });
+    ui_theme_init(&ball_layer->ui_theme,
+                  ui_color_from_hex(0xDA627DFF),
+                  ui_color_from_hex(0x9A348EFF),
+                  ui_color_from_hex(0x0D0628FF));
 
     ui_layer_init(parent_window, &ball_layer->ui_layer, width, height, ball_layer->ui_theme);
 

@@ -48,7 +48,7 @@ static void ui_element_static_text_render(struct renderer_2d_t* renderer_2d,
                             static_text_element->typeface, 
                             (fvector3) { 
                                          origin_x + ui_element->padding_x,
-                                         origin_y - ui_element->height - ui_element->padding_y,
+                                         origin_y - (ui_element->height + ui_element->padding_y),
                                          0.1f 
                                        }, 
                             static_text_element->static_text);
@@ -77,21 +77,12 @@ void ui_element_static_text_init(struct ui_element_static_text_t* text_element,
 
 // ------------------------------------------------------------------------------------------------------------
 
-static void ui_element_slider_render(struct renderer_2d_t* renderer_2d,
-                                          struct ui_element_t* ui_element,
-                                          uint16_t origin_x,
-                                          uint16_t origin_y,
-                                          struct ui_theme_t* theme)
+static fmatrix_4x4 get_transform(const fvector3 scale_factors, 
+                                 const fvector3 translation_vector)
 {
-
-    struct ui_element_slider_t* slider_element = (struct ui_element_slider_t*)ui_element;
-
     fmatrix_4x4 transform_matrix;
     {
         fmatrix_4x4 scale_matrix, translation_matrix;
-
-        const fvector3 scale_factors = (fvector3) { {ui_element->width, ui_element->height, 1.0f} };
-        const fvector3 translation_vector = (fvector3) { {origin_x + ui_element->padding_x, origin_y - (ui_element->height + ui_element->padding_y), 0.1f} };
 
         fmatrix_4x4_init(&scale_matrix);
         fmatrix_4x4_init(&translation_matrix);
@@ -101,8 +92,79 @@ static void ui_element_slider_render(struct renderer_2d_t* renderer_2d,
         translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
         transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
     }
+    return transform_matrix;
+}
 
-    renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->accent_color);
+static void ui_element_slider_render(struct renderer_2d_t* renderer_2d,
+                                     struct ui_element_t* ui_element,
+                                     uint16_t origin_x,
+                                     uint16_t origin_y,
+                                     struct ui_theme_t* theme)
+{
+    struct ui_element_slider_t* slider_element = (struct ui_element_slider_t*)ui_element;
+
+    float slider_range = (slider_element->upper_bound - slider_element->lower_bound);
+    float slider_percentage = ((slider_element->slider_position - slider_element->lower_bound) / slider_range);
+
+    uint16_t slider_margin = 10U;
+
+    const fvector3 box_scale_factors = 
+        (fvector3) 
+        { 
+            ui_element->width, 
+            ui_element->height, 
+            1.0f 
+        };
+
+    const fvector3 box_translation_vector = 
+        (fvector3) 
+        { 
+            origin_x + ui_element->padding_x, 
+            origin_y - (ui_element->height + ui_element->padding_y), 
+            0.1f 
+        };
+
+    fmatrix_4x4 box_transform = get_transform(box_scale_factors, box_translation_vector);
+
+    renderer_2d_draw_quad(renderer_2d, &box_transform, theme->foreground_color);
+
+    const fvector3 line_point1 = 
+        (fvector3) 
+        { 
+            origin_x + ui_element->padding_x + slider_margin,
+            origin_y - ((ui_element->height / 2) + ui_element->padding_y),
+            0.2f
+        };
+
+    const fvector3 line_point2 = 
+        (fvector3) 
+        {
+            origin_x + ui_element->width + ui_element->padding_x - slider_margin,
+            origin_y - ((ui_element->height / 2) + ui_element->padding_y),
+            0.2f
+        };
+
+    renderer_2d_draw_line(renderer_2d, line_point1, line_point2, theme->accent_color);
+
+    uint16_t slider_x = (ui_element->width - 2*(ui_element->padding_x + slider_margin))*slider_percentage;
+
+    const fvector3 slider_point1 = 
+        (fvector3)
+        {
+            origin_x + ui_element->padding_x + slider_x,
+            origin_y - ((ui_element->height / 2) + ui_element->padding_y) + slider_margin,
+            0.3f
+        };
+
+    const fvector3 slider_point2 = 
+        (fvector3)
+        {
+            origin_x + ui_element->padding_x + slider_x,
+            origin_y - ((ui_element->height / 2) + ui_element->padding_y) - slider_margin,
+            0.3f
+        };
+
+    renderer_2d_draw_line(renderer_2d, slider_point1, slider_point2, theme->foreground_color);
 }
 
 void ui_element_slider_init(struct ui_element_slider_t* slider_element, 

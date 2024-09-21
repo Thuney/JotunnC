@@ -7,6 +7,27 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
 static void ui_layer_event_handle(struct window_t* parent_window, struct window_layer_t* window_layer, struct event_base_t* event);
 static void ui_layer_run(struct window_layer_t* ui_layer);
 
+fvector4 ui_color_from_hex(uint32_t hex_code)
+{
+    uint8_t r_hex, g_hex, b_hex, a_hex;
+
+    r_hex = (hex_code & 0xFF000000) >> 24;
+    g_hex = (hex_code & 0x00FF0000) >> 16;
+    b_hex = (hex_code & 0x0000FF00) >>  8;
+    a_hex = (hex_code & 0x000000FF);
+
+    fvector4 color = 
+        (fvector4) 
+        { 
+            (r_hex / 255.0f), 
+            (g_hex / 255.0f), 
+            (b_hex / 255.0f), 
+            (a_hex / 255.0f) 
+        };
+
+    return color;
+}
+
 //
 void ui_theme_init(struct ui_theme_t* ui_theme,
                    fvector4 accent_color,

@@ -172,7 +172,7 @@ static void renderer_2d_next_batch(struct renderer_2d_t *renderer)
    renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads = 10000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads = 1000; // Our upper limit on quads to draw. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
 static const unsigned int max_vertices = max_quads * 4;
 static const unsigned int max_indices = max_quads * 6;
 
@@ -182,27 +182,27 @@ static void renderer_2d_data_init(struct renderer_2d_data_t *data)
 {
    unsigned int error = 0;
 
-   error = shader_program_init_filepath(&data->triangle_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/triangle_2d_shader.frag");
+   error = shader_program_init_filepath(&data->triangle_shader, "/home/loki/Projects/JotunnC/Jotunn/res/shaders/triangle_2d_shader.vert", "/home/loki/Projects/JotunnC/Jotunn/res/shaders/triangle_2d_shader.frag");
 #ifdef DEBUG
    if (error)
       fprintf(stdout, "Error during triangle shader init\n");
 #endif
-   error = shader_program_init_filepath(&data->quad_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/quad_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/quad_2d_shader.frag");
+   error = shader_program_init_filepath(&data->quad_shader, "/home/loki/Projects/JotunnC/Jotunn/res/shaders/quad_2d_shader.vert", "/home/loki/Projects/JotunnC/Jotunn/res/shaders/quad_2d_shader.frag");
 #ifdef DEBUG
    if (error)
       fprintf(stdout, "Error during quad shader init\n");
 #endif
-   error = shader_program_init_filepath(&data->textured_quad_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.frag");
+   error = shader_program_init_filepath(&data->textured_quad_shader, "/home/loki/Projects/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.vert", "/home/loki/Projects/JotunnC/Jotunn/res/shaders/textured_quad_2d_shader.frag");
 #ifdef DEBUG
    if (error)
       fprintf(stdout, "Error during quad shader init\n");
 #endif
-   error = shader_program_init_filepath(&data->circle_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/circle_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/circle_2d_shader.frag");
+   error = shader_program_init_filepath(&data->circle_shader, "/home/loki/Projects/JotunnC/Jotunn/res/shaders/circle_2d_shader.vert", "/home/loki/Projects/JotunnC/Jotunn/res/shaders/circle_2d_shader.frag");
 #ifdef DEBUG
    if (error)
       fprintf(stdout, "Error during circle shader init\n");
 #endif
-   error = shader_program_init_filepath(&data->line_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/line_2d_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/line_2d_shader.frag");
+   error = shader_program_init_filepath(&data->line_shader, "/home/loki/Projects/JotunnC/Jotunn/res/shaders/line_2d_shader.vert", "/home/loki/Projects/JotunnC/Jotunn/res/shaders/line_2d_shader.frag");
 #ifdef DEBUG
    if (error)
       fprintf(stdout, "Error during line shader init\n");
@@ -216,7 +216,7 @@ static void renderer_2d_data_init(struct renderer_2d_data_t *data)
    renderable_2d_circle_data_init(&data->circle_data, max_vertices, &data->circle_shader);
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
-   data->line_width = 3.0f;
+   data->line_width = 6.0f;
 
    data->textures_index = 0;
 }

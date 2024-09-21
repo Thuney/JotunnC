@@ -78,6 +78,10 @@ struct ui_layer_t
 };
 
 //
+
+fvector4 ui_color_from_hex(uint32_t hex_code);
+
+//
 void ui_theme_init(struct ui_theme_t* ui_theme,
                    fvector4 accent_color,
                    fvector4 foreground_color,
