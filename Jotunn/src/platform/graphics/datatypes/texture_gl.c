@@ -90,6 +90,8 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
    glGenTextures(1, &texture->texture_id);
    glBindTexture(GL_TEXTURE_2D, texture->texture_id);
 
+   glTexImage2D(GL_TEXTURE_2D, 0, gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
+
    /*
 	 * Set the modes for texture filtering
     * 'Minimizing' filter for down-scaling textures
@@ -108,16 +110,17 @@ static void gl_texture_2d_init(struct texture_2d_t* texture, bool wrap)
       glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
    }
 
-   glTexImage2D(GL_TEXTURE_2D, 0,  gl_get_texture_internal_format(texture->internal_format), texture->width, texture->height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
-
    #ifdef DEBUG
       fprintf(stdout, "Texture initialized with ID %d\n", texture->texture_id);
    #endif
+
+   // Unbind texture
+   glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 static void gl_texture_2d_resize(struct texture_2d_t* texture, const int new_width, const int new_height)
 {
-   glTexImage2D(texture->texture_id, 0, gl_get_texture_internal_format(texture->internal_format), new_width, new_height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
+   glTexImage2D(GL_TEXTURE_2D, 0, gl_get_texture_internal_format(texture->internal_format), new_width, new_height, 0, gl_get_texture_data_format(texture->data_format), GL_UNSIGNED_BYTE, NULL);
 }
 
 static void gl_texture_2d_cleanup(struct texture_2d_t* texture)

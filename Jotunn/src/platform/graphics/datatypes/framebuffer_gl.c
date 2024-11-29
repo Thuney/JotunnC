@@ -14,20 +14,33 @@ void platform_framebuffer_init(struct framebuffer_t* frame_buffer)
 
 void platform_color_buffer_init(struct color_buffer_t* color_buffer, const int width, const int height)
 {
-    
+    texture_2d_init(&color_buffer->texture, width, height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8, false);
 }
 
 void platform_render_buffer_init(struct render_buffer_t* render_buffer, const int width, const int height)
 {
     glGenRenderbuffers(1, &(render_buffer->rbo));
     glBindRenderbuffer(GL_RENDERBUFFER, (render_buffer->rbo));
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height); // use a single renderbuffer object for both a depth AND stencil buffer.
+
+    // Use a single renderbuffer object for both a depth AND stencil buffer
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, width, height);
 }
+
+extern void platform_color_buffer_cleanup(struct color_buffer_t* color_buffer)
+{
+    texture_2d_cleanup(&color_buffer->texture);
+}
+
+extern void platform_render_buffer_cleanup(struct render_buffer_t* render_buffer)
+{
+    glDeleteRenderbuffers(1, &(render_buffer->rbo));
+}
+
 
 void platform_color_buffer_resize(struct color_buffer_t* color_buffer, const int new_width, const int new_height)
 {
-    glBindTexture(GL_TEXTURE_2D, color_buffer->texture.texture_id);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, new_width, new_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    texture_2d_bind(&color_buffer->texture, 0);
+    texture_2d_resize(&color_buffer->texture, new_width, new_height);
 }
 
 void platform_render_buffer_resize(struct render_buffer_t* render_buffer, const int new_width, const int new_height)
@@ -44,7 +57,7 @@ void platform_framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer
     if (error != GL_NO_ERROR)
     {
         #ifdef DEBUG
-            fprintf(stdout, "Error occurred during color buffer attachment\n");
+            fprintf(stdout, "Error occurred during color buffer attachment - %d\n", error);
         #endif
     }
 }
@@ -75,6 +88,5 @@ void platform_framebuffer_unbind()
 
 void platform_framebuffer_cleanup(struct framebuffer_t* frame_buffer)
 {
-    glDeleteRenderbuffers(1, &(frame_buffer->depth_stencil_buffer.rbo));
     glDeleteFramebuffers(1, &(frame_buffer->frame_buffer));
 }

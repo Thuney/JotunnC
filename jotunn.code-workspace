@@ -1,0 +1,91 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"font.h": "c",
+			"texture.h": "c",
+			"string.h": "c",
+			"fmatrix.h": "c",
+			"stdlib.h": "c",
+			"stdio.h": "c",
+			"memory.h": "c",
+			"ft2build.h": "c",
+			"window.h": "c",
+			"event.h": "c",
+			"renderer_2d.h": "c",
+			"array": "c",
+			"bit": "c",
+			"*.tcc": "c",
+			"cctype": "c",
+			"clocale": "c",
+			"cmath": "c",
+			"compare": "c",
+			"concepts": "c",
+			"cstddef": "c",
+			"cstdint": "c",
+			"cstdio": "c",
+			"cstdlib": "c",
+			"cstring": "c",
+			"cwchar": "c",
+			"cwctype": "c",
+			"deque": "c",
+			"unordered_map": "c",
+			"vector": "c",
+			"exception": "c",
+			"functional": "c",
+			"initializer_list": "c",
+			"iosfwd": "c",
+			"limits": "c",
+			"memory": "c",
+			"new": "c",
+			"numbers": "c",
+			"ostream": "c",
+			"stdexcept": "c",
+			"streambuf": "c",
+			"string": "c",
+			"string_view": "c",
+			"system_error": "c",
+			"type_traits": "c",
+			"tuple": "c",
+			"typeinfo": "c",
+			"utility": "c",
+			"list": "c",
+			"hash_map": "c",
+			"application.h": "c",
+			"ball_window.h": "c",
+			"camera.h": "c",
+			"fvector.h": "c",
+			"renderer.h": "c",
+			"framebuffer.h": "c",
+			"stdbool.h": "c",
+			"*.ipp": "c",
+			"window_layer.h": "c",
+			"renderable_2d_primitive.h": "c",
+			"render_api.h": "c",
+			"timestep.h": "c",
+			"renderer_window_layer.h": "c",
+			"shader.h": "c",
+			"ui_layer.h": "c",
+			"ui_element.h": "c",
+			"ball_ui.h": "c",
+			"expected": "c"
+		},
+		"makefile.launchConfigurations": 
+    [
+			{
+				"cwd": "${workspaceFolder}/BoilerPlateApp/.build/apps",
+				"binaryPath": "${workspaceFolder}/BoilerPlateApp/.build/apps/BoilerPlateApp",
+				"binaryArgs": []
+			},
+			{
+				"cwd": "${workspaceFolder}/TestApp/.build/apps",
+				"binaryPath": "${workspaceFolder}/TestApp/.build/apps/TestApp",
+				"binaryArgs": []
+			}
+    ]
+	}
+}

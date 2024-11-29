@@ -21,8 +21,8 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 {
     uint8_t error = 0U;
 
-    const uint32_t width     = 1200;
-    const uint32_t height    = 800;
+    const uint32_t width     = 1024;
+    const uint32_t height    = 512;
     const uint8_t num_layers = 2;
 
     ball_window->clicked_indicator_radius = 4.0f;

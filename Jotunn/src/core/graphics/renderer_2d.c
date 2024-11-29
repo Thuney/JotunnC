@@ -249,7 +249,7 @@ void renderer_2d_init(struct renderer_2d_t *renderer, struct camera_base_t *came
    renderer_base_init(&renderer->base, render_flags, camera, parent_window, tag);
 
    renderer->base.renderer_begin_scene = &renderer_2d_begin_scene;
-   renderer->base.renderer_end_scene = &renderer_2d_end_scene;
+   renderer->base.renderer_end_scene   = &renderer_2d_end_scene;
 
 #ifdef DEBUG
    fprintf(stdout, "Initializing renderer_2d\n");

@@ -437,6 +437,8 @@ void ui_layer_init(struct window_t* parent_window,
 {
     memset(ui_layer, 0, sizeof(struct ui_layer_t));
 
+    framebuffer_init(&ui_layer->ui_framebuffer, width, height);
+
     // Camera stuff
     const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
     const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
@@ -454,7 +456,6 @@ void ui_layer_init(struct window_t* parent_window,
 
     renderer_2d_init(&(ui_layer->ui_renderer_2d), &(ui_layer->ui_camera_ortho).base, parent_window, "ball_renderer_2d");
 
-    framebuffer_init(&ui_layer->ui_framebuffer, width, height);
     window_layer_init(parent_window, &ui_layer->ui_window_layer, &ui_layer->ui_framebuffer, &ui_layer->ui_camera_ortho.base, &ui_layer->ui_renderer_2d.base);
 
     window_layer_set_custom_layer_run(&(ui_layer->ui_window_layer), ui_layer_run);

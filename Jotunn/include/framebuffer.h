@@ -30,16 +30,15 @@ struct framebuffer_t
 
 void framebuffer_init(struct framebuffer_t* frame_buffer, const int width, const int height);
 
-// Probably doesn't work tbh
-void framebuffer_resize(struct framebuffer_t* frame_buffer, const int new_width, const int new_height);
-
-void framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer);
-void framebuffer_attach_render_buffer(struct framebuffer_t* frame_buffer, struct render_buffer_t* render_buffer);
+void framebuffer_cleanup(struct framebuffer_t* frame_buffer);
 
 void framebuffer_bind(struct framebuffer_t* frame_buffer);
 void framebuffer_unbind();
 
-void framebuffer_cleanup(struct framebuffer_t* frame_buffer);
+void framebuffer_resize(struct framebuffer_t* frame_buffer, const int new_width, const int new_height);
+
+void framebuffer_attach_color_buffer(struct framebuffer_t* frame_buffer, struct color_buffer_t* color_buffer);
+void framebuffer_attach_render_buffer(struct framebuffer_t* frame_buffer, struct render_buffer_t* render_buffer);
 
 //
 

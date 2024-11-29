@@ -85,10 +85,8 @@ void color_buffer_init(struct color_buffer_t* color_buffer, const int width, con
     #ifdef DEBUG
         fprintf(stdout, "Initializing color buffer\n");
     #endif
-
-    texture_2d_init(&(color_buffer->texture), width, height, TEXTURE_2D_INTERNAL_FORMAT_RGBA8, false);
-
-    // platform_color_buffer_init(color_buffer, width, height);
+    
+    platform_color_buffer_init(color_buffer, width, height);
 }
 
 void render_buffer_init(struct render_buffer_t* render_buffer, const int width, const int height)
