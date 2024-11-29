@@ -94,9 +94,11 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
 
     //
 
+    const fvector2 container_effective_size = ui_container_get_effective_size(&(ball_layer->ui_container_1));
+
     ui_container_set_origin(&ball_layer->ui_container_1, 
                             0.0f, 
-                            (height - ball_layer->ui_container_1.height));
+                            (height - container_effective_size.comp.y));
 
     ui_layer_add_container(&(ball_layer->ui_layer),
                            container);
