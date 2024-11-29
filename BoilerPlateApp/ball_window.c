@@ -21,8 +21,8 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 {
     uint8_t error = 0U;
 
-    const uint32_t width     = 600;
-    const uint32_t height    = 400;
+    const uint32_t width     = 1200;
+    const uint32_t height    = 800;
     const uint8_t num_layers = 2;
 
     ball_window->clicked_indicator_radius = 4.0f;
@@ -50,9 +50,7 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
         fvector4 window_background_color;
-        // fvector4_set(&window_background_color, 0.0f, 0.0f, 0.0f, 0.0f);
-        fvector4_set(&window_background_color, 0.3f, 0.3f, 0.3f, 0.0f);
-        // fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 0.0f);
+        fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 0.0f);
 
         // Camera stuff
         const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -190,9 +188,9 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         ball_window->last_clicked.comp.x = cur_mouse.comp.x;
                         ball_window->last_clicked.comp.y = cur_mouse.comp.y;
 
-                        #ifdef DEBUG
-                            fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
-                        #endif
+                        // #ifdef DEBUG
+                        //     fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
+                        // #endif
 
                         if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
                         {

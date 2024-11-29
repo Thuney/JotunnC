@@ -216,7 +216,7 @@ static void renderer_2d_data_init(struct renderer_2d_data_t *data)
    renderable_2d_circle_data_init(&data->circle_data, max_vertices, &data->circle_shader);
    renderable_2d_line_data_init(&data->line_data, max_vertices, &data->line_shader);
 
-   data->line_width = 6.0f;
+   data->line_width = 5.0f;
 
    data->textures_index = 0;
 }
@@ -345,6 +345,37 @@ void renderer_2d_draw_quad(struct renderer_2d_t *renderer, const fmatrix_4x4 *tr
    }
 
    data->quad_data.quad_index_count += 6;
+}
+
+void renderer_2d_draw_unfilled_quad(struct renderer_2d_t* renderer, const fmatrix_4x4* transform, const fvector4 color)
+{
+   // #ifdef DEBUG
+   //    fprintf(stdout, "Renderer 2D drawing unfilled quad\n");
+   // #endif
+
+   renderer_2d_draw_line(
+      renderer, 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[0]), 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[1]), 
+      color);
+
+   renderer_2d_draw_line(
+      renderer, 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[1]), 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[2]), 
+      color);
+
+   renderer_2d_draw_line(
+      renderer, 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[2]), 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[3]), 
+      color);
+
+   renderer_2d_draw_line(
+      renderer, 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[3]), 
+      fmatrix_4x4_transform_point(transform, quad_2d_position_data[0]), 
+      color);
 }
 
 void renderer_2d_draw_textured_quad(struct renderer_2d_t *renderer, const fmatrix_4x4 *transform, struct texture_2d_t *texture)
@@ -509,17 +540,18 @@ void renderer_2d_draw_string(struct renderer_2d_t *renderer, const struct typefa
    //    fprintf(stdout, "Renderer 2D drawing string\n");
    // #endif
 
+   unsigned int num_chars = strlen(draw_string);
+   fvector2 text_dimensions = typeface_calculate_string_dimensions(typeface, draw_string, num_chars);
+
    int error;
 
    fmatrix_4x4 scale_matrix, translation_matrix, transform;
    fmatrix_4x4_init(&scale_matrix);
    fmatrix_4x4_init(&translation_matrix);
 
-   fvector3 string_current_render_position = {start_position.comp.x, start_position.comp.y, 0.0f};
+   fvector3 string_current_render_position = {start_position.comp.x, (start_position.comp.y - text_dimensions.comp.y), 0.0f};
 
    fvector3 texture_dimensions_scale_factors, character_x_translation, character_local_translation;
-
-   unsigned int num_chars = strlen(draw_string);
 
    const struct glyph_t *character_glyph;
 
@@ -530,8 +562,15 @@ void renderer_2d_draw_string(struct renderer_2d_t *renderer, const struct typefa
 
       character_glyph = typeface_get_glyph_from_char(typeface, c);
 
-      fvector3_set(&texture_dimensions_scale_factors, ((float)(character_glyph->width)), ((float)(character_glyph->height)), 1.0f);
-      fvector3_set(&character_local_translation, (float)character_glyph->offset_x, -1.0f * (float)character_glyph->offset_y, 0.0f);
+      fvector3_set(&texture_dimensions_scale_factors, 
+                  (float)(character_glyph->width), 
+                  (float)(character_glyph->height), 
+                  1.0f);
+
+      fvector3_set(&character_local_translation, 
+                  (float)character_glyph->offset_x, 
+                  -1.0f * (float)character_glyph->offset_y,
+                  0.0f);
 
       translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, character_local_translation);
       translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, string_current_render_position);
@@ -545,11 +584,12 @@ void renderer_2d_draw_string(struct renderer_2d_t *renderer, const struct typefa
       p1 = &(character_glyph->glyph_texture.subtexture_coordinates[1]);
 
       const fvector2 subtexture_coords[4] =
-          {
-              {p0->comp.x, p1->comp.y},
-              {p1->comp.x, p1->comp.y},
-              {p1->comp.x, p0->comp.y},
-              {p0->comp.x, p0->comp.y}};
+         {
+            {p0->comp.x, p1->comp.y},
+            {p1->comp.x, p1->comp.y},
+            {p1->comp.x, p0->comp.y},
+            {p0->comp.x, p0->comp.y}
+         };
 
       renderer_2d_draw_subtextured_quad(renderer, &transform, character_glyph->glyph_texture.parent_texture, subtexture_coords);
 

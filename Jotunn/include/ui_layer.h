@@ -88,10 +88,17 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
                    fvector4 background_color);
 
 //
+fvector2 ui_container_get_effective_size(struct ui_container_t* ui_container);
+
 void ui_container_init(struct ui_container_t* ui_container,
-                       enum ui_container_layout_t layout,
-                       float origin_x, 
-                       float origin_y);
+                       enum ui_container_layout_t layout);
+
+void ui_container_set_origin(struct ui_container_t* ui_container,
+                             float origin_x,
+                             float origin_y);
+
+void ui_container_set_padding(struct ui_container_t* ui_container,
+                             uint16_t padding);
 
 void ui_container_add_element(struct ui_container_t* ui_container,
                               struct ui_element_t* ui_element);

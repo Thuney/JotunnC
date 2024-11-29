@@ -71,7 +71,7 @@ void window1_run(struct window_layer_t* window_layer)
             const fvector4 circle_color   = { 0.0f, val2,  val, 1.0f };
 
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
-            renderer_2d_draw_quad(&window1_renderer_2d, &transform_matrix, quad_color);
+            renderer_2d_draw_unfilled_quad(&window1_renderer_2d, &transform_matrix, quad_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
             renderer_2d_draw_triangle(&window1_renderer_2d, &transform_matrix, triangle_color);
             transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, circle_position);

@@ -317,7 +317,7 @@ void typeface_set_char_size(const struct typeface_t* typeface, const unsigned in
    int error = FT_Set_Pixel_Sizes(typeface->typeface, 0, char_height_points);
 }
 
-fvector2 typeface_calculate_string_dimensions(struct typeface_t* typeface, const char* string, int string_length)
+fvector2 typeface_calculate_string_dimensions(const struct typeface_t* typeface, const char* string, int string_length)
 {
    static fvector2 string_dimensions;
    string_dimensions = (fvector2) { 0.0f, 0.0f };

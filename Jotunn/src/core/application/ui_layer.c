@@ -43,10 +43,20 @@ void ui_theme_init(struct ui_theme_t* ui_theme,
 #define UI_CONTAINER_MIN_HEIGHT 20
 
 //
+fvector2 ui_container_get_effective_size(struct ui_container_t* ui_container)
+{
+    fvector2 effective_size = 
+        (fvector2)
+        {
+            .comp.x = (ui_container->width + 2*ui_container->padding),
+            .comp.y = (ui_container->height + 2*ui_container->padding)
+        };
+
+    return effective_size;
+}
+
 void ui_container_init(struct ui_container_t* ui_container,
-                       enum ui_container_layout_t layout,
-                       float origin_x,
-                       float origin_y)
+                       enum ui_container_layout_t layout)
 {
     memset(ui_container, 0, sizeof(struct ui_container_t));
 
@@ -54,13 +64,13 @@ void ui_container_init(struct ui_container_t* ui_container,
 
     ui_container->layout = layout;
 
-    ui_container->origin_x = origin_x;
-    ui_container->origin_y = origin_y;
+    ui_container->origin_x = 0.0f;
+    ui_container->origin_y = 0.0f;
 
     ui_container->width  = UI_CONTAINER_MIN_WIDTH;
     ui_container->height = UI_CONTAINER_MIN_HEIGHT;
 
-    ui_container->padding = 5;
+    ui_container->padding = 0;
 
     ui_container->num_elements = 0;
 
@@ -69,42 +79,99 @@ void ui_container_init(struct ui_container_t* ui_container,
     ui_container->parent_layer = NULL;
 }
 
+void ui_container_set_origin(struct ui_container_t* ui_container,
+                             float origin_x,
+                             float origin_y)
+{
+    ui_container->origin_x = origin_x;
+    ui_container->origin_y = origin_y;
+}
+
+void ui_container_set_padding(struct ui_container_t* ui_container,
+                             uint16_t padding)
+{
+    ui_container->padding = padding;
+}
+
 void ui_container_render(struct renderer_2d_t* renderer_2d,
                          struct ui_container_t* ui_container,
                          struct ui_theme_t* theme)
 {
-    struct ui_element_t* element = ui_container->contained_elements[0].element;
+    const fvector2 container_effective_size = ui_container_get_effective_size(ui_container);
 
-    fmatrix_4x4 transform_matrix;
+    // Render backdrop box for container
     {
-        fmatrix_4x4 scale_matrix, translation_matrix;
+        fmatrix_4x4 transform_matrix;
+        {
+            fmatrix_4x4 scale_matrix, translation_matrix;
 
-        const fvector3 scale_factors = (fvector3) 
-            { 
-                {   ui_container->width  + 2*ui_container->padding,
-                    ui_container->height + 2*ui_container->padding,
-                    1.0 
-                } 
-            };
+            const fvector3 scale_factors = (fvector3) 
+                {
+                    {   
+                        container_effective_size.comp.x,
+                        container_effective_size.comp.y,
+                        1.0 
+                    } 
+                };
 
-        const fvector3 translation_vector = (fvector3) 
-            { 
-                {   ui_container->origin_x, 
-                    ui_container->origin_y, 
-                    -0.1f
-                } 
-            };
+            const fvector3 translation_vector = (fvector3) 
+                { 
+                    {   ui_container->origin_x, 
+                        ui_container->origin_y, 
+                        -0.1f
+                    } 
+                };
 
-        fmatrix_4x4_init(&scale_matrix);
-        fmatrix_4x4_init(&translation_matrix);
-        fmatrix_4x4_init(&transform_matrix);
+            fmatrix_4x4_init(&scale_matrix);
+            fmatrix_4x4_init(&translation_matrix);
+            fmatrix_4x4_init(&transform_matrix);
 
-        scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
-        translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
-        transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+            scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+            translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+            transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+        }
+
+        renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->background_color);
     }
 
-    renderer_2d_draw_quad(renderer_2d, &transform_matrix, theme->background_color);
+    // Render unfilled box around contents (for debug, mostly)
+    {
+        fmatrix_4x4 transform_matrix;
+        {
+            fmatrix_4x4 scale_matrix, translation_matrix;
+
+            const fvector3 scale_factors = (fvector3) 
+                {
+                    {   
+                        ui_container->width,
+                        ui_container->height,
+                        1.0 
+                    } 
+                };
+
+            const fvector3 translation_vector = (fvector3) 
+                { 
+                    {   
+                        ui_container->origin_x + ui_container->padding, 
+                        ui_container->origin_y + ui_container->padding,
+                        0.0f
+                    }
+                };
+
+            fmatrix_4x4_init(&scale_matrix);
+            fmatrix_4x4_init(&translation_matrix);
+            fmatrix_4x4_init(&transform_matrix);
+
+            scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+            translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+            transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+        }
+
+        renderer_2d_draw_unfilled_quad(renderer_2d, &transform_matrix, theme->accent_color);
+    }
+
+    // Render elements in container, according to the container layout
+    struct ui_element_t* element = ui_container->contained_elements[0].element;
 
     switch (ui_container->layout)
     {
@@ -121,8 +188,12 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
                 {
                     element->function_ui_element_render(renderer_2d,
                                                         element, 
-                                                        pen_position.comp.x, 
-                                                        pen_position.comp.y, 
+                                                        pen_position,
+                                                        (fvector2) 
+                                                        { 
+                                                            .comp.x = (float)ui_container->width,
+                                                            .comp.y = (float)ui_container->height
+                                                        },
                                                         theme);
                 }
 
@@ -143,8 +214,12 @@ void ui_container_render(struct renderer_2d_t* renderer_2d,
                 {
                     element->function_ui_element_render(renderer_2d,
                                                         element, 
-                                                        pen_position.comp.x, 
-                                                        pen_position.comp.y, 
+                                                        pen_position,
+                                                        (fvector2) 
+                                                        { 
+                                                            .comp.x = ui_container->width,
+                                                            .comp.y = ui_container->height
+                                                        },
                                                         theme);
                 }
 

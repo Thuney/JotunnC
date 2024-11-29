@@ -6,6 +6,8 @@ struct typeface_t;
 struct ui_layer_t;
 struct ui_theme_t;
 
+#include "fvector.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -46,8 +48,8 @@ struct ui_element_t
 
     void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
                                        struct ui_element_t* ui_element,
-                                       uint16_t origin_x,
-                                       uint16_t origin_y,
+                                       fvector2 origin_position,
+                                       fvector2 allocated_space,
                                        struct ui_theme_t* theme);
 
     void (*function_ui_element_event_react)(struct ui_element_t* ui_element, 
@@ -85,14 +87,16 @@ struct ui_element_checkbox_t
 };
 
 //
+fvector2 ui_element_get_effective_size(struct ui_element_t* ui_element);
+
 void ui_element_init(struct ui_element_t* ui_element,
                      enum ui_element_type_t element_type,
                      uint16_t width, 
                      uint16_t height, 
                      void (*function_ui_element_render)(struct renderer_2d_t* renderer_2d,
                                                         struct ui_element_t* ui_element,
-                                                        uint16_t origin_x,
-                                                        uint16_t origin_y,
+                                                        fvector2 origin_position,
+                                                        fvector2 allocated_space,
                                                         struct ui_theme_t* ui_theme),
                      void (*function_ui_element_event_react)(struct ui_element_t* ui_element, 
                                                              struct event_base_t* event) );
