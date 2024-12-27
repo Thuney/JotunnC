@@ -347,84 +347,85 @@ static void ui_container_event_handle(struct ui_container_t* ui_container, struc
 {
     static float delta_time = 0.0f;
 
-    static fvector2 cur_mouse = { 0.0f, 0.0f };
+    static fvector2 cur_mouse   = { 0.0f, 0.0f };
     static fvector2 delta_mouse = { 0.0f, 0.0f };
 
-    switch (event->event_type)
+    int i = 0;
+    while (!event->handled && i < ui_container->num_elements)
     {
-        case EVENT_APP_TICK:
+        struct ui_element_t* element = (ui_container->contained_elements[i++].element);
+        
+        if (element->function_ui_element_event_react)
         {
-            struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)event;
-
-            delta_time = app_tick_event->delta_time_seconds;
+            element->function_ui_element_event_react(element, event);
         }
-        break;
-
-        case EVENT_MOUSE_MOVED:
-        {
-            struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
-
-            float mouse_x = event_mouse_moved->x;
-            float mouse_y = event_mouse_moved->y;
-
-            delta_mouse.comp.x = (mouse_x - cur_mouse.comp.x);
-            delta_mouse.comp.y = (mouse_y - cur_mouse.comp.y);
-
-            cur_mouse.comp.x = mouse_x;
-            cur_mouse.comp.y = mouse_y;
-
-            ui_container_update_movement(ui_container, cur_mouse, delta_mouse);
-        }
-        break;
-
-        case EVENT_MOUSE_BUTTON:
-        {
-            struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)event;
-
-            if (event_mouse_button->button == 0)
-            {
-                switch(event_mouse_button->action)
-                {
-                    // Pressed
-                    case 1:
-                    {
-                        if (point_intersects_ui_container(ui_container, cur_mouse))
-                        {
-                            ui_container->held = true;
-                        }
-                    }
-                    break;
-                    // Released
-                    case 0:
-                    {
-                        if (ui_container->held) 
-                        {
-                            ui_container->held = false;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-        break;
-
-        default:
-        {
-
-        }
-        break;
     }
 
     if (!event->handled)
     {
-        for (int j = 0; j < ui_container->num_elements; j++)
+        switch (event->event_type)
         {
-            struct ui_element_t* element = (ui_container->contained_elements[j].element);
-            
-            if (element->function_ui_element_event_react)
+            case EVENT_APP_TICK:
             {
-                element->function_ui_element_event_react(element, event);
+                struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)event;
+
+                delta_time = app_tick_event->delta_time_seconds;
             }
+            break;
+
+            case EVENT_MOUSE_MOVED:
+            {
+                struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
+
+                float mouse_x = event_mouse_moved->x;
+                float mouse_y = event_mouse_moved->y;
+
+                delta_mouse.comp.x = (mouse_x - cur_mouse.comp.x);
+                delta_mouse.comp.y = (mouse_y - cur_mouse.comp.y);
+
+                cur_mouse.comp.x = mouse_x;
+                cur_mouse.comp.y = mouse_y;
+
+                ui_container_update_movement(ui_container, cur_mouse, delta_mouse);
+            }
+            break;
+
+            case EVENT_MOUSE_BUTTON:
+            {
+                struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)event;
+
+                if (event_mouse_button->button == 0)
+                {
+                    switch(event_mouse_button->action)
+                    {
+                        // Pressed
+                        case 1:
+                        {
+                            if (point_intersects_ui_container(ui_container, cur_mouse))
+                            {
+                                ui_container->held = true;
+                            }
+                        }
+                        break;
+                        // Released
+                        case 0:
+                        {
+                            if (ui_container->held) 
+                            {
+                                ui_container->held = false;
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+            break;
+
+            default:
+            {
+
+            }
+            break;
         }
     }
 }
