@@ -1,0 +1,3 @@
+[submodule "Jotunn/vendor/clay"]
+	path = Jotunn/vendor/clay
+	url = https://github.com/nicbarker/clay.git

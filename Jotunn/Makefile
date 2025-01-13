@@ -1,5 +1,6 @@
 C        := -gcc
-CFLAGS   := -g -pedantic-errors -Wall -std=gnu99 -D_POSIX_SOURCE -D_GNU_SOURCE -Wextra -fPIC
+# CFLAGS   := -g -pedantic-errors -Wall -std=c17 -D_POSIX_SOURCE -D_GNU_SOURCE -Wextra -fPIC
+CFLAGS   := -g -Wall -std=c17 -D_POSIX_SOURCE -D_GNU_SOURCE -Wextra -fPIC
 CDEFINES := 
 
 GRAPHICS_BACKEND := OPENGL
@@ -11,15 +12,16 @@ CDEFINES := $(CDEFINES) -DBACKEND_OPENGL
 
 endif
 
-LDFLAGS  := -L/usr/lib/ -lm -lfreetype -lpthread -lrt $(LD_GRAPHICS_FLAGS) -shared
+LDFLAGS  := -L/usr/lib -lm -lfreetype -lpthread -lrt $(LD_GRAPHICS_FLAGS) -shared
 
 FREETYPE2_INCLUDE := -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-4
+CLAY_INCLUDE := -I./vendor/clay
 
 BUILD    := ./.build
 OBJ_DIR  := $(BUILD)/objects
 LIB_DIR  := $(BUILD)/lib
 TARGET   := libjotunn.so
-INCLUDE  := -I./include -I./res $(FREETYPE2_INCLUDE)
+INCLUDE  := -I./include -I./res $(FREETYPE2_INCLUDE) $(CLAY_INCLUDE)
 
 HDRS := \
 ./include/application.h               \
@@ -29,6 +31,7 @@ HDRS := \
 ./include/window_layer.h              \
 ./include/ui_element.h                \
 ./include/ui_layer.h              	  \
+./include/ui_layer_clay.h             \
 \
 ./include/util.h                      \
 \
@@ -50,6 +53,8 @@ HDRS := \
 ./include/fvector.h                   \
 ./include/fmatrix.h                   \
 ./include/fquaternion.h               \
+\
+./vendor/clay/clay.h
 
 # Platform independent application sources
 CORE_SRC := \
@@ -58,14 +63,15 @@ CORE_SRC := \
 ./src/core/application/window.c                  \
 ./src/core/application/window_layer.c            \
 ./src/core/application/ui_element.c           	 \
-./src/core/application/ui_layer.c           	 \
+./src/core/application/ui_layer.c           	 	 \
+./src/core/application/ui_layer_clay.c           \
 \
 ./src/core/utils/util.c                          \
 \
 ./src/core/graphics/api/render_api.c             \
 ./src/core/graphics/renderer.c                   \
 ./src/core/graphics/renderer_2d.c                \
-./src/core/graphics/renderer_window_layer.c		 \
+./src/core/graphics/renderer_window_layer.c		 	 \
 ./src/core/graphics/renderable_2d_primitive.c    \
 ./src/core/graphics/camera.c                     \
 \

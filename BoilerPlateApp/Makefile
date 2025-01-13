@@ -1,9 +1,10 @@
 C      := -gcc
-CFLAGS := -pedantic-errors -Wall -Wextra
+# CFLAGS := -g -pedantic-errors -std=c17 -Wall -Wextra
+CFLAGS := -g -Wall -std=c17 -Wextra
 
-RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../Jotunn/.build/lib/
+RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../Jotunn/.build/lib
 
-LDFLAGS  := -L/usr/lib/ -lstdc++ -lm -lpthread $(RPATH_LINKAGE) -L$(CURDIR)/../Jotunn/.build/lib/ -ljotunn
+LDFLAGS  := -L/usr/lib -lm -lpthread $(RPATH_LINKAGE) -L$(CURDIR)/../Jotunn/.build/lib -ljotunn
 
 FREETYPE2_INCLUDE := -I/usr/include/freetype2 -I/usr/include/libpng16 -I/usr/include/harfbuzz -I/usr/include/glib-2.0 -I/usr/lib/glib-2.0/include -I/usr/include/sysprof-4
 
@@ -11,14 +12,16 @@ BUILD    := ./.build
 OBJ_DIR  := $(BUILD)/objects
 APP_DIR  := $(BUILD)/apps
 TARGET   := BoilerPlateApp
-INCLUDE  := -I$(CURDIR)/../Jotunn/include/ $(FREETYPE2_INCLUDE)
+INCLUDE  := -I$(CURDIR)/../Jotunn/include -I$(CURDIR)/../Jotunn/vendor/clay $(FREETYPE2_INCLUDE)
 
-HDRS     := ball_window.h \
-			ball_ui.h 	  \
+HDRS     := ball_window.h  \
+					  ball_ui.h 	   \
+						ball_ui_clay.h \
 
-SRC      := ball_window.c \
-			ball_ui.c 	  \
-			main.c 		  \
+SRC      := ball_window.c  \
+						ball_ui.c 	   \
+						ball_ui_clay.c \
+						main.c 		     \
 
 OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)
 

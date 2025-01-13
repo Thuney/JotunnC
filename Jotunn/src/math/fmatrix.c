@@ -366,6 +366,24 @@ fmatrix_4x4 fmatrix_4x4_transform_scale(fmatrix_4x4* matrix, const fvector3 scal
    return fmatrix_4x4_multiply(matrix, &scale_matrix);
 }
 
+fmatrix_4x4 fmatrix_4x4_get_transform(const fvector3 scale_factors, 
+                                      const fvector3 translation_vector)
+{
+  fmatrix_4x4 transform_matrix;
+  {
+      fmatrix_4x4 scale_matrix, translation_matrix;
+
+      fmatrix_4x4_init(&scale_matrix);
+      fmatrix_4x4_init(&translation_matrix);
+      fmatrix_4x4_init(&transform_matrix);
+
+      scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+      translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+      transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+  }
+  return transform_matrix;
+}
+
 fvector3 fmatrix_4x4_transform_point(const fmatrix_4x4* matrix, const fvector3 point)
 {
    fvector4 point_vec4 = { point.comp.x, point.comp.y, point.comp.z, 1.0f };

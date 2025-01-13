@@ -43,9 +43,11 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
         window_add_layer(&ball_window->window, &(ball_window->window_layer));
 
-        ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
-        
-        window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
+        // ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
+        // window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
+
+        ball_ui_layer_clay_init(&ball_window->ball_ui_layer_clay, width, height, &ball_window->window);
+        window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer_clay.ui_layer.ui_window_layer));
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
@@ -279,34 +281,11 @@ void ball_window_run(struct window_layer_t* window_layer)
     renderer_2d_draw_circle(&(ball_window->renderer_2d), &(click_transform), ball_window->clicked_color);
 }
 
-void ball_ui_window_run(struct window_t* parent_window, struct window_layer_t* window_layer)
-{
-    struct ball_window_t* ball_window = (struct ball_window_t*)parent_window;
-
-    fmatrix_4x4 transform_matrix;
-    {
-        fmatrix_4x4 scale_matrix, translation_matrix;
-
-        const fvector3 scale_factors = (fvector3) { {20.0f, 20.0f, 20.0f} };
-        const fvector3 translation_vector = (fvector3) { {200.0f, 200.0f, 0.0f} };
-
-        fmatrix_4x4_init(&scale_matrix);
-        fmatrix_4x4_init(&translation_matrix);
-        fmatrix_4x4_init(&transform_matrix);
-
-        scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
-        translation_matrix = fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
-        transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
-    }
-
-    renderer_2d_draw_quad(&(ball_window->renderer_2d), &(transform_matrix), ball_window->clicked_color);
-}
-
 void ball_window_cleanup(struct ball_window_t* ball_window)
 {
     renderer_2d_cleanup(&(ball_window->renderer_2d));
-
     framebuffer_cleanup(&(ball_window->framebuffer));
 
-    ball_ui_layer_cleanup(&(ball_window->ball_ui_layer));
+    // ball_ui_layer_cleanup(&(ball_window->ball_ui_layer));
+    ball_ui_layer_clay_cleanup(&(ball_window->ball_ui_layer_clay));
 }

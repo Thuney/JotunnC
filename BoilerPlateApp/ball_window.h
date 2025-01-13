@@ -4,7 +4,9 @@
 #include "fmatrix.h"
 #include "fvector.h"
 #include "renderer_2d.h"
+
 #include "ball_ui.h"
+#include "ball_ui_clay.h"
 
 #include <stdbool.h>
 
@@ -30,6 +32,7 @@ struct ball_window_t
     struct framebuffer_t framebuffer;
     //
     struct ball_ui_layer_t ball_ui_layer;
+    struct ball_ui_layer_clay_t ball_ui_layer_clay;
     //
     struct camera_ortho_t camera_ortho;
     struct renderer_2d_t renderer_2d;
@@ -45,6 +48,5 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 void ball_window_on_event(struct window_t* window, struct event_base_t* event);
 
 void ball_window_run(struct window_layer_t* window_layer);
-void ball_ui_window_run(struct window_t* parent_window, struct window_layer_t* window_layer);
 
 void ball_window_cleanup(struct ball_window_t* ball_window);

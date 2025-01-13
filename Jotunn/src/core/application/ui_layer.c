@@ -456,7 +456,7 @@ void ui_layer_init(struct window_t* parent_window,
     camera_init_orthographic(&(ui_layer->ui_camera_ortho), camera_position, camera_up, camera_front);
     camera_set_projection_orthographic(&(ui_layer->ui_camera_ortho), ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
 
-    renderer_2d_init(&(ui_layer->ui_renderer_2d), &(ui_layer->ui_camera_ortho).base, parent_window, "ball_renderer_2d");
+    renderer_2d_init(&(ui_layer->ui_renderer_2d), &(ui_layer->ui_camera_ortho).base, parent_window, "ui_renderer_2d");
 
     window_layer_init(parent_window, &ui_layer->ui_window_layer, &ui_layer->ui_framebuffer, &ui_layer->ui_camera_ortho.base, &ui_layer->ui_renderer_2d.base);
 

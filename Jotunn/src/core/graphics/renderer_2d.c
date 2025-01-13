@@ -244,7 +244,8 @@ static void renderer_2d_data_cleanup(struct renderer_2d_data_t *data)
 
 void renderer_2d_init(struct renderer_2d_t *renderer, struct camera_base_t *camera, struct window_t *parent_window, const char *tag)
 {
-   const uint16_t render_flags = (COLOR_FLAG | DEPTH_FLAG | BLEND_FLAG);
+   // const uint16_t render_flags = (COLOR_FLAG | DEPTH_FLAG | BLEND_FLAG);
+   const uint16_t render_flags = (COLOR_FLAG | BLEND_FLAG);
 
    renderer_base_init(&renderer->base, render_flags, camera, parent_window, tag);
 

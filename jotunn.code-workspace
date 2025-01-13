@@ -72,7 +72,11 @@
 			"ui_layer.h": "c",
 			"ui_element.h": "c",
 			"ball_ui.h": "c",
-			"expected": "c"
+			"expected": "c",
+			"clay.h": "c",
+			"ui_layer_clay.h": "c",
+			"ball_ui_clay.h": "c",
+			"random": "c"
 		},
 		"makefile.launchConfigurations": 
     [
