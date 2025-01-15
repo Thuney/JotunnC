@@ -207,7 +207,10 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 
         fvector4 window1_background_color;
         fvector4_set(&window1_background_color, 0.3f, 0.3f, 0.3f, 1.0f);
-        // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+
+        window_set_context(window1);
+
+        typeface_init(&window1_typeface, "/usr/share/fonts/TTF/Roboto-Medium.ttf", 20);
 
         // Camera stuff
         const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -221,14 +224,10 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
         const float ortho_near_plane = -3.0f;
         const float ortho_far_plane  = 100.0f;
 
-        window_set_context(window1);
-
-        typeface_init(&window1_typeface, "/usr/share/fonts/TTF/Roboto-Medium.ttf", 20);
-
         camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
 
-        renderer_2d_init(&window1_renderer_2d, window1_layer.camera, window1, "renderer_2d");
+        renderer_2d_init(&window1_renderer_2d, window1_layer.camera, window1, "renderer_2d_window1");
 
         texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Projects/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
         texture_2d_create_from_file_path(&lenna_texture, "/home/loki/Projects/JotunnC/Jotunn/res/textures/lenna.png", 1);
@@ -257,9 +256,12 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
         window_layer_init(window2, &window2_layer, &window2_framebuffer, (struct camera_base_t*)&window2_camera_ortho, (struct renderer_base_t*)&window2_renderer_2d);
         window_add_layer(window2, &window2_layer);
 
+        window_set_context(window2);
+
+        typeface_init(&window2_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
+
         fvector4 window2_background_color;
         fvector4_set(&window2_background_color, 0.3f, 0.3f, 0.3f, 1.0f);
-        // fvector4_set(&window2_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
         // Camera stuff
         const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -273,14 +275,10 @@ uint8_t init_window2(struct application_t* app, struct window_t* window2)
         const float ortho_near_plane = -3.0f;
         const float ortho_far_plane  = 100.0f;
 
-        window_set_context(window2);
-
-        typeface_init(&window2_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
-
         camera_init_orthographic(&window2_camera_ortho, camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&window2_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
 
-        renderer_2d_init(&window2_renderer_2d, window2_layer.camera, window2, "renderer_2d");
+        renderer_2d_init(&window2_renderer_2d, window2_layer.camera, window2, "renderer_2d_window2");
 
         window_set_background_color(window2, window2_background_color);
 
