@@ -14,4 +14,4 @@ struct timestep_t
 void timestep_init(struct timestep_t* timestep);
 void timestep_reset(struct timestep_t* timestep);
 void timestep_step(struct timestep_t* timestep);
-void timestep_cleanup();
+void timestep_cleanup(void);

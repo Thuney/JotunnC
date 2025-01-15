@@ -223,7 +223,7 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 
         window_set_context(window1);
 
-        typeface_init(&window1_typeface, "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
+        typeface_init(&window1_typeface, "/usr/share/fonts/TTF/Roboto-Medium.ttf", 20);
 
         camera_init_orthographic(&window1_camera_ortho, camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&window1_camera_ortho, ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);

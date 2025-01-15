@@ -15,7 +15,7 @@ Clay_LayoutConfig sidebarItemLayout = (Clay_LayoutConfig)
   .sizing = { .width = CLAY_SIZING_GROW(0), .height = CLAY_SIZING_FIXED(50) },
 };
 
-// Re-useable components are just normal functions
+// Re-usable components are just normal functions
 void SidebarItemComponent() 
 {
   CLAY(CLAY_LAYOUT(sidebarItemLayout), CLAY_RECTANGLE({ .color = COLOR_ORANGE })) {}
@@ -50,6 +50,26 @@ static const void* function_clay_ui_create_layout(struct ui_layer_clay_t* ui_lay
            CLAY_LAYOUT({ .layoutDirection = CLAY_TOP_TO_BOTTOM, .sizing = { .width = CLAY_SIZING_FIXED(300), .height = CLAY_SIZING_GROW(0) }, .padding = {16, 16}, .childGap = 16 }),
            CLAY_RECTANGLE({ .color = COLOR_LIGHT }))
       {
+        CLAY(
+          CLAY_ID("ProfilePictureOuter"), 
+          CLAY_LAYOUT(
+            { 
+              .sizing = { .width = CLAY_SIZING_GROW(0) }, 
+              .padding = {16, 16}, 
+              .childGap = 16, 
+              .childAlignment = 
+              { 
+                .y = CLAY_ALIGN_Y_CENTER 
+              }
+            }
+          ),
+          CLAY_RECTANGLE({ .color = COLOR_RED })
+        )
+        {
+          CLAY(CLAY_ID("ProfilePicture"), CLAY_LAYOUT({ .sizing = { .width = CLAY_SIZING_FIXED(60), .height = CLAY_SIZING_FIXED(60) }}), CLAY_RECTANGLE({ .color = COLOR_RED })) {}
+          CLAY_TEXT(CLAY_STRING("Clay - UI Library"), CLAY_TEXT_CONFIG({ .fontSize = 18, .textColor = {255, 255, 255, 255} }));
+        }
+
         // Standard C code like loops etc work inside components
         for (int i = 0; i < 5; i++) 
         {

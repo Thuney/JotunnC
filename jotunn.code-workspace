@@ -76,7 +76,8 @@
 			"clay.h": "c",
 			"ui_layer_clay.h": "c",
 			"ball_ui_clay.h": "c",
-			"random": "c"
+			"random": "c",
+			"vertexarray.h": "c"
 		},
 		"makefile.launchConfigurations": 
     [

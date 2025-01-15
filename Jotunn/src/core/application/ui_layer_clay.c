@@ -51,26 +51,6 @@ static void ui_layer_clay_render(struct ui_layer_clay_t* ui_layer_clay)
         Clay_RectangleElementConfig *config = renderCommand->config.rectangleElementConfig;
         Clay_Color color = config->color;
 
-        // // Render backing box
-        // const fvector3 rect_scale_factors = 
-        //   (fvector3) 
-        //   { 
-        //     boundingBox.width, 
-        //     boundingBox.height, 
-        //     1.0f
-        //   };
-
-        // const fvector3 rect_translation_vector = 
-        //   (fvector3) 
-        //   { 
-        //     boundingBox.x, 
-        //     boundingBox.y, 
-        //     -0.1f
-        //   };
-
-        // const fmatrix_4x4 rect_transform = 
-        //   fmatrix_4x4_get_transform(rect_scale_factors, rect_translation_vector);
-
         fmatrix_4x4 transform_matrix;
         {
             fmatrix_4x4 scale_matrix, translation_matrix;
@@ -88,7 +68,7 @@ static void ui_layer_clay_render(struct ui_layer_clay_t* ui_layer_clay)
             //   { 
             //     {   
             //       boundingBox.x, 
-            //       (ui_layer_clay->ui_window_layer.parent_window->metadata.height - boundingBox.y),
+            //       (renderer->base.parent_window->metadata.height - boundingBox.y),
             //       0.0f
             //     }
             //   };
@@ -126,7 +106,7 @@ static void ui_layer_clay_render(struct ui_layer_clay_t* ui_layer_clay)
       }
       break;
 
-      case CLAY_RENDER_COMMAND_TYPE_TEXT: 
+      case CLAY_RENDER_COMMAND_TYPE_TEXT:
       {
         Clay_TextElementConfig *config = renderCommand->config.textElementConfig;
         Clay_String text = renderCommand->text;
@@ -156,7 +136,7 @@ static void ui_layer_clay_render(struct ui_layer_clay_t* ui_layer_clay)
         // SDL_FreeSurface(surface);
         // free(cloned);
 
-        // renderer_2d_draw_string(renderer, ui_layer_clay->ui_layer_typeface, )
+        renderer_2d_draw_string(renderer, ui_layer_clay->ui_layer_typeface, (fvector3){ boundingBox.x, boundingBox.y, 0.0f }, text.chars);
       }
       break;
 
@@ -216,8 +196,8 @@ void ui_layer_clay_init(struct window_t* parent_window,
 
   const float ortho_left   = 0.0f; 
   const float ortho_right  = (float)width;
-  const float ortho_top    = (float)height;
-  const float ortho_bottom = 0.0f;
+  const float ortho_top    = 0.0f;
+  const float ortho_bottom = (float)height;
   const float ortho_near_plane = -3.0f;
   const float ortho_far_plane  = 100.0f;
 
