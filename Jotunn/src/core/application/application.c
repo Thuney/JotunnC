@@ -1,5 +1,6 @@
 #include "application.h"
 #include "render_api.h"
+#include "util.h"
 
 #include <font.h>
 #include <memory.h>
@@ -13,6 +14,9 @@ uint8_t application_init(struct application_t* app, const char* app_name, const 
 {
     #ifdef DEBUG
         fprintf(stdout, "Initializing application\n");
+
+        fprintf(stdout, PATH_FROM_JOTUNN_ROOT(""));
+        fprintf(stdout, "\n");
     #endif
 
     uint8_t error = 0;

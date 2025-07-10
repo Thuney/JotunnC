@@ -1,11 +1,11 @@
 #include <memory.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "application.h"
 #include "camera.h"
 #include "fvector.h"
 #include "renderer_2d.h"
-
 #include "texture.h"
 
 static struct application_t jotunn_app;
@@ -224,8 +224,8 @@ uint8_t init_window1(struct application_t* app, struct window_t* window1)
 
         renderer_2d_init(&window1_renderer_2d, window1_layer.camera, window1, "renderer_2d");
 
-        texture_2d_create_from_file_path(&aaron_shakespeare_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/AaronShakespeare.png", 1);
-        texture_2d_create_from_file_path(&lenna_texture, "/home/loki/Repos/JotunnC/Jotunn/res/textures/lenna.png", 1);
+        texture_2d_create_from_file_path(&aaron_shakespeare_texture, realpath("../../res/textures/AaronShakespeare.png", NULL), 1);
+        texture_2d_create_from_file_path(&lenna_texture, realpath("../../res/textures/lenna.png", NULL), 1);
 
         window_set_background_color(window1, window1_background_color);
 

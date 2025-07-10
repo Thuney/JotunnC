@@ -1,13 +1,13 @@
 C        := -gcc
 CFLAGS   := -g -pedantic-errors -Wall -std=gnu99 -D_POSIX_SOURCE -D_GNU_SOURCE -Wextra -fPIC
-CDEFINES := 
+CDEFINES := -DJOTUNN_ROOT_PATH=$(shell pwd)
 
 GRAPHICS_BACKEND := OPENGL
 
 ifeq ($(GRAPHICS_BACKEND), OPENGL)
 
 LD_GRAPHICS_FLAGS := -lGL -lglfw -lGLEW
-CDEFINES := $(CDEFINES) -DBACKEND_OPENGL 
+CDEFINES := $(CDEFINES) -DBACKEND_OPENGL
 
 endif
 
@@ -115,7 +115,7 @@ all: build $(LIB_DIR)/$(TARGET)
 
 $(OBJ_DIR)/%.o: %.c $(HDRS)
 	@mkdir -p $(@D)
-	$(C) $(CFLAGS) $(INCLUDE) -o $@ -c $<
+	$(C) $(CFLAGS) $(CDEFINES) $(INCLUDE) -o $@ -c $<
 
 $(LIB_DIR)/$(TARGET): $(OBJECTS)
 	@mkdir -p $(@D)

@@ -1,5 +1,7 @@
 #include "renderer_window_layer.h"
 
+#include "util.h"
+
 #ifdef DEBUG
     #include <stdio.h>
 #endif
@@ -71,7 +73,7 @@ static void renderer_window_layer_data_init(struct renderer_window_layer_data_t 
     vertex_buffer_bind(&(data->vbo));
     element_buffer_bind(&(data->ebo));
 
-    error = shader_program_init_filepath(&data->framebuffer_shader, "/home/loki/Repos/JotunnC/Jotunn/res/shaders/framebuffer_shader.vert", "/home/loki/Repos/JotunnC/Jotunn/res/shaders/framebuffer_shader.frag");
+    error = shader_program_init_filepath(&data->framebuffer_shader, PATH_FROM_JOTUNN_ROOT("/res/shaders/framebuffer_shader.vert"), PATH_FROM_JOTUNN_ROOT("/res/shaders/framebuffer_shader.frag"));
 #ifdef DEBUG
     if (error)
         fprintf(stdout, "Error during framebuffer shader init\n");

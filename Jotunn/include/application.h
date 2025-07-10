@@ -3,6 +3,7 @@
 #include "event.h"
 #include "timestep.h"
 #include "window.h"
+#include "util.h"
 
 struct application_t
 {

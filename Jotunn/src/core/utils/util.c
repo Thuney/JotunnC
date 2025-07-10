@@ -39,7 +39,7 @@ char* read_raw_file_contents(const char* file_path)
    }
 
    #ifdef DEBUG
-      // fprintf(stdout, "Shader File Contents:\n%s", buffer);
+      // fprintf(stdout, "Shader File Contents:\n%s"), buffer);
    #endif
    return buffer;
 }
