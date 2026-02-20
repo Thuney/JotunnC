@@ -109,7 +109,7 @@ PLATFORM_SRC := \
 endif
 
 # Combine sources
-SRC := $(CORE_SRC) $(PLATFORM_SRC) 
+SRC := $(CORE_SRC) $(PLATFORM_SRC)
 
 #
 

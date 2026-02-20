@@ -7,16 +7,16 @@
 
 struct application_t
 {
-    //
-    char* name;
-    //
-    struct window_t* current_window;
-    struct window_t** windows;
-    uint8_t num_windows;
-    uint8_t max_windows;
-    //
-    struct timestep_t timer;
-    uint8_t running;
+  //
+  char* name;
+  //
+  struct window_t* current_window;
+  struct window_t** windows;
+  uint8_t num_windows;
+  uint8_t max_windows;
+  //
+  struct timestep_t timer;
+  uint8_t running;
 };
 
 uint8_t application_init(struct application_t* app, const char* app_name, const uint8_t max_windows);
