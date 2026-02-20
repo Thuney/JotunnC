@@ -47,5 +47,5 @@ int main(int argc, char** argv)
     }
     fprintf(stdout, "Jobs done from main.c\n");
     fflush(stdout);
-#endif  
+#endif
 }

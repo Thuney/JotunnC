@@ -1,5 +1,8 @@
-project (JotunnC)
 cmake_minimum_required(VERSION 4.2.3)
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project (JotunnC LANGUAGES C)
 
 set(GRAPHICS_BACKEND "OPENGL")
 
@@ -8,6 +11,13 @@ set(
   ${JotunnC_SOURCE_DIR}/.build/lib/)
 
 find_package(Freetype REQUIRED)
+
+if (GRAPHICS_BACKEND STREQUAL "OPENGL")
+  find_package(glfw3 REQUIRED)
+  find_package(GLEW REQUIRED)
+else()
+
+endif()
 
 #
 set(APP_SRCS
@@ -70,10 +80,50 @@ else()
 endif()
 
 add_library(
+	imgui
+#
+  STATIC
+
+	${JotunnC_SOURCE_DIR}/vendor/imgui/imgui.cpp
+	${JotunnC_SOURCE_DIR}/vendor/imgui/imgui_demo.cpp
+	${JotunnC_SOURCE_DIR}/vendor/imgui/imgui_draw.cpp
+	${JotunnC_SOURCE_DIR}/vendor/imgui/imgui_widgets.cpp
+
+	${JotunnC_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_glfw.cpp
+	${JotunnC_SOURCE_DIR}/vendor/imgui/backends/imgui_impl_opengl3.cpp
+)
+target_include_directories(imgui PUBLIC ${JotunnC_SOURCE_DIR}/vendor/imgui/)
+target_include_directories(imgui PUBLIC ${JotunnC_SOURCE_DIR}/vendor/imgui/backends/)
+
+#
+if (GRAPHICS_BACKEND STREQUAL "OPENGL")
+  target_link_libraries(imgui PUBLIC glfw)
+  target_link_libraries(imgui PUBLIC GLEW::GLEW)
+else()
+target_compile_definitions(
+  imgui
+  PUBLIC
+  IMGUI_DEFINE_MATH_OPERATORS
+)
+
+endif()
+
+add_library(
   JotunnC
   SHARED
   ${APP_SRCS}
   ${PLATFORM_SRCS})
+
+target_sources(
+  JotunnC
+  PUBLIC
+  $<TARGET_OBJECTS:imgui>
+)
+
+target_compile_options(
+  JotunnC
+  PUBLIC
+  -Wall -Wextra)
 
 target_compile_definitions(
   JotunnC
@@ -93,11 +143,8 @@ target_include_directories(JotunnC PUBLIC ${FREETYPE_INCLUDE_DIRS})
 
 #
 if (GRAPHICS_BACKEND STREQUAL "OPENGL")
-  find_package(glfw3 REQUIRED)
-  find_package(GLEW REQUIRED)
-
-  target_link_libraries(JotunnC PRIVATE glfw)
-  target_link_libraries(JotunnC PRIVATE GLEW::GLEW)
+  target_link_libraries(JotunnC PUBLIC glfw)
+  target_link_libraries(JotunnC PUBLIC GLEW::GLEW)
 else()
 
 endif()

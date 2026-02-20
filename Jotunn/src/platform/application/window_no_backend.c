@@ -3,43 +3,53 @@
 #include "window.h"
 
 // Extern function definitions
-uint8_t window_graphics_init(struct window_t* window)
+uint8_t window_graphics_init(
+  struct window_t* window)
 {
    #ifdef DEBUG
-      printf("No graphics backend!\n");
+  printf("No graphics backend!\n");
    #endif
 
-   window->metadata.signaled_close = 1;
+  window->metadata.signaled_close = 1;
 
-   return 1;
+  return 1;
 }
 
-void window_graphics_poll_events(struct window_t* window)
+void window_graphics_poll_events(
+  struct window_t* window)
 {
-   return;
+  return;
 }
 
-void window_graphics_run(struct window_t* window)
+void window_graphics_run(
+  struct window_t* window)
 {
-   return;
+  return;
 }
 
-void window_graphics_cleanup(struct window_t* window)
+void window_graphics_cleanup(
+  struct window_t* window)
 {
-   return;
+  return;
 }
 
-void window_graphics_set_context(struct window_t* window)
+void window_graphics_set_context(
+  struct window_t* window)
 {
-   return;
+  return;
 }
 
 void window_graphics_release_context()
 {
-   return;
+  return;
 }
 
-void window_graphics_set_background_color(struct window_t* window, float red, float green, float blue, float alpha)
+void window_graphics_set_background_color(
+  struct window_t* window,
+  float red,
+  float green,
+  float blue,
+  float alpha)
 {
-   return;
+  return;
 }

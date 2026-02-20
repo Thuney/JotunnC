@@ -35,7 +35,7 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
 
     struct ui_element_slider_t* slider = &(ball_layer->slider_element_1);
 
-    ui_container_init(container, 
+    ui_container_init(container,
                       UI_LAYOUT_VERTICAL);
 
     ui_container_set_padding(container, 5);
@@ -94,8 +94,8 @@ void ball_ui_layer_init(struct ball_ui_layer_t* ball_layer, uint16_t width, uint
 
     //
 
-    ui_container_set_origin(&ball_layer->ui_container_1, 
-                            0.0f, 
+    ui_container_set_origin(&ball_layer->ui_container_1,
+                            0.0f,
                             (height - ball_layer->ui_container_1.height));
 
     ui_layer_add_container(&(ball_layer->ui_layer),

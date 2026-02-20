@@ -2,7 +2,7 @@
 #define BOOST_TEST_MODULE vector_tests
 #include <boost/test/unit_test.hpp>
 
-extern "C" 
+extern "C"
 {
    #include "fvector.h"
 

@@ -2,7 +2,8 @@
 
 #include "fquaternion.h"
 
-void fquaternion_init(fquaternion* quaternion)
+void fquaternion_init(
+  fquaternion* quaternion)
 {
-   memset(quaternion, 0, sizeof(fquaternion));
+  memset(quaternion, 0, sizeof(fquaternion));
 }

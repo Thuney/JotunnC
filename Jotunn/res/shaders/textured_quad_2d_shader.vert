@@ -18,6 +18,6 @@ void main()
    v_textureCoordinate = texCoord;
    v_textureIndex = texIndex;
    v_tilingFactor = tilingFactor;
-   
+
    gl_Position = projection * view * model * vec4(position, 1.0);
 }

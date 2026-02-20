@@ -1,15 +1,29 @@
+#pragma once
+
+/** System Includes **/
 #include <time.h>
 
+/************************************************************
+ *
+ * Struct Definitions
+ *
+ ************************************************************/
 struct timestep_t
 {
-    double current_time_seconds;
-    // Time from last step
-    double delta_time_seconds;
-    // Underlying time structs
-    struct timespec current_time;
-    struct timespec last_time;
-    struct timespec start_time;
+  double current_time_seconds;
+  // Time from last step
+  double delta_time_seconds;
+  // Underlying time structs
+  struct timespec current_time;
+  struct timespec last_time;
+  struct timespec start_time;
 };
+
+/************************************************************
+ *
+ * Interface Functions
+ *
+ ************************************************************/
 
 void timestep_init(struct timestep_t* timestep);
 void timestep_reset(struct timestep_t* timestep);

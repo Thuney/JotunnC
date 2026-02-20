@@ -44,7 +44,7 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_add_layer(&ball_window->window, &(ball_window->window_layer));
 
         ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
-        
+
         window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
@@ -57,7 +57,7 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         const fvector3 camera_up       = (fvector3) { {0.0f, 1.0f,  0.0f} };
         const fvector3 camera_front    = (fvector3) { {0.0f, 0.0f, -1.0f} };
 
-        const float ortho_left   = 0.0f; 
+        const float ortho_left   = 0.0f;
         const float ortho_right  = (float)width;
         const float ortho_top    = (float)height;
         const float ortho_bottom = 0.0f;
