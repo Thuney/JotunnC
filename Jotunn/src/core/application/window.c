@@ -2,6 +2,7 @@
 #include "fvector.h"
 #include "render_api.h"
 #include "window.h"
+#include "window_layer.h"
 
 #include <memory.h>
 
@@ -105,6 +106,27 @@ void window_bind_custom_events(struct window_t* window, void (*custom_event_func
     window->function_event_react = custom_event_function;
 }
 
+void window_handle_event(struct window_t* window, struct event_base_t* event)
+{
+    if(window->function_event_react)
+    {
+        window->function_event_react(window, event);
+
+        if(event->handled) return;
+    }
+
+    struct window_layer_t** current_layer;
+
+    current_layer = window->layers;
+    for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
+    {
+        if ((*current_layer)->function_event_react)
+        {
+            (*current_layer)->function_event_react(window, (*current_layer), event);
+        }
+    }
+}
+
 // ---------------------------
 // ---------------------------
 // ---------------------------
@@ -143,7 +165,7 @@ uint8_t window_run(struct window_t* window)
 
         if ((*current_layer)->function_custom_window_layer_run)
         {
-            (*current_layer)->function_custom_window_layer_run(window, *(current_layer));
+            (*current_layer)->function_custom_window_layer_run(*(current_layer));
         }
 
         renderer_base_end_scene(((*current_layer)->renderer));

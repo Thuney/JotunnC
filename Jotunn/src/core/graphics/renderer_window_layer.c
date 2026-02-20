@@ -1,6 +1,7 @@
 #include "renderer_window_layer.h"
 
 #include "util.h"
+#include "window_layer.h"
 
 #ifdef DEBUG
     #include <stdio.h>
@@ -39,7 +40,7 @@ enum framebuffer_vertex_attribute_t
 
 // Framebuffer vertex attributes
 static struct vertex_attribute_t framebuffer_vertex_attributes[4] = {
-   [0] = 
+   [0] =
    {
       .attribute_name       = "position",
       .index                = (unsigned int)-1, // To be filled by shader program
@@ -49,7 +50,7 @@ static struct vertex_attribute_t framebuffer_vertex_attributes[4] = {
       .stride               = sizeof(struct framebuffer_vertex_t),
       .ptr_offset_to_attrib = 0
    },
-   [1] = 
+   [1] =
    {
       .attribute_name       = "texCoord",
       .index                = (unsigned int)-1, // To be filled by shader program
@@ -99,7 +100,7 @@ static void renderer_window_layer_data_init(struct renderer_window_layer_data_t 
 
         vertex_array_set_attribute(&(data->vao), &attributes[attribute_index]);
     }
-    
+
 }
 
 static void renderer_window_layer_data_cleanup(struct renderer_window_layer_data_t *data)

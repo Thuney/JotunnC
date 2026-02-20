@@ -169,7 +169,7 @@ static void gl_window_cursor_position_callback(GLFWwindow* window, double x_pos,
          },
          .window_handle = (void*)window,
          .x             = (float)x_pos,
-         .y             = (float)y_pos
+         .y             = (float)(metadata->height - y_pos)
       };
 
    metadata->function_event_notify(metadata->parent_application, &(mouse_moved_event.base));

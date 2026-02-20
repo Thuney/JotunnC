@@ -21,8 +21,8 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 {
     uint8_t error = 0U;
 
-    const uint32_t width     = 600;
-    const uint32_t height    = 400;
+    const uint32_t width     = 1200;
+    const uint32_t height    = 800;
     const uint8_t num_layers = 2;
 
     ball_window->clicked_indicator_radius = 4.0f;
@@ -37,19 +37,20 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
 
     if (!error)
     {
-        framebuffer_init(&ball_window->framebuffer, width, height);
-        window_layer_init(&ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
-        window_add_layer(&ball_window->window, &ball_window->window_layer);
+        window_set_context(window_ptr);
 
-        framebuffer_init(&ball_window->ui_framebuffer, width, height);
-        window_layer_init(&ball_window->ui_window_layer, &ball_window->ui_framebuffer, camera_base_ptr, renderer_base_ptr);
-        window_add_layer(&ball_window->window, &ball_window->ui_window_layer);
+        framebuffer_init(&ball_window->framebuffer, width, height);
+        window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
+        window_add_layer(&ball_window->window, &(ball_window->window_layer));
+
+        ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
+        
+        window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
 
         window_bind_custom_events(window_ptr, &ball_window_on_event);
 
         fvector4 window_background_color;
-        fvector4_set(&window_background_color, 0.1f, 0.1f, 0.1f, 0.0f);
-        // fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
+        fvector4_set(&window_background_color, 1.0f, 1.0f, 1.0f, 0.0f);
 
         // Camera stuff
         const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -62,8 +63,6 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         const float ortho_bottom = 0.0f;
         const float ortho_near_plane = -3.0f;
         const float ortho_far_plane  = 100.0f;
-
-        window_set_context(window_ptr);
 
         camera_init_orthographic(&(ball_window->camera_ortho), camera_position, camera_up, camera_front);
         camera_set_projection_orthographic(&(ball_window->camera_ortho), ortho_left, ortho_right, ortho_top, ortho_bottom, ortho_near_plane, ortho_far_plane);
@@ -159,10 +158,10 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
             struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)event;
 
             float mouse_x = event_mouse_moved->x;
-            float mouse_y = (ball_window->window.metadata.height - event_mouse_moved->y);
+            float mouse_y = event_mouse_moved->y;
 
-            delta_mouse.comp.x = (cur_mouse.comp.x - mouse_x);
-            delta_mouse.comp.y = (cur_mouse.comp.y - mouse_y);
+            delta_mouse.comp.x = (mouse_x - cur_mouse.comp.x);
+            delta_mouse.comp.y = (mouse_y - cur_mouse.comp.y);
 
             cur_mouse.comp.x = mouse_x;
             cur_mouse.comp.y = mouse_y;
@@ -189,9 +188,9 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         ball_window->last_clicked.comp.x = cur_mouse.comp.x;
                         ball_window->last_clicked.comp.y = cur_mouse.comp.y;
 
-                        #ifdef DEBUG
-                            fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
-                        #endif
+                        // #ifdef DEBUG
+                        //     fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
+                        // #endif
 
                         if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
                         {
@@ -209,8 +208,8 @@ void ball_window_on_event(struct window_t* window, struct event_base_t* event)
                         {
                             ball->held = false;
 
-                            ball->ball_velocity.comp.x = (-delta_mouse.comp.x * 300.0f);
-                            ball->ball_velocity.comp.y = (-delta_mouse.comp.y * 300.0f);
+                            ball->ball_velocity.comp.x = (delta_mouse.comp.x * 300.0f);
+                            ball->ball_velocity.comp.y = (delta_mouse.comp.y * 300.0f);
                         }
                     }
                     break;
@@ -267,9 +266,9 @@ static const fmatrix_4x4 click_calculate_transform(struct ball_window_t* ball_wi
     return transform_matrix;
 }
 
-void ball_window_run(struct window_t* parent_window, struct window_layer_t* window_layer)
+void ball_window_run(struct window_layer_t* window_layer)
 {
-    struct ball_window_t* ball_window = (struct ball_window_t*)parent_window;
+    struct ball_window_t* ball_window = (struct ball_window_t*)window_layer->parent_window;
 
     const fmatrix_4x4 ball_transform = ball_calculate_transform(&(ball_window->ball));
 
@@ -308,5 +307,6 @@ void ball_window_cleanup(struct ball_window_t* ball_window)
     renderer_2d_cleanup(&(ball_window->renderer_2d));
 
     framebuffer_cleanup(&(ball_window->framebuffer));
-    framebuffer_cleanup(&(ball_window->ui_framebuffer));
+
+    ball_ui_layer_cleanup(&(ball_window->ball_ui_layer));
 }

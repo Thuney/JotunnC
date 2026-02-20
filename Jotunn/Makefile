@@ -27,6 +27,8 @@ HDRS := \
 ./include/timestep.h                  \
 ./include/window.h                    \
 ./include/window_layer.h              \
+./include/ui_element.h                \
+./include/ui_layer.h              	  \
 \
 ./include/util.h                      \
 \
@@ -55,6 +57,8 @@ CORE_SRC := \
 ./src/core/application/timestep.c                \
 ./src/core/application/window.c                  \
 ./src/core/application/window_layer.c            \
+./src/core/application/ui_element.c           	 \
+./src/core/application/ui_layer.c           	 \
 \
 ./src/core/utils/util.c                          \
 \

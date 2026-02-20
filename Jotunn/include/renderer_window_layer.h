@@ -5,11 +5,10 @@
 #include "renderable_2d_primitive.h"
 #include "renderer.h"
 #include "shader.h"
-#include "window_layer.h"
+
+struct window_layer_t;
 
 #define _RENDERER_WINDOW_LAYER_MAX_TEXTURES 16
-
-
 
 struct renderer_window_layer_data_t
 {
