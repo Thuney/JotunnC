@@ -84,9 +84,15 @@ uint8_t window_init(
   memset((void*)window, 0, sizeof(struct window_t));
 
   window_set_metadata(
-    &window->metadata, width, height, tag, app_parent, &application_on_event);
+    &(window->metadata),
+    width,
+    height,
+    tag,
+    app_parent,
+    &application_on_event);
 
-  uint8_t error = window_graphics_init(window);
+  const uint8_t error =
+    window_graphics_init(window);
 
   #ifdef DEBUG
   if (error)
@@ -100,12 +106,12 @@ uint8_t window_init(
     window_set_context(window);
 
     renderer_window_layer_init(
-      &window->window_layer_renderer, window, "Window Renderer");
+      &(window->window_layer_renderer), window, "Window Renderer");
 
     window->max_layers = max_window_layers;
     window->num_layers = 0;
-    window->layers = (struct window_layer_t**)malloc(
-      window->max_layers * sizeof(struct window_layer_t*));
+    window->layers = (struct window_layer_t**)
+      malloc(window->max_layers * sizeof(struct window_layer_t*));
   }
 
   return error;

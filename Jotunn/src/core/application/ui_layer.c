@@ -21,6 +21,23 @@
 //     return color;
 // }
 
+extern void ui_layer_graphics_init(
+  struct ui_layer_t* ui_layer);
+
+extern void ui_layer_graphics_cleanup(
+  struct ui_layer_t* ui_layer);
+
+extern void ui_layer_graphics_render_begin(
+  struct ui_layer_t* ui_layer);
+
+extern void ui_layer_graphics_render_end(
+  struct ui_layer_t* ui_layer);
+
+//
+
+static void ui_layer_window_layer_render(
+  struct window_layer_t* window_layer);
+
 //
 void ui_layer_init(
   struct window_t* parent_window,
@@ -29,6 +46,18 @@ void ui_layer_init(
   uint32_t height)
 {
   memset(ui_layer, 0, sizeof(struct ui_layer_t));
+
+  framebuffer_init(
+    &(ui_layer->ui_framebuffer),
+    width,
+    height);
+
+  window_layer_init(
+    parent_window,
+    &(ui_layer->ui_window_layer),
+    &(ui_layer->ui_framebuffer),
+    &(ui_layer->ui_camera_ortho.base),
+    &(ui_layer->ui_renderer_2d.base));
 
   // Camera stuff
   const fvector3 camera_position = (fvector3) { {0.0f, 0.0f,  2.0f} };
@@ -60,20 +89,12 @@ void ui_layer_init(
     &(ui_layer->ui_renderer_2d),
     &(ui_layer->ui_camera_ortho.base),
     parent_window,
-    "ball_renderer_2d");
+    "ui_layer_renderer_2d");
 
-  framebuffer_init(
-    &(ui_layer->ui_framebuffer),
-    width,
-    height);
-  window_layer_init(
-    parent_window,
-    &(ui_layer->ui_window_layer),
-    &(ui_layer->ui_framebuffer),
-    &(ui_layer->ui_camera_ortho.base),
-    &(ui_layer->ui_renderer_2d.base));
+  ui_layer_graphics_init(
+    ui_layer);
 
-  // window_layer_set_custom_layer_run(&(ui_layer->ui_window_layer), ui_layer_run);
+  window_layer_set_custom_layer_run(&(ui_layer->ui_window_layer), ui_layer_window_layer_render);
   // window_layer_set_event_react(&(ui_layer->ui_window_layer), ui_layer_event_handle);
 }
 
@@ -81,4 +102,30 @@ void ui_layer_cleanup(
   struct ui_layer_t* ui_layer)
 {
   framebuffer_cleanup(&(ui_layer->ui_framebuffer));
+
+  ui_layer_graphics_cleanup(ui_layer);
+}
+
+void ui_layer_set_custom_render(
+  struct ui_layer_t* ui_layer,
+  void (*function_custom_ui_layer_render)(struct ui_layer_t* ui_layer))
+{
+  ui_layer->function_custom_ui_layer_render =
+    function_custom_ui_layer_render;
+}
+
+static void ui_layer_window_layer_render(
+  struct window_layer_t* window_layer)
+{
+  struct ui_layer_t *ui_layer =
+    (struct ui_layer_t*)window_layer;
+
+  ui_layer_graphics_render_begin(ui_layer);
+
+  if (ui_layer->function_custom_ui_layer_render)
+  {
+    ui_layer->function_custom_ui_layer_render(ui_layer);
+  }
+
+  ui_layer_graphics_render_end(ui_layer);
 }

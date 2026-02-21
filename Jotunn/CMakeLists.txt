@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.2.3)
 set(CMAKE_C_STANDARD 23)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-project (JotunnC LANGUAGES C)
+project (JotunnC LANGUAGES C CXX)
 
 set(GRAPHICS_BACKEND "OPENGL")
 
@@ -15,6 +15,8 @@ find_package(Freetype REQUIRED)
 if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   find_package(glfw3 REQUIRED)
   find_package(GLEW REQUIRED)
+
+  add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
 else()
 
 endif()
@@ -25,7 +27,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/application/timestep.c
   ${JotunnC_SOURCE_DIR}/src/core/application/window.c
   ${JotunnC_SOURCE_DIR}/src/core/application/window_layer.c
-  ${JotunnC_SOURCE_DIR}/src/core/application/ui_element.c
+  # ${JotunnC_SOURCE_DIR}/src/core/application/ui_element.c
   ${JotunnC_SOURCE_DIR}/src/core/application/ui_layer.c
 
   ${JotunnC_SOURCE_DIR}/src/core/utils/util.c
@@ -55,6 +57,11 @@ if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   set(
     PLATFORM_SRCS
     ${JotunnC_SOURCE_DIR}/src/platform/application/window_gl.c
+    ${JotunnC_SOURCE_DIR}/src/platform/application/ui/ui_layer_gl_imgui.c
+
+    ${JotunnC_SOURCE_DIR}/vendor/cimgui/imgui/backends/imgui_impl_glfw.cpp
+    ${JotunnC_SOURCE_DIR}/vendor/cimgui/imgui/backends/imgui_impl_opengl3.cpp
+
     ${JotunnC_SOURCE_DIR}/src/platform/graphics/api/render_api_opengl.c
     ${JotunnC_SOURCE_DIR}/src/platform/graphics/datatypes/framebuffer_gl.c
     ${JotunnC_SOURCE_DIR}/src/platform/graphics/datatypes/shader_gl.c
@@ -87,9 +94,16 @@ add_library(
 
 target_compile_definitions(
   JotunnC
+  #
   PUBLIC
+  #
   JOTUNN_ROOT_PATH=${JotunnC_SOURCE_DIR}
+
   DEBUG
+
+  CIMGUI_DEFINE_ENUMS_AND_STRUCTS
+  CIMGUI_USE_GLFW
+  CIMGUI_USE_OPENGL3
 )
 
 target_include_directories(
@@ -97,7 +111,6 @@ target_include_directories(
   PUBLIC
   ${JotunnC_SOURCE_DIR}/include/)
 
-add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
 target_link_libraries(JotunnC PUBLIC cimgui)
 
 target_link_libraries(JotunnC PUBLIC ${FREETYPE_LIBRARIES})
