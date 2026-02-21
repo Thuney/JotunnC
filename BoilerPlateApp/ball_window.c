@@ -43,7 +43,11 @@ uint8_t ball_window_init(struct application_t* app_parent, struct ball_window_t*
         window_layer_init(window_ptr, &ball_window->window_layer, &ball_window->framebuffer, camera_base_ptr, renderer_base_ptr);
         window_add_layer(&ball_window->window, &(ball_window->window_layer));
 
-        ball_ui_layer_init(&ball_window->ball_ui_layer, width, height, &ball_window->window);
+        ball_ui_layer_init(
+          &(ball_window->window),
+          &(ball_window->ball_ui_layer),
+          width,
+          height);
 
         window_add_layer(&ball_window->window, &(ball_window->ball_ui_layer.ui_layer.ui_window_layer));
 
