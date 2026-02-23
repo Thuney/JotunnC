@@ -1,6 +1,6 @@
 #include "vertexarray.h"
 
-int platform_vertex_array_init(
+void platform_vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num)
 {

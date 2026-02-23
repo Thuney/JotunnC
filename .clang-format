@@ -1,0 +1,54 @@
+# clang-format
+---
+Language: C
+AlignAfterOpenBracket: true
+AlignConsecutiveBitFields: true
+AlignOperands: false
+AlignTrailingComments: true
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: true
+BinPackArguments: false
+BinPackParameters: AlwaysOnePerLine
+BraceWrapping:
+  AfterCaseLabel: true
+  AfterControlStatement: true
+  AfterEnum: true
+  AfterFunction: true
+  AfterUnion: true
+  AfterStruct: true
+  BeforeElse: true
+  IndentBraces: false
+  SplitEmptyFunction: true
+BreakAfterOpenBracketIf: false
+BreakAfterOpenBracketFunction: true
+BreakBeforeBraces: Custom
+BreakBeforeTernaryOperators: false
+BreakFunctionDefinitionParameters: true #Note, this newlines (void)
+ColumnLimit: 80
+ContinuationIndentWidth: 2
+DerivePointerAlignment: true
+IncludeBlocks: Preserve
+IndentCaseLabels: true
+IndentPPDirectives: Leave
+IndentWidth: 2
+KeepEmptyLines:
+  AtStartOfBlock: false
+MaxEmptyLinesToKeep: 1
+ReflowComments: IndentOnly
+RemoveParentheses: MultipleParentheses
+RemoveSemicolon: true
+SeparateDefinitionBlocks: Always
+SortIncludes: true
+SpaceAfterCStyleCast: false
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpacesInParens: Custom
+SpacesInParensOptions:
+  InEmptyParentheses: false
+SpacesInSquareBrackets: false
+TabWidth: 2
+UseTab: Never
+WhitespaceSensitiveMacros: [STRINGIFY, _dynamic_header_three_parts, dynamic_header_three_parts]

@@ -18,7 +18,7 @@ struct vertex_buffer_t
   unsigned int vertex_buffer;
 };
 
-int vertex_buffer_init(
+void vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num);
 void vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer);

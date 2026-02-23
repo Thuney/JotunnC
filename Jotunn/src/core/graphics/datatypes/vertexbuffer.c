@@ -1,6 +1,6 @@
 #include "vertexbuffer.h"
 
-extern int platform_vertex_buffer_init(
+extern void platform_vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num);
 extern void platform_vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer);
@@ -20,8 +20,7 @@ extern void platform_vertex_buffer_destroy(
 extern int platform_element_buffer_init(
   struct element_buffer_t* element_buffer,
   int num);
-extern void
-platform_element_buffer_bind(struct element_buffer_t* element_buffer);
+extern void platform_element_buffer_bind(struct element_buffer_t* element_buffer);
 extern void platform_element_buffer_buffer_data(
   struct element_buffer_t* element_buffer,
   unsigned int* data,
@@ -33,11 +32,11 @@ extern void platform_element_buffer_destroy(
 
 //
 
-int vertex_buffer_init(
+void vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num)
 {
-  return platform_vertex_buffer_init(vertex_buffer, num);
+  platform_vertex_buffer_init(vertex_buffer, num);
 }
 
 void vertex_buffer_bind(

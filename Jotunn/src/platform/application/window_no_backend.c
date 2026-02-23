@@ -39,7 +39,8 @@ void window_graphics_set_context(
   return;
 }
 
-void window_graphics_release_context()
+void window_graphics_release_context(
+  struct window_t* window)
 {
   return;
 }

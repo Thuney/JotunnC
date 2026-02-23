@@ -26,7 +26,7 @@ extern void window_graphics_poll_events(struct window_t* window);
 extern void window_graphics_run(struct window_t* window);
 extern void window_graphics_cleanup(struct window_t* window);
 extern void window_graphics_set_context(struct window_t* window);
-extern void window_graphics_release_context();
+extern void window_graphics_release_context(struct window_t* window);
 extern void window_graphics_set_viewport(
   uint32_t x,
   uint32_t y,
@@ -91,13 +91,11 @@ uint8_t window_init(
     app_parent,
     &application_on_event);
 
-  const uint8_t error =
-    window_graphics_init(window);
+  const uint8_t error = window_graphics_init(window);
 
-  #ifdef DEBUG
-  if (error)
-    fprintf(stdout, "Error during window_graphics_init\n");
-  #endif
+#ifdef DEBUG
+  if (error) fprintf(stdout, "Error during window_graphics_init\n");
+#endif
 
   if (!error)
   {
@@ -106,7 +104,9 @@ uint8_t window_init(
     window_set_context(window);
 
     renderer_window_layer_init(
-      &(window->window_layer_renderer), window, "Window Renderer");
+      &(window->window_layer_renderer),
+      window,
+      "Window Renderer");
 
     window->max_layers = max_window_layers;
     window->num_layers = 0;
@@ -165,6 +165,11 @@ void window_bind_custom_events(
   window->function_event_react = custom_event_function;
 }
 
+/************************************************************
+ *
+ * Function: window_handle_event()
+ *
+ ************************************************************/
 void window_handle_event(
   struct window_t* window,
   struct event_base_t* event)
@@ -262,7 +267,7 @@ uint8_t window_run(
 
   window_graphics_run(window);
 
-  window_release_context();
+  window_release_context(window);
 
   return (window->metadata.signaled_close);
 }
@@ -303,9 +308,10 @@ void window_set_context(
  * Function: window_release_context()
  *
  ************************************************************/
-void window_release_context()
+void window_release_context(
+  struct window_t* window)
 {
-  window_graphics_release_context();
+  window_graphics_release_context(window);
 }
 
 /************************************************************

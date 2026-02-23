@@ -16,10 +16,11 @@ extern int platform_shader_program_init(
   struct vertex_shader_t* vertex_shader,
   struct fragment_shader_t* fragment_shader);
 
-extern int
-platform_shader_program_link(struct shader_program_t* shader_program);
+extern int platform_shader_program_link(
+  struct shader_program_t* shader_program);
 
-extern void platform_shader_program_use(struct shader_program_t* shader_program);
+extern void platform_shader_program_use(
+  struct shader_program_t* shader_program);
 extern void platform_shader_program_bind_fragment_data_location(
   struct shader_program_t* shader_program,
   unsigned int buffer_index,
@@ -34,9 +35,12 @@ extern void platform_shader_program_set_uniform(
   void* uniform_data,
   const enum shader_program_uniform_t uniform_type);
 
-extern void platform_vertex_shader_destroy(struct vertex_shader_t* shader);
-extern void platform_fragment_shader_destroy(struct fragment_shader_t* shader);
-extern void platform_shader_program_destroy(struct shader_program_t* shader_program);
+extern void platform_vertex_shader_destroy(
+  struct vertex_shader_t* shader);
+extern void platform_fragment_shader_destroy(
+  struct fragment_shader_t* shader);
+extern void platform_shader_program_destroy(
+  struct shader_program_t* shader_program);
 
 int vertex_shader_init(
   struct vertex_shader_t* shader,

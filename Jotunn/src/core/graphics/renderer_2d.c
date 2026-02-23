@@ -6,7 +6,7 @@
 
 #include <memory.h>
 #ifdef DEBUG
-#include <stdio.h>
+  #include <stdio.h>
 #endif
 #include <stdlib.h>
 #include <string.h>
@@ -34,25 +34,25 @@ static void renderer_2d_flush(
       (unsigned int)((uint8_t *)data->triangle_data.vertex_data_ptr -
                      (uint8_t *)data->triangle_data.vertex_data_base);
 
-    vertex_array_bind(&data->triangle_data.vao);
-    vertex_buffer_bind(&data->triangle_data.vbo);
-    element_buffer_bind(&data->triangle_data.ebo);
+    vertex_array_bind(&(data->triangle_data.vao));
+    vertex_buffer_bind(&(data->triangle_data.vbo));
+    element_buffer_bind(&(data->triangle_data.ebo));
 
     vertex_buffer_buffer_sub_data(
-      &data->triangle_data.vbo,
+      &(data->triangle_data.vbo),
       (float *)data->triangle_data.vertex_data_base,
       triangle_data_size);
 
-    shader_program_use(&data->triangle_shader);
+    shader_program_use(&(data->triangle_shader));
 
     shader_program_set_uniform_fmat4x4(
-      &data->triangle_shader, "model", &renderer->render_data.model_matrix);
+      &(data->triangle_shader), "model", &renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->triangle_shader, "view", &renderer->base.camera->view_matrix);
+      &(data->triangle_shader), "view", &renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->triangle_shader,
+      &(data->triangle_shader),
       "projection",
-      &renderer->base.camera->projection_matrix);
+      &(renderer->base.camera->projection_matrix));
 
     render_api_draw_elements(
       DRAW_TYPE_TRIANGLES,

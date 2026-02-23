@@ -66,8 +66,6 @@ static void renderer_window_layer_data_init(
   struct renderer_window_layer_data_t *data,
   struct vertex_attribute_t *attributes)
 {
-  unsigned int error = 0;
-
   vertex_array_init(&(data->vao), 1);
   vertex_buffer_init(&(data->vbo), 1);
   element_buffer_init(&(data->ebo), 1);
@@ -76,14 +74,10 @@ static void renderer_window_layer_data_init(
   vertex_buffer_bind(&(data->vbo));
   element_buffer_bind(&(data->ebo));
 
-  error = shader_program_init_filepath(
+  shader_program_init_filepath(
     &(data->framebuffer_shader),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/framebuffer_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/framebuffer_shader.frag"));
-#ifdef DEBUG
-  if (error)
-    fprintf(stdout, "Error during framebuffer shader init\n");
-#endif
 
   unsigned int attribute_index, temp_shader_index;
   char *attribute_name;
@@ -91,23 +85,13 @@ static void renderer_window_layer_data_init(
   for (attribute_index = 0; attribute_index < _FRAMEBUFFER_VERTEX_ATTRIBUTE_NUM;
        attribute_index++)
   {
-    attribute_name = attributes[attribute_index].attribute_name;
-    temp_shader_index = shader_program_get_attribute_location(
-      &(data->framebuffer_shader), attribute_name);
+    attribute_name =
+      attributes[attribute_index].attribute_name;
 
-    #ifdef DEBUG
-    fprintf(
-      stdout,
-      "Setting shader attribute at index %u with name %s\n",
-      temp_shader_index,
-      attribute_name);
-    #endif
-
-    attributes[attribute_index].index = temp_shader_index;
-
-    #ifdef DEBUG
-    vertex_attribute_print(&attributes[attribute_index]);
-    #endif
+    attributes[attribute_index].index =
+      shader_program_get_attribute_location(
+        &(data->framebuffer_shader),
+        attribute_name);
 
     vertex_array_set_attribute(&(data->vao), &attributes[attribute_index]);
   }
@@ -128,7 +112,8 @@ void renderer_window_layer_init(
 {
   const uint16_t render_flags = (COLOR_FLAG | BLEND_FLAG);
 
-  camera_init_unprojected(&(renderer->camera_unprojected));
+  camera_init_unprojected(
+    &(renderer->camera_unprojected));
 
   renderer_base_init(
     &(renderer->base),
@@ -138,14 +123,15 @@ void renderer_window_layer_init(
     tag);
 
   renderer->base.renderer_begin_scene = &(renderer_window_layer_begin_scene);
-  renderer->base.renderer_end_scene = &(renderer_window_layer_end_scene);
+  renderer->base.renderer_end_scene   = &(renderer_window_layer_end_scene);
 
 #ifdef DEBUG
   fprintf(stdout, "Initializing renderer_window_layer\n");
 #endif
 
   renderer_window_layer_data_init(
-    &(renderer->render_data), framebuffer_vertex_attributes);
+    &(renderer->render_data),
+    framebuffer_vertex_attributes);
 }
 
 void renderer_window_layer_cleanup(

@@ -7,7 +7,7 @@ struct vertex_array_t
   unsigned int vertex_array;
 };
 
-int vertex_array_init(
+void vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num);
 void vertex_array_bind(struct vertex_array_t* vertex_array);

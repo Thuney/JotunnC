@@ -90,7 +90,7 @@ uint8_t window_run(struct window_t* window);
 void window_cleanup(struct window_t* window);
 
 void window_set_context(struct window_t* window);
-void window_release_context();
+void window_release_context(struct window_t* window);
 
 void window_set_viewport(
   uint32_t x,

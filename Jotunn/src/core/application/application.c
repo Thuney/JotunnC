@@ -263,6 +263,7 @@ void application_on_event(
             #endif
 
               app->current_window = (*cur_window);
+              break;
             }
             cur_window++;
           }

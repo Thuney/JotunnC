@@ -329,7 +329,8 @@ int typeface_load_glyph_atlas(
     texture_atlas_texture,
     texture_atlas_width,
     texture_atlas_height,
-    TEXTURE_2D_INTERNAL_FORMAT_RGBA8,
+    TEXTURE_2D_INTERNAL_FORMAT_RGBA,
+    TEXTURE_2D_DATA_FORMAT_RGBA,
     false);
   texture_2d_set_data(
     texture_atlas_texture,

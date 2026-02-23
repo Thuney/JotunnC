@@ -1,6 +1,6 @@
 #include "vertexbuffer.h"
 
-int platform_vertex_buffer_init(
+void platform_vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num)
 {
@@ -29,7 +29,7 @@ void platform_vertex_buffer_destroy(
   return 0;
 }
 
-int platform_element_buffer_init(
+void platform_element_buffer_init(
   struct element_buffer_t* element_buffer,
   int num)
 {

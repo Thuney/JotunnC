@@ -28,6 +28,138 @@ static uint8_t is_glew_initialized = 0;
 static void gl_window_size_callback(
   GLFWwindow* window,
   int width,
+  int height);
+static void gl_framebuffer_size_callback(
+  GLFWwindow* window,
+  int width,
+  int height);
+static void gl_window_close_callback(
+  GLFWwindow* window);
+static void gl_window_key_callback(
+  GLFWwindow* window,
+  int key,
+  int scancode,
+  int action,
+  int mods);
+static void gl_window_char_callback(
+  GLFWwindow* window,
+  unsigned int codepoint);
+static void gl_window_mouse_button_callback(
+  GLFWwindow* window,
+  int button,
+  int action,
+  int mods);
+static void gl_window_scroll_callback(
+  GLFWwindow* window,
+  double x_offset,
+  double y_offset);
+static void gl_window_cursor_position_callback(
+  GLFWwindow* window,
+  double x_pos,
+  double y_pos);
+static void gl_window_focus_callback(
+  GLFWwindow* window,
+  int focused);
+
+static void gl_window_error_callback(
+  int error_code,
+  const char* description);
+
+/**************************************************
+ *
+ *  Internal GL window functions
+ *
+ **************************************************/
+static void window_gl_set_callbacks(
+  GLFWwindow* glfw_window_ptr);
+
+static uint8_t window_gl_init(
+  struct window_t* window);
+
+void window_gl_set_context(
+  struct window_t* window);
+void window_gl_release_context(
+  struct window_t* window);
+
+static void window_gl_poll_events(
+  struct window_t* window);
+
+static void window_gl_run(
+  struct window_t* window);
+
+static void window_gl_cleanup(
+  struct window_t* window);
+
+/**************************************************
+ *
+ *  Extern window function definitions
+ *
+ **************************************************/
+uint8_t window_graphics_init(
+  struct window_t* window)
+{
+#ifdef DEBUG
+  fprintf(stdout, "Found OpenGL Backend\n");
+#endif
+
+  return window_gl_init(window);
+}
+
+void window_graphics_poll_events(
+  struct window_t* window)
+{
+  window_gl_poll_events(window);
+}
+
+void window_graphics_run(
+  struct window_t* window)
+{
+  window_gl_run(window);
+}
+
+void window_graphics_cleanup(
+  struct window_t* window)
+{
+  window_gl_cleanup(window);
+}
+
+void window_graphics_set_context(
+  struct window_t* window)
+{
+  window_gl_set_context(window);
+}
+
+void window_graphics_release_context(
+  struct window_t* window)
+{
+  window_gl_release_context(window);
+}
+
+void window_graphics_set_viewport(
+  uint32_t x,
+  uint32_t y,
+  uint32_t width,
+  uint32_t height)
+{
+  glViewport(x, y, width, height);
+}
+
+void window_graphics_set_background_color(
+  struct window_t* window,
+  const fvector4 color)
+{
+  render_api_set_clear_color(color);
+}
+
+/**************************************************
+ *
+ *  GLFW callback functions
+ *
+ **************************************************/
+
+static void gl_window_size_callback(
+  GLFWwindow* window,
+  int width,
   int height)
 {
   #ifdef DEBUG
@@ -259,37 +391,12 @@ static void window_gl_set_callbacks(
     glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
-// // ChatGPT wrote this function
-// static void printOpenGLInfo(GLFWwindow* window) {
-//     // Get the OpenGL context version string
-//     const char* version = (const char*) glGetString(GL_VERSION);
-//     printf("OpenGL version: %s\n", version);
-
-//     // Get the OpenGL renderer string
-//     const char* renderer = (const char*) glGetString(GL_RENDERER);
-//     printf("Renderer: %s\n", renderer);
-
-//     // Get the OpenGL vendor string
-//     const char* vendor = (const char*) glGetString(GL_VENDOR);
-//     printf("Vendor: %s\n", vendor);
-
-//     // Get the GLFW version string
-//     int major, minor, rev;
-//     glfwGetVersion(&major, &minor, &rev);
-//     printf("GLFW version: %d.%d.%d\n", major, minor, rev);
-
-//     // Get the GLFW window size
-//     int width, height;
-//     glfwGetWindowSize(window, &width, &height);
-//     printf("Window size: %d x %d\n", width, height);
-// }
-
 static uint8_t window_gl_init(
   struct window_t* window)
 {
-  #ifdef DEBUG
+#ifdef DEBUG
   fprintf(stdout, "Initializing OpenGL Window\n");
-  #endif
+#endif
 
   // Handle GLFW initialization
   if (!is_glfw_initialized)
@@ -308,14 +415,14 @@ static uint8_t window_gl_init(
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
   }
-  #ifdef DEBUG
+#ifdef DEBUG
   else
   {
     fprintf(stdout, "GLFW initialization failed\n");
   }
 
   fprintf(stdout, "Creating Window\n");
-  #endif
+#endif
 
   // Create window via GLFW
   GLFWwindow* gl_window_ptr = glfwCreateWindow(
@@ -328,16 +435,12 @@ static uint8_t window_gl_init(
   // Assign to our window handle as void*
   window->context_data.window_handle = (void*)gl_window_ptr;
 
-  #ifdef DEBUG
-  fprintf(stdout, "Got past that part\n");
-  #endif
-
   // Set a pointer in GLFW to our window data
   glfwSetWindowUserPointer(gl_window_ptr, (void*)&(window->metadata));
 
   window_gl_set_callbacks(gl_window_ptr);
 
-  glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
+  window_gl_set_context(window);
 
   // printOpenGLInfo(gl_window_ptr);
 
@@ -350,13 +453,51 @@ static uint8_t window_gl_init(
     is_glew_initialized = (glewInit() == GLEW_OK);
   }
 
+  // window_gl_release_context();
+
+  GLenum gl_error = GL_NO_ERROR;
+
+#ifdef DEBUG
+  fprintf(stdout, "End of Window Graphics Init - Clearing error queue\n");
+#endif
+
+  do
+  {
+    gl_error = glGetError();
+
   #ifdef DEBUG
-  fprintf(stdout, "Releasing context\n");
+    fprintf(stdout, "Error Code: %d\n", gl_error);
   #endif
-  // Release context
-  glfwMakeContextCurrent(NULL);
+
+  } while (gl_error != GL_NO_ERROR);
+
+#ifdef DEBUG
+  fprintf(stdout, "Done clearing error queue\n");
+#endif
 
   return !(is_glfw_initialized && is_glew_initialized);
+}
+
+void window_gl_set_context(
+  struct window_t* window)
+{
+#ifdef DEBUG
+  fprintf(stdout, "Setting context to window '%s'\n", window->metadata.tag);
+#endif
+
+  GLFWwindow* gl_window_handle =
+    (GLFWwindow*)(window->context_data.window_handle);
+
+  glfwMakeContextCurrent(gl_window_handle);
+}
+
+void window_gl_release_context(
+  struct window_t* window)
+{
+#ifdef DEBUG
+  fprintf(stdout, "Releasing context from window '%s'\n", window->metadata.tag);
+#endif
+  glfwMakeContextCurrent(NULL);
 }
 
 static void window_gl_poll_events(
@@ -377,9 +518,9 @@ static void window_gl_run(
 static void window_gl_cleanup(
   struct window_t* window)
 {
-  #ifdef DEBUG
+#ifdef DEBUG
   fprintf(stdout, "Cleaning up OpenGL Window\n");
-  #endif
+#endif
 
   if (is_glfw_initialized)
   {
@@ -395,72 +536,4 @@ static void window_gl_cleanup(
   {
     is_glew_initialized = 0;
   }
-}
-
-/**************************************************
- *
- *  Extern window function definitions
- *
- **************************************************/
-uint8_t window_graphics_init(
-  struct window_t* window)
-{
-  #ifdef DEBUG
-  fprintf(stdout, "Found OpenGL Backend\n");
-  #endif
-
-  return window_gl_init(window);
-}
-
-void window_graphics_poll_events(
-  struct window_t* window)
-{
-  window_gl_poll_events(window);
-}
-
-void window_graphics_run(
-  struct window_t* window)
-{
-  window_gl_run(window);
-}
-
-void window_graphics_cleanup(
-  struct window_t* window)
-{
-  window_gl_cleanup(window);
-}
-
-void window_graphics_set_context(
-  struct window_t* window)
-{
-  // #ifdef DEBUG
-  //    fprintf(stdout, "Setting Context to Window %s\n", window->metadata.tag);
-  // #endif
-
-  glfwMakeContextCurrent((GLFWwindow*)window->context_data.window_handle);
-}
-
-void window_graphics_release_context()
-{
-  // #ifdef DEBUG
-  //    fprintf(stdout, "Releasing Context\n");
-  // #endif
-
-  glfwMakeContextCurrent(NULL);
-}
-
-void window_graphics_set_viewport(
-  uint32_t x,
-  uint32_t y,
-  uint32_t width,
-  uint32_t height)
-{
-  glViewport(x, y, width, height);
-}
-
-void window_graphics_set_background_color(
-  struct window_t* window,
-  const fvector4 color)
-{
-  render_api_set_clear_color(color);
 }
