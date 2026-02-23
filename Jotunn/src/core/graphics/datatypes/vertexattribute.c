@@ -56,13 +56,12 @@ void vertex_attribute_print(
   fprintf(
     stdout,
     "Vertex Attribute - Name: %s, Index: %u, Size: %u, Data Type: %u, "
-    "Normalize: %u, Stride: %u, Offset: %u\n",
+    "Normalize: %u, Stride: %u\n",
     vertex_attribute->attribute_name,
     vertex_attribute->index,
     vertex_attribute->size,
     vertex_attribute->data_type,
     vertex_attribute->should_normalize,
-    vertex_attribute->stride,
-    vertex_attribute->ptr_offset_to_attrib);
+    vertex_attribute->stride);
 }
 #endif

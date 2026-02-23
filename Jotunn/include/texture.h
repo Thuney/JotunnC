@@ -42,7 +42,7 @@ struct texture_2d_t
   unsigned int width, height;
   int channels;
 
-  enum texture_2d_data_format_t internal_format;
+  enum texture_2d_internal_format_t internal_format;
   enum texture_2d_data_format_t data_format;
   //
   unsigned int is_loaded;

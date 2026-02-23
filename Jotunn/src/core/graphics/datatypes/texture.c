@@ -145,8 +145,8 @@ void texture_2d_create_from_file_path(
   texture->data =
     stbi_load(
       filepath,
-      &(texture->width),
-      &(texture->height),
+      (int*)&(texture->width),
+      (int*)&(texture->height),
       &(texture->channels),
       0);
 
