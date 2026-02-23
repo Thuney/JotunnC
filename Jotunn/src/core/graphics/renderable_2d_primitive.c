@@ -1,7 +1,7 @@
 #include <memory.h>
 #include <stdlib.h>
 #ifdef DEBUG
-   #include <stdio.h>
+  #include <stdio.h>
 #endif
 #include <math.h>
 

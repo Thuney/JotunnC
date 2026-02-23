@@ -247,8 +247,8 @@ static void renderer_2d_next_batch(
   renderer_2d_start_batch(renderer);
 }
 
-static const unsigned int max_quads =
-  10000; // Our upper limit on quads to draw per batch. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+// Our upper limit on quads to draw per batch. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+static const unsigned int max_quads = 1000;
 static const unsigned int max_vertices = max_quads * 4;
 static const unsigned int max_indices = max_quads * 6;
 
