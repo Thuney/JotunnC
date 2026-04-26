@@ -62,6 +62,8 @@ uint8_t application_init(
       .delta_time_seconds = 0.0f
     };
 
+  app->function_event_react = NULL;
+
   return error;
 }
 
@@ -192,6 +194,14 @@ void application_cleanup(
   free(app->windows);
 }
 
+void application_bind_custom_events(
+  struct application_t* app,
+  void (*custom_event_function)(struct application_t*,
+                                struct event_base_t*))
+{
+  app->function_event_react = custom_event_function;
+}
+
 /************************************************************
  *
  * Function: application_on_event()
@@ -201,6 +211,14 @@ void application_on_event(
   struct application_t* app,
   struct event_base_t* event)
 {
+  if (app->function_event_react)
+  {
+    app->function_event_react(app, event);
+
+    if (event->handled)
+      return;
+  }
+
   switch (event->event_type)
   {
     case EVENT_WINDOW_RESIZE:

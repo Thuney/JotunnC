@@ -25,6 +25,10 @@ struct application_t
   //
   struct timestep_t timer;
   uint8_t running;
+
+  void (*function_event_react)(
+    struct application_t* app,
+    struct event_base_t* event);
 };
 
 /************************************************************
@@ -52,7 +56,7 @@ void application_on_event(
   struct event_base_t* event);
 void application_bind_custom_events(
   struct application_t* app,
-  void (*custom_event_function)(void*,
+  void (*custom_event_function)(struct application_t*,
                                 struct event_base_t*));
 
 uint8_t application_add_window(
