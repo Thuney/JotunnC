@@ -17,6 +17,7 @@ if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   find_package(GLEW REQUIRED)
 
   add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
+  add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimplot)
 else()
 
 endif()
@@ -111,7 +112,8 @@ target_include_directories(
   PUBLIC
   ${JotunnC_SOURCE_DIR}/include/)
 
-target_link_libraries(JotunnC PUBLIC cimgui)
+target_link_libraries(JotunnC PUBLIC cimgui cimplot)
+target_include_directories(JotunnC PUBLIC cimgui cimplot)
 
 target_link_libraries(JotunnC PUBLIC ${FREETYPE_LIBRARIES})
 include_directories(JotunnC PUBLIC ${FREETYPE_INCLUDE_DIRS})
