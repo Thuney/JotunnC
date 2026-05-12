@@ -202,10 +202,10 @@ static void gl_vertex_buffer_init(
 {
   glGenBuffers(num, &(vertex_buffer->vertex_buffer));
 
-  gl_error_check(
-    "Vertex Buffer initialized with ID %d\n",
-    "Error occurred during Vertex Buffer generation: [ID %d]\n",
-    vertex_buffer->vertex_buffer);
+  // gl_error_check(
+  //   "Vertex Buffer initialized with ID %d\n",
+  //   "Error occurred during Vertex Buffer generation: [ID %d]\n",
+  //   vertex_buffer->vertex_buffer);
 }
 
 static void gl_vertex_buffer_bind(
@@ -213,10 +213,10 @@ static void gl_vertex_buffer_bind(
 {
   glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->vertex_buffer);
 
-  gl_error_check(
-    "Bound Vertex Buffer ID %d\n",
-    "Error occurred during Vertex Buffer binding: [ID %d]\n",
-    vertex_buffer->vertex_buffer);
+  // gl_error_check(
+  //   "Bound Vertex Buffer ID %d\n",
+  //   "Error occurred during Vertex Buffer binding: [ID %d]\n",
+  //   vertex_buffer->vertex_buffer);
 }
 
 static void gl_vertex_buffer_buffer_data(
@@ -228,11 +228,11 @@ static void gl_vertex_buffer_buffer_data(
   glBufferData(
     GL_ARRAY_BUFFER, data_bytes, data, get_gl_data_usage_type(usage_type));
 
-  gl_error_check(
-    "Buffered %d bytes of data in Vertex Buffer ID %d\n",
-    "Error occurred trying to buffer %d bytes of data in Vertex Buffer: [ID %d]\n",
-    data_bytes,
-    vertex_buffer->vertex_buffer);
+  // gl_error_check(
+  //   "Buffered %d bytes of data in Vertex Buffer ID %d\n",
+  //   "Error occurred trying to buffer %d bytes of data in Vertex Buffer: [ID %d]\n",
+  //   data_bytes,
+  //   vertex_buffer->vertex_buffer);
 }
 
 static void gl_vertex_buffer_buffer_sub_data(
@@ -242,11 +242,11 @@ static void gl_vertex_buffer_buffer_sub_data(
 {
   glBufferSubData(GL_ARRAY_BUFFER, 0, data_bytes, data);
 
-  gl_error_check(
-    "Buffered %d bytes of sub-data in Vertex Buffer ID %d\n",
-    "Error occurred trying to buffer %d bytes of sub-data in Vertex Buffer: [ID %d]\n",
-    data_bytes,
-    vertex_buffer->vertex_buffer);
+  // gl_error_check(
+  //   "Buffered %d bytes of sub-data in Vertex Buffer ID %d\n",
+  //   "Error occurred trying to buffer %d bytes of sub-data in Vertex Buffer: [ID %d]\n",
+  //   data_bytes,
+  //   vertex_buffer->vertex_buffer);
 }
 
 static void gl_vertex_buffer_destroy(
@@ -262,10 +262,10 @@ static void gl_element_buffer_init(
 {
   glGenBuffers(num, &(element_buffer->element_buffer));
 
-  gl_error_check(
-    "Element Buffer initialized with ID %d\n",
-    "Error occurred during Element Buffer generation: [ID %d]\n",
-    element_buffer->element_buffer);
+  // gl_error_check(
+  //   "Element Buffer initialized with ID %d\n",
+  //   "Error occurred during Element Buffer generation: [ID %d]\n",
+  //   element_buffer->element_buffer);
 }
 
 static void gl_element_buffer_bind(
@@ -273,10 +273,10 @@ static void gl_element_buffer_bind(
 {
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, element_buffer->element_buffer);
 
-  gl_error_check(
-    "Bound Element Buffer ID %d\n",
-    "Error occurred during Element Buffer binding: [ID %d]\n",
-    element_buffer->element_buffer);
+  // gl_error_check(
+  //   "Bound Element Buffer ID %d\n",
+  //   "Error occurred during Element Buffer binding: [ID %d]\n",
+  //   element_buffer->element_buffer);
 }
 
 static void gl_element_buffer_buffer_data(
@@ -291,11 +291,11 @@ static void gl_element_buffer_buffer_data(
     data,
     get_gl_data_usage_type(usage_type));
 
-  gl_error_check(
-    "Buffered %d bytes of data in Element Buffer ID %d\n",
-    "Error occurred trying to buffer %d bytes of data in Element Buffer: [ID %d]\n",
-    data_bytes,
-    element_buffer->element_buffer);
+  // gl_error_check(
+  //   "Buffered %d bytes of data in Element Buffer ID %d\n",
+  //   "Error occurred trying to buffer %d bytes of data in Element Buffer: [ID %d]\n",
+  //   data_bytes,
+  //   element_buffer->element_buffer);
 }
 
 static void gl_element_buffer_destroy(

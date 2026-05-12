@@ -274,11 +274,11 @@ void application_on_event(
             if ((*cur_window)->context_data.window_handle ==
                 window_focus_event->window_handle)
             {
-            #ifdef DEBUG
-              fprintf(stdout,
-                      "Refocusing window - %s\n",
-                      (*cur_window)->metadata.tag);
-            #endif
+            // #ifdef DEBUG
+            //   fprintf(stdout,
+            //           "Refocusing window - %s\n",
+            //           (*cur_window)->metadata.tag);
+            // #endif
 
               app->current_window = (*cur_window);
               break;

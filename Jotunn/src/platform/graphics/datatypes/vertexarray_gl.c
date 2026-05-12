@@ -100,25 +100,25 @@ static void gl_vertex_array_init(
 {
   glGenVertexArrays(num, &(vertex_array->vertex_array));
 
-  gl_error_check(
-    "Vertex Array initialized with ID %d\n",
-    "Error occurred during Vertex Array generation: [ID %d]\n",
-    vertex_array->vertex_array);
+  // gl_error_check(
+  //   "Vertex Array initialized with ID %d\n",
+  //   "Error occurred during Vertex Array generation: [ID %d]\n",
+  //   vertex_array->vertex_array);
 }
 
 static void gl_vertex_array_bind(
   struct vertex_array_t* vertex_array)
 {
-  gl_error_check(
-    "No error before vertex array bind\n",
-    "Error occurred prior to vertex array bind\n");
+  // gl_error_check(
+  //   "No error before vertex array bind\n",
+  //   "Error occurred prior to vertex array bind\n");
 
   glBindVertexArray(vertex_array->vertex_array);
 
-  gl_error_check(
-    "Bound Vertex Array ID %d\n",
-    "Error occurred during Vertex Array binding: [ID %d]\n",
-    vertex_array->vertex_array);
+  // gl_error_check(
+  //   "Bound Vertex Array ID %d\n",
+  //   "Error occurred during Vertex Array binding: [ID %d]\n",
+  //   vertex_array->vertex_array);
 }
 
 void gl_vertex_array_unbind()
@@ -184,19 +184,19 @@ static void gl_vertex_array_set_attribute(
     vertex_attribute->stride,
     vertex_attribute->ptr_offset_to_attrib);
 
-  gl_error_check(
-    "Set attribute '%s' in Vertex Array ID %d\n",
-    "Error occurred in setting of vertex attribute '%s' in Vertex Array ID %d\n",
-    vertex_attribute->attribute_name,
-    vertex_array->vertex_array);
+  // gl_error_check(
+  //   "Set attribute '%s' in Vertex Array ID %d\n",
+  //   "Error occurred in setting of vertex attribute '%s' in Vertex Array ID %d\n",
+  //   vertex_attribute->attribute_name,
+  //   vertex_array->vertex_array);
 
   glEnableVertexAttribArray(vertex_attribute->index);
 
-  gl_error_check(
-    "Enabled Vertex Attribute '%s' in Vertex Array ID %d\n",
-    "Error occurred in enabling of vertex attribute '%s' in Vertex Array ID %d\n",
-    vertex_attribute->attribute_name,
-    vertex_array->vertex_array);
+  // gl_error_check(
+  //   "Enabled Vertex Attribute '%s' in Vertex Array ID %d\n",
+  //   "Error occurred in enabling of vertex attribute '%s' in Vertex Array ID %d\n",
+  //   vertex_attribute->attribute_name,
+  //   vertex_array->vertex_array);
 }
 
 static void gl_vertex_array_destroy(

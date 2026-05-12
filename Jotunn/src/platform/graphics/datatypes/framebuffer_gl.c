@@ -170,10 +170,10 @@ static void gl_framebuffer_init(
 {
   glGenFramebuffers(1, &(frame_buffer->frame_buffer));
 
-  gl_error_check(
-    "Frame buffer initialized with ID %d\n",
-    "Error occurred during frame buffer generation\n",
-    frame_buffer->frame_buffer);
+  // gl_error_check(
+  //   "Frame buffer initialized with ID %d\n",
+  //   "Error occurred during frame buffer generation\n",
+  //   frame_buffer->frame_buffer);
 }
 
 static void gl_framebuffer_cleanup(
@@ -186,16 +186,16 @@ static void gl_framebuffer_cleanup(
 static void gl_framebuffer_bind(
   struct framebuffer_t* frame_buffer)
 {
-  gl_error_check(
-    "No error before frame buffer bind\n",
-    "Error occurred prior to frame buffer bind\n");
+  // gl_error_check(
+  //   "No error before frame buffer bind\n",
+  //   "Error occurred prior to frame buffer bind\n");
 
   glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer->frame_buffer);
 
-  gl_error_check(
-    "Successfully bound frame buffer %d\n",
-    "Error occurred while binding frame buffer %d\n",
-    frame_buffer->frame_buffer);
+  // gl_error_check(
+  //   "Successfully bound frame buffer %d\n",
+  //   "Error occurred while binding frame buffer %d\n",
+  //   frame_buffer->frame_buffer);
 }
 
 static void gl_framebuffer_unbind()
@@ -215,11 +215,11 @@ static void gl_framebuffer_attach_color_buffer(
     color_buffer->texture.texture_id,
     0);
 
-  gl_error_check(
-    "Attached color buffer ID %d to frame buffer ID %d\n",
-    "Error occurred during attachment of color buffer ID %d to frame buffer ID %d\n",
-    color_buffer->texture.texture_id,
-    frame_buffer->frame_buffer);
+  // gl_error_check(
+  //   "Attached color buffer ID %d to frame buffer ID %d\n",
+  //   "Error occurred during attachment of color buffer ID %d to frame buffer ID %d\n",
+  //   color_buffer->texture.texture_id,
+  //   frame_buffer->frame_buffer);
 }
 
 static void gl_framebuffer_attach_render_buffer(
@@ -232,11 +232,11 @@ static void gl_framebuffer_attach_render_buffer(
     GL_RENDERBUFFER,
     render_buffer->rbo);
 
-  gl_error_check(
-    "Attached render buffer ID %d to frame buffer ID %d\n",
-    "Error occurred during attachment of render buffer ID %d to frame buffer ID %d\n",
-    render_buffer->rbo,
-    frame_buffer->frame_buffer);
+  // gl_error_check(
+  //   "Attached render buffer ID %d to frame buffer ID %d\n",
+  //   "Error occurred during attachment of render buffer ID %d to frame buffer ID %d\n",
+  //   render_buffer->rbo,
+  //   frame_buffer->frame_buffer);
 }
 
 // Component Buffers

@@ -204,16 +204,16 @@ static void gl_texture_2d_init(
 {
   // glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
 
-  gl_error_check(
-    "No error before texture init\n",
-    "Error occurred prior to texture init\n");
+  // gl_error_check(
+  //   "No error before texture init\n",
+  //   "Error occurred prior to texture init\n");
 
   glGenTextures(1, &(texture->texture_id));
 
-  gl_error_check(
-    "Texture initialized with ID %d\n",
-    "Error occurred during texture generation: [ID %d]\n",
-    texture->texture_id);
+  // gl_error_check(
+  //   "Texture initialized with ID %d\n",
+  //   "Error occurred during texture generation: [ID %d]\n",
+  //   texture->texture_id);
 
   glBindTexture(GL_TEXTURE_2D, texture->texture_id);
   gl_texture_2d_bind(texture, 0);
@@ -253,10 +253,10 @@ static void gl_texture_2d_init(
     GL_UNSIGNED_BYTE,
     NULL);
 
-  gl_error_check(
-    "Successfully specified image data for Texture ID %d\n",
-    "Error occurred during image data specification for Texture ID %d\n",
-    texture->texture_id);
+  // gl_error_check(
+  //   "Successfully specified image data for Texture ID %d\n",
+  //   "Error occurred during image data specification for Texture ID %d\n",
+  //   texture->texture_id);
 }
 
 static void gl_texture_2d_cleanup(
@@ -271,11 +271,11 @@ static void gl_texture_2d_bind(
 {
   glBindTextureUnit(texture_slot, texture->texture_id);
 
-  gl_error_check(
-    "Texture ID %d bound to Texture Slot %d\n",
-    "Error occurred while binding Texture ID %d to Texture Slot %d\n",
-    texture->texture_id,
-    texture_slot);
+  // gl_error_check(
+  //   "Texture ID %d bound to Texture Slot %d\n",
+  //   "Error occurred while binding Texture ID %d to Texture Slot %d\n",
+  //   texture->texture_id,
+  //   texture_slot);
 }
 
 static void gl_texture_2d_set_data(

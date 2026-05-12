@@ -230,15 +230,15 @@ static void gl_window_key_callback(
   int action,
   int mods)
 {
-  #ifdef DEBUG
-  fprintf(
-    stdout,
-    "Event - Key - Key: %c Scancode: %d Action: %d Mods: %d\n",
-    key,
-    scancode,
-    action,
-    mods);
-  #endif
+  // #ifdef DEBUG
+  // fprintf(
+  //   stdout,
+  //   "Event - Key - Key: %c Scancode: %d Action: %d Mods: %d\n",
+  //   key,
+  //   scancode,
+  //   action,
+  //   mods);
+  // #endif
 }
 
 static void gl_window_char_callback(
@@ -256,14 +256,14 @@ static void gl_window_mouse_button_callback(
   int action,
   int mods)
 {
-  #ifdef DEBUG
-  fprintf(
-    stdout,
-    "Event - Mouse Button - Button %d Action %d Mods %d\n",
-    button,
-    action,
-    mods);
-  #endif
+  // #ifdef DEBUG
+  // fprintf(
+  //   stdout,
+  //   "Event - Mouse Button - Button %d Action %d Mods %d\n",
+  //   button,
+  //   action,
+  //   mods);
+  // #endif
 
   struct window_data_t* metadata =
     (struct window_data_t*)glfwGetWindowUserPointer(window);
@@ -333,12 +333,12 @@ static void gl_window_focus_callback(
   struct window_data_t* metadata =
     (struct window_data_t*)glfwGetWindowUserPointer(window);
 
-  #ifdef DEBUG
-  if (focused)
-  {
-    fprintf(stdout, "Window focus changed to %s\n", metadata->tag);
-  }
-  #endif
+  // #ifdef DEBUG
+  // if (focused)
+  // {
+  //   fprintf(stdout, "Window focus changed to %s\n", metadata->tag);
+  // }
+  // #endif
 
   struct event_window_focus_t window_focus_event =
     (struct event_window_focus_t){
@@ -481,9 +481,9 @@ static uint8_t window_gl_init(
 void window_gl_set_context(
   struct window_t* window)
 {
-#ifdef DEBUG
-  fprintf(stdout, "Setting context to window '%s'\n", window->metadata.tag);
-#endif
+// #ifdef DEBUG
+//   fprintf(stdout, "Setting context to window '%s'\n", window->metadata.tag);
+// #endif
 
   GLFWwindow* gl_window_handle =
     (GLFWwindow*)(window->context_data.window_handle);
@@ -494,9 +494,9 @@ void window_gl_set_context(
 void window_gl_release_context(
   struct window_t* window)
 {
-#ifdef DEBUG
-  fprintf(stdout, "Releasing context from window '%s'\n", window->metadata.tag);
-#endif
+// #ifdef DEBUG
+//   fprintf(stdout, "Releasing context from window '%s'\n", window->metadata.tag);
+// #endif
   glfwMakeContextCurrent(NULL);
 }
 
