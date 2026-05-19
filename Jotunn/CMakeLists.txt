@@ -110,19 +110,44 @@ target_compile_definitions(
 target_include_directories(
   JotunnC
   PUBLIC
-  ${JotunnC_SOURCE_DIR}/include/)
+  ${JotunnC_SOURCE_DIR}/include/
+  ${cimplot_SOURCE_DIR}/)
 
-target_link_libraries(JotunnC PUBLIC cimgui cimplot)
-target_include_directories(JotunnC PUBLIC cimgui cimplot)
+target_link_libraries(
+  JotunnC 
+  PUBLIC 
+  cimgui 
+  cimplot)
 
-target_link_libraries(JotunnC PUBLIC ${FREETYPE_LIBRARIES})
-include_directories(JotunnC PUBLIC ${FREETYPE_INCLUDE_DIRS})
-target_include_directories(JotunnC PUBLIC ${FREETYPE_INCLUDE_DIRS})
+target_include_directories(
+  JotunnC 
+  PUBLIC 
+  cimgui 
+  cimplot)
+
+target_link_libraries(
+  JotunnC 
+  PUBLIC 
+  ${FREETYPE_LIBRARIES})
+include_directories(
+  JotunnC 
+  PUBLIC 
+  ${FREETYPE_INCLUDE_DIRS})
+target_include_directories(
+  JotunnC 
+  PUBLIC 
+  ${FREETYPE_INCLUDE_DIRS})
 
 #
 if (GRAPHICS_BACKEND STREQUAL "OPENGL")
-  target_link_libraries(JotunnC PUBLIC glfw)
-  target_link_libraries(JotunnC PUBLIC GLEW::GLEW)
+  target_link_libraries(
+    JotunnC 
+    PUBLIC 
+    glfw)
+  target_link_libraries(
+    JotunnC 
+    PUBLIC 
+    GLEW::GLEW)
 else()
 
 endif()

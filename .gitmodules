@@ -4,3 +4,4 @@
 [submodule "Jotunn/vendor/cimplot"]
 	path = Jotunn/vendor/cimplot
 	url = https://github.com/cimgui/cimplot.git
+	branch = master
