@@ -15,6 +15,8 @@ struct ui_layer_gl_imgui_data_t
   ImGuiContext *ui_context;
   ImPlotContext *ui_plot_context;
   ImGuiIO *ui_io;
+
+  ImGuiViewport* ui_viewport;
 };
 
 static void ui_layer_gl_imgui_init(
@@ -70,6 +72,7 @@ static void ui_layer_gl_imgui_init(
   imgui_data->ui_context      = igCreateContext(NULL);
   imgui_data->ui_plot_context = ImPlot_CreateContext();
   imgui_data->ui_io           = igGetIO_ContextPtr(imgui_data->ui_context);
+  imgui_data->ui_viewport     = igGetMainViewport();
 
   imgui_data->ui_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
