@@ -6,8 +6,11 @@ set(
   JOTUNN_APPLICATION_SOURCES
 
   ${TestApp_SOURCE_DIR}/main.c
+  ${TestApp_SOURCE_DIR}/demo_3d_window.c
 )
 
 add_executable(TestApp ${JOTUNN_APPLICATION_SOURCES})
+
+target_link_libraries(TestApp m)
 
 target_link_libraries(TestApp JotunnC)

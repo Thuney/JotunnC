@@ -14,8 +14,10 @@ TARGET   := TestApp
 INCLUDE  := -I$(CURDIR)/../Jotunn/include/ $(FREETYPE2_INCLUDE)
 
 HDRS     := \
+demo_3d_window.h \
 
 SRC      := main.c \
+demo_3d_window.c \
 
 OBJECTS := $(SRC:%.c=$(OBJ_DIR)/%.o)
 

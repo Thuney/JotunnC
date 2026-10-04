@@ -168,6 +168,11 @@ fmatrix_4x4 fmatrix_4x4_transform_translate(
 fmatrix_4x4 fmatrix_4x4_transform_scale(
   fmatrix_4x4* matrix,
   const fvector3 scale_factors);
+// Rotates counter-clockwise about the given axis (right-handed)
+fmatrix_4x4 fmatrix_4x4_transform_rotate(
+  fmatrix_4x4* matrix,
+  const fvector3 axis,
+  const float angle_radians);
 
 fvector3 fmatrix_4x4_transform_point(
   const fmatrix_4x4* matrix,

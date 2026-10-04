@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <math.h>
+
 #ifdef DEBUG
   #include <stdio.h>
 #endif
@@ -32,10 +34,12 @@ static void camera_reproject(
         (struct camera_perspective_t*)camera;
       camera_set_projection_perspective(
         camera_perspective,
+        camera_perspective->field_of_view,
         window_width / window_height,
         near_plane,
         far_plane);
     }
+    break;
     case CAMERA_UNPROJECTED:
     {
     }
@@ -64,7 +68,7 @@ static fmatrix_4x4 calculate_look_at_matrix(
   const fvector3 target,
   const fvector3 up)
 {
-  fvector3 direction, right;
+  fvector3 direction, right, camera_up;
 
   fvector3 pos_minus_target, up_cross_direction;
 
@@ -74,11 +78,15 @@ static fmatrix_4x4 calculate_look_at_matrix(
   up_cross_direction = fvector3_cross(&up, &direction);
   right = fvector3_normalize(&up_cross_direction);
 
+  // The supplied up vector need not be perpendicular to the view direction,
+  //  so derive one that is to keep the basis orthonormal
+  camera_up = fvector3_cross(&direction, &right);
+
   fmatrix_4x4 coordinate_matrix;
 
   const float coordinate_matrix_data[4][4] = {
     {right.comp.x, right.comp.y, right.comp.z, 0.0f},
-    {up.comp.x, up.comp.y, up.comp.z, 0.0f},
+    {camera_up.comp.x, camera_up.comp.y, camera_up.comp.z, 0.0f},
     {direction.comp.x, direction.comp.y, direction.comp.z, 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f}};
 
@@ -103,14 +111,7 @@ static void camera_init(
   fmatrix_4x4_init(&camera->view_matrix);
   fmatrix_4x4_init(&camera->view_projection_matrix);
 
-  fvector3_setv(&(camera->position), position);
-  fvector3_setv(&(camera->up), up);
-  fvector3_setv(&(camera->front), front);
-
-  fvector3 target = fvector3_add(&position, &front);
-
-  camera->view_matrix = calculate_look_at_matrix(position, target, up);
-  camera_recalculate_view_projection_matrix(camera);
+  camera_set_view(camera, position, up, front);
 
   camera->camera_reproject = &camera_reproject;
 }
@@ -188,6 +189,7 @@ void camera_set_projection_orthographic(
 
 void camera_set_projection_perspective(
   struct camera_perspective_t* perspective_camera,
+  const float field_of_view,
   const float aspect_ratio,
   const float near_plane,
   const float far_plane)
@@ -197,19 +199,49 @@ void camera_set_projection_perspective(
   camera_base->near_plane = near_plane;
   camera_base->far_plane = far_plane;
 
+  perspective_camera->field_of_view = field_of_view;
   perspective_camera->aspect_ratio = aspect_ratio;
 
   camera_base->projection_type = CAMERA_PERSPECTIVE;
 
-  const float persp_matrix[4][4] = {{0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f}};
+  const float degrees_to_radians = 3.14159265f / 180.0f;
+  const float focal_length =
+    1.0f / tanf(0.5f * field_of_view * degrees_to_radians);
+
+  const float persp_matrix[4][4] = {
+    {focal_length / aspect_ratio, 0.0f, 0.0f, 0.0f},
+    {0.0f, focal_length, 0.0f, 0.0f},
+    {0.0f,
+     0.0f,
+     (far_plane + near_plane) / (near_plane - far_plane),
+     (2.0f * far_plane * near_plane) / (near_plane - far_plane)},
+    {0.0f, 0.0f, -1.0f, 0.0f}};
 
   fmatrix_4x4_set(&camera_base->projection_matrix, persp_matrix);
   fmatrix_4x4_transpose(&camera_base->projection_matrix);
 
   camera_recalculate_view_projection_matrix(camera_base);
+}
+
+/*******************************************************************************
+ *
+ * Function: camera_set_view()
+ *
+ ******************************************************************************/
+void camera_set_view(
+  struct camera_base_t* camera,
+  const fvector3 position,
+  const fvector3 up,
+  const fvector3 front)
+{
+  fvector3_setv(&(camera->position), position);
+  fvector3_setv(&(camera->up), up);
+  fvector3_setv(&(camera->front), front);
+
+  const fvector3 target = fvector3_add(&position, &front);
+
+  camera->view_matrix = calculate_look_at_matrix(position, target, up);
+  camera_recalculate_view_projection_matrix(camera);
 }
 
 void camera_recalculate_view_projection_matrix(

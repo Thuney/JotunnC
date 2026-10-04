@@ -13,7 +13,7 @@ void renderer_base_init(
   renderer->parent_window = parent_window;
 
   int tag_length = strlen(tag);
-  renderer->tag = (char*)malloc(tag_length * sizeof(char));
+  renderer->tag = (char*)malloc((tag_length + 1) * sizeof(char));
   strcpy(renderer->tag, tag);
 
   render_api_init(&(renderer->render_api), render_flags);

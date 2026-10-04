@@ -47,6 +47,8 @@ struct camera_perspective_t
 {
   struct camera_base_t base;
   //
+  // Vertical field of view, in degrees
+  float field_of_view;
   float aspect_ratio;
 };
 
@@ -72,9 +74,16 @@ void camera_set_projection_orthographic(
   const float far_plane);
 void camera_set_projection_perspective(
   struct camera_perspective_t* perspective_camera,
+  const float field_of_view,
   const float aspect_ratio,
   const float near_plane,
   const float far_plane);
+
+void camera_set_view(
+  struct camera_base_t* camera,
+  const fvector3 position,
+  const fvector3 up,
+  const fvector3 front);
 
 void camera_recalculate_view_projection_matrix(struct camera_base_t* camera);
 fvector3 camera_get_front_vector(struct camera_base_t* camera);

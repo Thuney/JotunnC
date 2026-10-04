@@ -4,6 +4,7 @@
 
 #include "application.h"
 #include "camera.h"
+#include "demo_3d_window.h"
 #include "fvector.h"
 #include "renderer_2d.h"
 #include "window_layer.h"
@@ -20,6 +21,8 @@ static struct renderer_2d_t window1_renderer_2d;
 
 static struct camera_ortho_t window2_camera_ortho;
 static struct renderer_2d_t window2_renderer_2d;
+
+static struct demo_3d_window_t demo_3d_window;
 
 static struct texture_2d_t aaron_shakespeare_texture;
 static struct texture_2d_t lenna_texture;
@@ -437,7 +440,7 @@ int main(
   int argc,
   char** argv)
 {
-  const uint8_t max_windows = 2;
+  const uint8_t max_windows = 3;
 
   struct application_t* app_ptr = &jotunn_app;
   struct window_t* window1_ptr = &window1;
@@ -448,12 +451,14 @@ int main(
   error |= application_init(app_ptr, "JotunnTestApp", max_windows);
   init_window1(app_ptr, window1_ptr);
   init_window2(app_ptr, window2_ptr);
+  error |= demo_3d_window_init(app_ptr, &(demo_3d_window));
 
   window_layer_set_custom_layer_run(&window1_layer, &window1_run);
   window_layer_set_custom_layer_run(&window2_layer, &window2_run);
 
   error |= application_add_window(app_ptr, window1_ptr);
   error |= application_add_window(app_ptr, window2_ptr);
+  error |= application_add_window(app_ptr, &(demo_3d_window.window));
 
   if (!error)
   {
@@ -472,6 +477,8 @@ int main(
 
     renderer_2d_cleanup(&(window1_renderer_2d));
     renderer_2d_cleanup(&(window2_renderer_2d));
+
+    demo_3d_window_cleanup(&(demo_3d_window));
 
     framebuffer_cleanup(&(window1_framebuffer));
     framebuffer_cleanup(&(window2_framebuffer));

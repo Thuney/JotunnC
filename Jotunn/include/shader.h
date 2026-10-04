@@ -86,6 +86,10 @@ void shader_program_set_uniform_fmat4x4(
   struct shader_program_t* shader_program,
   const char* uniform_name,
   const fmatrix_4x4* matrix);
+void shader_program_set_uniform_fvec3(
+  struct shader_program_t* shader_program,
+  const char* uniform_name,
+  const fvector3* vector);
 void shader_program_set_uniform_float(
   struct shader_program_t* shader_program,
   const char* uniform_name,
