@@ -3,11 +3,11 @@
 /** System Includes **/
 #include <time.h>
 
-/************************************************************
+/*******************************************************************************
  *
  * Struct Definitions
  *
- ************************************************************/
+ ******************************************************************************/
 struct timestep_t
 {
   double current_time_seconds;
@@ -19,13 +19,16 @@ struct timestep_t
   struct timespec start_time;
 };
 
-/************************************************************
+/*******************************************************************************
  *
  * Interface Functions
  *
- ************************************************************/
+ ******************************************************************************/
 
-void timestep_init(struct timestep_t* timestep);
-void timestep_reset(struct timestep_t* timestep);
-void timestep_step(struct timestep_t* timestep);
+void timestep_init(
+  struct timestep_t* timestep);
+void timestep_reset(
+  struct timestep_t* timestep);
+void timestep_step(
+  struct timestep_t* timestep);
 void timestep_cleanup();

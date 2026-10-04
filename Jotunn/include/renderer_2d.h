@@ -46,10 +46,13 @@ void renderer_2d_init(
   struct camera_base_t* camera,
   struct window_t* parent_window,
   const char* tag);
-void renderer_2d_cleanup(struct renderer_2d_t* renderer);
+void renderer_2d_cleanup(
+  struct renderer_2d_t* renderer);
 
-void renderer_2d_begin_scene(void* renderer);
-void renderer_2d_end_scene(void* renderer);
+void renderer_2d_begin_scene(
+  void* renderer);
+void renderer_2d_end_scene(
+  void* renderer);
 
 void renderer_2d_draw_triangle(
   struct renderer_2d_t* renderer,

@@ -10,7 +10,8 @@ struct vertex_array_t
 void vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num);
-void vertex_array_bind(struct vertex_array_t* vertex_array);
+void vertex_array_bind(
+  struct vertex_array_t* vertex_array);
 void vertex_array_unbind();
 void vertex_array_set_attribute(
   struct vertex_array_t* vertex_array,

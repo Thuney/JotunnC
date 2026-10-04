@@ -4,6 +4,11 @@
 #include <memory.h>
 #include <stdio.h>
 
+/*******************************************************************************
+ *
+ * Function: ball_init()
+ *
+ ******************************************************************************/
 static void ball_init(
   struct ball_t* ball)
 {
@@ -18,6 +23,11 @@ static void ball_init(
   ball->grounded = false;
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_window_init()
+ *
+ ******************************************************************************/
 uint8_t ball_window_init(
   struct application_t* app_parent,
   struct ball_window_t* ball_window)
@@ -46,8 +56,7 @@ uint8_t ball_window_init(
     "JotunnWindow_BallWindow",
     app_parent);
 
-  if (!error)
-  {
+  if (!error) {
     window_set_context(window_ptr);
 
     // Camera stuff
@@ -114,7 +123,12 @@ uint8_t ball_window_init(
       &ball_window_on_event);
 
     fvector4 window_background_color;
-    fvector4_set(&(window_background_color), 1.0f, 1.0f, 1.0f, 0.0f);
+    fvector4_set(
+      &(window_background_color),
+      1.0f,
+      1.0f,
+      1.0f,
+      0.0f);
 
     window_set_background_color(
       window_ptr,
@@ -126,6 +140,11 @@ uint8_t ball_window_init(
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_update()
+ *
+ ******************************************************************************/
 static void ball_update(
   struct ball_t* ball,
   const float delta_time_seconds,
@@ -137,18 +156,17 @@ static void ball_update(
   fvector2 *accel = &(ball->acceleration);
 
 
-  if (fabs(vel->comp.x) <= 0.1)
-  {
+  if (fabs(vel->comp.x) <= 0.1) {
     vel->comp.x = 0.0f;
   }
 
-  if (fabs(vel->comp.y) <= 0.1 && !ball->grounded)
+  if (fabs(vel->comp.y) <= 0.1 &&
+      !ball->grounded)
   {
     vel->comp.y = 0.0f;
     ball->grounded = true;
   }
-  else
-  {
+  else {
     ball->grounded = false;
   }
 
@@ -196,6 +214,11 @@ static void ball_update(
     ((new_y - ball->radius) <= 0) ? (ball->radius) : (new_y);
 }
 
+/*******************************************************************************
+ *
+ * Function: mouse_intersects_ball()
+ *
+ ******************************************************************************/
 static bool mouse_intersects_ball(
   const fvector2 mouse_pos,
   struct ball_t* ball,
@@ -215,6 +238,11 @@ static bool mouse_intersects_ball(
   return (hypotenuse < ball->radius);
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_window_on_event()
+ *
+ ******************************************************************************/
 void ball_window_on_event(
   struct window_t* window,
   struct event_base_t* event)
@@ -235,8 +263,7 @@ void ball_window_on_event(
 
       double delta_time_seconds = app_tick_event->delta_time_seconds;
 
-      if (!ball->held)
-      {
+      if (!ball->held) {
         ball_update(
           ball,
           delta_time_seconds,
@@ -262,8 +289,7 @@ void ball_window_on_event(
       cur_mouse.comp.x = mouse_x;
       cur_mouse.comp.y = mouse_y;
 
-      if (ball->held)
-      {
+      if (ball->held) {
         ball->position.comp.x =
           (cur_mouse.comp.x - intersection_diff.comp.x);
         ball->position.comp.y =
@@ -277,8 +303,7 @@ void ball_window_on_event(
       struct event_mouse_button_t* event_mouse_button =
         (struct event_mouse_button_t*)event;
 
-      if (event_mouse_button->button == 0)
-      {
+      if (event_mouse_button->button == 0) {
         switch (event_mouse_button->action)
         {
           // Pressed
@@ -291,7 +316,10 @@ void ball_window_on_event(
             //     fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
             // #endif
 
-            if (mouse_intersects_ball(cur_mouse, ball, &intersection_diff))
+            if (mouse_intersects_ball(
+              cur_mouse,
+              ball,
+              &intersection_diff))
             {
               ball->held = true;
 
@@ -303,8 +331,7 @@ void ball_window_on_event(
           // Released
           case 0:
           {
-            if (ball->held)
-            {
+            if (ball->held) {
               ball->held = false;
 
               ball->velocity.comp.x = (delta_mouse.comp.x * 300.0f);
@@ -324,6 +351,11 @@ void ball_window_on_event(
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_calculate_transform()
+ *
+ ******************************************************************************/
 static const fmatrix_4x4 ball_calculate_transform(
   struct ball_t* ball)
 {
@@ -340,14 +372,25 @@ static const fmatrix_4x4 ball_calculate_transform(
     fmatrix_4x4_init(&(translation_matrix));
     fmatrix_4x4_init(&(transform_matrix));
 
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
     translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
+      fmatrix_4x4_transform_translate(
+        &(translation_matrix),
+        translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
   }
   return transform_matrix;
 }
 
+/*******************************************************************************
+ *
+ * Function: click_calculate_transform()
+ *
+ ******************************************************************************/
 static const fmatrix_4x4 click_calculate_transform(
   struct ball_window_t* ball_window)
 {
@@ -368,14 +411,25 @@ static const fmatrix_4x4 click_calculate_transform(
     fmatrix_4x4_init(&(translation_matrix));
     fmatrix_4x4_init(&(transform_matrix));
 
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
     translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
+      fmatrix_4x4_transform_translate(
+        &(translation_matrix),
+        translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
   }
   return transform_matrix;
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_window_run()
+ *
+ ******************************************************************************/
 void ball_window_run(
   struct window_layer_t* window_layer)
 {
@@ -398,6 +452,11 @@ void ball_window_run(
     ball_window->clicked_color);
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_ui_window_run()
+ *
+ ******************************************************************************/
 void ball_ui_window_run(
   struct window_t* parent_window,
   struct window_layer_t* window_layer)
@@ -415,10 +474,16 @@ void ball_ui_window_run(
     fmatrix_4x4_init(&(translation_matrix));
     fmatrix_4x4_init(&(transform_matrix));
 
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
     translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
+      fmatrix_4x4_transform_translate(
+        &(translation_matrix),
+        translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
   }
 
   renderer_2d_draw_quad(
@@ -427,6 +492,11 @@ void ball_ui_window_run(
     ball_window->clicked_color);
 }
 
+/*******************************************************************************
+ *
+ * Function: ball_window_cleanup()
+ *
+ ******************************************************************************/
 void ball_window_cleanup(
   struct ball_window_t* ball_window)
 {

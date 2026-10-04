@@ -39,13 +39,22 @@ static void ui_layer_window_layer_render(
   struct window_layer_t* window_layer);
 
 //
+
+/*******************************************************************************
+ *
+ * Function: ui_layer_init()
+ *
+ ******************************************************************************/
 void ui_layer_init(
   struct window_t* parent_window,
   struct ui_layer_t* ui_layer,
   uint32_t width,
   uint32_t height)
 {
-  memset(ui_layer, 0, sizeof(struct ui_layer_t));
+  memset(
+    ui_layer,
+    0,
+    sizeof(struct ui_layer_t));
 
   framebuffer_init(
     &(ui_layer->ui_framebuffer),
@@ -94,10 +103,17 @@ void ui_layer_init(
   ui_layer_graphics_init(
     ui_layer);
 
-  window_layer_set_custom_layer_run(&(ui_layer->ui_window_layer), ui_layer_window_layer_render);
+  window_layer_set_custom_layer_run(
+    &(ui_layer->ui_window_layer),
+    ui_layer_window_layer_render);
   // window_layer_set_event_react(&(ui_layer->ui_window_layer), ui_layer_event_handle);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_cleanup()
+ *
+ ******************************************************************************/
 void ui_layer_cleanup(
   struct ui_layer_t* ui_layer)
 {
@@ -106,14 +122,25 @@ void ui_layer_cleanup(
   ui_layer_graphics_cleanup(ui_layer);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_set_custom_render()
+ *
+ ******************************************************************************/
 void ui_layer_set_custom_render(
   struct ui_layer_t* ui_layer,
-  void (*function_custom_ui_layer_render)(struct ui_layer_t* ui_layer))
+  void (*function_custom_ui_layer_render)(
+    struct ui_layer_t* ui_layer))
 {
   ui_layer->function_custom_ui_layer_render =
     function_custom_ui_layer_render;
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_window_layer_render()
+ *
+ ******************************************************************************/
 static void ui_layer_window_layer_render(
   struct window_layer_t* window_layer)
 {
@@ -122,8 +149,7 @@ static void ui_layer_window_layer_render(
 
   ui_layer_graphics_render_begin(ui_layer);
 
-  if (ui_layer->function_custom_ui_layer_render)
-  {
+  if (ui_layer->function_custom_ui_layer_render) {
     ui_layer->function_custom_ui_layer_render(ui_layer);
   }
 

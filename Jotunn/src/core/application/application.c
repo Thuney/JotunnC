@@ -14,30 +14,41 @@
 
 static struct event_app_tick_t app_tick_event;
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_init()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_init(
   struct application_t* app,
   const char* app_name,
   const uint8_t max_windows)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing application\n");
+  fprintf(
+    stdout,
+    "Initializing application\n");
 
-  fprintf(stdout, PATH_FROM_JOTUNN_ROOT(""));
-  fprintf(stdout, "\n");
+  fprintf(
+    stdout,
+    PATH_FROM_JOTUNN_ROOT(""));
+  fprintf(
+    stdout,
+    "\n");
 #endif
 
   uint8_t error = 0;
 
-  memset(app, 0, sizeof(struct application_t));
+  memset(
+    app,
+    0,
+    sizeof(struct application_t));
 
   const int name_length = strlen(app_name);
   app->name = (char*)malloc((name_length + 1) * sizeof(char));
-  strcpy(app->name, app_name);
+  strcpy(
+    app->name,
+    app_name);
 
   app->max_windows = max_windows;
   app->num_windows = 0;
@@ -67,16 +78,18 @@ uint8_t application_init(
   return error;
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_start()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_start(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Starting application\n");
+  fprintf(
+    stdout,
+    "Starting application\n");
 #endif
 
   timestep_reset(&app->timer);
@@ -85,11 +98,11 @@ uint8_t application_start(
   return 0;
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_run()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_run(
   struct application_t* app)
 {
@@ -107,27 +120,27 @@ void application_run(
     //     fflush(stdout);
     // #endif
 
-    if (app_tick_event.delta_time_seconds >= seconds_between_frames)
-    {
-      application_on_event(app, &(app_tick_event.base));
+    if (app_tick_event.delta_time_seconds >= seconds_between_frames) {
+      application_on_event(
+        app,
+        &(app_tick_event.base));
 
       // Pointer to first window, to be iterated over
       struct window_t** cur_window = app->windows;
-      for (uint8_t i = 0U; i < app->num_windows; i++)
-      {
+      for (uint8_t i = 0U; i < app->num_windows; i++) {
         // #ifdef DEBUG
         //     fprintf(stdout, "Running Window %s\n", cur_window->metadata.tag);
         // #endif
 
-        if ((*cur_window)->metadata.visible)
-        {
+        if ((*cur_window)->metadata.visible) {
           const uint8_t signaled_close = window_run(*cur_window);
-          if (signaled_close)
-          {
+          if (signaled_close) {
             app->running = 0U;
 
           #ifdef DEBUG
-            fprintf(stdout, "Window signaled to close\n");
+            fprintf(
+              stdout,
+              "Window signaled to close\n");
           #endif
           }
         }
@@ -139,16 +152,18 @@ void application_run(
   }
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_stop()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_stop(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Stopping application\n");
+  fprintf(
+    stdout,
+    "Stopping application\n");
 #endif
 
   app->running = 0;
@@ -156,16 +171,18 @@ uint8_t application_stop(
   return 0;
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_cleanup()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_cleanup(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up application\n");
+  fprintf(
+    stdout,
+    "Cleaning up application\n");
 #endif
 
   if (app->running) {
@@ -175,12 +192,10 @@ void application_cleanup(
   free(app->name);
   app->name = 0;
 
-  if (app->num_windows)
-  {
+  if (app->num_windows) {
     // Pointer to first window, to be iterated over
     struct window_t** cur_window = app->windows;
-    for (uint8_t i = 0U; i < app->num_windows; i++)
-    {
+    for (uint8_t i = 0U; i < app->num_windows; i++) {
       window_cleanup(*cur_window);
       cur_window++;
     }
@@ -194,29 +209,37 @@ void application_cleanup(
   free(app->windows);
 }
 
+/*******************************************************************************
+ *
+ * Function: application_bind_custom_events()
+ *
+ ******************************************************************************/
 void application_bind_custom_events(
   struct application_t* app,
-  void (*custom_event_function)(struct application_t*,
-                                struct event_base_t*))
+  void (*custom_event_function)(
+    struct application_t*,
+    struct event_base_t*))
 {
   app->function_event_react = custom_event_function;
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_on_event()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_on_event(
   struct application_t* app,
   struct event_base_t* event)
 {
-  if (app->function_event_react)
-  {
-    app->function_event_react(app, event);
+  if (app->function_event_react) {
+    app->function_event_react(
+      app,
+      event);
 
-    if (event->handled)
+    if (event->handled) {
       return;
+    }
   }
 
   switch (event->event_type)
@@ -231,19 +254,18 @@ void application_on_event(
       new_width = window_resize_event->width;
       new_height = window_resize_event->height;
 
-      if (app->num_windows)
-      {
+      if (app->num_windows) {
         // Pointer to first window, to be iterated over
         struct window_t** cur_window = app->windows;
-        for (uint8_t i = 0U; i < app->num_windows; i++)
-        {
+        for (uint8_t i = 0U; i < app->num_windows; i++) {
           if ((*cur_window)->context_data.window_handle ==
               window_resize_event->window_handle)
           {
           #ifdef DEBUG
-            fprintf(stdout,
-                    "Resizing window - %s\n",
-                    (*cur_window)->metadata.tag);
+            fprintf(
+              stdout,
+              "Resizing window - %s\n",
+              (*cur_window)->metadata.tag);
           #endif
 
             (*cur_window)->metadata.width = new_width;
@@ -263,14 +285,11 @@ void application_on_event(
       struct event_window_focus_t* window_focus_event =
         (struct event_window_focus_t*)event;
 
-      if (window_focus_event->focused)
-      {
-        if (app->num_windows)
-        {
+      if (window_focus_event->focused) {
+        if (app->num_windows) {
           // Pointer to first window, to be iterated over
           struct window_t** cur_window = app->windows;
-          for (uint8_t i = 0U; i < app->num_windows; i++)
-          {
+          for (uint8_t i = 0U; i < app->num_windows; i++) {
             if ((*cur_window)->context_data.window_handle ==
                 window_focus_event->window_handle)
             {
@@ -310,44 +329,44 @@ void application_on_event(
 
   // Custom events
 
-  if (!event->handled)
-  {
+  if (!event->handled) {
     // Pointer to first window, to be iterated over
     struct window_t** cur_window = app->windows;
-    for (uint8_t i = 0U; i < app->num_windows; i++)
-    {
-      window_handle_event(*cur_window, event);
+    for (uint8_t i = 0U; i < app->num_windows; i++) {
+      window_handle_event(
+        *cur_window,
+        event);
 
       cur_window++;
     }
   }
 }
 
-/************************************************************
+/*******************************************************************************
  *
  * Function: application_add_window()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_add_window(
   struct application_t* app,
   struct window_t* new_window)
 {
     #ifdef DEBUG
-  fprintf(stdout, "Adding window to application\n");
+  fprintf(
+    stdout,
+    "Adding window to application\n");
     #endif
 
   uint8_t error = 0U;
 
-  if (app->num_windows < app->max_windows)
-  {
+  if (app->num_windows < app->max_windows) {
     struct window_t** window_ptr;
     window_ptr = (app->windows + app->num_windows);
     *window_ptr = new_window;
     app->current_window = *window_ptr;
     app->num_windows++;
   }
-  else
-  {
+  else {
     error |= 1U;
   }
 

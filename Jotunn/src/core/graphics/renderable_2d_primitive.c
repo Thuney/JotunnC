@@ -42,6 +42,11 @@ fvector3 circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
 
 #define PI 3.14159f
 
+/*******************************************************************************
+ *
+ * Function: gen_circle_2d_position_data()
+ *
+ ******************************************************************************/
 static void gen_circle_2d_position_data()
 {
   const float angle_increment_degrees =
@@ -59,8 +64,7 @@ static void gen_circle_2d_position_data()
     (fvector3){offset.comp.x, offset.comp.y, 0.0f}; // Origin / Center of circle
 
   // Generate vertices on circle
-  for (v = 1; v < _NUM_CIRCLE_2D_VERTICES; v++)
-  {
+  for (v = 1; v < _NUM_CIRCLE_2D_VERTICES; v++) {
     angle_radians = (PI / 180.0f) * angle_degrees;
 
     x = (cosf(angle_radians) + offset.comp.x);
@@ -217,6 +221,11 @@ static struct vertex_attribute_t line_vertex_attributes[2] =
   }
 };
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_primitive_data_init()
+ *
+ ******************************************************************************/
 static void renderable_2d_primitive_data_init(
   struct vertex_array_t* vao,
   struct vertex_buffer_t* vbo,
@@ -226,30 +235,35 @@ static void renderable_2d_primitive_data_init(
   const unsigned int num_attributes,
   struct shader_program_t* shader_program)
 {
-  vertex_array_init(vao, 1);
-  vertex_buffer_init(vbo, 1);
+  vertex_array_init(
+    vao,
+    1);
+  vertex_buffer_init(
+    vbo,
+    1);
 
-  if (use_ebo)
-  {
-    element_buffer_init(ebo, 1);
+  if (use_ebo) {
+    element_buffer_init(
+      ebo,
+      1);
   }
 
   vertex_array_bind(vao);
   vertex_buffer_bind(vbo);
 
-  if (use_ebo)
-  {
+  if (use_ebo) {
     element_buffer_bind(ebo);
   }
 
   unsigned int attribute_index, temp_shader_index;
   char* attribute_name;
 
-  for (attribute_index = 0; attribute_index < num_attributes; attribute_index++)
-  {
+  for (attribute_index = 0; attribute_index < num_attributes; attribute_index++) {
     attribute_name = attributes[attribute_index].attribute_name;
     temp_shader_index =
-      shader_program_get_attribute_location(shader_program, attribute_name);
+      shader_program_get_attribute_location(
+        shader_program,
+        attribute_name);
 
     // #ifdef DEBUG
     //    fprintf(stdout, "Setting shader attribute at index %u with name %s\n", temp_shader_index, attribute_name);
@@ -261,11 +275,19 @@ static void renderable_2d_primitive_data_init(
     //    vertex_attribute_print(&attributes[attribute_index]);
     // #endif
 
-    vertex_array_set_attribute(vao, &attributes[attribute_index]);
+    vertex_array_set_attribute(
+      vao,
+      &attributes[attribute_index]);
   }
 }
 
 // Triangle
+
+/*******************************************************************************
+ *
+ * Function: renderable_2d_triangle_data_init()
+ *
+ ******************************************************************************/
 void renderable_2d_triangle_data_init(
   struct renderable_2d_triangle_data_t* triangle_data,
   const unsigned int max_count,
@@ -285,14 +307,14 @@ void renderable_2d_triangle_data_init(
 
   triangle_data->vertex_data_base =
     (struct renderable_2d_triangle_vertex_t*)calloc(
-      max_vertices, sizeof(struct renderable_2d_triangle_vertex_t));
+      max_vertices,
+      sizeof(struct renderable_2d_triangle_vertex_t));
   triangle_data->vertex_data_ptr = triangle_data->vertex_data_base;
 
   unsigned int triangle_indices[max_indices];
 
   unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 3)
-  {
+  for (unsigned int i = 0; i < max_indices; i += 3) {
     triangle_indices[i + 0] = offset + 0;
     triangle_indices[i + 1] = offset + 1;
     triangle_indices[i + 2] = offset + 2;
@@ -314,6 +336,12 @@ void renderable_2d_triangle_data_init(
 }
 
 // Quad
+
+/*******************************************************************************
+ *
+ * Function: renderable_2d_quad_data_init()
+ *
+ ******************************************************************************/
 void renderable_2d_quad_data_init(
   struct renderable_2d_quad_data_t* quad_data,
   const unsigned int max_count,
@@ -332,14 +360,14 @@ void renderable_2d_quad_data_init(
     shader_program);
 
   quad_data->vertex_data_base = (struct renderable_2d_quad_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_quad_vertex_t));
+    max_vertices,
+    sizeof(struct renderable_2d_quad_vertex_t));
   quad_data->vertex_data_ptr = quad_data->vertex_data_base;
 
   unsigned int quad_indices[max_indices];
 
   unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 6)
-  {
+  for (unsigned int i = 0; i < max_indices; i += 6) {
     quad_indices[i + 0] = offset + 0;
     quad_indices[i + 1] = offset + 1;
     quad_indices[i + 2] = offset + 2;
@@ -365,6 +393,11 @@ void renderable_2d_quad_data_init(
   vertex_array_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_textured_quad_data_init()
+ *
+ ******************************************************************************/
 void renderable_2d_textured_quad_data_init(
   struct renderable_2d_textured_quad_data_t* textured_quad_data,
   const unsigned int max_count,
@@ -384,14 +417,14 @@ void renderable_2d_textured_quad_data_init(
 
   textured_quad_data->vertex_data_base =
     (struct renderable_2d_textured_quad_vertex_t*)calloc(
-      max_vertices, sizeof(struct renderable_2d_textured_quad_vertex_t));
+      max_vertices,
+      sizeof(struct renderable_2d_textured_quad_vertex_t));
   textured_quad_data->vertex_data_ptr = textured_quad_data->vertex_data_base;
 
   unsigned int textured_quad_indices[max_indices];
 
   unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 6)
-  {
+  for (unsigned int i = 0; i < max_indices; i += 6) {
     textured_quad_indices[i + 0] = offset + 0;
     textured_quad_indices[i + 1] = offset + 1;
     textured_quad_indices[i + 2] = offset + 2;
@@ -418,6 +451,12 @@ void renderable_2d_textured_quad_data_init(
 }
 
 // Circle
+
+/*******************************************************************************
+ *
+ * Function: renderable_2d_circle_data_init()
+ *
+ ******************************************************************************/
 void renderable_2d_circle_data_init(
   struct renderable_2d_circle_data_t* circle_data,
   const unsigned int max_count,
@@ -441,7 +480,8 @@ void renderable_2d_circle_data_init(
     shader_program);
 
   circle_data->vertex_data_base = (struct renderable_2d_circle_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_circle_vertex_t));
+    max_vertices,
+    sizeof(struct renderable_2d_circle_vertex_t));
   circle_data->vertex_data_ptr = circle_data->vertex_data_base;
 
   unsigned int circle_indices[max_indices];
@@ -450,11 +490,9 @@ void renderable_2d_circle_data_init(
 
   unsigned int vertex_offset = 0;
 
-  for (circle = 0; circle < max_count; circle++)
-  {
+  for (circle = 0; circle < max_count; circle++) {
     unsigned int triangle;
-    for (triangle = 1; triangle < _RENDERABLE_2D_CIRCLE_RESOLUTION; triangle++)
-    {
+    for (triangle = 1; triangle < _RENDERABLE_2D_CIRCLE_RESOLUTION; triangle++) {
       circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 0] =
         vertex_offset;
       circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 1] =
@@ -487,6 +525,12 @@ void renderable_2d_circle_data_init(
 }
 
 // Line
+
+/*******************************************************************************
+ *
+ * Function: renderable_2d_line_data_init()
+ *
+ ******************************************************************************/
 void renderable_2d_line_data_init(
   struct renderable_2d_line_data_t* line_data,
   const unsigned int max_count,
@@ -507,7 +551,8 @@ void renderable_2d_line_data_init(
   line_data->max_line_vertex_count = max_vertices;
 
   line_data->vertex_data_base = (struct renderable_2d_line_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_line_vertex_t));
+    max_vertices,
+    sizeof(struct renderable_2d_line_vertex_t));
   line_data->vertex_data_ptr = line_data->vertex_data_base;
 
   vertex_buffer_buffer_data(
@@ -519,51 +564,104 @@ void renderable_2d_line_data_init(
   vertex_array_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_triangle_data_cleanup()
+ *
+ ******************************************************************************/
 void renderable_2d_triangle_data_cleanup(
   struct renderable_2d_triangle_data_t* triangle_data)
 {
-  vertex_array_destroy(&triangle_data->vao, 1);
-  vertex_buffer_destroy(&triangle_data->vbo, 1);
-  element_buffer_destroy(&triangle_data->ebo, 1);
+  vertex_array_destroy(
+    &triangle_data->vao,
+    1);
+  vertex_buffer_destroy(
+    &triangle_data->vbo,
+    1);
+  element_buffer_destroy(
+    &triangle_data->ebo,
+    1);
 
   free(triangle_data->vertex_data_base);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_quad_data_cleanup()
+ *
+ ******************************************************************************/
 void renderable_2d_quad_data_cleanup(
   struct renderable_2d_quad_data_t* quad_data)
 {
-  vertex_array_destroy(&quad_data->vao, 1);
-  vertex_buffer_destroy(&quad_data->vbo, 1);
-  element_buffer_destroy(&quad_data->ebo, 1);
+  vertex_array_destroy(
+    &quad_data->vao,
+    1);
+  vertex_buffer_destroy(
+    &quad_data->vbo,
+    1);
+  element_buffer_destroy(
+    &quad_data->ebo,
+    1);
 
   free(quad_data->vertex_data_base);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_textured_quad_data_cleanup()
+ *
+ ******************************************************************************/
 void renderable_2d_textured_quad_data_cleanup(
   struct renderable_2d_textured_quad_data_t* quad_data)
 {
-  vertex_array_destroy(&quad_data->vao, 1);
-  vertex_buffer_destroy(&quad_data->vbo, 1);
-  element_buffer_destroy(&quad_data->ebo, 1);
+  vertex_array_destroy(
+    &quad_data->vao,
+    1);
+  vertex_buffer_destroy(
+    &quad_data->vbo,
+    1);
+  element_buffer_destroy(
+    &quad_data->ebo,
+    1);
 
   free(quad_data->vertex_data_base);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_circle_data_cleanup()
+ *
+ ******************************************************************************/
 void renderable_2d_circle_data_cleanup(
   struct renderable_2d_circle_data_t* circle_data)
 {
-  vertex_array_destroy(&circle_data->vao, 1);
-  vertex_buffer_destroy(&circle_data->vbo, 1);
-  element_buffer_destroy(&circle_data->ebo, 1);
+  vertex_array_destroy(
+    &circle_data->vao,
+    1);
+  vertex_buffer_destroy(
+    &circle_data->vbo,
+    1);
+  element_buffer_destroy(
+    &circle_data->ebo,
+    1);
 
   free(circle_data->vertex_data_base);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderable_2d_line_data_cleanup()
+ *
+ ******************************************************************************/
 void renderable_2d_line_data_cleanup(
   struct renderable_2d_line_data_t* line_data)
 {
-  vertex_array_destroy(&line_data->vao, 1);
-  vertex_buffer_destroy(&line_data->vbo, 1);
+  vertex_array_destroy(
+    &line_data->vao,
+    1);
+  vertex_buffer_destroy(
+    &line_data->vbo,
+    1);
 
   free(line_data->vertex_data_base);
 }

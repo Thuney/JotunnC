@@ -14,6 +14,11 @@ extern void platform_vertex_attribute_init(
   unsigned int stride,
   void* ptr_offset_to_attrib);
 
+/*******************************************************************************
+ *
+ * Function: vertex_attribute_init()
+ *
+ ******************************************************************************/
 void vertex_attribute_init(
   struct vertex_attribute_t* vertex_attribute,
   char* attribute_name,
@@ -26,7 +31,9 @@ void vertex_attribute_init(
 {
   int name_length = strlen(attribute_name);
   vertex_attribute->attribute_name = (char*)malloc(name_length * sizeof(char));
-  strcpy(vertex_attribute->attribute_name, attribute_name);
+  strcpy(
+    vertex_attribute->attribute_name,
+    attribute_name);
 
   platform_vertex_attribute_init(
     vertex_attribute,
@@ -38,18 +45,28 @@ void vertex_attribute_init(
     ptr_offset_to_attrib);
 }
 
+/*******************************************************************************
+ *
+ * Function: vertex_attribute_cleanup()
+ *
+ ******************************************************************************/
 void vertex_attribute_cleanup(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int num)
 {
-  for (int i = 0; i < num; i++, vertex_attribute++)
-  {
+  for (int i = 0; i < num; i++, vertex_attribute++) {
     free(vertex_attribute[i].attribute_name);
     vertex_attribute[i].attribute_name = 0;
   }
 }
 
 #ifdef DEBUG
+
+/*******************************************************************************
+ *
+ * Function: vertex_attribute_print()
+ *
+ ******************************************************************************/
 void vertex_attribute_print(
   struct vertex_attribute_t* vertex_attribute)
 {

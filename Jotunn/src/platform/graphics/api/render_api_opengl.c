@@ -4,6 +4,11 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
+/*******************************************************************************
+ *
+ * Function: get_gl_element_data_type()
+ *
+ ******************************************************************************/
 static GLenum get_gl_element_data_type(
   enum render_api_element_data_type_t data_type)
 {
@@ -28,6 +33,11 @@ static GLenum get_gl_element_data_type(
   return gl_data_type;
 }
 
+/*******************************************************************************
+ *
+ * Function: get_gl_draw_mode()
+ *
+ ******************************************************************************/
 static GLenum get_gl_draw_mode(
   enum render_api_draw_mode_t draw_mode)
 {
@@ -79,67 +89,110 @@ static GLenum get_gl_draw_mode(
   return gl_draw_mode;
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_init()
+ *
+ ******************************************************************************/
 static void opengl_render_api_init(
   struct render_api_implementation_t* render_api)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing OpenGL Render API\n");
+  fprintf(
+    stdout,
+    "Initializing OpenGL Render API\n");
 #endif
 
   glEnable(GL_LINE_SMOOTH);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_bind()
+ *
+ ******************************************************************************/
 static void opengl_render_api_bind(
   struct render_api_implementation_t* render_api)
 {
-  if (render_api->active_render_flags & BLEND_FLAG)
+  if (render_api->active_render_flags &
+      BLEND_FLAG)
   {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glBlendFunc(
+      GL_SRC_ALPHA,
+      GL_ONE_MINUS_SRC_ALPHA);
   }
-  else
-  {
+  else {
     glDisable(GL_BLEND);
   }
   //
-  if (render_api->active_render_flags & DEPTH_FLAG)
+  if (render_api->active_render_flags &
+      DEPTH_FLAG)
   {
     glEnable(GL_DEPTH_TEST);
   }
-  else
-  {
+  else {
     glDisable(GL_DEPTH_TEST);
   }
   //
-  if (render_api->active_render_flags & WIREFRAME_FLAG)
+  if (render_api->active_render_flags &
+      WIREFRAME_FLAG)
   {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glPolygonMode(
+      GL_FRONT_AND_BACK,
+      GL_LINE);
   }
-  else
-  {
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+  else {
+    glPolygonMode(
+      GL_FRONT_AND_BACK,
+      GL_FILL);
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_set_clear_color()
+ *
+ ******************************************************************************/
 static void opengl_render_api_set_clear_color(
   const fvector4 color)
 {
-  glClearColor(color.comp.w, color.comp.x, color.comp.y, color.comp.z);
+  glClearColor(
+    color.comp.w,
+    color.comp.x,
+    color.comp.y,
+    color.comp.z);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_clear()
+ *
+ ******************************************************************************/
 static void opengl_render_api_clear(
   struct render_api_implementation_t* render_api)
 {
   GLbitfield flags = 0x0000;
 
-  if (render_api->active_render_flags & COLOR_FLAG)
+  if (render_api->active_render_flags &
+      COLOR_FLAG)
+  {
     flags |= GL_COLOR_BUFFER_BIT;
-  if (render_api->active_render_flags & DEPTH_FLAG)
+  }
+  if (render_api->active_render_flags &
+      DEPTH_FLAG)
+  {
     flags |= GL_DEPTH_BUFFER_BIT;
+  }
 
   glClear(flags);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_draw_elements()
+ *
+ ******************************************************************************/
 static void opengl_render_api_draw_elements(
   enum render_api_draw_mode_t draw_mode,
   unsigned int element_count,
@@ -153,18 +206,39 @@ static void opengl_render_api_draw_elements(
     indices);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_draw_triangle_fan()
+ *
+ ******************************************************************************/
 static void opengl_render_api_draw_triangle_fan(
   unsigned int vertex_count)
 {
-  glDrawArrays(get_gl_draw_mode(DRAW_TYPE_TRIANGLE_FAN), 0, vertex_count);
+  glDrawArrays(
+    get_gl_draw_mode(DRAW_TYPE_TRIANGLE_FAN),
+    0,
+    vertex_count);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_draw_lines()
+ *
+ ******************************************************************************/
 static void opengl_render_api_draw_lines(
   unsigned int vertex_count)
 {
-  glDrawArrays(get_gl_draw_mode(DRAW_TYPE_LINES), 0, vertex_count);
+  glDrawArrays(
+    get_gl_draw_mode(DRAW_TYPE_LINES),
+    0,
+    vertex_count);
 }
 
+/*******************************************************************************
+ *
+ * Function: opengl_render_api_set_line_width()
+ *
+ ******************************************************************************/
 static void opengl_render_api_set_line_width(
   float line_width)
 {
@@ -173,30 +247,55 @@ static void opengl_render_api_set_line_width(
 
 //
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_init()
+ *
+ ******************************************************************************/
 void platform_render_api_init(
   struct render_api_implementation_t* render_api)
 {
   opengl_render_api_init(render_api);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_bind()
+ *
+ ******************************************************************************/
 void platform_render_api_bind(
   struct render_api_implementation_t* render_api)
 {
   opengl_render_api_bind(render_api);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_set_clear_color()
+ *
+ ******************************************************************************/
 void platform_render_api_set_clear_color(
   const fvector4 color)
 {
   opengl_render_api_set_clear_color(color);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_clear()
+ *
+ ******************************************************************************/
 void platform_render_api_clear(
   struct render_api_implementation_t* render_api)
 {
   opengl_render_api_clear(render_api);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_draw_elements()
+ *
+ ******************************************************************************/
 void platform_render_api_draw_elements(
   enum render_api_draw_mode_t draw_mode,
   unsigned int element_count,
@@ -204,21 +303,39 @@ void platform_render_api_draw_elements(
   const void* indices)
 {
   opengl_render_api_draw_elements(
-    draw_mode, element_count, element_data_type, indices);
+    draw_mode,
+    element_count,
+    element_data_type,
+    indices);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_draw_triangle_fan()
+ *
+ ******************************************************************************/
 void platform_render_api_draw_triangle_fan(
   unsigned int vertex_count)
 {
   opengl_render_api_draw_triangle_fan(vertex_count);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_draw_lines()
+ *
+ ******************************************************************************/
 void platform_render_api_draw_lines(
   unsigned int vertex_count)
 {
   opengl_render_api_draw_lines(vertex_count);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_api_set_line_width()
+ *
+ ******************************************************************************/
 void platform_render_api_set_line_width(
   float line_width)
 {

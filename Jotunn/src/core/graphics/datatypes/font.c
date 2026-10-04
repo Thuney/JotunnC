@@ -10,24 +10,28 @@
 static FT_Library font_library;
 static unsigned int freetype_initialized = 0;
 
+/*******************************************************************************
+ *
+ * Function: font_init()
+ *
+ ******************************************************************************/
 void font_init()
 {
   int error;
 
-  if (!freetype_initialized)
-  {
+  if (!freetype_initialized) {
     error = FT_Init_FreeType(&font_library);
 
       #ifdef DEBUG
-    if (error)
-    {
+    if (error) {
     }
       #endif
 
-    if (!error)
-    {
+    if (!error) {
          #ifdef DEBUG
-      fprintf(stdout, "Loaded FreeType Library\n");
+      fprintf(
+        stdout,
+        "Loaded FreeType Library\n");
          #endif
 
       freetype_initialized = 1;
@@ -35,24 +39,28 @@ void font_init()
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: font_cleanup()
+ *
+ ******************************************************************************/
 void font_cleanup()
 {
   int error;
 
-  if (freetype_initialized)
-  {
+  if (freetype_initialized) {
     error = FT_Done_FreeType(font_library);
 
   #ifdef DEBUG
-    if (error)
-    {
+    if (error) {
     }
   #endif
 
-    if (!error)
-    {
+    if (!error) {
     #ifdef DEBUG
-      fprintf(stdout, "Cleaning up FreeType Library\n");
+      fprintf(
+        stdout,
+        "Cleaning up FreeType Library\n");
     #endif
 
       freetype_initialized = 0;
@@ -61,20 +69,25 @@ void font_cleanup()
 }
 
 //
+
+/*******************************************************************************
+ *
+ * Function: grayscale_bitmap_data_to_rgba_texture_data()
+ *
+ ******************************************************************************/
 static unsigned char* grayscale_bitmap_data_to_rgba_texture_data(
   unsigned char* char_bitmap_data,
   const int bitmap_width,
   const int bitmap_height)
 {
   unsigned char* char_rgba_data = (unsigned char*)calloc(
-    bitmap_height * bitmap_width * 4, sizeof(unsigned char));
+    bitmap_height * bitmap_width * 4,
+    sizeof(unsigned char));
 
   unsigned int i, j, bitmap_i, bitmap_j;
 
-  for (j = 0, bitmap_j = 0; bitmap_j < bitmap_height; j += 4, bitmap_j++)
-  {
-    for (i = 0, bitmap_i = 0; bitmap_i < bitmap_width; i += 4, bitmap_i++)
-    {
+  for (j = 0, bitmap_j = 0; bitmap_j < bitmap_height; j += 4, bitmap_j++) {
+    for (i = 0, bitmap_i = 0; bitmap_i < bitmap_width; i += 4, bitmap_i++) {
       const char char_bitmap_val =
         char_bitmap_data[bitmap_width * bitmap_j + bitmap_i];
 
@@ -88,6 +101,11 @@ static unsigned char* grayscale_bitmap_data_to_rgba_texture_data(
   return char_rgba_data;
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_render_char()
+ *
+ ******************************************************************************/
 static int typeface_render_char(
   struct typeface_t* typeface,
   const char charcode)
@@ -96,13 +114,17 @@ static int typeface_render_char(
 
   FT_UInt glyph_index = 0;
 
-  glyph_index = FT_Get_Char_Index(typeface->typeface, charcode);
+  glyph_index = FT_Get_Char_Index(
+    typeface->typeface,
+    charcode);
 
-  error |= FT_Load_Glyph(typeface->typeface, glyph_index, FT_LOAD_DEFAULT);
+  error |= FT_Load_Glyph(
+    typeface->typeface,
+    glyph_index,
+    FT_LOAD_DEFAULT);
 
 #ifdef DEBUG
-  if (error)
-  {
+  if (error) {
     fprintf(
       stdout,
       "Error loading glyph '%c' - glyph_index = %u\n",
@@ -111,11 +133,12 @@ static int typeface_render_char(
   }
 #endif
 
-  error |= FT_Render_Glyph(typeface->typeface->glyph, FT_RENDER_MODE_NORMAL);
+  error |= FT_Render_Glyph(
+    typeface->typeface->glyph,
+    FT_RENDER_MODE_NORMAL);
 
 #ifdef DEBUG
-  if (error)
-  {
+  if (error) {
     fprintf(
       stdout,
       "Error rendering glyph for char '%c' - glyph_index = %u\n",
@@ -127,6 +150,11 @@ static int typeface_render_char(
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_add_bitmap_to_glyph_atlas()
+ *
+ ******************************************************************************/
 static int typeface_add_bitmap_to_glyph_atlas(
   struct typeface_t* typeface,
   struct texture_2d_t* ptr_texture_atlas_texture,
@@ -142,10 +170,8 @@ static int typeface_add_bitmap_to_glyph_atlas(
   int error = 0;
 
   int row, col;
-  for (row = 0; row < char_bitmap->rows; ++row)
-  {
-    for (col = 0; col < char_bitmap->width; ++col)
-    {
+  for (row = 0; row < char_bitmap->rows; ++row) {
+    for (col = 0; col < char_bitmap->width; ++col) {
       const int x = (*pen_x) + col;
       const int y = (*pen_y) + row;
 
@@ -182,6 +208,11 @@ static int typeface_add_bitmap_to_glyph_atlas(
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_cleanup_glyph_atlas()
+ *
+ ******************************************************************************/
 static int typeface_cleanup_glyph_atlas(
   struct typeface_t* typeface)
 {
@@ -190,8 +221,7 @@ static int typeface_cleanup_glyph_atlas(
   struct glyph_t* glyph;
 
   unsigned int i;
-  for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++)
-  {
+  for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++) {
     glyph = &typeface->glyphs[i];
 
     glyph->glyph_texture.parent_texture = 0;
@@ -206,6 +236,11 @@ static int typeface_cleanup_glyph_atlas(
 
 //
 
+/*******************************************************************************
+ *
+ * Function: typeface_init()
+ *
+ ******************************************************************************/
 void typeface_init(
   struct typeface_t* typeface,
   const char* ttf_file_path,
@@ -213,24 +248,28 @@ void typeface_init(
 {
   int error = 0;
 
-  if (freetype_initialized)
-  {
-    error |= FT_New_Face(font_library, ttf_file_path, 0, &typeface->typeface);
+  if (freetype_initialized) {
+    error |= FT_New_Face(
+      font_library,
+      ttf_file_path,
+      0,
+      &typeface->typeface);
 
   #ifdef DEBUG
-    if (error == FT_Err_Unknown_File_Format)
-    {
-      fprintf(stdout, "Error loading TypeFace - Unknown File Format\n");
-    }
-    else if (error)
-    {
+    if (error == FT_Err_Unknown_File_Format) {
       fprintf(
-        stdout, "Error loading TypeFace - Generic Error - Code = %u\n", error);
+        stdout,
+        "Error loading TypeFace - Unknown File Format\n");
+    }
+    else if (error) {
+      fprintf(
+        stdout,
+        "Error loading TypeFace - Generic Error - Code = %u\n",
+        error);
     }
   #endif
 
-    if (!error)
-    {
+    if (!error) {
       // #ifdef DEBUG
       //    fprintf(stdout, "Loaded TypeFace from %s\n", ttf_file_path);
       //    fprintf(stdout, "Num Glyphs = %u\n", typeface->typeface->num_glyphs);
@@ -238,29 +277,39 @@ void typeface_init(
       //    fprintf(stdout, "Num Fixed Sizes = %u\n", typeface->typeface->num_fixed_sizes);
       // #endif
 
-      typeface_set_char_size(typeface, size_points);
+      typeface_set_char_size(
+        typeface,
+        size_points);
       error |= typeface_load_glyph_atlas(typeface);
 
-      if (!error)
+      if (!error) {
         typeface->is_loaded = 1;
+      }
     }
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_cleanup()
+ *
+ ******************************************************************************/
 void typeface_cleanup(
   struct typeface_t* typeface)
 {
   int error = 0;
 
-  if (freetype_initialized && typeface->is_loaded)
+  if (freetype_initialized &&
+      typeface->is_loaded)
   {
     error |= typeface_cleanup_glyph_atlas(typeface);
     error |= FT_Done_Face(typeface->typeface);
 
-    if (!error)
-    {
+    if (!error) {
     #ifdef DEBUG
-      fprintf(stdout, "Cleaning up TypeFace\n");
+      fprintf(
+        stdout,
+        "Cleaning up TypeFace\n");
     #endif
 
       typeface->is_loaded = 0;
@@ -268,6 +317,11 @@ void typeface_cleanup(
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_load_glyph_atlas()
+ *
+ ******************************************************************************/
 int typeface_load_glyph_atlas(
   struct typeface_t* typeface)
 {
@@ -280,32 +334,35 @@ int typeface_load_glyph_atlas(
     (glyph_height_estimate)*ceilf(sqrtf(_FONT_LOADED_GLYPHS_STRING_LEN));
 
   int texture_atlas_width = 1;
-  while (texture_atlas_width < max_dimension)
-    texture_atlas_width <<=
-      1; // Starting at 1, multiply width by 2 until we exceed our guess
+  while (texture_atlas_width < max_dimension) {
+    // Starting at 1, multiply width by 2 until we exceed our guess
+    texture_atlas_width <<= 1;
+  }
   int texture_atlas_height = texture_atlas_width;
 
   struct texture_2d_t* texture_atlas_texture = &(typeface->glyph_atlas);
   struct glyph_t* texture_atlas_glyphs = &(typeface->glyphs[0]);
 
   unsigned char* pixel_data_bitmap =
-    (unsigned char*)calloc(texture_atlas_width * texture_atlas_height, 1);
+    (unsigned char*)calloc(
+      texture_atlas_width * texture_atlas_height,
+      1);
   int pen_x = 0, pen_y = 0;
 
   char cur_char;
   FT_Bitmap* char_bitmap;
 
   unsigned int i;
-  for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++)
-  {
+  for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++) {
     cur_char = _FONT_LOADED_GLYPHS_STRING[i];
     error |=
-      typeface_render_char(typeface, cur_char); // Load glyph into glyph slot
+      typeface_render_char(
+        typeface,
+        cur_char); // Load glyph into glyph slot
 
     char_bitmap = &(typeface->typeface->glyph->bitmap);
 
-    if (pen_x + char_bitmap->width >= texture_atlas_width)
-    {
+    if (pen_x + char_bitmap->width >= texture_atlas_width) {
       pen_x = 0;
       pen_y += glyph_height_estimate;
     }
@@ -324,7 +381,9 @@ int typeface_load_glyph_atlas(
   }
 
   unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(
-    pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
+    pixel_data_bitmap,
+    texture_atlas_width,
+    texture_atlas_height);
 
   texture_2d_init(
     texture_atlas_texture,
@@ -343,19 +402,22 @@ int typeface_load_glyph_atlas(
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_get_glyph_from_char()
+ *
+ ******************************************************************************/
 const struct glyph_t* typeface_get_glyph_from_char(
   const struct typeface_t* typeface,
   const char charcode)
 {
   const struct glyph_t* char_glyph;
 
-  if (typeface->is_loaded)
-  {
+  if (typeface->is_loaded) {
     const unsigned int is_char_code_in_loaded_range =
       (charcode >= _FONT_LOADED_GLYPHS_FIRST_CHARACTER &&
        charcode <= _FONT_LOADED_GLYPHS_LAST_CHARACTER);
-    if (is_char_code_in_loaded_range)
-    {
+    if (is_char_code_in_loaded_range) {
       const unsigned int index =
         ((const unsigned int)charcode -
          (const unsigned int)_FONT_LOADED_GLYPHS_FIRST_CHARACTER);
@@ -363,8 +425,7 @@ const struct glyph_t* typeface_get_glyph_from_char(
       char_glyph = &(typeface->glyphs[index]);
     }
   #ifdef DEBUG
-    else
-    {
+    else {
       fprintf(
         stdout,
         "Attempted to load char outside of char range loaded by typeface\n");
@@ -375,13 +436,26 @@ const struct glyph_t* typeface_get_glyph_from_char(
   return char_glyph;
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_set_char_size()
+ *
+ ******************************************************************************/
 void typeface_set_char_size(
   const struct typeface_t* typeface,
   const unsigned int char_height_points)
 {
-  int error = FT_Set_Pixel_Sizes(typeface->typeface, 0, char_height_points);
+  int error = FT_Set_Pixel_Sizes(
+    typeface->typeface,
+    0,
+    char_height_points);
 }
 
+/*******************************************************************************
+ *
+ * Function: typeface_calculate_string_dimensions()
+ *
+ ******************************************************************************/
 fvector2 typeface_calculate_string_dimensions(
   const struct typeface_t* typeface,
   const char* string,
@@ -390,16 +464,16 @@ fvector2 typeface_calculate_string_dimensions(
   static fvector2 string_dimensions;
   string_dimensions = (fvector2){0.0f, 0.0f};
 
-  for (int i = 0; i < string_length; i++)
-  {
+  for (int i = 0; i < string_length; i++) {
     char c = string[i];
 
-    const struct glyph_t* glyph = typeface_get_glyph_from_char(typeface, c);
+    const struct glyph_t* glyph = typeface_get_glyph_from_char(
+      typeface,
+      c);
 
     string_dimensions.comp.x += (glyph->advance_x);
 
-    if (glyph->height > string_dimensions.comp.y)
-    {
+    if (glyph->height > string_dimensions.comp.y) {
       string_dimensions.comp.y = glyph->height;
     }
   }

@@ -3,23 +3,44 @@
 
 #include <stdlib.h>
 
+/*******************************************************************************
+ *
+ * Function: timestep_init()
+ *
+ ******************************************************************************/
 void timestep_init(
   struct timestep_t* timestep)
 {
   timestep->current_time_seconds = 0.0f;
   timestep->delta_time_seconds = 0.0f;
 
-  clock_gettime(CLOCK_MONOTONIC, &timestep->start_time);
-  clock_gettime(CLOCK_MONOTONIC, &timestep->last_time);
-  clock_gettime(CLOCK_MONOTONIC, &timestep->current_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &timestep->start_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &timestep->last_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &timestep->current_time);
 }
 
+/*******************************************************************************
+ *
+ * Function: timestep_reset()
+ *
+ ******************************************************************************/
 void timestep_reset(
   struct timestep_t* timestep)
 {
   timestep_init(timestep);
 }
 
+/*******************************************************************************
+ *
+ * Function: diff_timespec()
+ *
+ ******************************************************************************/
 static double diff_timespec(
   const struct timespec* time1,
   const struct timespec* time0)
@@ -28,18 +49,34 @@ static double diff_timespec(
     (time1->tv_nsec - time0->tv_nsec) / 1000000000.0;
 }
 
+/*******************************************************************************
+ *
+ * Function: timestep_step()
+ *
+ ******************************************************************************/
 void timestep_step(
   struct timestep_t* timestep)
 {
   timestep->last_time = timestep->current_time;
-  clock_gettime(CLOCK_MONOTONIC, &timestep->current_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &timestep->current_time);
 
   timestep->current_time_seconds =
-    diff_timespec(&timestep->current_time, &timestep->start_time);
+    diff_timespec(
+      &timestep->current_time,
+      &timestep->start_time);
   timestep->delta_time_seconds =
-    diff_timespec(&timestep->current_time, &timestep->last_time);
+    diff_timespec(
+      &timestep->current_time,
+      &timestep->last_time);
 }
 
+/*******************************************************************************
+ *
+ * Function: timestep_cleanup()
+ *
+ ******************************************************************************/
 void timestep_cleanup()
 {
 }

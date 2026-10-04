@@ -1,3 +1,5 @@
+#pragma once
+
 #include "application.h"
 #include "ball_ui.h"
 #include "camera.h"

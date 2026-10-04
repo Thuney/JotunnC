@@ -1,5 +1,10 @@
 #include "window_layer.h"
 
+/*******************************************************************************
+ *
+ * Function: window_layer_init()
+ *
+ ******************************************************************************/
 void window_layer_init(
   struct window_t* parent_window,
   struct window_layer_t* window_layer,
@@ -16,14 +21,25 @@ void window_layer_init(
   window_layer->function_event_react = 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: window_layer_set_custom_layer_run()
+ *
+ ******************************************************************************/
 void window_layer_set_custom_layer_run(
   struct window_layer_t* window_layer,
-  void (*function_custom_window_layer_run)(struct window_layer_t* window_layer))
+  void (*function_custom_window_layer_run)(
+    struct window_layer_t* window_layer))
 {
   window_layer->function_custom_window_layer_run =
     function_custom_window_layer_run;
 }
 
+/*******************************************************************************
+ *
+ * Function: window_layer_set_event_react()
+ *
+ ******************************************************************************/
 void window_layer_set_event_react(
   struct window_layer_t* window_layer,
   void (*function_event_react)(

@@ -15,8 +15,10 @@ struct renderer_base_t
   //
   struct render_api_implementation_t render_api;
   //
-  void (*renderer_begin_scene)(void* renderer);
-  void (*renderer_end_scene)(void* renderer);
+  void (*renderer_begin_scene)(
+    void* renderer);
+  void (*renderer_end_scene)(
+    void* renderer);
 };
 
 void renderer_base_init(
@@ -25,7 +27,10 @@ void renderer_base_init(
   struct camera_base_t* camera,
   struct window_t* parent_window,
   const char* tag);
-void renderer_base_cleanup(struct renderer_base_t* renderer);
+void renderer_base_cleanup(
+  struct renderer_base_t* renderer);
 
-void renderer_base_begin_scene(struct renderer_base_t* renderer);
-void renderer_base_end_scene(struct renderer_base_t* renderer);
+void renderer_base_begin_scene(
+  struct renderer_base_t* renderer);
+void renderer_base_end_scene(
+  struct renderer_base_t* renderer);

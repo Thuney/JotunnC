@@ -3,6 +3,11 @@
 #include <memory.h>
 #include <stdlib.h>
 
+/*******************************************************************************
+ *
+ * Function: renderer_base_init()
+ *
+ ******************************************************************************/
 void renderer_base_init(
   struct renderer_base_t* renderer,
   const uint16_t render_flags,
@@ -14,13 +19,22 @@ void renderer_base_init(
 
   int tag_length = strlen(tag);
   renderer->tag = (char*)malloc((tag_length + 1) * sizeof(char));
-  strcpy(renderer->tag, tag);
+  strcpy(
+    renderer->tag,
+    tag);
 
-  render_api_init(&(renderer->render_api), render_flags);
+  render_api_init(
+    &(renderer->render_api),
+    render_flags);
 
   renderer->camera = camera;
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_base_cleanup()
+ *
+ ******************************************************************************/
 void renderer_base_cleanup(
   struct renderer_base_t* renderer)
 {
@@ -28,6 +42,11 @@ void renderer_base_cleanup(
   renderer->tag = 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_base_begin_scene()
+ *
+ ******************************************************************************/
 void renderer_base_begin_scene(
   struct renderer_base_t* renderer)
 {
@@ -36,6 +55,11 @@ void renderer_base_begin_scene(
   renderer->renderer_begin_scene((void*)renderer);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_base_end_scene()
+ *
+ ******************************************************************************/
 void renderer_base_end_scene(
   struct renderer_base_t* renderer)
 {

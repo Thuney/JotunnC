@@ -40,5 +40,6 @@ void vertex_attribute_cleanup(
   unsigned int num);
 
 #ifdef DEBUG
-void vertex_attribute_print(struct vertex_attribute_t* vertex_attribute);
+void vertex_attribute_print(
+  struct vertex_attribute_t* vertex_attribute);
 #endif

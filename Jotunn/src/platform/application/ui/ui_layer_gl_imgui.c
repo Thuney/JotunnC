@@ -32,24 +32,45 @@ static void ui_layer_gl_imgui_render_end(
   struct ui_layer_t* ui_layer);
 
 //
+
+/*******************************************************************************
+ *
+ * Function: ui_layer_graphics_init()
+ *
+ ******************************************************************************/
 void ui_layer_graphics_init(
   struct ui_layer_t* ui_layer)
 {
   ui_layer_gl_imgui_init(ui_layer);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_graphics_cleanup()
+ *
+ ******************************************************************************/
 void ui_layer_graphics_cleanup(
   struct ui_layer_t* ui_layer)
 {
   ui_layer_gl_imgui_cleanup(ui_layer);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_graphics_render_begin()
+ *
+ ******************************************************************************/
 void ui_layer_graphics_render_begin(
   struct ui_layer_t* ui_layer)
 {
   ui_layer_gl_imgui_render_begin(ui_layer);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_graphics_render_end()
+ *
+ ******************************************************************************/
 void ui_layer_graphics_render_end(
   struct ui_layer_t* ui_layer)
 {
@@ -57,6 +78,12 @@ void ui_layer_graphics_render_end(
 }
 
 //
+
+/*******************************************************************************
+ *
+ * Function: ui_layer_gl_imgui_init()
+ *
+ ******************************************************************************/
 static void ui_layer_gl_imgui_init(
   struct ui_layer_t* ui_layer)
 {
@@ -77,13 +104,20 @@ static void ui_layer_gl_imgui_init(
   imgui_data->ui_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
   const char* glsl_version = "#version 330 core";
-  ImGui_ImplGlfw_InitForOpenGL(glfw_window_handle, true);
+  ImGui_ImplGlfw_InitForOpenGL(
+    glfw_window_handle,
+    true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Setup style
   igStyleColorsDark(NULL);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_gl_imgui_cleanup()
+ *
+ ******************************************************************************/
 static void ui_layer_gl_imgui_cleanup(
   struct ui_layer_t* ui_layer)
 {
@@ -99,6 +133,11 @@ static void ui_layer_gl_imgui_cleanup(
   imgui_data->ui_io = NULL;
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_gl_imgui_render_begin()
+ *
+ ******************************************************************************/
 static void ui_layer_gl_imgui_render_begin(
   struct ui_layer_t* ui_layer)
 {
@@ -107,6 +146,11 @@ static void ui_layer_gl_imgui_render_begin(
   igNewFrame();
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_layer_gl_imgui_render_end()
+ *
+ ******************************************************************************/
 static void ui_layer_gl_imgui_render_end(
   struct ui_layer_t* ui_layer)
 {

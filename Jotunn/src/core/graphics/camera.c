@@ -6,6 +6,11 @@
   #include <stdio.h>
 #endif
 
+/*******************************************************************************
+ *
+ * Function: camera_reproject()
+ *
+ ******************************************************************************/
 static void camera_reproject(
   struct camera_base_t* camera,
   float window_width,
@@ -47,6 +52,11 @@ static void camera_reproject(
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: position_as_matrix()
+ *
+ ******************************************************************************/
 static fmatrix_4x4 position_as_matrix(
   const fvector3 position)
 {
@@ -58,11 +68,18 @@ static fmatrix_4x4 position_as_matrix(
     {0.0f, 0.0f, 1.0f, -position.comp.z},
     {0.0f, 0.0f, 0.0f, 1.0f}};
 
-  fmatrix_4x4_set(&(position_as_matrix), position_as_matrix_data);
+  fmatrix_4x4_set(
+    &(position_as_matrix),
+    position_as_matrix_data);
 
   return position_as_matrix;
 }
 
+/*******************************************************************************
+ *
+ * Function: calculate_look_at_matrix()
+ *
+ ******************************************************************************/
 static fmatrix_4x4 calculate_look_at_matrix(
   const fvector3 position,
   const fvector3 target,
@@ -72,15 +89,21 @@ static fmatrix_4x4 calculate_look_at_matrix(
 
   fvector3 pos_minus_target, up_cross_direction;
 
-  pos_minus_target = fvector3_subtract(&position, &target);
+  pos_minus_target = fvector3_subtract(
+    &position,
+    &target);
   direction = fvector3_normalize(&pos_minus_target);
 
-  up_cross_direction = fvector3_cross(&up, &direction);
+  up_cross_direction = fvector3_cross(
+    &up,
+    &direction);
   right = fvector3_normalize(&up_cross_direction);
 
   // The supplied up vector need not be perpendicular to the view direction,
   //  so derive one that is to keep the basis orthonormal
-  camera_up = fvector3_cross(&direction, &right);
+  camera_up = fvector3_cross(
+    &direction,
+    &right);
 
   fmatrix_4x4 coordinate_matrix;
 
@@ -90,17 +113,26 @@ static fmatrix_4x4 calculate_look_at_matrix(
     {direction.comp.x, direction.comp.y, direction.comp.z, 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f}};
 
-  fmatrix_4x4_set(&(coordinate_matrix), coordinate_matrix_data);
+  fmatrix_4x4_set(
+    &(coordinate_matrix),
+    coordinate_matrix_data);
 
   fmatrix_4x4 pos_matrix = position_as_matrix(position);
 
   fmatrix_4x4 look_at_matrix =
-    fmatrix_4x4_multiply(&coordinate_matrix, &pos_matrix);
+    fmatrix_4x4_multiply(
+      &coordinate_matrix,
+      &pos_matrix);
   fmatrix_4x4_transpose(&look_at_matrix);
 
   return look_at_matrix;
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_init()
+ *
+ ******************************************************************************/
 static void camera_init(
   struct camera_base_t* camera,
   const fvector3 position,
@@ -111,11 +143,20 @@ static void camera_init(
   fmatrix_4x4_init(&camera->view_matrix);
   fmatrix_4x4_init(&camera->view_projection_matrix);
 
-  camera_set_view(camera, position, up, front);
+  camera_set_view(
+    camera,
+    position,
+    up,
+    front);
 
   camera->camera_reproject = &camera_reproject;
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_init_unprojected()
+ *
+ ******************************************************************************/
 void camera_init_unprojected(
   struct camera_base_t* camera)
 {
@@ -128,24 +169,47 @@ void camera_init_unprojected(
   camera->camera_reproject = &camera_reproject;
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_init_orthographic()
+ *
+ ******************************************************************************/
 void camera_init_orthographic(
   struct camera_ortho_t* camera,
   const fvector3 position,
   const fvector3 up,
   const fvector3 front)
 {
-  camera_init(&(camera->base), position, up, front);
+  camera_init(
+    &(camera->base),
+    position,
+    up,
+    front);
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_init_perspective()
+ *
+ ******************************************************************************/
 void camera_init_perspective(
   struct camera_perspective_t* camera,
   const fvector3 position,
   const fvector3 up,
   const fvector3 front)
 {
-  camera_init(&(camera->base), position, up, front);
+  camera_init(
+    &(camera->base),
+    position,
+    up,
+    front);
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_set_projection_orthographic()
+ *
+ ******************************************************************************/
 void camera_set_projection_orthographic(
   struct camera_ortho_t* ortho_camera,
   const float left,
@@ -176,7 +240,9 @@ void camera_set_projection_orthographic(
      -((far_plane + near_plane) / (far_plane - near_plane))},
     {0.0f, 0.0f, 0.0f, 1.0f}};
 
-  fmatrix_4x4_set(&camera_base->projection_matrix, ortho_matrix);
+  fmatrix_4x4_set(
+    &camera_base->projection_matrix,
+    ortho_matrix);
 
   fmatrix_4x4_transpose(&camera_base->projection_matrix);
 
@@ -187,6 +253,11 @@ void camera_set_projection_orthographic(
   camera_recalculate_view_projection_matrix(camera_base);
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_set_projection_perspective()
+ *
+ ******************************************************************************/
 void camera_set_projection_perspective(
   struct camera_perspective_t* perspective_camera,
   const float field_of_view,
@@ -217,7 +288,9 @@ void camera_set_projection_perspective(
      (2.0f * far_plane * near_plane) / (near_plane - far_plane)},
     {0.0f, 0.0f, -1.0f, 0.0f}};
 
-  fmatrix_4x4_set(&camera_base->projection_matrix, persp_matrix);
+  fmatrix_4x4_set(
+    &camera_base->projection_matrix,
+    persp_matrix);
   fmatrix_4x4_transpose(&camera_base->projection_matrix);
 
   camera_recalculate_view_projection_matrix(camera_base);
@@ -234,23 +307,46 @@ void camera_set_view(
   const fvector3 up,
   const fvector3 front)
 {
-  fvector3_setv(&(camera->position), position);
-  fvector3_setv(&(camera->up), up);
-  fvector3_setv(&(camera->front), front);
+  fvector3_setv(
+    &(camera->position),
+    position);
+  fvector3_setv(
+    &(camera->up),
+    up);
+  fvector3_setv(
+    &(camera->front),
+    front);
 
-  const fvector3 target = fvector3_add(&position, &front);
+  const fvector3 target = fvector3_add(
+    &position,
+    &front);
 
-  camera->view_matrix = calculate_look_at_matrix(position, target, up);
+  camera->view_matrix = calculate_look_at_matrix(
+    position,
+    target,
+    up);
   camera_recalculate_view_projection_matrix(camera);
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_recalculate_view_projection_matrix()
+ *
+ ******************************************************************************/
 void camera_recalculate_view_projection_matrix(
   struct camera_base_t* camera)
 {
   camera->view_projection_matrix =
-    fmatrix_4x4_multiply(&(camera->view_matrix), &(camera->projection_matrix));
+    fmatrix_4x4_multiply(
+      &(camera->view_matrix),
+      &(camera->projection_matrix));
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_get_front_vector()
+ *
+ ******************************************************************************/
 fvector3 camera_get_front_vector(
   struct camera_base_t* camera)
 {
@@ -260,6 +356,11 @@ fvector3 camera_get_front_vector(
   return front;
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_get_left_vector()
+ *
+ ******************************************************************************/
 fvector3 camera_get_left_vector(
   struct camera_base_t* camera)
 {
@@ -269,6 +370,11 @@ fvector3 camera_get_left_vector(
   return left;
 }
 
+/*******************************************************************************
+ *
+ * Function: camera_get_up_vector()
+ *
+ ******************************************************************************/
 fvector3 camera_get_up_vector(
   struct camera_base_t* camera)
 {

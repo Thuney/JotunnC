@@ -5,6 +5,12 @@
 #include "ui_layer.h"
 
 //
+
+/*******************************************************************************
+ *
+ * Function: ui_element_get_effective_size()
+ *
+ ******************************************************************************/
 fvector2 ui_element_get_effective_size(
   struct ui_element_t* ui_element)
 {
@@ -17,6 +23,11 @@ fvector2 ui_element_get_effective_size(
 
 // ------------------------------------------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: ui_element_init()
+ *
+ ******************************************************************************/
 void ui_element_init(
   struct ui_element_t* ui_element,
   enum ui_element_type_t element_type,
@@ -42,15 +53,22 @@ void ui_element_init(
   ui_element->padding_x = 0;
   ui_element->padding_y = 0;
 
-  if (function_ui_element_render)
+  if (function_ui_element_render) {
     ui_element->function_ui_element_render = function_ui_element_render;
+  }
 
-  if (function_ui_element_event_react)
+  if (function_ui_element_event_react) {
     ui_element->function_ui_element_event_react = function_ui_element_event_react;
+  }
 }
 
 // ------------------------------------------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: ui_element_static_text_render()
+ *
+ ******************************************************************************/
 static void ui_element_static_text_render(
   struct renderer_2d_t* renderer_2d,
   struct ui_element_t* ui_element,
@@ -104,6 +122,11 @@ static void ui_element_static_text_render(
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_element_static_text_init()
+ *
+ ******************************************************************************/
 void ui_element_static_text_init(
   struct ui_element_static_text_t* text_element,
   char* static_text,
@@ -111,7 +134,10 @@ void ui_element_static_text_init(
 {
   int text_length = strlen(static_text);
   fvector2 text_dimensions =
-    typeface_calculate_string_dimensions(typeface, static_text, text_length);
+    typeface_calculate_string_dimensions(
+      typeface,
+      static_text,
+      text_length);
 
   ui_element_init(
     &(text_element->base_element),
@@ -130,6 +156,11 @@ void ui_element_static_text_init(
 
 // ------------------------------------------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: get_transform()
+ *
+ ******************************************************************************/
 static fmatrix_4x4 get_transform(
   const fvector3 scale_factors,
   const fvector3 translation_vector)
@@ -142,14 +173,25 @@ static fmatrix_4x4 get_transform(
     fmatrix_4x4_init(&translation_matrix);
     fmatrix_4x4_init(&transform_matrix);
 
-    scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &scale_matrix,
+      scale_factors);
     translation_matrix =
-      fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
+      fmatrix_4x4_transform_translate(
+        &translation_matrix,
+        translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &scale_matrix,
+      &translation_matrix);
   }
   return transform_matrix;
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_element_slider_render()
+ *
+ ******************************************************************************/
 static void ui_element_slider_render(
   struct renderer_2d_t* renderer_2d,
   struct ui_element_t* ui_element,
@@ -177,9 +219,14 @@ static void ui_element_slider_render(
     0.1f};
 
   fmatrix_4x4 box_transform =
-    get_transform(box_scale_factors, box_translation_vector);
+    get_transform(
+      box_scale_factors,
+      box_translation_vector);
 
-  renderer_2d_draw_quad(renderer_2d, &box_transform, theme->background_color);
+  renderer_2d_draw_quad(
+    renderer_2d,
+    &box_transform,
+    theme->background_color);
 
   const fvector3 line_point1 = (fvector3){
     origin_position.comp.x + ui_element->padding_x + slider_margin,
@@ -193,7 +240,10 @@ static void ui_element_slider_render(
     0.2f};
 
   renderer_2d_draw_line(
-    renderer_2d, line_point1, line_point2, theme->foreground_color);
+    renderer_2d,
+    line_point1,
+    line_point2,
+    theme->foreground_color);
 
   uint16_t slider_x =
     (ui_element->width - 2 * (ui_element->padding_x + slider_margin)) *
@@ -221,6 +271,11 @@ static void ui_element_slider_render(
     theme->accent_color);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_element_slider_init()
+ *
+ ******************************************************************************/
 void ui_element_slider_init(
   struct ui_element_slider_t* slider_element,
   float starting_position,
@@ -246,6 +301,11 @@ void ui_element_slider_init(
 
 // ------------------------------------------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: ui_element_button_init()
+ *
+ ******************************************************************************/
 void ui_element_button_init(
   struct ui_element_button_t* button_element)
 {
@@ -258,6 +318,11 @@ void ui_element_button_init(
     (void*)0);
 }
 
+/*******************************************************************************
+ *
+ * Function: ui_element_checkbox_init()
+ *
+ ******************************************************************************/
 void ui_element_checkbox_init(
   struct ui_element_checkbox_t* checkbox_element,
   bool start_checked)

@@ -8,7 +8,14 @@ static struct ball_window_t ball_window;
 
 //
 
-int main(int argc, char **argv)
+/*******************************************************************************
+ *
+ * Function: main()
+ *
+ ******************************************************************************/
+int main(
+  int argc,
+  char **argv)
 {
   const uint8_t max_windows = 1;
 
@@ -19,21 +26,27 @@ int main(int argc, char **argv)
 
   uint8_t error = 0U;
 
-  error |= application_init(app_ptr, "JotunnTestApp", max_windows);
+  error |= application_init(
+    app_ptr,
+    "JotunnTestApp",
+    max_windows);
 
-  ball_window_init(app_ptr, &(ball_window));
+  ball_window_init(
+    app_ptr,
+    &(ball_window));
 
   window_layer_set_custom_layer_run(
-    &(ball_window.window_layer), &ball_window_run);
+    &(ball_window.window_layer),
+    &ball_window_run);
 
-  error |= application_add_window(app_ptr, base_window_ptr);
+  error |= application_add_window(
+    app_ptr,
+    base_window_ptr);
 
-  if (!error)
-  {
+  if (!error) {
     application_start(app_ptr);
 
-    while (app_ptr->running)
-    {
+    while (app_ptr->running) {
       application_run(app_ptr);
     }
 
@@ -44,11 +57,14 @@ int main(int argc, char **argv)
     application_cleanup(app_ptr);
   }
 #ifdef DEBUG
-  else
-  {
-    fprintf(stdout, "Error initializing application\n");
+  else {
+    fprintf(
+      stdout,
+      "Error initializing application\n");
   }
-  fprintf(stdout, "Jobs done from main.c\n");
+  fprintf(
+    stdout,
+    "Jobs done from main.c\n");
   fflush(stdout);
 #endif
 }

@@ -26,11 +26,12 @@ struct camera_base_t
   float near_plane;
   float far_plane;
   //
-  void (*camera_reproject)(struct camera_base_t* camera,
-                           float window_width,
-                           float window_height,
-                           float near_plane,
-                           float far_plane);
+  void (*camera_reproject)(
+    struct camera_base_t* camera,
+    float window_width,
+    float window_height,
+    float near_plane,
+    float far_plane);
 };
 
 struct camera_ortho_t
@@ -52,7 +53,8 @@ struct camera_perspective_t
   float aspect_ratio;
 };
 
-void camera_init_unprojected(struct camera_base_t* camera);
+void camera_init_unprojected(
+  struct camera_base_t* camera);
 void camera_init_orthographic(
   struct camera_ortho_t* camera,
   const fvector3 position,
@@ -85,7 +87,11 @@ void camera_set_view(
   const fvector3 up,
   const fvector3 front);
 
-void camera_recalculate_view_projection_matrix(struct camera_base_t* camera);
-fvector3 camera_get_front_vector(struct camera_base_t* camera);
-fvector3 camera_get_left_vector(struct camera_base_t* camera);
-fvector3 camera_get_up_vector(struct camera_base_t* camera);
+void camera_recalculate_view_projection_matrix(
+  struct camera_base_t* camera);
+fvector3 camera_get_front_vector(
+  struct camera_base_t* camera);
+fvector3 camera_get_left_vector(
+  struct camera_base_t* camera);
+fvector3 camera_get_up_vector(
+  struct camera_base_t* camera);

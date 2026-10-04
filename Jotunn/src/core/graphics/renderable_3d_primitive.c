@@ -220,7 +220,7 @@ const struct renderable_3d_mesh_t sphere_3d_mesh =
     .num_indices         = _NUM_SPHERE_3D_INDICES
   };
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: gen_sphere_3d_data()
  *
@@ -286,7 +286,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_shaded_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_shaded_vertex_t, position)
+      (void*)offsetof(
+        struct renderable_3d_shaded_vertex_t,
+        position)
   },
   [SHADED_3D_NORMAL] =
   {
@@ -297,7 +299,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_shaded_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_shaded_vertex_t, normal)
+      (void*)offsetof(
+        struct renderable_3d_shaded_vertex_t,
+        normal)
   },
   [SHADED_3D_COLOR] =
   {
@@ -308,7 +312,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_shaded_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_shaded_vertex_t, color)
+      (void*)offsetof(
+        struct renderable_3d_shaded_vertex_t,
+        color)
   }
 };
 
@@ -324,7 +330,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_textured_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_textured_vertex_t, position)
+      (void*)offsetof(
+        struct renderable_3d_textured_vertex_t,
+        position)
   },
   [TEXTURED_3D_NORMAL] =
   {
@@ -335,7 +343,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_textured_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_textured_vertex_t, normal)
+      (void*)offsetof(
+        struct renderable_3d_textured_vertex_t,
+        normal)
   },
   [TEXTURED_3D_TEXTURE_COORDINATES] =
   {
@@ -358,7 +368,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_textured_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_textured_vertex_t, texture_index)
+      (void*)offsetof(
+        struct renderable_3d_textured_vertex_t,
+        texture_index)
   },
   [TEXTURED_3D_TILING_FACTOR] =
   {
@@ -369,7 +381,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_textured_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_textured_vertex_t, tiling_factor)
+      (void*)offsetof(
+        struct renderable_3d_textured_vertex_t,
+        tiling_factor)
   }
 };
 
@@ -385,7 +399,9 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_line_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_line_vertex_t, position)
+      (void*)offsetof(
+        struct renderable_3d_line_vertex_t,
+        position)
   },
   [LINE_3D_COLOR] =
   {
@@ -396,11 +412,13 @@ static const struct vertex_attribute_t
     .should_normalize = 0,
     .stride = sizeof(struct renderable_3d_line_vertex_t),
     .ptr_offset_to_attrib =
-      (void*)offsetof(struct renderable_3d_line_vertex_t, color)
+      (void*)offsetof(
+        struct renderable_3d_line_vertex_t,
+        color)
   }
 };
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_primitive_data_init()
  *
@@ -414,11 +432,17 @@ static void renderable_3d_primitive_data_init(
   const unsigned int num_attributes,
   struct shader_program_t* shader_program)
 {
-  vertex_array_init(vao, 1);
-  vertex_buffer_init(vbo, 1);
+  vertex_array_init(
+    vao,
+    1);
+  vertex_buffer_init(
+    vbo,
+    1);
 
   if (use_ebo) {
-    element_buffer_init(ebo, 1);
+    element_buffer_init(
+      ebo,
+      1);
   }
 
   vertex_array_bind(vao);
@@ -437,11 +461,13 @@ static void renderable_3d_primitive_data_init(
         shader_program,
         attribute.attribute_name);
 
-    vertex_array_set_attribute(vao, &attribute);
+    vertex_array_set_attribute(
+      vao,
+      &attribute);
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_buffer_mesh_indices()
  *
@@ -476,7 +502,7 @@ static void renderable_3d_buffer_mesh_indices(
   free(indices);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_generate_mesh_data()
  *
@@ -492,7 +518,7 @@ void renderable_3d_generate_mesh_data(void)
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_shaded_data_init()
  *
@@ -537,7 +563,7 @@ void renderable_3d_shaded_data_init(
   vertex_array_unbind();
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_textured_data_init()
  *
@@ -582,7 +608,7 @@ void renderable_3d_textured_data_init(
   vertex_array_unbind();
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_line_data_init()
  *
@@ -621,7 +647,7 @@ void renderable_3d_line_data_init(
   vertex_array_unbind();
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_shaded_data_cleanup()
  *
@@ -629,16 +655,22 @@ void renderable_3d_line_data_init(
 void renderable_3d_shaded_data_cleanup(
   struct renderable_3d_shaded_data_t* shaded_data)
 {
-  vertex_array_destroy(&(shaded_data->vao), 1);
-  vertex_buffer_destroy(&(shaded_data->vbo), 1);
-  element_buffer_destroy(&(shaded_data->ebo), 1);
+  vertex_array_destroy(
+    &(shaded_data->vao),
+    1);
+  vertex_buffer_destroy(
+    &(shaded_data->vbo),
+    1);
+  element_buffer_destroy(
+    &(shaded_data->ebo),
+    1);
 
   free(shaded_data->vertex_data_base);
   shaded_data->vertex_data_base = NULL;
   shaded_data->vertex_data_ptr = NULL;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_textured_data_cleanup()
  *
@@ -646,16 +678,22 @@ void renderable_3d_shaded_data_cleanup(
 void renderable_3d_textured_data_cleanup(
   struct renderable_3d_textured_data_t* textured_data)
 {
-  vertex_array_destroy(&(textured_data->vao), 1);
-  vertex_buffer_destroy(&(textured_data->vbo), 1);
-  element_buffer_destroy(&(textured_data->ebo), 1);
+  vertex_array_destroy(
+    &(textured_data->vao),
+    1);
+  vertex_buffer_destroy(
+    &(textured_data->vbo),
+    1);
+  element_buffer_destroy(
+    &(textured_data->ebo),
+    1);
 
   free(textured_data->vertex_data_base);
   textured_data->vertex_data_base = NULL;
   textured_data->vertex_data_ptr = NULL;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderable_3d_line_data_cleanup()
  *
@@ -663,8 +701,12 @@ void renderable_3d_textured_data_cleanup(
 void renderable_3d_line_data_cleanup(
   struct renderable_3d_line_data_t* line_data)
 {
-  vertex_array_destroy(&(line_data->vao), 1);
-  vertex_buffer_destroy(&(line_data->vbo), 1);
+  vertex_array_destroy(
+    &(line_data->vao),
+    1);
+  vertex_buffer_destroy(
+    &(line_data->vbo),
+    1);
 
   free(line_data->vertex_data_base);
   line_data->vertex_data_base = NULL;

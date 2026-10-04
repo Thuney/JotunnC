@@ -33,6 +33,11 @@ struct typeface_t window2_typeface;
 
 //
 
+/*******************************************************************************
+ *
+ * Function: window1_run()
+ *
+ ******************************************************************************/
 void window1_run(
   struct window_layer_t* window_layer)
 {
@@ -58,14 +63,14 @@ void window1_run(
   fmatrix_4x4 scale_matrix, transform_matrix;
   fmatrix_4x4_init(&scale_matrix);
 
-  scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+  scale_matrix = fmatrix_4x4_transform_scale(
+    &scale_matrix,
+    scale_factors);
 
   fvector3 quad_position, triangle_position, circle_position;
 
-  for (r = 0; r <= dim; r++)
-  {
-    for (c = 0; c <= dim; c += 3)
-    {
+  for (r = 0; r <= dim; r++) {
+    for (c = 0; c <= dim; c += 3) {
       quad_position =
         (fvector3){{grid_start_offset_position.comp.x + (spacing * c),
                     grid_start_offset_position.comp.y + (spacing * r),
@@ -87,17 +92,29 @@ void window1_run(
       const fvector4 circle_color = {0.0f, val2, val, 1.0f};
 
       transform_matrix =
-        fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
+        fmatrix_4x4_transform_translate(
+          &scale_matrix,
+          quad_position);
       renderer_2d_draw_unfilled_quad(
-        &window1_renderer_2d, &transform_matrix, quad_color);
+        &window1_renderer_2d,
+        &transform_matrix,
+        quad_color);
       transform_matrix =
-        fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
+        fmatrix_4x4_transform_translate(
+          &scale_matrix,
+          triangle_position);
       renderer_2d_draw_triangle(
-        &window1_renderer_2d, &transform_matrix, triangle_color);
+        &window1_renderer_2d,
+        &transform_matrix,
+        triangle_color);
       transform_matrix =
-        fmatrix_4x4_transform_translate(&scale_matrix, circle_position);
+        fmatrix_4x4_transform_translate(
+          &scale_matrix,
+          circle_position);
       renderer_2d_draw_circle(
-        &window1_renderer_2d, &transform_matrix, circle_color);
+        &window1_renderer_2d,
+        &transform_matrix,
+        circle_color);
     }
   }
 
@@ -115,9 +132,11 @@ void window1_run(
   fmatrix_4x4_init(&aaron_textured_quad_transform_matrix);
 
   aaron_textured_quad_transform_matrix = fmatrix_4x4_transform_scale(
-    &aaron_textured_quad_transform_matrix, aaron_textured_quad_scale_factors);
+    &aaron_textured_quad_transform_matrix,
+    aaron_textured_quad_scale_factors);
   aaron_textured_quad_transform_matrix = fmatrix_4x4_transform_translate(
-    &aaron_textured_quad_transform_matrix, aaron_textured_quad_position);
+    &aaron_textured_quad_transform_matrix,
+    aaron_textured_quad_position);
 
   renderer_2d_draw_textured_quad(
     &window1_renderer_2d,
@@ -138,9 +157,11 @@ void window1_run(
   fmatrix_4x4_init(&lenna_textured_quad_transform_matrix);
 
   lenna_textured_quad_transform_matrix = fmatrix_4x4_transform_scale(
-    &lenna_textured_quad_transform_matrix, lenna_textured_quad_scale_factors);
+    &lenna_textured_quad_transform_matrix,
+    lenna_textured_quad_scale_factors);
   lenna_textured_quad_transform_matrix = fmatrix_4x4_transform_translate(
-    &lenna_textured_quad_transform_matrix, lenna_textured_quad_position);
+    &lenna_textured_quad_transform_matrix,
+    lenna_textured_quad_position);
 
   renderer_2d_draw_textured_quad(
     &window1_renderer_2d,
@@ -154,7 +175,10 @@ void window1_run(
   const fvector4 line_color = {255.0f, 255.0f, 0.0f, 1.0f};
 
   renderer_2d_draw_line(
-    &window1_renderer_2d, line_position_1, line_position_2, line_color);
+    &window1_renderer_2d,
+    line_position_1,
+    line_position_2,
+    line_color);
 
   // String of text
   const fvector3 text_start_position = {200.0f, 700.0f, 0.0f};
@@ -169,6 +193,11 @@ void window1_run(
   // renderer_2d_draw_string(&window->renderer, &window->typeface, text_start_position, _FONT_LOADED_GLYPHS_STRING);
 }
 
+/*******************************************************************************
+ *
+ * Function: window2_run()
+ *
+ ******************************************************************************/
 void window2_run(
   struct window_layer_t* window_layer)
 {
@@ -190,16 +219,16 @@ void window2_run(
   fmatrix_4x4 scale_matrix, transform_matrix;
   fmatrix_4x4_init(&scale_matrix);
 
-  scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+  scale_matrix = fmatrix_4x4_transform_scale(
+    &scale_matrix,
+    scale_factors);
 
   // fvector3 quad_position;
   fvector3 triangle_position;
   fvector3 circle_position;
 
-  for (r = 0; r <= dim; r++)
-  {
-    for (c = 0; c <= dim; c += 3)
-    {
+  for (r = 0; r <= dim; r++) {
+    for (c = 0; c <= dim; c += 3) {
       // quad_position     = (fvector3) { {grid_start_offset_position.comp.x + (spacing*c)    , grid_start_offset_position.comp.y + (spacing*r), 0.0f} };
       triangle_position =
         (fvector3){{grid_start_offset_position.comp.x + (spacing * (c + 1)),
@@ -220,13 +249,21 @@ void window2_run(
       // transform_matrix = fmatrix_4x4_transform_translate(&scale_matrix, quad_position);
       // renderer_2d_draw_quad(renderer, &transform_matrix, quad_color);
       transform_matrix =
-        fmatrix_4x4_transform_translate(&scale_matrix, triangle_position);
+        fmatrix_4x4_transform_translate(
+          &scale_matrix,
+          triangle_position);
       renderer_2d_draw_triangle(
-        &window2_renderer_2d, &transform_matrix, triangle_color);
+        &window2_renderer_2d,
+        &transform_matrix,
+        triangle_color);
       transform_matrix =
-        fmatrix_4x4_transform_translate(&scale_matrix, circle_position);
+        fmatrix_4x4_transform_translate(
+          &scale_matrix,
+          circle_position);
       renderer_2d_draw_circle(
-        &window2_renderer_2d, &transform_matrix, circle_color);
+        &window2_renderer_2d,
+        &transform_matrix,
+        circle_color);
     }
   }
 
@@ -237,7 +274,10 @@ void window2_run(
   const fvector4 line_color = {127.0f, 33.0f, 127.0f, 1.0f};
 
   renderer_2d_draw_line(
-    &window2_renderer_2d, line_position_1, line_position_2, line_color);
+    &window2_renderer_2d,
+    line_position_1,
+    line_position_2,
+    line_color);
 
   // String of text
   const fvector3 text_start_position = {100.0f, 900.0f, 0.0f};
@@ -249,6 +289,11 @@ void window2_run(
     _FONT_LOADED_GLYPHS_STRING);
 }
 
+/*******************************************************************************
+ *
+ * Function: init_window1()
+ *
+ ******************************************************************************/
 uint8_t init_window1(
   struct application_t* app,
   struct window_t* window1)
@@ -268,8 +313,7 @@ uint8_t init_window1(
       "JotunnWindow1",
       app);
 
-  if (!error)
-  {
+  if (!error) {
     typeface_init(
       &(window1_typeface),
       "/usr/share/fonts/noto/NotoSerif-Regular.ttf",
@@ -331,18 +375,32 @@ uint8_t init_window1(
       (struct camera_base_t*)&(window1_camera_ortho),
       (struct renderer_base_t*)&(window1_renderer_2d));
 
-    window_add_layer(window1, &(window1_layer));
+    window_add_layer(
+      window1,
+      &(window1_layer));
 
     fvector4 window1_background_color;
-    fvector4_set(&(window1_background_color), 0.3f, 0.3f, 0.3f, 1.0f);
+    fvector4_set(
+      &(window1_background_color),
+      0.3f,
+      0.3f,
+      0.3f,
+      1.0f);
     // fvector4_set(&window1_background_color, 1.0f, 1.0f, 1.0f, 1.0f);
 
-    window_set_background_color(window1, window1_background_color);
+    window_set_background_color(
+      window1,
+      window1_background_color);
   }
 
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: init_window2()
+ *
+ ******************************************************************************/
 uint8_t init_window2(
   struct application_t* app,
   struct window_t* window2)
@@ -354,12 +412,19 @@ uint8_t init_window2(
   const uint8_t num_layers = 1;
 
   error |=
-    window_init(window2, num_layers, width, height, "JotunnWindow2", app);
+    window_init(
+      window2,
+      num_layers,
+      width,
+      height,
+      "JotunnWindow2",
+      app);
 
-  if (!error)
-  {
+  if (!error) {
     typeface_init(
-      &(window2_typeface), "/usr/share/fonts/noto/NotoSerif-Regular.ttf", 18);
+      &(window2_typeface),
+      "/usr/share/fonts/noto/NotoSerif-Regular.ttf",
+      18);
 
     window_set_context(window2);
 
@@ -408,17 +473,31 @@ uint8_t init_window2(
       (struct camera_base_t*)&(window2_camera_ortho),
       (struct renderer_base_t*)&(window2_renderer_2d));
 
-    window_add_layer(window2, &(window2_layer));
+    window_add_layer(
+      window2,
+      &(window2_layer));
 
     fvector4 window2_background_color;
-    fvector4_set(&(window2_background_color), 0.3f, 0.3f, 0.3f, 1.0f);
+    fvector4_set(
+      &(window2_background_color),
+      0.3f,
+      0.3f,
+      0.3f,
+      1.0f);
 
-    window_set_background_color(window2, window2_background_color);
+    window_set_background_color(
+      window2,
+      window2_background_color);
   }
 
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: main()
+ *
+ ******************************************************************************/
 int main(
   int argc,
   char** argv)
@@ -431,28 +510,47 @@ int main(
 
   uint8_t error = 0U;
 
-  error |= application_init(app_ptr, "JotunnTestApp", max_windows);
-  init_window1(app_ptr, window1_ptr);
-  init_window2(app_ptr, window2_ptr);
-  error |= demo_3d_window_init(app_ptr, &(demo_3d_window));
+  error |= application_init(
+    app_ptr,
+    "JotunnTestApp",
+    max_windows);
+  init_window1(
+    app_ptr,
+    window1_ptr);
+  init_window2(
+    app_ptr,
+    window2_ptr);
+  error |= demo_3d_window_init(
+    app_ptr,
+    &(demo_3d_window));
 
-  window_layer_set_custom_layer_run(&window1_layer, &window1_run);
-  window_layer_set_custom_layer_run(&window2_layer, &window2_run);
+  window_layer_set_custom_layer_run(
+    &window1_layer,
+    &window1_run);
+  window_layer_set_custom_layer_run(
+    &window2_layer,
+    &window2_run);
 
-  error |= application_add_window(app_ptr, window1_ptr);
-  error |= application_add_window(app_ptr, window2_ptr);
-  error |= application_add_window(app_ptr, &(demo_3d_window.window));
+  error |= application_add_window(
+    app_ptr,
+    window1_ptr);
+  error |= application_add_window(
+    app_ptr,
+    window2_ptr);
+  error |= application_add_window(
+    app_ptr,
+    &(demo_3d_window.window));
 
-  if (!error)
-  {
+  if (!error) {
     application_start(app_ptr);
 
         #ifdef DEBUG
-    fprintf(stdout, "Running application\n");
+    fprintf(
+      stdout,
+      "Running application\n");
         #endif
 
-    while (app_ptr->running)
-    {
+    while (app_ptr->running) {
       application_run(app_ptr);
     }
 
@@ -478,11 +576,14 @@ int main(
     application_cleanup(app_ptr);
   }
 #ifdef DEBUG
-  else
-  {
-    fprintf(stdout, "Error initializing application\n");
+  else {
+    fprintf(
+      stdout,
+      "Error initializing application\n");
   }
-  fprintf(stdout, "Jobs done from main.c\n");
+  fprintf(
+    stdout,
+    "Jobs done from main.c\n");
   fflush(stdout);
 #endif
 }

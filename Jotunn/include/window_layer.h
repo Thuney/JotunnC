@@ -11,7 +11,8 @@ struct window_layer_t
   struct camera_base_t* camera;
   struct renderer_base_t* renderer;
   // Does the rendering for this layer, whatever that may be
-  void (*function_custom_window_layer_run)(struct window_layer_t* window_layer);
+  void (*function_custom_window_layer_run)(
+    struct window_layer_t* window_layer);
   // Acts on events propagated through to this layer
   void (*function_event_react)(
     struct window_t* parent_window,

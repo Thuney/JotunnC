@@ -1,5 +1,10 @@
 #include "vertexattribute.h"
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_attribute_init()
+ *
+ ******************************************************************************/
 void platform_vertex_attribute_init(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int index,

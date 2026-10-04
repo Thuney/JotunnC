@@ -13,11 +13,11 @@ struct event_base_t;
 struct renderer_base_t;
 struct window_t;
 
-/************************************************************
+/*******************************************************************************
  *
  * Struct Definitions
  *
- ************************************************************/
+ ******************************************************************************/
 struct window_data_t
 {
   char* tag;
@@ -56,11 +56,11 @@ struct window_t
     struct event_base_t* event);
 };
 
-/************************************************************
+/*******************************************************************************
  *
  * Interface Functions
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t window_init(
   struct window_t* window,
   const uint8_t max_window_layers,
@@ -82,15 +82,21 @@ void window_handle_event(
   struct window_t* window,
   struct event_base_t* event);
 
-void window_show(struct window_t* window);
-void window_hide(struct window_t* window);
+void window_show(
+  struct window_t* window);
+void window_hide(
+  struct window_t* window);
 
-uint8_t window_run(struct window_t* window);
+uint8_t window_run(
+  struct window_t* window);
 
-void window_cleanup(struct window_t* window);
+void window_cleanup(
+  struct window_t* window);
 
-void window_set_context(struct window_t* window);
-void window_release_context(struct window_t* window);
+void window_set_context(
+  struct window_t* window);
+void window_release_context(
+  struct window_t* window);
 
 void window_set_viewport(
   uint32_t x,

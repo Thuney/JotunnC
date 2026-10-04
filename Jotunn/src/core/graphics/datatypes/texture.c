@@ -29,6 +29,11 @@ extern void platform_texture_2d_resize(
   unsigned int new_width,
   unsigned int new_height);
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_init()
+ *
+ ******************************************************************************/
 void texture_2d_init(
   struct texture_2d_t* texture,
   unsigned int width,
@@ -74,20 +79,25 @@ void texture_2d_init(
     break;
   }
 
-  platform_texture_2d_init(texture, wrap);
+  platform_texture_2d_init(
+    texture,
+    wrap);
 }
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_cleanup()
+ *
+ ******************************************************************************/
 void texture_2d_cleanup(
   struct texture_2d_t* texture)
 {
-  if (texture->is_loaded)
-  {
+  if (texture->is_loaded) {
     platform_texture_2d_cleanup(texture);
   }
 
   // If you opt to be the owner of this texture's data, unbind the data pointer before calling texture cleanup
-  if (texture->data)
-  {
+  if (texture->data) {
     stbi_image_free(texture->data);
   }
 
@@ -100,6 +110,11 @@ void texture_2d_cleanup(
   texture->internal_format = -1;
 }
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_resize()
+ *
+ ******************************************************************************/
 void texture_2d_resize(
   struct texture_2d_t* texture,
   unsigned int new_width,
@@ -107,16 +122,23 @@ void texture_2d_resize(
 {
   texture->width  = new_width;
   texture->height = new_height;
-  platform_texture_2d_resize(texture, new_width, new_height);
+  platform_texture_2d_resize(
+    texture,
+    new_width,
+    new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_set_data()
+ *
+ ******************************************************************************/
 void texture_2d_set_data(
   struct texture_2d_t* texture,
   unsigned char* data,
   const unsigned int data_size_bytes)
 {
-  if (data_size_bytes != (texture->width * texture->height * texture->channels))
-  {
+  if (data_size_bytes != (texture->width * texture->height * texture->channels)) {
   #ifdef DEBUG
     fprintf(
       stdout,
@@ -130,11 +152,19 @@ void texture_2d_set_data(
   texture->data = data;
   texture->data_size_bytes = data_size_bytes;
 
-  platform_texture_2d_set_data(texture, data, data_size_bytes);
+  platform_texture_2d_set_data(
+    texture,
+    data,
+    data_size_bytes);
 
   texture->is_loaded = 1;
 }
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_create_from_file_path()
+ *
+ ******************************************************************************/
 void texture_2d_create_from_file_path(
   struct texture_2d_t* texture,
   const char* filepath,
@@ -190,8 +220,7 @@ void texture_2d_create_from_file_path(
       texture->internal_format);
   #endif
 
-  if (texture->data)
-  {
+  if (texture->data) {
     // Indicate that we are already loaded so we don't needlessly re-set fields
     texture->is_loaded = 1;
 
@@ -210,9 +239,16 @@ void texture_2d_create_from_file_path(
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: texture_2d_bind()
+ *
+ ******************************************************************************/
 void texture_2d_bind(
   const struct texture_2d_t* texture,
   const unsigned int texture_slot)
 {
-  platform_texture_2d_bind(texture, texture_slot);
+  platform_texture_2d_bind(
+    texture,
+    texture_slot);
 }

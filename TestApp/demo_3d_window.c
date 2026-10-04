@@ -14,7 +14,7 @@ static const float orbit_max_pitch = 1.4f;
 static const float orbit_min_distance = 3.0f;
 static const float orbit_max_distance = 40.0f;
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_hue_to_color()
  *
@@ -26,9 +26,13 @@ static fvector4 demo_3d_hue_to_color(
   const float saturation = 0.65f;
   const float value = 0.95f;
 
-  const float h = fmodf(hue, 1.0f) * 6.0f;
+  const float h = fmodf(
+    hue,
+    1.0f) * 6.0f;
   const float chroma = value * saturation;
-  const float x = chroma * (1.0f - fabsf(fmodf(h, 2.0f) - 1.0f));
+  const float x = chroma * (1.0f - fabsf(fmodf(
+    h,
+    2.0f) - 1.0f));
   const float m = value - chroma;
 
   float r = 0.0f, g = 0.0f, b = 0.0f;
@@ -46,7 +50,7 @@ static fvector4 demo_3d_hue_to_color(
   return (fvector4){{r + m, g + m, b + m, 1.0f}};
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_calculate_transform()
  *
@@ -61,15 +65,22 @@ static fmatrix_4x4 demo_3d_calculate_transform(
   fmatrix_4x4_init(&transform);
 
   // Scale, then rotate, then translate
-  transform = fmatrix_4x4_transform_scale(&transform, scale_factors);
+  transform = fmatrix_4x4_transform_scale(
+    &transform,
+    scale_factors);
   transform =
-    fmatrix_4x4_transform_rotate(&transform, rotation_axis, rotation_radians);
-  transform = fmatrix_4x4_transform_translate(&transform, translation);
+    fmatrix_4x4_transform_rotate(
+      &transform,
+      rotation_axis,
+      rotation_radians);
+  transform = fmatrix_4x4_transform_translate(
+    &transform,
+    translation);
 
   return transform;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_calculate_orbit_position()
  *
@@ -87,7 +98,7 @@ static fvector3 demo_3d_calculate_orbit_position(
                        (horizontal_distance * cosf(orbit->yaw))}};
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_update_camera()
  *
@@ -101,7 +112,9 @@ static void demo_3d_update_camera(
   const fvector3 camera_position = demo_3d_calculate_orbit_position(orbit);
 
   const fvector3 to_target =
-    fvector3_subtract(&(orbit->target), &camera_position);
+    fvector3_subtract(
+      &(orbit->target),
+      &camera_position);
   const fvector3 camera_front = fvector3_normalize(&to_target);
 
   camera_set_view(
@@ -111,7 +124,7 @@ static void demo_3d_update_camera(
     camera_front);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_load_texture()
  *
@@ -120,7 +133,10 @@ static void demo_3d_load_texture(
   struct texture_2d_t* texture,
   const char* texture_path)
 {
-  texture_2d_create_from_file_path(texture, texture_path, 1);
+  texture_2d_create_from_file_path(
+    texture,
+    texture_path,
+    1);
 
   if (!texture->is_loaded) {
     printf(
@@ -129,7 +145,7 @@ static void demo_3d_load_texture(
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_draw_grid()
  *
@@ -170,7 +186,7 @@ static void demo_3d_draw_grid(
     y_axis_color);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_draw_centerpiece()
  *
@@ -220,7 +236,7 @@ static void demo_3d_draw_centerpiece(
     (fvector4){{1.0f, 0.85f, 0.3f, 1.0f}});
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_draw_orbiting_shapes()
  *
@@ -259,7 +275,10 @@ static void demo_3d_draw_orbiting_shapes(
             y_axis,
             spin,
             position);
-        renderer_3d_draw_cube(renderer, &transform, color);
+        renderer_3d_draw_cube(
+          renderer,
+          &transform,
+          color);
       }
       break;
       case 1:
@@ -270,7 +289,10 @@ static void demo_3d_draw_orbiting_shapes(
             y_axis,
             spin,
             position);
-        renderer_3d_draw_pyramid(renderer, &transform, color);
+        renderer_3d_draw_pyramid(
+          renderer,
+          &transform,
+          color);
       }
       break;
       default:
@@ -281,14 +303,17 @@ static void demo_3d_draw_orbiting_shapes(
             y_axis,
             spin,
             position);
-        renderer_3d_draw_sphere(renderer, &transform, color);
+        renderer_3d_draw_sphere(
+          renderer,
+          &transform,
+          color);
       }
       break;
     }
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_window_init()
  *
@@ -339,7 +364,9 @@ uint8_t demo_3d_window_init(
       demo_3d_calculate_orbit_position(&(demo_window->orbit));
     const fvector3 camera_up = (fvector3){{0.0f, 1.0f, 0.0f}};
     const fvector3 to_target =
-      fvector3_subtract(&(demo_window->orbit.target), &camera_position);
+      fvector3_subtract(
+        &(demo_window->orbit.target),
+        &camera_position);
     const fvector3 camera_front = fvector3_normalize(&to_target);
 
     const float field_of_view = 60.0f;
@@ -397,7 +424,12 @@ uint8_t demo_3d_window_init(
       &demo_3d_window_on_event);
 
     fvector4 background_color;
-    fvector4_set(&(background_color), 0.12f, 0.13f, 0.16f, 1.0f);
+    fvector4_set(
+      &(background_color),
+      0.12f,
+      0.13f,
+      0.16f,
+      1.0f);
 
     window_set_background_color(
       window_ptr,
@@ -407,7 +439,7 @@ uint8_t demo_3d_window_init(
   return error;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_window_on_event()
  *
@@ -514,7 +546,7 @@ void demo_3d_window_on_event(
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_window_run()
  *
@@ -532,7 +564,7 @@ void demo_3d_window_run(
   demo_3d_draw_orbiting_shapes(demo_window);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: demo_3d_window_cleanup()
  *

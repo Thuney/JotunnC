@@ -1,5 +1,10 @@
 #include "vertexattribute.h"
 
+/*******************************************************************************
+ *
+ * Function: gl_platform_vertex_attribute_init()
+ *
+ ******************************************************************************/
 static void gl_platform_vertex_attribute_init(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int index,
@@ -17,6 +22,11 @@ static void gl_platform_vertex_attribute_init(
   vertex_attribute->ptr_offset_to_attrib = ptr_offset_to_attrib;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_attribute_init()
+ *
+ ******************************************************************************/
 void platform_vertex_attribute_init(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int index,

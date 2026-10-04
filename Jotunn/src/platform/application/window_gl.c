@@ -10,20 +10,20 @@
 #include "renderer_2d.h"
 #include "window.h"
 
-/**************************************************
+/*******************************************************************************
  *
  *  Variables
  *
- **************************************************/
+ ******************************************************************************/
 
 static uint8_t is_glfw_initialized = 0;
 static uint8_t is_glew_initialized = 0;
 
-/**************************************************
+/*******************************************************************************
  *
  *  GLFW callback functions
  *
- **************************************************/
+ ******************************************************************************/
 
 static void gl_window_size_callback(
   GLFWwindow* window,
@@ -65,11 +65,11 @@ static void gl_window_error_callback(
   int error_code,
   const char* description);
 
-/**************************************************
+/*******************************************************************************
  *
  *  Internal GL window functions
  *
- **************************************************/
+ ******************************************************************************/
 static void window_gl_set_callbacks(
   GLFWwindow* glfw_window_ptr);
 
@@ -90,60 +90,107 @@ static void window_gl_run(
 static void window_gl_cleanup(
   struct window_t* window);
 
-/**************************************************
+/*******************************************************************************
  *
  *  Extern window function definitions
  *
- **************************************************/
+ ******************************************************************************/
+
+/*******************************************************************************
+ *
+ * Function: window_graphics_init()
+ *
+ ******************************************************************************/
 uint8_t window_graphics_init(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Found OpenGL Backend\n");
+  fprintf(
+    stdout,
+    "Found OpenGL Backend\n");
 #endif
 
   return window_gl_init(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_poll_events()
+ *
+ ******************************************************************************/
 void window_graphics_poll_events(
   struct window_t* window)
 {
   window_gl_poll_events(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_run()
+ *
+ ******************************************************************************/
 void window_graphics_run(
   struct window_t* window)
 {
   window_gl_run(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_cleanup()
+ *
+ ******************************************************************************/
 void window_graphics_cleanup(
   struct window_t* window)
 {
   window_gl_cleanup(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_set_context()
+ *
+ ******************************************************************************/
 void window_graphics_set_context(
   struct window_t* window)
 {
   window_gl_set_context(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_release_context()
+ *
+ ******************************************************************************/
 void window_graphics_release_context(
   struct window_t* window)
 {
   window_gl_release_context(window);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_set_viewport()
+ *
+ ******************************************************************************/
 void window_graphics_set_viewport(
   uint32_t x,
   uint32_t y,
   uint32_t width,
   uint32_t height)
 {
-  glViewport(x, y, width, height);
+  glViewport(
+    x,
+    y,
+    width,
+    height);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_graphics_set_background_color()
+ *
+ ******************************************************************************/
 void window_graphics_set_background_color(
   struct window_t* window,
   const fvector4 color)
@@ -151,19 +198,28 @@ void window_graphics_set_background_color(
   render_api_set_clear_color(color);
 }
 
-/**************************************************
+/*******************************************************************************
  *
  *  GLFW callback functions
  *
- **************************************************/
+ ******************************************************************************/
 
+/*******************************************************************************
+ *
+ * Function: gl_window_size_callback()
+ *
+ ******************************************************************************/
 static void gl_window_size_callback(
   GLFWwindow* window,
   int width,
   int height)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Window Resize - W: %d H: %d\n", width, height);
+  fprintf(
+    stdout,
+    "Event - Window Resize - W: %d H: %d\n",
+    width,
+    height);
   #endif
 
   struct window_data_t* metadata =
@@ -180,16 +236,26 @@ static void gl_window_size_callback(
     .height = height};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(resize_event.base));
+    metadata->parent_application,
+    &(resize_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_size_callback()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_size_callback(
   GLFWwindow* window,
   int width,
   int height)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Framebuffer Resize - W: %d H: %d\n", width, height);
+  fprintf(
+    stdout,
+    "Event - Framebuffer Resize - W: %d H: %d\n",
+    width,
+    height);
   #endif
 
   struct window_data_t* metadata =
@@ -201,6 +267,11 @@ static void gl_framebuffer_size_callback(
   // glViewport(0, 0, metadata->width, metadata->height);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_close_callback()
+ *
+ ******************************************************************************/
 static void gl_window_close_callback(
   GLFWwindow* window)
 {
@@ -220,9 +291,15 @@ static void gl_window_close_callback(
       .window_handle = (void*)window};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(window_close_event.base));
+    metadata->parent_application,
+    &(window_close_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_key_callback()
+ *
+ ******************************************************************************/
 static void gl_window_key_callback(
   GLFWwindow* window,
   int key,
@@ -241,15 +318,28 @@ static void gl_window_key_callback(
   // #endif
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_char_callback()
+ *
+ ******************************************************************************/
 static void gl_window_char_callback(
   GLFWwindow* window,
   unsigned int codepoint)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
+  fprintf(
+    stdout,
+    "Event - Char Received - Char: %c\n",
+    codepoint);
   #endif
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_mouse_button_callback()
+ *
+ ******************************************************************************/
 static void gl_window_mouse_button_callback(
   GLFWwindow* window,
   int button,
@@ -278,16 +368,26 @@ static void gl_window_mouse_button_callback(
       .mods = mods};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_button_event.base));
+    metadata->parent_application,
+    &(mouse_button_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_scroll_callback()
+ *
+ ******************************************************************************/
 static void gl_window_scroll_callback(
   GLFWwindow* window,
   double x_offset,
   double y_offset)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Scroll Wheel - X: %lf Y: %lf\n", x_offset, y_offset);
+  fprintf(
+    stdout,
+    "Event - Scroll Wheel - X: %lf Y: %lf\n",
+    x_offset,
+    y_offset);
   #endif
 
   struct window_data_t* metadata =
@@ -302,9 +402,15 @@ static void gl_window_scroll_callback(
       .y_offset = (float)y_offset};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_scrolled_event.base));
+    metadata->parent_application,
+    &(mouse_scrolled_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_cursor_position_callback()
+ *
+ ******************************************************************************/
 static void gl_window_cursor_position_callback(
   GLFWwindow* window,
   double x_pos,
@@ -325,9 +431,15 @@ static void gl_window_cursor_position_callback(
     .y = (float)(metadata->height - y_pos)};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_moved_event.base));
+    metadata->parent_application,
+    &(mouse_moved_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_focus_callback()
+ *
+ ******************************************************************************/
 static void gl_window_focus_callback(
   GLFWwindow* window,
   int focused)
@@ -350,9 +462,15 @@ static void gl_window_focus_callback(
       .focused = focused};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(window_focus_event.base));
+    metadata->parent_application,
+    &(window_focus_event.base));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_window_error_callback()
+ *
+ ******************************************************************************/
 static void gl_window_error_callback(
   int error_code,
   const char* description)
@@ -366,64 +484,99 @@ static void gl_window_error_callback(
   #endif
 }
 
-/**************************************************
+/*******************************************************************************
  *
  *  Internal GL window functions
  *
- **************************************************/
+ ******************************************************************************/
+
+/*******************************************************************************
+ *
+ * Function: window_gl_set_callbacks()
+ *
+ ******************************************************************************/
 static void window_gl_set_callbacks(
   GLFWwindow* glfw_window_ptr)
 {
   // Window action callback assignment
   glfwSetWindowSizeCallback(
-    glfw_window_ptr, (GLFWwindowsizefun)&gl_window_size_callback);
+    glfw_window_ptr,
+    (GLFWwindowsizefun)&gl_window_size_callback);
   glfwSetFramebufferSizeCallback(
-    glfw_window_ptr, (GLFWframebuffersizefun)&gl_framebuffer_size_callback);
+    glfw_window_ptr,
+    (GLFWframebuffersizefun)&gl_framebuffer_size_callback);
   glfwSetWindowCloseCallback(
-    glfw_window_ptr, (GLFWwindowclosefun)&gl_window_close_callback);
-  glfwSetKeyCallback(glfw_window_ptr, (GLFWkeyfun)&gl_window_key_callback);
-  glfwSetCharCallback(glfw_window_ptr, (GLFWcharfun)&gl_window_char_callback);
+    glfw_window_ptr,
+    (GLFWwindowclosefun)&gl_window_close_callback);
+  glfwSetKeyCallback(
+    glfw_window_ptr,
+    (GLFWkeyfun)&gl_window_key_callback);
+  glfwSetCharCallback(
+    glfw_window_ptr,
+    (GLFWcharfun)&gl_window_char_callback);
   glfwSetMouseButtonCallback(
-    glfw_window_ptr, (GLFWmousebuttonfun)&gl_window_mouse_button_callback);
+    glfw_window_ptr,
+    (GLFWmousebuttonfun)&gl_window_mouse_button_callback);
   glfwSetScrollCallback(
-    glfw_window_ptr, (GLFWscrollfun)&gl_window_scroll_callback);
+    glfw_window_ptr,
+    (GLFWscrollfun)&gl_window_scroll_callback);
   glfwSetCursorPosCallback(
-    glfw_window_ptr, (GLFWcursorposfun)&gl_window_cursor_position_callback);
+    glfw_window_ptr,
+    (GLFWcursorposfun)&gl_window_cursor_position_callback);
   glfwSetWindowFocusCallback(
-    glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
+    glfw_window_ptr,
+    (GLFWwindowfocusfun)&gl_window_focus_callback);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_init()
+ *
+ ******************************************************************************/
 static uint8_t window_gl_init(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing OpenGL Window\n");
+  fprintf(
+    stdout,
+    "Initializing OpenGL Window\n");
 #endif
 
   // Handle GLFW initialization
-  if (!is_glfw_initialized)
-  {
+  if (!is_glfw_initialized) {
     is_glfw_initialized = glfwInit();
   }
 
-  if (is_glfw_initialized)
-  {
+  if (is_glfw_initialized) {
     glfwSetErrorCallback((GLFWerrorfun)gl_window_error_callback);
 
     // Set some GLFW settings such as GL context version, modern core profile for the context, etc.
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(
+      GLFW_CONTEXT_VERSION_MAJOR,
+      3);
+    glfwWindowHint(
+      GLFW_CONTEXT_VERSION_MINOR,
+      2);
+    glfwWindowHint(
+      GLFW_OPENGL_PROFILE,
+      GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(
+      GLFW_OPENGL_FORWARD_COMPAT,
+      GL_TRUE);
+    glfwWindowHint(
+      GLFW_RESIZABLE,
+      GL_TRUE);
   }
 #ifdef DEBUG
-  else
-  {
-    fprintf(stdout, "GLFW initialization failed\n");
+  else {
+    fprintf(
+      stdout,
+      "GLFW initialization failed\n");
   }
 
-  fprintf(stdout, "Creating Window\n");
+  fprintf(
+    stdout,
+    "Creating Window\n");
 #endif
 
   // Create window via GLFW
@@ -438,7 +591,9 @@ static uint8_t window_gl_init(
   window->context_data.window_handle = (void*)gl_window_ptr;
 
   // Set a pointer in GLFW to our window data
-  glfwSetWindowUserPointer(gl_window_ptr, (void*)&(window->metadata));
+  glfwSetWindowUserPointer(
+    gl_window_ptr,
+    (void*)&(window->metadata));
 
   window_gl_set_callbacks(gl_window_ptr);
 
@@ -447,10 +602,13 @@ static uint8_t window_gl_init(
   // printOpenGLInfo(gl_window_ptr);
 
   // Set the GL viewport to the size of the window
-  glViewport(0, 0, window->metadata.width, window->metadata.height);
+  glViewport(
+    0,
+    0,
+    window->metadata.width,
+    window->metadata.height);
 
-  if (!is_glew_initialized)
-  {
+  if (!is_glew_initialized) {
     glewExperimental = GL_TRUE;
     is_glew_initialized = (glewInit() == GLEW_OK);
   }
@@ -460,7 +618,9 @@ static uint8_t window_gl_init(
   GLenum gl_error = GL_NO_ERROR;
 
 #ifdef DEBUG
-  fprintf(stdout, "End of Window Graphics Init - Clearing error queue\n");
+  fprintf(
+    stdout,
+    "End of Window Graphics Init - Clearing error queue\n");
 #endif
 
   do
@@ -468,18 +628,29 @@ static uint8_t window_gl_init(
     gl_error = glGetError();
 
   #ifdef DEBUG
-    fprintf(stdout, "Error Code: %d\n", gl_error);
+    fprintf(
+      stdout,
+      "Error Code: %d\n",
+      gl_error);
   #endif
 
-  } while (gl_error != GL_NO_ERROR);
+  }
+  while (gl_error != GL_NO_ERROR);
 
 #ifdef DEBUG
-  fprintf(stdout, "Done clearing error queue\n");
+  fprintf(
+    stdout,
+    "Done clearing error queue\n");
 #endif
 
   return !(is_glfw_initialized && is_glew_initialized);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_set_context()
+ *
+ ******************************************************************************/
 void window_gl_set_context(
   struct window_t* window)
 {
@@ -493,6 +664,11 @@ void window_gl_set_context(
   glfwMakeContextCurrent(gl_window_handle);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_release_context()
+ *
+ ******************************************************************************/
 void window_gl_release_context(
   struct window_t* window)
 {
@@ -502,12 +678,22 @@ void window_gl_release_context(
   glfwMakeContextCurrent(NULL);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_poll_events()
+ *
+ ******************************************************************************/
 static void window_gl_poll_events(
   struct window_t* window)
 {
   glfwPollEvents();
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_run()
+ *
+ ******************************************************************************/
 static void window_gl_run(
   struct window_t* window)
 {
@@ -517,15 +703,21 @@ static void window_gl_run(
   glfwSwapBuffers(gl_window_ptr);
 }
 
+/*******************************************************************************
+ *
+ * Function: window_gl_cleanup()
+ *
+ ******************************************************************************/
 static void window_gl_cleanup(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up OpenGL Window\n");
+  fprintf(
+    stdout,
+    "Cleaning up OpenGL Window\n");
 #endif
 
-  if (is_glfw_initialized)
-  {
+  if (is_glfw_initialized) {
     GLFWwindow* gl_window_ptr = (GLFWwindow*)window->context_data.window_handle;
 
     glfwDestroyWindow(gl_window_ptr);
@@ -534,8 +726,7 @@ static void window_gl_cleanup(
     is_glfw_initialized = 0;
   }
 
-  if (is_glew_initialized)
-  {
+  if (is_glew_initialized) {
     is_glew_initialized = 0;
   }
 }

@@ -89,7 +89,8 @@ struct ui_element_checkbox_t
 };
 
 //
-fvector2 ui_element_get_effective_size(struct ui_element_t* ui_element);
+fvector2 ui_element_get_effective_size(
+  struct ui_element_t* ui_element);
 
 void ui_element_init(
   struct ui_element_t* ui_element,
@@ -117,7 +118,8 @@ void ui_element_slider_init(
   float lower_bound,
   float upper_bound);
 
-void ui_element_button_init(struct ui_element_button_t* button_element);
+void ui_element_button_init(
+  struct ui_element_button_t* button_element);
 
 void ui_element_checkbox_init(
   struct ui_element_checkbox_t* checkbox_element,

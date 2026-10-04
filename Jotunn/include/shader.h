@@ -70,9 +70,11 @@ int shader_program_init_filepath(
   const char* vertex_shader_filepath,
   const char* fragment_shader_filepath);
 
-int shader_program_link(struct shader_program_t* shader_program);
+int shader_program_link(
+  struct shader_program_t* shader_program);
 
-void shader_program_use(struct shader_program_t* shader_program);
+void shader_program_use(
+  struct shader_program_t* shader_program);
 
 void shader_program_bind_fragment_data_location(
   struct shader_program_t* shader_program,
@@ -99,6 +101,9 @@ void shader_program_set_uniform_int(
   const char* uniform_name,
   int val);
 
-void vertex_shader_destroy(struct vertex_shader_t* shader);
-void fragment_shader_destroy(struct fragment_shader_t* shader);
-void shader_program_destroy(struct shader_program_t* shader_program);
+void vertex_shader_destroy(
+  struct vertex_shader_t* shader);
+void fragment_shader_destroy(
+  struct fragment_shader_t* shader);
+void shader_program_destroy(
+  struct shader_program_t* shader_program);

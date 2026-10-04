@@ -50,6 +50,11 @@ extern void platform_render_buffer_resize(
   unsigned int new_width,
   unsigned int new_height);
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_init()
+ *
+ ******************************************************************************/
 void framebuffer_init(
   struct framebuffer_t* frame_buffer,
   unsigned int width,
@@ -84,6 +89,11 @@ void framebuffer_init(
   framebuffer_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_resize()
+ *
+ ******************************************************************************/
 void framebuffer_resize(
   struct framebuffer_t* frame_buffer,
   unsigned int new_width,
@@ -99,6 +109,11 @@ void framebuffer_resize(
     new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_attach_color_buffer()
+ *
+ ******************************************************************************/
 void framebuffer_attach_color_buffer(
   struct framebuffer_t* frame_buffer,
   struct color_buffer_t* color_buffer)
@@ -108,6 +123,11 @@ void framebuffer_attach_color_buffer(
     color_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_attach_render_buffer()
+ *
+ ******************************************************************************/
 void framebuffer_attach_render_buffer(
   struct framebuffer_t* frame_buffer,
   struct render_buffer_t* render_buffer)
@@ -117,17 +137,32 @@ void framebuffer_attach_render_buffer(
     render_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_bind()
+ *
+ ******************************************************************************/
 void framebuffer_bind(
   struct framebuffer_t* frame_buffer)
 {
   platform_framebuffer_bind(frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_unbind()
+ *
+ ******************************************************************************/
 void framebuffer_unbind()
 {
   platform_framebuffer_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: framebuffer_cleanup()
+ *
+ ******************************************************************************/
 void framebuffer_cleanup(
   struct framebuffer_t* frame_buffer)
 {
@@ -139,62 +174,118 @@ void framebuffer_cleanup(
 
 //
 
+/*******************************************************************************
+ *
+ * Function: color_buffer_init()
+ *
+ ******************************************************************************/
 void color_buffer_init(
   struct color_buffer_t* color_buffer,
   unsigned int width,
   unsigned int height)
 {
-  platform_color_buffer_init(color_buffer, width, height);
+  platform_color_buffer_init(
+    color_buffer,
+    width,
+    height);
 }
 
+/*******************************************************************************
+ *
+ * Function: render_buffer_init()
+ *
+ ******************************************************************************/
 void render_buffer_init(
   struct render_buffer_t* render_buffer,
   unsigned int width,
   unsigned int height)
 {
-  platform_render_buffer_init(render_buffer, width, height);
+  platform_render_buffer_init(
+    render_buffer,
+    width,
+    height);
 }
 
+/*******************************************************************************
+ *
+ * Function: color_buffer_bind()
+ *
+ ******************************************************************************/
 void color_buffer_bind(
   struct color_buffer_t* color_buffer)
 {
   platform_color_buffer_bind(color_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: render_buffer_bind()
+ *
+ ******************************************************************************/
 void render_buffer_bind(
   struct render_buffer_t* render_buffer)
 {
   platform_render_buffer_bind(render_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: color_buffer_resize()
+ *
+ ******************************************************************************/
 void color_buffer_resize(
   struct color_buffer_t* color_buffer,
   unsigned int new_width,
   unsigned int new_height)
 {
-  platform_color_buffer_resize(color_buffer, new_width, new_height);
+  platform_color_buffer_resize(
+    color_buffer,
+    new_width,
+    new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: render_buffer_resize()
+ *
+ ******************************************************************************/
 void render_buffer_resize(
   struct render_buffer_t* render_buffer,
   unsigned int new_width,
   unsigned int new_height)
 {
-  platform_render_buffer_resize(render_buffer, new_width, new_height);
+  platform_render_buffer_resize(
+    render_buffer,
+    new_width,
+    new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: color_buffer_cleanup()
+ *
+ ******************************************************************************/
 void color_buffer_cleanup(
   struct color_buffer_t* color_buffer)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up color buffer\n");
+  fprintf(
+    stdout,
+    "Cleaning up color buffer\n");
 #endif
 }
 
+/*******************************************************************************
+ *
+ * Function: render_buffer_cleanup()
+ *
+ ******************************************************************************/
 void render_buffer_cleanup(
   struct render_buffer_t* render_buffer)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up render buffer\n");
+  fprintf(
+    stdout,
+    "Cleaning up render buffer\n");
 #endif
 }

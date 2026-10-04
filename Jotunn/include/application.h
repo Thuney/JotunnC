@@ -8,11 +8,11 @@
 #include "util.h"
 #include "window.h"
 
-/************************************************************
+/*******************************************************************************
  *
  * Struct Definitions
  *
- ************************************************************/
+ ******************************************************************************/
 struct application_t
 {
   //
@@ -31,11 +31,11 @@ struct application_t
     struct event_base_t* event);
 };
 
-/************************************************************
+/*******************************************************************************
  *
  * Interface Functions
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_init(
   struct application_t* app,
   const char* app_name,
@@ -56,8 +56,9 @@ void application_on_event(
   struct event_base_t* event);
 void application_bind_custom_events(
   struct application_t* app,
-  void (*custom_event_function)(struct application_t*,
-                                struct event_base_t*));
+  void (*custom_event_function)(
+    struct application_t*,
+    struct event_base_t*));
 
 uint8_t application_add_window(
   struct application_t* app,

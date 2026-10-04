@@ -1,5 +1,10 @@
 #include "vertexbuffer.h"
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_buffer_init()
+ *
+ ******************************************************************************/
 void platform_vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num)
@@ -7,12 +12,22 @@ void platform_vertex_buffer_init(
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_buffer_bind()
+ *
+ ******************************************************************************/
 void platform_vertex_buffer_bind(
   struct vertex_buffer_t* vertex_buffer)
 {
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_buffer_buffer_data()
+ *
+ ******************************************************************************/
 void platform_vertex_buffer_buffer_data(
   struct vertex_buffer_t* vertex_buffer,
   float* data,
@@ -22,6 +37,11 @@ void platform_vertex_buffer_buffer_data(
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_buffer_destroy()
+ *
+ ******************************************************************************/
 void platform_vertex_buffer_destroy(
   struct vertex_buffer_t* vertex_buffer,
   int num)
@@ -29,6 +49,11 @@ void platform_vertex_buffer_destroy(
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_element_buffer_init()
+ *
+ ******************************************************************************/
 void platform_element_buffer_init(
   struct element_buffer_t* element_buffer,
   int num)
@@ -36,12 +61,22 @@ void platform_element_buffer_init(
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_element_buffer_bind()
+ *
+ ******************************************************************************/
 void platform_element_buffer_bind(
   struct element_buffer_t* element_buffer)
 {
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_element_buffer_buffer_data()
+ *
+ ******************************************************************************/
 void platform_element_buffer_buffer_data(
   struct element_buffer_t* element_buffer,
   unsigned int* index_data,
@@ -51,6 +86,11 @@ void platform_element_buffer_buffer_data(
   return 0;
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_element_buffer_destroy()
+ *
+ ******************************************************************************/
 void platform_element_buffer_destroy(
   struct element_buffer_t* element_buffer,
   int num)

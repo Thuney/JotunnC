@@ -42,40 +42,73 @@ extern void platform_fragment_shader_destroy(
 extern void platform_shader_program_destroy(
   struct shader_program_t* shader_program);
 
+/*******************************************************************************
+ *
+ * Function: vertex_shader_init()
+ *
+ ******************************************************************************/
 int vertex_shader_init(
   struct vertex_shader_t* shader,
   const char* vertex_shader_src)
 {
-  return platform_vertex_shader_init(shader, vertex_shader_src);
+  return platform_vertex_shader_init(
+    shader,
+    vertex_shader_src);
 }
 
+/*******************************************************************************
+ *
+ * Function: fragment_shader_init()
+ *
+ ******************************************************************************/
 int fragment_shader_init(
   struct fragment_shader_t* shader,
   const char* fragment_shader_src)
 {
-  return platform_fragment_shader_init(shader, fragment_shader_src);
+  return platform_fragment_shader_init(
+    shader,
+    fragment_shader_src);
 }
 
+/*******************************************************************************
+ *
+ * Function: vertex_shader_init_filepath()
+ *
+ ******************************************************************************/
 int vertex_shader_init_filepath(
   struct vertex_shader_t* shader,
   const char* filepath)
 {
   char* file_contents = read_raw_file_contents(filepath);
-  int success = platform_vertex_shader_init(shader, file_contents);
+  int success = platform_vertex_shader_init(
+    shader,
+    file_contents);
   free(file_contents);
   return !success;
 }
 
+/*******************************************************************************
+ *
+ * Function: fragment_shader_init_filepath()
+ *
+ ******************************************************************************/
 int fragment_shader_init_filepath(
   struct fragment_shader_t* shader,
   const char* filepath)
 {
   char* file_contents = read_raw_file_contents(filepath);
-  int success = platform_fragment_shader_init(shader, file_contents);
+  int success = platform_fragment_shader_init(
+    shader,
+    file_contents);
   free(file_contents);
   return !success;
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_init_filepath()
+ *
+ ******************************************************************************/
 int shader_program_init_filepath(
   struct shader_program_t* shader_program,
   const char* vertex_shader_filepath,
@@ -86,30 +119,48 @@ int shader_program_init_filepath(
 
   int error;
 
-  error = vertex_shader_init_filepath(&vertex_shader, vertex_shader_filepath);
-  if (error)
+  error = vertex_shader_init_filepath(
+    &vertex_shader,
+    vertex_shader_filepath);
+  if (error) {
     fprintf(
       stdout,
       "Error occurred during vertex shader init - Filepath = %s\n",
       vertex_shader_filepath);
+  }
 
   error =
-    fragment_shader_init_filepath(&fragment_shader, fragment_shader_filepath);
-  if (error)
+    fragment_shader_init_filepath(
+      &fragment_shader,
+      fragment_shader_filepath);
+  if (error) {
     fprintf(
       stdout,
       "Error occurred during fragment shader init - Filepath = %s\n",
       fragment_shader_filepath);
+  }
 
-  error = shader_program_init(shader_program, &vertex_shader, &fragment_shader);
-  if (error)
-    fprintf(stdout, "Error occurred during shader program init\n");
+  error = shader_program_init(
+    shader_program,
+    &vertex_shader,
+    &fragment_shader);
+  if (error) {
+    fprintf(
+      stdout,
+      "Error occurred during shader program init\n");
+  }
 
-  shader_program_bind_fragment_data_location(shader_program, 0, "fColor");
+  shader_program_bind_fragment_data_location(
+    shader_program,
+    0,
+    "fColor");
 
   error = shader_program_link(shader_program);
-  if (error)
-    fprintf(stdout, "Error occurred during shader program linkage\n");
+  if (error) {
+    fprintf(
+      stdout,
+      "Error occurred during shader program linkage\n");
+  }
 
   vertex_shader_destroy(&vertex_shader);
   fragment_shader_destroy(&fragment_shader);
@@ -117,16 +168,28 @@ int shader_program_init_filepath(
   return error;
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_init()
+ *
+ ******************************************************************************/
 int shader_program_init(
   struct shader_program_t* shader_program,
   struct vertex_shader_t* vertex_shader,
   struct fragment_shader_t* fragment_shader)
 {
   int success = platform_shader_program_init(
-    shader_program, vertex_shader, fragment_shader);
+    shader_program,
+    vertex_shader,
+    fragment_shader);
   return !success;
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_link()
+ *
+ ******************************************************************************/
 int shader_program_link(
   struct shader_program_t* shader_program)
 {
@@ -134,36 +197,62 @@ int shader_program_link(
   return !success;
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_use()
+ *
+ ******************************************************************************/
 void shader_program_use(
   struct shader_program_t* shader_program)
 {
   platform_shader_program_use(shader_program);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_bind_fragment_data_location()
+ *
+ ******************************************************************************/
 void shader_program_bind_fragment_data_location(
   struct shader_program_t* shader_program,
   unsigned int buffer_index,
   const char* var_name)
 {
   platform_shader_program_bind_fragment_data_location(
-    shader_program, buffer_index, var_name);
+    shader_program,
+    buffer_index,
+    var_name);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_get_attribute_location()
+ *
+ ******************************************************************************/
 int shader_program_get_attribute_location(
   struct shader_program_t* shader_program,
   const char* attribute_name)
 {
   return platform_shader_program_get_attribute_location(
-    shader_program, attribute_name);
+    shader_program,
+    attribute_name);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_set_uniform_fmat4x4()
+ *
+ ******************************************************************************/
 void shader_program_set_uniform_fmat4x4(
   struct shader_program_t* shader_program,
   const char* uniform_name,
   const fmatrix_4x4* matrix)
 {
   platform_shader_program_set_uniform(
-    shader_program, uniform_name, (void*)matrix, SHADER_FMAT4x4);
+    shader_program,
+    uniform_name,
+    (void*)matrix,
+    SHADER_FMAT4x4);
 }
 
 /*******************************************************************************
@@ -183,36 +272,67 @@ void shader_program_set_uniform_fvec3(
     SHADER_FVEC3);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_set_uniform_float()
+ *
+ ******************************************************************************/
 void shader_program_set_uniform_float(
   struct shader_program_t* shader_program,
   const char* uniform_name,
   float val)
 {
   platform_shader_program_set_uniform(
-    shader_program, uniform_name, &val, SHADER_FLOAT);
+    shader_program,
+    uniform_name,
+    &val,
+    SHADER_FLOAT);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_set_uniform_int()
+ *
+ ******************************************************************************/
 void shader_program_set_uniform_int(
   struct shader_program_t* shader_program,
   const char* uniform_name,
   int val)
 {
   platform_shader_program_set_uniform(
-    shader_program, uniform_name, &val, SHADER_INT);
+    shader_program,
+    uniform_name,
+    &val,
+    SHADER_INT);
 }
 
+/*******************************************************************************
+ *
+ * Function: vertex_shader_destroy()
+ *
+ ******************************************************************************/
 void vertex_shader_destroy(
   struct vertex_shader_t* shader)
 {
   platform_vertex_shader_destroy(shader);
 }
 
+/*******************************************************************************
+ *
+ * Function: fragment_shader_destroy()
+ *
+ ******************************************************************************/
 void fragment_shader_destroy(
   struct fragment_shader_t* shader)
 {
   platform_fragment_shader_destroy(shader);
 }
 
+/*******************************************************************************
+ *
+ * Function: shader_program_destroy()
+ *
+ ******************************************************************************/
 void shader_program_destroy(
   struct shader_program_t* shader_program)
 {

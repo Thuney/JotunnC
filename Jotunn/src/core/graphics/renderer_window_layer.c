@@ -62,13 +62,24 @@ static struct vertex_attribute_t framebuffer_vertex_attributes[4] =
   }
 };
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_data_init()
+ *
+ ******************************************************************************/
 static void renderer_window_layer_data_init(
   struct renderer_window_layer_data_t *data,
   struct vertex_attribute_t *attributes)
 {
-  vertex_array_init(&(data->vao), 1);
-  vertex_buffer_init(&(data->vbo), 1);
-  element_buffer_init(&(data->ebo), 1);
+  vertex_array_init(
+    &(data->vao),
+    1);
+  vertex_buffer_init(
+    &(data->vbo),
+    1);
+  element_buffer_init(
+    &(data->ebo),
+    1);
 
   vertex_array_bind(&(data->vao));
   vertex_buffer_bind(&(data->vbo));
@@ -93,10 +104,17 @@ static void renderer_window_layer_data_init(
         &(data->framebuffer_shader),
         attribute_name);
 
-    vertex_array_set_attribute(&(data->vao), &attributes[attribute_index]);
+    vertex_array_set_attribute(
+      &(data->vao),
+      &attributes[attribute_index]);
   }
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_data_cleanup()
+ *
+ ******************************************************************************/
 static void renderer_window_layer_data_cleanup(
   struct renderer_window_layer_data_t *data)
 {
@@ -105,6 +123,11 @@ static void renderer_window_layer_data_cleanup(
 
 //
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_init()
+ *
+ ******************************************************************************/
 void renderer_window_layer_init(
   struct renderer_window_layer_t *renderer,
   struct window_t *parent_window,
@@ -126,7 +149,9 @@ void renderer_window_layer_init(
   renderer->base.renderer_end_scene   = &(renderer_window_layer_end_scene);
 
 #ifdef DEBUG
-  fprintf(stdout, "Initializing renderer_window_layer\n");
+  fprintf(
+    stdout,
+    "Initializing renderer_window_layer\n");
 #endif
 
   renderer_window_layer_data_init(
@@ -134,6 +159,11 @@ void renderer_window_layer_init(
     framebuffer_vertex_attributes);
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_cleanup()
+ *
+ ******************************************************************************/
 void renderer_window_layer_cleanup(
   struct renderer_window_layer_t *renderer)
 {
@@ -142,6 +172,11 @@ void renderer_window_layer_cleanup(
   renderer_window_layer_data_cleanup(&(renderer->render_data));
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_begin_scene()
+ *
+ ******************************************************************************/
 void renderer_window_layer_begin_scene(
   void *renderer)
 {
@@ -154,6 +189,11 @@ void renderer_window_layer_begin_scene(
   render_api_clear(&(renderer_window_layer->base.render_api));
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_end_scene()
+ *
+ ******************************************************************************/
 void renderer_window_layer_end_scene(
   void *renderer)
 {
@@ -165,6 +205,11 @@ void renderer_window_layer_end_scene(
   framebuffer_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: renderer_window_layer_draw_layer()
+ *
+ ******************************************************************************/
 void renderer_window_layer_draw_layer(
   struct renderer_window_layer_t *renderer,
   struct window_layer_t *window_layer,
@@ -180,7 +225,10 @@ void renderer_window_layer_draw_layer(
 
   // Fill vertex buffer
   element_buffer_buffer_data(
-    &(data->ebo), framebuffer_indices, sizeof(framebuffer_indices), STATIC_DRAW);
+    &(data->ebo),
+    framebuffer_indices,
+    sizeof(framebuffer_indices),
+    STATIC_DRAW);
   vertex_buffer_buffer_data(
     &(data->vbo),
     framebuffer_vertices,
@@ -189,9 +237,18 @@ void renderer_window_layer_draw_layer(
 
   shader_program_use(&(data->framebuffer_shader));
 
-  texture_2d_bind(&(window_layer->framebuffer->color_buffer.texture), 0);
+  texture_2d_bind(
+    &(window_layer->framebuffer->color_buffer.texture),
+    0);
 
-  shader_program_set_uniform_int(&(data->framebuffer_shader), "u_textures[0]", 0);
+  shader_program_set_uniform_int(
+    &(data->framebuffer_shader),
+    "u_textures[0]",
+    0);
 
-  render_api_draw_elements(DRAW_TYPE_TRIANGLES, 6, ELEMENT_UNSIGNED_INT, 0);
+  render_api_draw_elements(
+    DRAW_TYPE_TRIANGLES,
+    6,
+    ELEMENT_UNSIGNED_INT,
+    0);
 }

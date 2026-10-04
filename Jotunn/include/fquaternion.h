@@ -10,4 +10,5 @@ typedef union fquaternion_t
   } comp;
 } fquaternion;
 
-void fquaternion_init(fquaternion* quaternion);
+void fquaternion_init(
+  fquaternion* quaternion);

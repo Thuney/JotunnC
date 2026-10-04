@@ -34,40 +34,76 @@ static void gl_vertex_array_destroy(
 
 // -----------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_array_init()
+ *
+ ******************************************************************************/
 void platform_vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  gl_vertex_array_init(vertex_array, num);
+  gl_vertex_array_init(
+    vertex_array,
+    num);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_array_bind()
+ *
+ ******************************************************************************/
 void platform_vertex_array_bind(
   struct vertex_array_t* vertex_array)
 {
   gl_vertex_array_bind(vertex_array);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_array_unbind()
+ *
+ ******************************************************************************/
 void platform_vertex_array_unbind()
 {
   gl_vertex_array_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_array_set_attribute()
+ *
+ ******************************************************************************/
 void platform_vertex_array_set_attribute(
   struct vertex_array_t* vertex_array,
   struct vertex_attribute_t* vertex_attribute)
 {
-  gl_vertex_array_set_attribute(vertex_array, vertex_attribute);
+  gl_vertex_array_set_attribute(
+    vertex_array,
+    vertex_attribute);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_vertex_array_destroy()
+ *
+ ******************************************************************************/
 void platform_vertex_array_destroy(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  gl_vertex_array_destroy(vertex_array, num);
+  gl_vertex_array_destroy(
+    vertex_array,
+    num);
 }
 
 // -----------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: gl_error_check()
+ *
+ ******************************************************************************/
 static void gl_error_check(
   const char* success_string,
   const char* error_string,
@@ -78,27 +114,40 @@ static void gl_error_check(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, error_string);
+  va_start(
+    args,
+    error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
-    vprintf(success_string, args);
+  if (_gl_error == GL_NO_ERROR) {
+    vprintf(
+      success_string,
+      args);
   }
-  else
-  {
-    vprintf(error_string, args);
-    printf("--> Error Code: %d\n", _gl_error);
+  else {
+    vprintf(
+      error_string,
+      args);
+    printf(
+      "--> Error Code: %d\n",
+      _gl_error);
   }
 
   va_end(args);
 #endif
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_vertex_array_init()
+ *
+ ******************************************************************************/
 static void gl_vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  glGenVertexArrays(num, &(vertex_array->vertex_array));
+  glGenVertexArrays(
+    num,
+    &(vertex_array->vertex_array));
 
   // gl_error_check(
   //   "Vertex Array initialized with ID %d\n",
@@ -106,6 +155,11 @@ static void gl_vertex_array_init(
   //   vertex_array->vertex_array);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_vertex_array_bind()
+ *
+ ******************************************************************************/
 static void gl_vertex_array_bind(
   struct vertex_array_t* vertex_array)
 {
@@ -121,11 +175,21 @@ static void gl_vertex_array_bind(
   //   vertex_array->vertex_array);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_vertex_array_unbind()
+ *
+ ******************************************************************************/
 void gl_vertex_array_unbind()
 {
   glBindVertexArray(0);
 }
 
+/*******************************************************************************
+ *
+ * Function: get_gl_attribute_data_type()
+ *
+ ******************************************************************************/
 static GLenum get_gl_attribute_data_type(
   enum vertex_attribute_data_type_t data_type)
 {
@@ -171,6 +235,11 @@ static GLenum get_gl_attribute_data_type(
   return gl_data_type;
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_vertex_array_set_attribute()
+ *
+ ******************************************************************************/
 static void gl_vertex_array_set_attribute(
   struct vertex_array_t* vertex_array,
   struct vertex_attribute_t* vertex_attribute)
@@ -199,9 +268,16 @@ static void gl_vertex_array_set_attribute(
   //   vertex_array->vertex_array);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_vertex_array_destroy()
+ *
+ ******************************************************************************/
 static void gl_vertex_array_destroy(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  glDeleteVertexArrays(num, &vertex_array->vertex_array);
+  glDeleteVertexArrays(
+    num,
+    &vertex_array->vertex_array);
 }

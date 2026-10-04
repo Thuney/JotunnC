@@ -13,7 +13,7 @@ static const unsigned int max_spheres = 250;
 static const unsigned int max_textured_cubes = 500;
 static const unsigned int max_lines = 10000;
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_calculate_normal_matrix()
  *
@@ -50,16 +50,20 @@ static fmatrix_3x3 renderer_3d_calculate_normal_matrix(
       {-cofactors[1][0], -cofactors[1][1], -cofactors[1][2]},
       {-cofactors[2][0], -cofactors[2][1], -cofactors[2][2]}};
 
-    fmatrix_3x3_set(&normal_matrix, negated_cofactors);
+    fmatrix_3x3_set(
+      &normal_matrix,
+      negated_cofactors);
   }
   else {
-    fmatrix_3x3_set(&normal_matrix, cofactors);
+    fmatrix_3x3_set(
+      &normal_matrix,
+      cofactors);
   }
 
   return normal_matrix;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_transform_normal()
  *
@@ -80,7 +84,7 @@ static fvector3 renderer_3d_transform_normal(
   return resultant;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_set_camera_uniforms()
  *
@@ -103,7 +107,7 @@ static void renderer_3d_set_camera_uniforms(
     &(renderer->base.camera->projection_matrix));
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_set_light_uniforms()
  *
@@ -128,7 +132,7 @@ static void renderer_3d_set_light_uniforms(
     light->ambient_strength);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_flush_shaded()
  *
@@ -168,7 +172,7 @@ static void renderer_3d_flush_shaded(
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_flush()
  *
@@ -178,9 +182,15 @@ static void renderer_3d_flush(
 {
   struct renderer_3d_data_t* data = &(renderer->render_data);
 
-  renderer_3d_flush_shaded(renderer, &(data->cube_data));
-  renderer_3d_flush_shaded(renderer, &(data->pyramid_data));
-  renderer_3d_flush_shaded(renderer, &(data->sphere_data));
+  renderer_3d_flush_shaded(
+    renderer,
+    &(data->cube_data));
+  renderer_3d_flush_shaded(
+    renderer,
+    &(data->pyramid_data));
+  renderer_3d_flush_shaded(
+    renderer,
+    &(data->sphere_data));
 
   if (data->textured_cube_data.index_count) {
     const unsigned int textured_data_size =
@@ -199,16 +209,25 @@ static void renderer_3d_flush(
     shader_program_use(&(data->textured_shader));
 
     for (unsigned int i = 0; i < data->textures_index; i++) {
-      texture_2d_bind(data->textures[i], i);
+      texture_2d_bind(
+        data->textures[i],
+        i);
     }
 
-    renderer_3d_set_camera_uniforms(renderer, &(data->textured_shader));
-    renderer_3d_set_light_uniforms(renderer, &(data->textured_shader));
+    renderer_3d_set_camera_uniforms(
+      renderer,
+      &(data->textured_shader));
+    renderer_3d_set_light_uniforms(
+      renderer,
+      &(data->textured_shader));
 
     char texture_uniform_name_buf[16];
 
     for (unsigned int i = 0; i < _RENDERER_3D_MAX_TEXTURES; i++) {
-      sprintf(texture_uniform_name_buf, "u_textures[%u]", i);
+      sprintf(
+        texture_uniform_name_buf,
+        "u_textures[%u]",
+        i);
       shader_program_set_uniform_int(
         &(data->textured_shader),
         texture_uniform_name_buf,
@@ -237,14 +256,16 @@ static void renderer_3d_flush(
 
     shader_program_use(&(data->line_shader));
 
-    renderer_3d_set_camera_uniforms(renderer, &(data->line_shader));
+    renderer_3d_set_camera_uniforms(
+      renderer,
+      &(data->line_shader));
 
     render_api_set_line_width(data->line_width);
     render_api_draw_lines(data->line_data.line_vertex_count);
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_start_batch()
  *
@@ -273,7 +294,7 @@ static void renderer_3d_start_batch(
   data->textures_index = 0;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_next_batch()
  *
@@ -285,7 +306,7 @@ static void renderer_3d_next_batch(
   renderer_3d_start_batch(renderer);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_data_init()
  *
@@ -301,7 +322,9 @@ static void renderer_3d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/shaded_3d_shader.frag"));
 #ifdef DEBUG
   if (error) {
-    fprintf(stdout, "Error during shaded 3D shader init\n");
+    fprintf(
+      stdout,
+      "Error during shaded 3D shader init\n");
   }
 #endif
   error = shader_program_init_filepath(
@@ -310,7 +333,9 @@ static void renderer_3d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/textured_3d_shader.frag"));
 #ifdef DEBUG
   if (error) {
-    fprintf(stdout, "Error during textured 3D shader init\n");
+    fprintf(
+      stdout,
+      "Error during textured 3D shader init\n");
   }
 #endif
   error = shader_program_init_filepath(
@@ -319,7 +344,9 @@ static void renderer_3d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/line_3d_shader.frag"));
 #ifdef DEBUG
   if (error) {
-    fprintf(stdout, "Error during line 3D shader init\n");
+    fprintf(
+      stdout,
+      "Error during line 3D shader init\n");
   }
 #endif
 
@@ -355,8 +382,16 @@ static void renderer_3d_data_init(
     &(data->line_shader));
 
   // Default light - white, shining down and away from the default camera
-  fvector3_set(&(data->light.direction), -0.4f, -1.0f, -0.6f);
-  fvector3_set(&(data->light.color), 1.0f, 1.0f, 1.0f);
+  fvector3_set(
+    &(data->light.direction),
+    -0.4f,
+    -1.0f,
+    -0.6f);
+  fvector3_set(
+    &(data->light.color),
+    1.0f,
+    1.0f,
+    1.0f);
   data->light.ambient_strength = 0.25f;
 
   data->line_width = 1.0f;
@@ -364,7 +399,7 @@ static void renderer_3d_data_init(
   data->textures_index = 0;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_data_cleanup()
  *
@@ -385,7 +420,7 @@ static void renderer_3d_data_cleanup(
   data->line_width = -1.0f;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_push_shaded_mesh()
  *
@@ -410,9 +445,13 @@ static void renderer_3d_push_shaded_mesh(
 
   for (unsigned int v = 0; v < mesh->num_vertices; v++) {
     shaded_data->vertex_data_ptr->position =
-      fmatrix_4x4_transform_point(transform, mesh->positions[v]);
+      fmatrix_4x4_transform_point(
+        transform,
+        mesh->positions[v]);
     shaded_data->vertex_data_ptr->normal =
-      renderer_3d_transform_normal(&normal_matrix, mesh->normals[v]);
+      renderer_3d_transform_normal(
+        &normal_matrix,
+        mesh->normals[v]);
     shaded_data->vertex_data_ptr->color = color;
 
     shaded_data->vertex_data_ptr++;
@@ -421,7 +460,7 @@ static void renderer_3d_push_shaded_mesh(
   shaded_data->index_count += mesh->num_indices;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_init()
  *
@@ -445,13 +484,15 @@ void renderer_3d_init(
   renderer->base.renderer_end_scene = &renderer_3d_end_scene;
 
 #ifdef DEBUG
-  fprintf(stdout, "Initializing renderer_3d\n");
+  fprintf(
+    stdout,
+    "Initializing renderer_3d\n");
 #endif
 
   renderer_3d_data_init(&(renderer->render_data));
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_cleanup()
  *
@@ -469,7 +510,7 @@ void renderer_3d_cleanup(
   renderer_base_cleanup(&(renderer->base));
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_begin_scene()
  *
@@ -482,7 +523,7 @@ void renderer_3d_begin_scene(
   renderer_3d_start_batch(renderer_3d);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_end_scene()
  *
@@ -499,7 +540,7 @@ void renderer_3d_end_scene(
   framebuffer_unbind();
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_cube()
  *
@@ -516,7 +557,7 @@ void renderer_3d_draw_cube(
     color);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_unfilled_cube()
  *
@@ -532,13 +573,17 @@ void renderer_3d_draw_unfilled_cube(
   for (unsigned int i = 0; i < num_edge_points; i += 2) {
     renderer_3d_draw_line(
       renderer,
-      fmatrix_4x4_transform_point(transform, cube_3d_edge_data[i]),
-      fmatrix_4x4_transform_point(transform, cube_3d_edge_data[i + 1]),
+      fmatrix_4x4_transform_point(
+        transform,
+        cube_3d_edge_data[i]),
+      fmatrix_4x4_transform_point(
+        transform,
+        cube_3d_edge_data[i + 1]),
       color);
   }
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_textured_cube()
  *
@@ -586,9 +631,13 @@ void renderer_3d_draw_textured_cube(
 
   for (unsigned int v = 0; v < mesh->num_vertices; v++) {
     textured_data->vertex_data_ptr->position =
-      fmatrix_4x4_transform_point(transform, mesh->positions[v]);
+      fmatrix_4x4_transform_point(
+        transform,
+        mesh->positions[v]);
     textured_data->vertex_data_ptr->normal =
-      renderer_3d_transform_normal(&normal_matrix, mesh->normals[v]);
+      renderer_3d_transform_normal(
+        &normal_matrix,
+        mesh->normals[v]);
     textured_data->vertex_data_ptr->texture_coordinate =
       mesh->texture_coordinates[v];
     textured_data->vertex_data_ptr->texture_index = texture_index;
@@ -600,7 +649,7 @@ void renderer_3d_draw_textured_cube(
   textured_data->index_count += mesh->num_indices;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_pyramid()
  *
@@ -617,7 +666,7 @@ void renderer_3d_draw_pyramid(
     color);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_sphere()
  *
@@ -634,7 +683,7 @@ void renderer_3d_draw_sphere(
     color);
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_draw_line()
  *
@@ -665,7 +714,7 @@ void renderer_3d_draw_line(
   line_data->line_vertex_count += 2;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_set_line_width()
  *
@@ -677,7 +726,7 @@ void renderer_3d_set_line_width(
   renderer->render_data.line_width = line_width;
 }
 
-/******************************************************************************
+/*******************************************************************************
  *
  * Function: renderer_3d_set_light()
  *
@@ -690,7 +739,11 @@ void renderer_3d_set_light(
 {
   struct renderer_3d_light_t* light = &(renderer->render_data.light);
 
-  fvector3_setv(&(light->direction), direction);
-  fvector3_setv(&(light->color), color);
+  fvector3_setv(
+    &(light->direction),
+    direction);
+  fvector3_setv(
+    &(light->color),
+    color);
   light->ambient_strength = ambient_strength;
 }

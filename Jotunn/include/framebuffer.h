@@ -46,10 +46,12 @@ void framebuffer_attach_render_buffer(
   struct framebuffer_t* frame_buffer,
   struct render_buffer_t* render_buffer);
 
-void framebuffer_bind(struct framebuffer_t* frame_buffer);
+void framebuffer_bind(
+  struct framebuffer_t* frame_buffer);
 void framebuffer_unbind();
 
-void framebuffer_cleanup(struct framebuffer_t* frame_buffer);
+void framebuffer_cleanup(
+  struct framebuffer_t* frame_buffer);
 
 //
 
@@ -76,5 +78,7 @@ void render_buffer_resize(
   unsigned int new_width,
   unsigned int new_height);
 
-void color_buffer_cleanup(struct color_buffer_t* color_buffer);
-void render_buffer_cleanup(struct render_buffer_t* render_buffer);
+void color_buffer_cleanup(
+  struct color_buffer_t* color_buffer);
+void render_buffer_cleanup(
+  struct render_buffer_t* render_buffer);

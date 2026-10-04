@@ -56,89 +56,170 @@ static void gl_render_buffer_resize(
 
 // -----------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_init()
+ *
+ ******************************************************************************/
 void platform_framebuffer_init(
   struct framebuffer_t* frame_buffer)
 {
   gl_framebuffer_init(frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_cleanup()
+ *
+ ******************************************************************************/
 void platform_framebuffer_cleanup(
   struct framebuffer_t* frame_buffer)
 {
   gl_framebuffer_cleanup(frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_bind()
+ *
+ ******************************************************************************/
 void platform_framebuffer_bind(
   struct framebuffer_t* frame_buffer)
 {
   gl_framebuffer_bind(frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_unbind()
+ *
+ ******************************************************************************/
 void platform_framebuffer_unbind()
 {
   gl_framebuffer_unbind();
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_attach_color_buffer()
+ *
+ ******************************************************************************/
 void platform_framebuffer_attach_color_buffer(
   struct framebuffer_t* frame_buffer,
   struct color_buffer_t* color_buffer)
 {
-  gl_framebuffer_attach_color_buffer(frame_buffer, color_buffer);
+  gl_framebuffer_attach_color_buffer(
+    frame_buffer,
+    color_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_framebuffer_attach_render_buffer()
+ *
+ ******************************************************************************/
 void platform_framebuffer_attach_render_buffer(
   struct framebuffer_t* frame_buffer,
   struct render_buffer_t* render_buffer)
 {
-  gl_framebuffer_attach_render_buffer(frame_buffer, render_buffer);
+  gl_framebuffer_attach_render_buffer(
+    frame_buffer,
+    render_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_color_buffer_init()
+ *
+ ******************************************************************************/
 void platform_color_buffer_init(
   struct color_buffer_t* color_buffer,
   unsigned int width,
   unsigned int height)
 {
-  gl_color_buffer_init(color_buffer, width, height);
+  gl_color_buffer_init(
+    color_buffer,
+    width,
+    height);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_buffer_init()
+ *
+ ******************************************************************************/
 void platform_render_buffer_init(
   struct render_buffer_t* render_buffer,
   unsigned int width,
   unsigned int height)
 {
-  gl_render_buffer_init(render_buffer, width, height);
+  gl_render_buffer_init(
+    render_buffer,
+    width,
+    height);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_color_buffer_bind()
+ *
+ ******************************************************************************/
 void platform_color_buffer_bind(
   struct color_buffer_t* color_buffer)
 {
   gl_color_buffer_bind(color_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_buffer_bind()
+ *
+ ******************************************************************************/
 void platform_render_buffer_bind(
   struct render_buffer_t* render_buffer)
 {
   gl_render_buffer_bind(render_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_color_buffer_resize()
+ *
+ ******************************************************************************/
 void platform_color_buffer_resize(
   struct color_buffer_t* color_buffer,
   unsigned int new_width,
   unsigned int new_height)
 {
-  gl_color_buffer_resize(color_buffer, new_width, new_height);
+  gl_color_buffer_resize(
+    color_buffer,
+    new_width,
+    new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: platform_render_buffer_resize()
+ *
+ ******************************************************************************/
 void platform_render_buffer_resize(
   struct render_buffer_t* render_buffer,
   unsigned int new_width,
   unsigned int new_height)
 {
-  gl_render_buffer_resize(render_buffer, new_width, new_height);
+  gl_render_buffer_resize(
+    render_buffer,
+    new_width,
+    new_height);
 }
 
 // -----------------------------------------------------------------------------
 
+/*******************************************************************************
+ *
+ * Function: gl_error_check()
+ *
+ ******************************************************************************/
 static void gl_error_check(
   const char* success_string,
   const char* error_string,
@@ -149,26 +230,39 @@ static void gl_error_check(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, error_string);
+  va_start(
+    args,
+    error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
-    vprintf(success_string, args);
+  if (_gl_error == GL_NO_ERROR) {
+    vprintf(
+      success_string,
+      args);
   }
-  else
-  {
-    vprintf(error_string, args);
-    printf("--> Error Code: %d\n", _gl_error);
+  else {
+    vprintf(
+      error_string,
+      args);
+    printf(
+      "--> Error Code: %d\n",
+      _gl_error);
   }
 
   va_end(args);
 #endif
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_init()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_init(
   struct framebuffer_t* frame_buffer)
 {
-  glGenFramebuffers(1, &(frame_buffer->frame_buffer));
+  glGenFramebuffers(
+    1,
+    &(frame_buffer->frame_buffer));
 
   // gl_error_check(
   //   "Frame buffer initialized with ID %d\n",
@@ -176,13 +270,27 @@ static void gl_framebuffer_init(
   //   frame_buffer->frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_cleanup()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_cleanup(
   struct framebuffer_t* frame_buffer)
 {
-  glDeleteRenderbuffers(1, &(frame_buffer->depth_stencil_buffer.rbo));
-  glDeleteFramebuffers(1, &(frame_buffer->frame_buffer));
+  glDeleteRenderbuffers(
+    1,
+    &(frame_buffer->depth_stencil_buffer.rbo));
+  glDeleteFramebuffers(
+    1,
+    &(frame_buffer->frame_buffer));
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_bind()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_bind(
   struct framebuffer_t* frame_buffer)
 {
@@ -190,7 +298,9 @@ static void gl_framebuffer_bind(
   //   "No error before frame buffer bind\n",
   //   "Error occurred prior to frame buffer bind\n");
 
-  glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer->frame_buffer);
+  glBindFramebuffer(
+    GL_FRAMEBUFFER,
+    frame_buffer->frame_buffer);
 
   // gl_error_check(
   //   "Successfully bound frame buffer %d\n",
@@ -198,12 +308,24 @@ static void gl_framebuffer_bind(
   //   frame_buffer->frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_unbind()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_unbind()
 {
   // Binds back to what should be the default framebuffer (the framebuffer of the first window spawned)
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(
+    GL_FRAMEBUFFER,
+    0);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_attach_color_buffer()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_attach_color_buffer(
   struct framebuffer_t* frame_buffer,
   struct color_buffer_t* color_buffer)
@@ -222,6 +344,11 @@ static void gl_framebuffer_attach_color_buffer(
   //   frame_buffer->frame_buffer);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_framebuffer_attach_render_buffer()
+ *
+ ******************************************************************************/
 static void gl_framebuffer_attach_render_buffer(
   struct framebuffer_t* frame_buffer,
   struct render_buffer_t* render_buffer)
@@ -240,6 +367,12 @@ static void gl_framebuffer_attach_render_buffer(
 }
 
 // Component Buffers
+
+/*******************************************************************************
+ *
+ * Function: gl_color_buffer_init()
+ *
+ ******************************************************************************/
 static void gl_color_buffer_init(
   struct color_buffer_t* color_buffer,
   unsigned int width,
@@ -254,12 +387,19 @@ static void gl_color_buffer_init(
     false);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_render_buffer_init()
+ *
+ ******************************************************************************/
 static void gl_render_buffer_init(
   struct render_buffer_t* render_buffer,
   unsigned int width,
   unsigned int height)
 {
-  glGenRenderbuffers(1, &(render_buffer->rbo));
+  glGenRenderbuffers(
+    1,
+    &(render_buffer->rbo));
 
   gl_render_buffer_bind(render_buffer);
 
@@ -271,6 +411,11 @@ static void gl_render_buffer_init(
     height);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_color_buffer_bind()
+ *
+ ******************************************************************************/
 static void gl_color_buffer_bind(
   struct color_buffer_t* color_buffer)
 {
@@ -279,12 +424,24 @@ static void gl_color_buffer_bind(
     0);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_render_buffer_bind()
+ *
+ ******************************************************************************/
 static void gl_render_buffer_bind(
   struct render_buffer_t* render_buffer)
 {
-  glBindRenderbuffer(GL_RENDERBUFFER, render_buffer->rbo);
+  glBindRenderbuffer(
+    GL_RENDERBUFFER,
+    render_buffer->rbo);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_color_buffer_resize()
+ *
+ ******************************************************************************/
 static void gl_color_buffer_resize(
   struct color_buffer_t* color_buffer,
   unsigned int new_width,
@@ -298,6 +455,11 @@ static void gl_color_buffer_resize(
     new_height);
 }
 
+/*******************************************************************************
+ *
+ * Function: gl_render_buffer_resize()
+ *
+ ******************************************************************************/
 static void gl_render_buffer_resize(
   struct render_buffer_t* render_buffer,
   unsigned int new_width,
