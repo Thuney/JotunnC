@@ -1,8 +1,9 @@
 #include "demo_3d_window.h"
 
+#include "testapp_paths.h"
+
 #include <math.h>
 #include <stdio.h>
-#include <stdlib.h>
 
 #define DEMO_3D_PI 3.14159265f
 
@@ -117,21 +118,14 @@ static void demo_3d_update_camera(
  ******************************************************************************/
 static void demo_3d_load_texture(
   struct texture_2d_t* texture,
-  const char* relative_path)
+  const char* texture_path)
 {
-  char* texture_path = realpath(relative_path, NULL);
+  texture_2d_create_from_file_path(texture, texture_path, 1);
 
-  if (texture_path != NULL) {
-    printf("3D demo texture path resolved to: '%s'\n", texture_path);
-
-    texture_2d_create_from_file_path(texture, texture_path, 1);
-
-    free(texture_path);
-  }
-  else {
+  if (!texture->is_loaded) {
     printf(
-      "3D demo texture '%s' not found; using a plain cube\n",
-      relative_path);
+      "3D demo texture '%s' failed to load; using a plain cube\n",
+      texture_path);
   }
 }
 
@@ -329,7 +323,7 @@ uint8_t demo_3d_window_init(
     // GL objects aren't shared between windows, so load our own copy
     demo_3d_load_texture(
       &(demo_window->cube_texture),
-      "../../res/textures/lenna.png");
+      PATH_FROM_TESTAPP_ROOT("/res/textures/lenna.png"));
 
     demo_window->elapsed_seconds = 0.0f;
 
@@ -425,10 +419,9 @@ void demo_3d_window_on_event(
   struct demo_3d_window_t* demo_window = (struct demo_3d_window_t*)window;
   struct demo_3d_orbit_t* orbit = &(demo_window->orbit);
 
-  // Mouse button / scroll events don't say which window they came from, so
-  //  only react to them while this window has focus
-  const uint8_t is_focused =
-    (window->metadata.parent_application->current_window == window);
+  // The application forwards every window's events to every window, so
+  //  input events are checked against this window's handle
+  const void* this_window_handle = window->context_data.window_handle;
 
   switch (event->event_type)
   {
@@ -452,7 +445,6 @@ void demo_3d_window_on_event(
       const struct event_mouse_moved_t* mouse_moved_event =
         (struct event_mouse_moved_t*)event;
 
-      const void* this_window_handle = window->context_data.window_handle;
       const uint8_t is_this_window =
         (mouse_moved_event->window_handle == this_window_handle);
 
@@ -481,10 +473,14 @@ void demo_3d_window_on_event(
       const struct event_mouse_button_t* mouse_button_event =
         (struct event_mouse_button_t*)event;
 
-      // Left button - pressed (1) starts a drag, released (0) always ends it
+      const uint8_t is_this_window =
+        (mouse_button_event->window_handle == this_window_handle);
+
+      // Left button - pressed (1) in this window starts a drag, released (0)
+      //  anywhere ends it
       if (mouse_button_event->button == 0) {
         if (mouse_button_event->action == 1) {
-          orbit->dragging = is_focused;
+          orbit->dragging = is_this_window;
         }
         else if (mouse_button_event->action == 0) {
           orbit->dragging = 0U;
@@ -498,7 +494,10 @@ void demo_3d_window_on_event(
       const struct event_mouse_scrolled_t* mouse_scrolled_event =
         (struct event_mouse_scrolled_t*)event;
 
-      if (is_focused) {
+      const uint8_t is_this_window =
+        (mouse_scrolled_event->window_handle == this_window_handle);
+
+      if (is_this_window) {
         orbit->distance = fminf(
           fmaxf(
             orbit->distance * (1.0f - (0.1f * mouse_scrolled_event->y_offset)),

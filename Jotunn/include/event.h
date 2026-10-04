@@ -116,6 +116,7 @@ struct event_app_tick_t
 struct event_mouse_button_t
 {
   struct event_base_t base;
+  void* window_handle;
   int button, action, mods;
 };
 
@@ -129,5 +130,6 @@ struct event_mouse_moved_t
 struct event_mouse_scrolled_t
 {
   struct event_base_t base;
+  void* window_handle;
   float x_offset, y_offset;
 };

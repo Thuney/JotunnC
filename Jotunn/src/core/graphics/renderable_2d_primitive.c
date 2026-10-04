@@ -411,7 +411,7 @@ void renderable_2d_textured_quad_data_init(
   vertex_buffer_buffer_data(
     &textured_quad_data->vbo,
     (float*)textured_quad_data->vertex_data_base,
-    max_vertices * sizeof(struct renderable_2d_textured_quad_data_t),
+    max_vertices * sizeof(struct renderable_2d_textured_quad_vertex_t),
     DYNAMIC_DRAW);
 
   vertex_array_unbind();
@@ -503,6 +503,9 @@ void renderable_2d_line_data_init(
     _LINE_2D_ATTRIBUTE_NUM,
     shader_program);
 
+  line_data->line_vertex_count = 0;
+  line_data->max_line_vertex_count = max_vertices;
+
   line_data->vertex_data_base = (struct renderable_2d_line_vertex_t*)calloc(
     max_vertices, sizeof(struct renderable_2d_line_vertex_t));
   line_data->vertex_data_ptr = line_data->vertex_data_base;
@@ -551,6 +554,7 @@ void renderable_2d_circle_data_cleanup(
 {
   vertex_array_destroy(&circle_data->vao, 1);
   vertex_buffer_destroy(&circle_data->vbo, 1);
+  element_buffer_destroy(&circle_data->ebo, 1);
 
   free(circle_data->vertex_data_base);
 }

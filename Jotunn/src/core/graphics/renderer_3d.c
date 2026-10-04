@@ -459,6 +459,9 @@ void renderer_3d_init(
 void renderer_3d_cleanup(
   struct renderer_3d_t* renderer)
 {
+  // Our GL objects belong to the parent window's context
+  window_set_context(renderer->base.parent_window);
+
   vertex_array_unbind();
 
   renderer_3d_data_cleanup(&(renderer->render_data));

@@ -144,6 +144,7 @@ struct renderable_2d_line_data_t
   struct vertex_buffer_t vbo;
   //
   unsigned int line_vertex_count;
+  unsigned int max_line_vertex_count;
   // Data pointers
   struct renderable_2d_line_vertex_t* vertex_data_base;
   struct renderable_2d_line_vertex_t* vertex_data_ptr;

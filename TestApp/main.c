@@ -7,6 +7,7 @@
 #include "demo_3d_window.h"
 #include "fvector.h"
 #include "renderer_2d.h"
+#include "testapp_paths.h"
 #include "window_layer.h"
 
 #include "texture.h"
@@ -274,32 +275,14 @@ uint8_t init_window1(
       "/usr/share/fonts/noto/NotoSerif-Regular.ttf",
       18);
 
-    char *aaron_shakespeare_texture_path =
-      realpath("../../res/textures/AaronShakespeare.png", NULL);
-
-    printf("aaron_shakespeare image path resolved to: '%s'\n", aaron_shakespeare_texture_path);
-
-    char *lenna_texture_path =
-      realpath("../../res/textures/lenna.png", NULL);
-
-    printf("lenna image path resolved to: '%s'\n", lenna_texture_path);
-
     texture_2d_create_from_file_path(
       &aaron_shakespeare_texture,
-      aaron_shakespeare_texture_path,
+      PATH_FROM_TESTAPP_ROOT("/res/textures/AaronShakespeare.png"),
       1);
     texture_2d_create_from_file_path(
       &lenna_texture,
-      lenna_texture_path,
+      PATH_FROM_TESTAPP_ROOT("/res/textures/lenna.png"),
       1);
-
-    if (aaron_shakespeare_texture_path != NULL) {
-      free(aaron_shakespeare_texture_path);
-    }
-
-    if (lenna_texture_path != NULL) {
-      free(lenna_texture_path);
-    }
 
     window_set_context(window1);
 
@@ -475,19 +458,22 @@ int main(
 
     application_stop(app_ptr);
 
+    // Each window's GL objects belong to that window's context
+    window_set_context(window1_ptr);
+
     renderer_2d_cleanup(&(window1_renderer_2d));
-    renderer_2d_cleanup(&(window2_renderer_2d));
-
-    demo_3d_window_cleanup(&(demo_3d_window));
-
     framebuffer_cleanup(&(window1_framebuffer));
-    framebuffer_cleanup(&(window2_framebuffer));
-
     texture_2d_cleanup(&aaron_shakespeare_texture);
     texture_2d_cleanup(&lenna_texture);
-
     typeface_cleanup(&(window1_typeface));
+
+    window_set_context(window2_ptr);
+
+    renderer_2d_cleanup(&(window2_renderer_2d));
+    framebuffer_cleanup(&(window2_framebuffer));
     typeface_cleanup(&(window2_typeface));
+
+    demo_3d_window_cleanup(&(demo_3d_window));
 
     application_cleanup(app_ptr);
   }

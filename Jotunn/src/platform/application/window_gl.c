@@ -216,7 +216,7 @@ static void gl_window_close_callback(
   struct event_window_close_t window_close_event =
     (struct event_window_close_t){
       .base =
-        (struct event_base_t){.event_type = EVENT_MOUSE_SCROLLED, .handled = 0},
+        (struct event_base_t){.event_type = EVENT_WINDOW_CLOSE, .handled = 0},
       .window_handle = (void*)window};
 
   metadata->function_event_notify(
@@ -272,6 +272,7 @@ static void gl_window_mouse_button_callback(
     (struct event_mouse_button_t){
       .base =
         (struct event_base_t){.event_type = EVENT_MOUSE_BUTTON, .handled = 0},
+      .window_handle = (void*)window,
       .button = button,
       .action = action,
       .mods = mods};
@@ -296,6 +297,7 @@ static void gl_window_scroll_callback(
     (struct event_mouse_scrolled_t){
       .base =
         (struct event_base_t){.event_type = EVENT_MOUSE_SCROLLED, .handled = 0},
+      .window_handle = (void*)window,
       .x_offset = (float)x_offset,
       .y_offset = (float)y_offset};
 

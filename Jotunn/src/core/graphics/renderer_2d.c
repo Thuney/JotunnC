@@ -369,9 +369,14 @@ void renderer_2d_cleanup(
   //      fprintf(stdout, "Cleaning up renderer 2D\n");
   // #endif
 
+  // Our GL objects belong to the parent window's context
+  window_set_context(renderer->base.parent_window);
+
   vertex_array_unbind();
 
   renderer_2d_data_cleanup(&renderer->render_data);
+
+  renderer_base_cleanup(&renderer->base);
 }
 
 void renderer_2d_begin_scene(
@@ -509,7 +514,7 @@ void renderer_2d_draw_textured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->quad_data.quad_index_count >= max_indices)
+  if (data->textured_quad_data.textured_quad_index_count >= max_indices)
     renderer_2d_next_batch(renderer);
 
   float texture_index = -1.0f;
@@ -572,7 +577,7 @@ void renderer_2d_draw_subtextured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->quad_data.quad_index_count >= max_indices)
+  if (data->textured_quad_data.textured_quad_index_count >= max_indices)
     renderer_2d_next_batch(renderer);
 
   float texture_index = -1.0f;
@@ -657,6 +662,12 @@ void renderer_2d_draw_line(
   // #endif
 
   struct renderer_2d_data_t *data = &renderer->render_data;
+
+  if ((data->line_data.line_vertex_count + 2) >
+      data->line_data.max_line_vertex_count)
+  {
+    renderer_2d_next_batch(renderer);
+  }
 
   data->line_data.vertex_data_ptr->position = pos_1;
   data->line_data.vertex_data_ptr->color = color;
@@ -762,5 +773,6 @@ void renderer_2d_set_line_width(
   struct renderer_2d_t *renderer,
   const float line_width)
 {
-  render_api_set_line_width(line_width);
+  // Applied when the line batch is flushed
+  renderer->render_data.line_width = line_width;
 }

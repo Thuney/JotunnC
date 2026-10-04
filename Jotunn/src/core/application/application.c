@@ -36,7 +36,7 @@ uint8_t application_init(
   memset(app, 0, sizeof(struct application_t));
 
   const int name_length = strlen(app_name);
-  app->name = (char*)malloc(name_length * sizeof(char));
+  app->name = (char*)malloc((name_length + 1) * sizeof(char));
   strcpy(app->name, app_name);
 
   app->max_windows = max_windows;

@@ -1,5 +1,5 @@
 C      := -gcc
-CFLAGS := -pedantic-errors -Wall -Wextra -g
+CFLAGS := -pedantic-errors -Wall -Wextra -g -DTESTAPP_ROOT_PATH=\"$(CURDIR)\"
 
 RPATH_LINKAGE := -Wl,-rpath,$(CURDIR)/../Jotunn/.build/lib/
 
@@ -15,6 +15,7 @@ INCLUDE  := -I$(CURDIR)/../Jotunn/include/ $(FREETYPE2_INCLUDE)
 
 HDRS     := \
 demo_3d_window.h \
+testapp_paths.h \
 
 SRC      := main.c \
 demo_3d_window.c \

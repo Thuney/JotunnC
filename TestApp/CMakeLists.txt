@@ -11,6 +11,11 @@ set(
 
 add_executable(TestApp ${JOTUNN_APPLICATION_SOURCES})
 
+target_compile_definitions(
+  TestApp
+  PRIVATE
+  TESTAPP_ROOT_PATH="${TestApp_SOURCE_DIR}")
+
 target_link_libraries(TestApp m)
 
 target_link_libraries(TestApp JotunnC)

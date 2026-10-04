@@ -53,7 +53,7 @@ static void window_set_metadata(
 {
   // Store our window tag
   const int tag_length = strlen(tag);
-  metadata->tag = (char*)malloc(tag_length * sizeof(char));
+  metadata->tag = (char*)malloc((tag_length + 1) * sizeof(char));
   strcpy(metadata->tag, tag);
 
   // Assign window properties

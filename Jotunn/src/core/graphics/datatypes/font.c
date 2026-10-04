@@ -197,8 +197,9 @@ static int typeface_cleanup_glyph_atlas(
     glyph->glyph_texture.parent_texture = 0;
   }
 
-  if (&typeface->glyph_atlas.is_loaded)
+  if (typeface->glyph_atlas.is_loaded) {
     texture_2d_cleanup(&typeface->glyph_atlas);
+  }
 
   return error;
 }
