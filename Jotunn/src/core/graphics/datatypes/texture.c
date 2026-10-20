@@ -24,6 +24,15 @@ extern void platform_texture_2d_set_data(
   void* data,
   unsigned int data_size_bytes);
 
+extern void platform_texture_2d_set_sub_data(
+  const struct texture_2d_t* in_texture,
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels,
+  const uint32_t in_row_length_pixels,
+  const void* in_data);
+
 extern void platform_texture_2d_resize(
   struct texture_2d_t* texture,
   unsigned int new_width,
@@ -133,6 +142,30 @@ void texture_2d_set_data(
   platform_texture_2d_set_data(texture, data, data_size_bytes);
 
   texture->is_loaded = 1;
+}
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_set_sub_data()
+ *
+ ******************************************************************************/
+void texture_2d_set_sub_data(
+  const struct texture_2d_t* in_texture,
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels,
+  const uint32_t in_row_length_pixels,
+  const void* in_data)
+{
+  platform_texture_2d_set_sub_data(
+    in_texture,
+    in_x_pixels,
+    in_y_pixels,
+    in_width_pixels,
+    in_height_pixels,
+    in_row_length_pixels,
+    in_data);
 }
 
 void texture_2d_create_from_file_path(

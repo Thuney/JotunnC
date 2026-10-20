@@ -1,7 +1,9 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include <stdbool.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "application.h"
 #include "event.h"
@@ -18,6 +20,11 @@
 
 static uint8_t is_glfw_initialized = 0;
 static uint8_t is_glew_initialized = 0;
+
+// Standard cursors are created on first use and shared between windows; GLFW
+//  destroys them itself when it terminates
+static GLFWcursor* gl_cursors[WINDOW_CURSOR_SHAPE_COUNT];
+static bool is_gl_cursor_created[WINDOW_CURSOR_SHAPE_COUNT];
 
 /**************************************************
  *
@@ -64,6 +71,16 @@ static void gl_window_focus_callback(
 static void gl_window_error_callback(
   int error_code,
   const char* description);
+static void _gl_window_cursor_enter_callback(
+  GLFWwindow* in_window,
+  int in_is_entered);
+
+static enum event_key_code_t _window_gl_translate_key(
+  const int in_glfw_key);
+static uint8_t _window_gl_translate_modifiers(
+  const int in_glfw_modifiers);
+static GLFWcursor* _window_gl_get_cursor(
+  const enum window_cursor_shape_t in_cursor_shape);
 
 /**************************************************
  *
@@ -148,7 +165,65 @@ void window_graphics_set_background_color(
   struct window_t* window,
   const fvector4 color)
 {
-  render_api_set_clear_color(color);
+  render_api_set_clear_color(
+    &(window->window_layer_renderer.base.render_api),
+    color);
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_graphics_set_cursor_shape()
+ *
+ ******************************************************************************/
+void window_graphics_set_cursor_shape(
+  const struct window_t* in_window,
+  const enum window_cursor_shape_t in_cursor_shape)
+{
+  GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
+
+  if (in_cursor_shape == WINDOW_CURSOR_SHAPE_HIDDEN)
+  {
+    glfwSetInputMode(
+      gl_window_ptr,
+      GLFW_CURSOR,
+      GLFW_CURSOR_HIDDEN);
+  }
+  else
+  {
+    // A NULL cursor falls back to the default arrow
+    glfwSetCursor(
+      gl_window_ptr,
+      _window_gl_get_cursor(in_cursor_shape));
+    glfwSetInputMode(
+      gl_window_ptr,
+      GLFW_CURSOR,
+      GLFW_CURSOR_NORMAL);
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_graphics_get_clipboard_text()
+ *
+ ******************************************************************************/
+const char* window_graphics_get_clipboard_text(
+  const struct window_t* in_window)
+{
+  return glfwGetClipboardString((GLFWwindow*)in_window->context_data.window_handle);
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_graphics_set_clipboard_text()
+ *
+ ******************************************************************************/
+void window_graphics_set_clipboard_text(
+  const struct window_t* in_window,
+  const char* in_text)
+{
+  glfwSetClipboardString(
+    (GLFWwindow*)in_window->context_data.window_handle,
+    in_text);
 }
 
 /**************************************************
@@ -216,7 +291,7 @@ static void gl_window_close_callback(
   struct event_window_close_t window_close_event =
     (struct event_window_close_t){
       .base =
-        (struct event_base_t){.event_type = EVENT_MOUSE_SCROLLED, .handled = 0},
+        (struct event_base_t){.event_type = EVENT_WINDOW_CLOSE, .handled = 0},
       .window_handle = (void*)window};
 
   metadata->function_event_notify(
@@ -239,15 +314,65 @@ static void gl_window_key_callback(
   //   action,
   //   mods);
   // #endif
+
+  struct window_data_t* metadata =
+    (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+  const enum event_key_code_t key_code = _window_gl_translate_key(key);
+  const uint8_t modifiers = _window_gl_translate_modifiers(mods);
+
+  if (action == GLFW_RELEASE)
+  {
+    struct event_key_released_t key_released_event =
+      (struct event_key_released_t){
+        .base =
+          (struct event_base_t){.event_type = EVENT_KEY_RELEASED, .handled = 0},
+        .window_handle = (void*)window,
+        .key = key_code,
+        .modifiers = modifiers};
+
+    metadata->function_event_notify(
+      metadata->parent_application,
+      &(key_released_event.base));
+  }
+  else
+  {
+    struct event_key_pressed_t key_pressed_event =
+      (struct event_key_pressed_t){
+        .base =
+          (struct event_base_t){.event_type = EVENT_KEY_PRESSED, .handled = 0},
+        .window_handle = (void*)window,
+        .key = key_code,
+        .modifiers = modifiers,
+        .is_repeat = (action == GLFW_REPEAT)};
+
+    metadata->function_event_notify(
+      metadata->parent_application,
+      &(key_pressed_event.base));
+  }
 }
 
 static void gl_window_char_callback(
   GLFWwindow* window,
   unsigned int codepoint)
 {
-  #ifdef DEBUG
-  fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
-  #endif
+  // #ifdef DEBUG
+  // fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
+  // #endif
+
+  struct window_data_t* metadata =
+    (struct window_data_t*)glfwGetWindowUserPointer(window);
+
+  struct event_key_typed_t key_typed_event =
+    (struct event_key_typed_t){
+      .base =
+        (struct event_base_t){.event_type = EVENT_KEY_TYPED, .handled = 0},
+      .window_handle = (void*)window,
+      .codepoint = codepoint};
+
+  metadata->function_event_notify(
+    metadata->parent_application,
+    &(key_typed_event.base));
 }
 
 static void gl_window_mouse_button_callback(
@@ -272,9 +397,10 @@ static void gl_window_mouse_button_callback(
     (struct event_mouse_button_t){
       .base =
         (struct event_base_t){.event_type = EVENT_MOUSE_BUTTON, .handled = 0},
+      .window_handle = (void*)window,
       .button = button,
       .action = action,
-      .mods = mods};
+      .mods = _window_gl_translate_modifiers(mods)};
 
   metadata->function_event_notify(
     metadata->parent_application, &(mouse_button_event.base));
@@ -296,6 +422,7 @@ static void gl_window_scroll_callback(
     (struct event_mouse_scrolled_t){
       .base =
         (struct event_base_t){.event_type = EVENT_MOUSE_SCROLLED, .handled = 0},
+      .window_handle = (void*)window,
       .x_offset = (float)x_offset,
       .y_offset = (float)y_offset};
 
@@ -389,6 +516,9 @@ static void window_gl_set_callbacks(
     glfw_window_ptr, (GLFWcursorposfun)&gl_window_cursor_position_callback);
   glfwSetWindowFocusCallback(
     glfw_window_ptr, (GLFWwindowfocusfun)&gl_window_focus_callback);
+  glfwSetCursorEnterCallback(
+    glfw_window_ptr,
+    (GLFWcursorenterfun)&(_gl_window_cursor_enter_callback));
 }
 
 static uint8_t window_gl_init(
@@ -529,6 +659,16 @@ static void window_gl_cleanup(
     glfwDestroyWindow(gl_window_ptr);
     glfwTerminate();
 
+    // Terminating destroyed any standard cursors that were created
+    memset(
+      gl_cursors,
+      0,
+      sizeof(gl_cursors));
+    memset(
+      is_gl_cursor_created,
+      0,
+      sizeof(is_gl_cursor_created));
+
     is_glfw_initialized = 0;
   }
 
@@ -536,4 +676,190 @@ static void window_gl_cleanup(
   {
     is_glew_initialized = 0;
   }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _gl_window_cursor_enter_callback()
+ *
+ ******************************************************************************/
+static void _gl_window_cursor_enter_callback(
+  GLFWwindow* in_window,
+  int in_is_entered)
+{
+  struct window_data_t* metadata =
+    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+
+  struct event_mouse_entered_t mouse_entered_event =
+    (struct event_mouse_entered_t){
+      .base =
+        (struct event_base_t){.event_type = EVENT_MOUSE_ENTERED, .handled = 0},
+      .window_handle = (void*)in_window,
+      .is_entered = (in_is_entered == GLFW_TRUE)};
+
+  metadata->function_event_notify(
+    metadata->parent_application,
+    &(mouse_entered_event.base));
+}
+
+/*******************************************************************************
+ *
+ *   Function: _window_gl_translate_key()
+ *
+ ******************************************************************************/
+static enum event_key_code_t _window_gl_translate_key(
+  const int in_glfw_key)
+{
+  // Digits, letters, function keys and keypad digits are contiguous in both
+  //  GLFW's key codes and Jotunn's
+  if ((in_glfw_key >= GLFW_KEY_0) &&
+      (in_glfw_key <= GLFW_KEY_9))
+  {
+    return (EVENT_KEY_CODE_0 + (in_glfw_key - GLFW_KEY_0));
+  }
+  if ((in_glfw_key >= GLFW_KEY_A) &&
+      (in_glfw_key <= GLFW_KEY_Z))
+  {
+    return (EVENT_KEY_CODE_A + (in_glfw_key - GLFW_KEY_A));
+  }
+  if ((in_glfw_key >= GLFW_KEY_F1) &&
+      (in_glfw_key <= GLFW_KEY_F24))
+  {
+    return (EVENT_KEY_CODE_F1 + (in_glfw_key - GLFW_KEY_F1));
+  }
+  if ((in_glfw_key >= GLFW_KEY_KP_0) &&
+      (in_glfw_key <= GLFW_KEY_KP_9))
+  {
+    return (EVENT_KEY_CODE_KEYPAD_0 + (in_glfw_key - GLFW_KEY_KP_0));
+  }
+
+  enum event_key_code_t key_code;
+
+  switch (in_glfw_key)
+  {
+    case GLFW_KEY_TAB:           key_code = EVENT_KEY_CODE_TAB;             break;
+    case GLFW_KEY_LEFT:          key_code = EVENT_KEY_CODE_LEFT_ARROW;      break;
+    case GLFW_KEY_RIGHT:         key_code = EVENT_KEY_CODE_RIGHT_ARROW;     break;
+    case GLFW_KEY_UP:            key_code = EVENT_KEY_CODE_UP_ARROW;        break;
+    case GLFW_KEY_DOWN:          key_code = EVENT_KEY_CODE_DOWN_ARROW;      break;
+    case GLFW_KEY_PAGE_UP:       key_code = EVENT_KEY_CODE_PAGE_UP;         break;
+    case GLFW_KEY_PAGE_DOWN:     key_code = EVENT_KEY_CODE_PAGE_DOWN;       break;
+    case GLFW_KEY_HOME:          key_code = EVENT_KEY_CODE_HOME;            break;
+    case GLFW_KEY_END:           key_code = EVENT_KEY_CODE_END;             break;
+    case GLFW_KEY_INSERT:        key_code = EVENT_KEY_CODE_INSERT;          break;
+    case GLFW_KEY_DELETE:        key_code = EVENT_KEY_CODE_DELETE;          break;
+    case GLFW_KEY_BACKSPACE:     key_code = EVENT_KEY_CODE_BACKSPACE;       break;
+    case GLFW_KEY_SPACE:         key_code = EVENT_KEY_CODE_SPACE;           break;
+    case GLFW_KEY_ENTER:         key_code = EVENT_KEY_CODE_ENTER;           break;
+    case GLFW_KEY_ESCAPE:        key_code = EVENT_KEY_CODE_ESCAPE;          break;
+    case GLFW_KEY_LEFT_CONTROL:  key_code = EVENT_KEY_CODE_LEFT_CONTROL;    break;
+    case GLFW_KEY_LEFT_SHIFT:    key_code = EVENT_KEY_CODE_LEFT_SHIFT;      break;
+    case GLFW_KEY_LEFT_ALT:      key_code = EVENT_KEY_CODE_LEFT_ALT;        break;
+    case GLFW_KEY_LEFT_SUPER:    key_code = EVENT_KEY_CODE_LEFT_SUPER;      break;
+    case GLFW_KEY_RIGHT_CONTROL: key_code = EVENT_KEY_CODE_RIGHT_CONTROL;   break;
+    case GLFW_KEY_RIGHT_SHIFT:   key_code = EVENT_KEY_CODE_RIGHT_SHIFT;     break;
+    case GLFW_KEY_RIGHT_ALT:     key_code = EVENT_KEY_CODE_RIGHT_ALT;       break;
+    case GLFW_KEY_RIGHT_SUPER:   key_code = EVENT_KEY_CODE_RIGHT_SUPER;     break;
+    case GLFW_KEY_MENU:          key_code = EVENT_KEY_CODE_MENU;            break;
+    case GLFW_KEY_APOSTROPHE:    key_code = EVENT_KEY_CODE_APOSTROPHE;      break;
+    case GLFW_KEY_COMMA:         key_code = EVENT_KEY_CODE_COMMA;           break;
+    case GLFW_KEY_MINUS:         key_code = EVENT_KEY_CODE_MINUS;           break;
+    case GLFW_KEY_PERIOD:        key_code = EVENT_KEY_CODE_PERIOD;          break;
+    case GLFW_KEY_SLASH:         key_code = EVENT_KEY_CODE_SLASH;           break;
+    case GLFW_KEY_SEMICOLON:     key_code = EVENT_KEY_CODE_SEMICOLON;       break;
+    case GLFW_KEY_EQUAL:         key_code = EVENT_KEY_CODE_EQUAL;           break;
+    case GLFW_KEY_LEFT_BRACKET:  key_code = EVENT_KEY_CODE_LEFT_BRACKET;    break;
+    case GLFW_KEY_BACKSLASH:     key_code = EVENT_KEY_CODE_BACKSLASH;       break;
+    case GLFW_KEY_RIGHT_BRACKET: key_code = EVENT_KEY_CODE_RIGHT_BRACKET;   break;
+    case GLFW_KEY_GRAVE_ACCENT:  key_code = EVENT_KEY_CODE_GRAVE_ACCENT;    break;
+    case GLFW_KEY_CAPS_LOCK:     key_code = EVENT_KEY_CODE_CAPS_LOCK;       break;
+    case GLFW_KEY_SCROLL_LOCK:   key_code = EVENT_KEY_CODE_SCROLL_LOCK;     break;
+    case GLFW_KEY_NUM_LOCK:      key_code = EVENT_KEY_CODE_NUM_LOCK;        break;
+    case GLFW_KEY_PRINT_SCREEN:  key_code = EVENT_KEY_CODE_PRINT_SCREEN;    break;
+    case GLFW_KEY_PAUSE:         key_code = EVENT_KEY_CODE_PAUSE;           break;
+    case GLFW_KEY_KP_DECIMAL:    key_code = EVENT_KEY_CODE_KEYPAD_DECIMAL;  break;
+    case GLFW_KEY_KP_DIVIDE:     key_code = EVENT_KEY_CODE_KEYPAD_DIVIDE;   break;
+    case GLFW_KEY_KP_MULTIPLY:   key_code = EVENT_KEY_CODE_KEYPAD_MULTIPLY; break;
+    case GLFW_KEY_KP_SUBTRACT:   key_code = EVENT_KEY_CODE_KEYPAD_SUBTRACT; break;
+    case GLFW_KEY_KP_ADD:        key_code = EVENT_KEY_CODE_KEYPAD_ADD;      break;
+    case GLFW_KEY_KP_ENTER:      key_code = EVENT_KEY_CODE_KEYPAD_ENTER;    break;
+    case GLFW_KEY_KP_EQUAL:      key_code = EVENT_KEY_CODE_KEYPAD_EQUAL;    break;
+    case GLFW_KEY_WORLD_1:       key_code = EVENT_KEY_CODE_OEM_102;         break;
+    default:                     key_code = EVENT_KEY_CODE_UNKNOWN;         break;
+  }
+
+  return key_code;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _window_gl_translate_modifiers()
+ *
+ ******************************************************************************/
+static uint8_t _window_gl_translate_modifiers(
+  const int in_glfw_modifiers)
+{
+  uint8_t modifiers = EVENT_KEY_MODIFIER_NONE;
+
+  if (in_glfw_modifiers & GLFW_MOD_SHIFT)
+  {
+    modifiers |= EVENT_KEY_MODIFIER_SHIFT;
+  }
+  if (in_glfw_modifiers & GLFW_MOD_CONTROL)
+  {
+    modifiers |= EVENT_KEY_MODIFIER_CONTROL;
+  }
+  if (in_glfw_modifiers & GLFW_MOD_ALT)
+  {
+    modifiers |= EVENT_KEY_MODIFIER_ALT;
+  }
+  if (in_glfw_modifiers & GLFW_MOD_SUPER)
+  {
+    modifiers |= EVENT_KEY_MODIFIER_SUPER;
+  }
+
+  return modifiers;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _window_gl_get_cursor()
+ *
+ ******************************************************************************/
+static GLFWcursor* _window_gl_get_cursor(
+  const enum window_cursor_shape_t in_cursor_shape)
+{
+  if ((in_cursor_shape < 0) ||
+      (in_cursor_shape >= WINDOW_CURSOR_SHAPE_COUNT))
+  {
+    return NULL;
+  }
+
+  if (!is_gl_cursor_created[in_cursor_shape])
+  {
+    int glfw_shape;
+
+    switch (in_cursor_shape)
+    {
+      case WINDOW_CURSOR_SHAPE_TEXT_INPUT:  glfw_shape = GLFW_IBEAM_CURSOR;         break;
+      case WINDOW_CURSOR_SHAPE_RESIZE_ALL:  glfw_shape = GLFW_RESIZE_ALL_CURSOR;    break;
+      case WINDOW_CURSOR_SHAPE_RESIZE_NS:   glfw_shape = GLFW_RESIZE_NS_CURSOR;     break;
+      case WINDOW_CURSOR_SHAPE_RESIZE_EW:   glfw_shape = GLFW_RESIZE_EW_CURSOR;     break;
+      case WINDOW_CURSOR_SHAPE_RESIZE_NESW: glfw_shape = GLFW_RESIZE_NESW_CURSOR;   break;
+      case WINDOW_CURSOR_SHAPE_RESIZE_NWSE: glfw_shape = GLFW_RESIZE_NWSE_CURSOR;   break;
+      case WINDOW_CURSOR_SHAPE_HAND:        glfw_shape = GLFW_POINTING_HAND_CURSOR; break;
+      case WINDOW_CURSOR_SHAPE_NOT_ALLOWED: glfw_shape = GLFW_NOT_ALLOWED_CURSOR;   break;
+      // GLFW has no busy cursors, so those fall back to the arrow
+      case WINDOW_CURSOR_SHAPE_ARROW:
+      case WINDOW_CURSOR_SHAPE_WAIT:
+      case WINDOW_CURSOR_SHAPE_PROGRESS:
+      default:                              glfw_shape = GLFW_ARROW_CURSOR;         break;
+    }
+
+    // Some platforms lack some shapes, leaving NULL and so the default arrow
+    gl_cursors[in_cursor_shape] = glfwCreateStandardCursor(glfw_shape);
+    is_gl_cursor_created[in_cursor_shape] = true;
+  }
+
+  return gl_cursors[in_cursor_shape];
 }

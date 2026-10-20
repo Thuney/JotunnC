@@ -4,6 +4,7 @@
   #include <stdio.h>
 #endif
 #include <math.h>
+#include <stddef.h>
 
 #include "renderable_2d_primitive.h"
 
@@ -214,6 +215,44 @@ static struct vertex_attribute_t line_vertex_attributes[2] =
     .should_normalize = 0,
     .stride = sizeof(struct renderable_2d_line_vertex_t),
     .ptr_offset_to_attrib = (void*)sizeof(fvector3)
+  }
+};
+
+// Mesh 2D vertex attributes
+static struct vertex_attribute_t mesh_vertex_attributes[3] =
+{
+  [RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_POSITION] =
+  {
+    .attribute_name = "position",
+    .index = (unsigned int)-1, // To be filled by shader program
+    .size = 2,
+    .data_type = V_FLOAT,
+    .should_normalize = 0,
+    .stride = sizeof(struct renderable_2d_mesh_vertex_t),
+    .ptr_offset_to_attrib =
+      (void*)offsetof(struct renderable_2d_mesh_vertex_t, position)
+  },
+  [RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_TEXTURE_COORDINATES] =
+  {
+    .attribute_name = "texCoord",
+    .index = (unsigned int)-1, // To be filled by shader program
+    .size = 2,
+    .data_type = V_FLOAT,
+    .should_normalize = 0,
+    .stride = sizeof(struct renderable_2d_mesh_vertex_t),
+    .ptr_offset_to_attrib =
+      (void*)offsetof(struct renderable_2d_mesh_vertex_t, texture_coordinate)
+  },
+  [RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_COLOR] =
+  {
+    .attribute_name = "color",
+    .index = (unsigned int)-1, // To be filled by shader program
+    .size = 4,
+    .data_type = V_UNSIGNED_BYTE,
+    .should_normalize = 1,
+    .stride = sizeof(struct renderable_2d_mesh_vertex_t),
+    .ptr_offset_to_attrib =
+      (void*)offsetof(struct renderable_2d_mesh_vertex_t, color)
   }
 };
 
@@ -516,6 +555,27 @@ void renderable_2d_line_data_init(
   vertex_array_unbind();
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_mesh_data_init()
+ *
+ ******************************************************************************/
+void renderable_2d_mesh_data_init(
+  struct renderable_2d_mesh_data_t* out_mesh_data,
+  struct shader_program_t* in_shader_program)
+{
+  renderable_2d_primitive_data_init(
+    &(out_mesh_data->vao),
+    &(out_mesh_data->vbo),
+    &(out_mesh_data->ebo),
+    1,
+    mesh_vertex_attributes,
+    RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_COUNT,
+    in_shader_program);
+
+  vertex_array_unbind();
+}
+
 void renderable_2d_triangle_data_cleanup(
   struct renderable_2d_triangle_data_t* triangle_data)
 {
@@ -562,4 +622,23 @@ void renderable_2d_line_data_cleanup(
   vertex_buffer_destroy(&line_data->vbo, 1);
 
   free(line_data->vertex_data_base);
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_mesh_data_cleanup()
+ *
+ ******************************************************************************/
+void renderable_2d_mesh_data_cleanup(
+  struct renderable_2d_mesh_data_t* inout_mesh_data)
+{
+  vertex_array_destroy(
+    &(inout_mesh_data->vao),
+    1);
+  vertex_buffer_destroy(
+    &(inout_mesh_data->vbo),
+    1);
+  element_buffer_destroy(
+    &(inout_mesh_data->ebo),
+    1);
 }

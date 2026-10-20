@@ -35,6 +35,14 @@ extern void window_graphics_set_viewport(
 extern void window_graphics_set_background_color(
   struct window_t* window,
   const fvector4 color);
+extern void window_graphics_set_cursor_shape(
+  const struct window_t* in_window,
+  const enum window_cursor_shape_t in_cursor_shape);
+extern const char* window_graphics_get_clipboard_text(
+  const struct window_t* in_window);
+extern void window_graphics_set_clipboard_text(
+  const struct window_t* in_window,
+  const char* in_text);
 
 /************************************************************
  *
@@ -174,23 +182,31 @@ void window_handle_event(
   struct window_t* window,
   struct event_base_t* event)
 {
-  if (window->function_event_react)
+  // Layers see events top to bottom, so that one drawn over another (such as
+  //  a UI) can claim an event before anything underneath it reacts
+  for (uint8_t i = window->num_layers; i > 0; i--)
   {
-    window->function_event_react(window, event);
+    struct window_layer_t* current_layer = window->layers[i - 1];
 
-    if (event->handled)
-      return;
+    if (current_layer->function_event_react)
+    {
+      current_layer->function_event_react(
+        window,
+        current_layer,
+        event);
+
+      if (event->handled)
+      {
+        return;
+      }
+    }
   }
 
-  struct window_layer_t** current_layer;
-
-  current_layer = window->layers;
-  for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
+  if (window->function_event_react)
   {
-    if ((*current_layer)->function_event_react)
-    {
-      (*current_layer)->function_event_react(window, *current_layer, event);
-    }
+    window->function_event_react(
+      window,
+      event);
   }
 }
 
@@ -338,4 +354,43 @@ void window_set_background_color(
   const fvector4 color)
 {
   window_graphics_set_background_color(window, color);
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_set_cursor_shape()
+ *
+ ******************************************************************************/
+void window_set_cursor_shape(
+  const struct window_t* in_window,
+  const enum window_cursor_shape_t in_cursor_shape)
+{
+  window_graphics_set_cursor_shape(
+    in_window,
+    in_cursor_shape);
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_get_clipboard_text()
+ *
+ ******************************************************************************/
+const char* window_get_clipboard_text(
+  const struct window_t* in_window)
+{
+  return window_graphics_get_clipboard_text(in_window);
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_set_clipboard_text()
+ *
+ ******************************************************************************/
+void window_set_clipboard_text(
+  const struct window_t* in_window,
+  const char* in_text)
+{
+  window_graphics_set_clipboard_text(
+    in_window,
+    in_text);
 }

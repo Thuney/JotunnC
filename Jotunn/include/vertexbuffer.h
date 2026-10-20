@@ -24,7 +24,7 @@ void vertex_buffer_init(
 void vertex_buffer_bind(struct vertex_buffer_t* vertex_buffer);
 void vertex_buffer_buffer_data(
   struct vertex_buffer_t* vertex_buffer,
-  float* data,
+  const void* data,
   unsigned int data_bytes,
   enum buffer_data_usage_t usage_type);
 void vertex_buffer_buffer_sub_data(
@@ -46,7 +46,7 @@ int element_buffer_init(
 void element_buffer_bind(struct element_buffer_t* element_buffer);
 void element_buffer_buffer_data(
   struct element_buffer_t* element_buffer,
-  unsigned int* data,
+  const void* data,
   unsigned int data_bytes,
   enum buffer_data_usage_t usage_type);
 void element_buffer_destroy(

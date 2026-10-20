@@ -3,6 +3,7 @@
 #include "fvector.h"
 
 #include <stdbool.h>
+#include <stdint.h>
 
 enum texture_2d_internal_format_t
 {
@@ -73,6 +74,22 @@ void texture_2d_set_data(
   struct texture_2d_t* texture,
   unsigned char* data,
   const unsigned int data_size_bytes);
+// Uploads a rectangle of pixels into an already initialized texture, leaving
+//  the rest of it untouched. in_data points at the rectangle's first pixel,
+//  in the texture's data format, and successive rows of the rectangle start
+//  in_row_length_pixels apart
+//
+//  in:     in_texture, in_x_pixels, in_y_pixels, in_width_pixels,
+//            in_height_pixels, in_row_length_pixels, in_data
+void texture_2d_set_sub_data(
+  const struct texture_2d_t* in_texture,
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels,
+  const uint32_t in_row_length_pixels,
+  const void* in_data);
+
 void texture_2d_create_from_file_path(
   struct texture_2d_t* texture,
   const char* filepath,

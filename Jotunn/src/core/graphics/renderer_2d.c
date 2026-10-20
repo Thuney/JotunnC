@@ -11,6 +11,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+static uint32_t _renderer_2d_get_index_size_bytes(
+  const enum render_api_element_data_type_t in_index_type);
+
 static void renderer_2d_flush(
   struct renderer_2d_t *renderer)
 {
@@ -299,6 +302,18 @@ static void renderer_2d_data_init(
   if (error)
     fprintf(stdout, "Error during line shader init\n");
 #endif
+  error = shader_program_init_filepath(
+    &(data->mesh_shader),
+    PATH_FROM_JOTUNN_ROOT("/res/shaders/mesh_2d_shader.vert"),
+    PATH_FROM_JOTUNN_ROOT("/res/shaders/mesh_2d_shader.frag"));
+#ifdef DEBUG
+  if (error)
+  {
+    fprintf(
+      stdout,
+      "Error during mesh shader init\n");
+  }
+#endif
 
   fmatrix_4x4_init(&data->model_matrix);
 
@@ -312,6 +327,24 @@ static void renderer_2d_data_init(
     &data->circle_data, max_vertices, &data->circle_shader);
   renderable_2d_line_data_init(
     &data->line_data, max_vertices, &data->line_shader);
+  renderable_2d_mesh_data_init(
+    &(data->mesh_data),
+    &(data->mesh_shader));
+
+  static unsigned char white_texture_pixels[4] = {0xFF, 0xFF, 0xFF, 0xFF};
+  texture_2d_init(
+    &(data->white_texture),
+    1,
+    1,
+    TEXTURE_2D_INTERNAL_FORMAT_RGBA,
+    TEXTURE_2D_DATA_FORMAT_RGBA,
+    false);
+  texture_2d_set_data(
+    &(data->white_texture),
+    white_texture_pixels,
+    sizeof(white_texture_pixels));
+  // The pixels are static, so the texture must not try to free them
+  data->white_texture.data = NULL;
 
   data->line_width = 5.0f;
 
@@ -330,12 +363,15 @@ static void renderer_2d_data_cleanup(
   renderable_2d_textured_quad_data_cleanup(&data->textured_quad_data);
   renderable_2d_circle_data_cleanup(&data->circle_data);
   renderable_2d_line_data_cleanup(&data->line_data);
+  renderable_2d_mesh_data_cleanup(&(data->mesh_data));
+  texture_2d_cleanup(&(data->white_texture));
 
   shader_program_destroy(&data->triangle_shader);
   shader_program_destroy(&data->quad_shader);
   shader_program_destroy(&data->textured_quad_shader);
   shader_program_destroy(&data->circle_shader);
   shader_program_destroy(&data->line_shader);
+  shader_program_destroy(&(data->mesh_shader));
 
   data->line_width = -1.0f;
 }
@@ -671,6 +707,112 @@ void renderer_2d_draw_line(
   data->line_data.line_vertex_count += 2;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_mesh()
+ *
+ ******************************************************************************/
+void renderer_2d_draw_mesh(
+  struct renderer_2d_t* inout_renderer,
+  const struct renderer_2d_mesh_t* in_mesh)
+{
+  struct renderer_2d_data_t* data = &(inout_renderer->render_data);
+
+  if ((in_mesh->vertex_count == 0) ||
+      (in_mesh->index_count == 0))
+  {
+    return;
+  }
+
+  // Everything submitted before the mesh has to land underneath it
+  renderer_2d_next_batch(inout_renderer);
+
+  const uint32_t index_size_bytes =
+    _renderer_2d_get_index_size_bytes(in_mesh->index_type);
+
+  vertex_array_bind(&(data->mesh_data.vao));
+  vertex_buffer_bind(&(data->mesh_data.vbo));
+  element_buffer_bind(&(data->mesh_data.ebo));
+
+  vertex_buffer_buffer_data(
+    &(data->mesh_data.vbo),
+    in_mesh->vertices,
+    (in_mesh->vertex_count * sizeof(struct renderable_2d_mesh_vertex_t)),
+    STREAM_DRAW);
+  element_buffer_buffer_data(
+    &(data->mesh_data.ebo),
+    in_mesh->indices,
+    (in_mesh->index_count * index_size_bytes),
+    STREAM_DRAW);
+
+  shader_program_use(&(data->mesh_shader));
+
+  shader_program_set_uniform_fmat4x4(
+    &(data->mesh_shader),
+    "model",
+    &(data->model_matrix));
+  shader_program_set_uniform_fmat4x4(
+    &(data->mesh_shader),
+    "view",
+    &(inout_renderer->base.camera->view_matrix));
+  shader_program_set_uniform_fmat4x4(
+    &(data->mesh_shader),
+    "projection",
+    &(inout_renderer->base.camera->projection_matrix));
+  shader_program_set_uniform_int(
+    &(data->mesh_shader),
+    "u_texture",
+    0);
+
+  for (uint32_t i = 0; i < in_mesh->submesh_count; i++)
+  {
+    const struct renderer_2d_submesh_t* submesh = &(in_mesh->submeshes[i]);
+    const struct renderer_2d_clip_rect_t* clip_rect = &(submesh->clip_rect);
+
+    if (submesh->index_count == 0)
+    {
+      continue;
+    }
+
+    if (submesh->is_clipped)
+    {
+      if ((clip_rect->width_pixels <= 0) ||
+          (clip_rect->height_pixels <= 0))
+      {
+        continue;
+      }
+
+      render_api_set_scissor(
+        &(inout_renderer->base.render_api),
+        clip_rect->x_pixels,
+        clip_rect->y_pixels,
+        clip_rect->width_pixels,
+        clip_rect->height_pixels);
+    }
+    else
+    {
+      render_api_disable_scissor(&(inout_renderer->base.render_api));
+    }
+
+    texture_2d_bind(
+      (submesh->texture != NULL) ?
+        submesh->texture :
+        &(data->white_texture),
+      0);
+
+    render_api_draw_elements_base_vertex(
+      DRAW_TYPE_TRIANGLES,
+      submesh->index_count,
+      in_mesh->index_type,
+      ((uintptr_t)submesh->index_offset * index_size_bytes),
+      (int32_t)submesh->vertex_offset);
+  }
+
+  render_api_disable_scissor(&(inout_renderer->base.render_api));
+
+  vertex_array_unbind();
+}
+
 void renderer_2d_draw_string(
   struct renderer_2d_t *renderer,
   const struct typeface_t *typeface,
@@ -763,4 +905,37 @@ void renderer_2d_set_line_width(
   const float line_width)
 {
   render_api_set_line_width(line_width);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _renderer_2d_get_index_size_bytes()
+ *
+ ******************************************************************************/
+static uint32_t _renderer_2d_get_index_size_bytes(
+  const enum render_api_element_data_type_t in_index_type)
+{
+  uint32_t index_size_bytes;
+
+  switch (in_index_type)
+  {
+    case ELEMENT_UNSIGNED_BYTE:
+    {
+      index_size_bytes = sizeof(uint8_t);
+    }
+    break;
+    case ELEMENT_UNSIGNED_SHORT:
+    {
+      index_size_bytes = sizeof(uint16_t);
+    }
+    break;
+    case ELEMENT_UNSIGNED_INT:
+    default:
+    {
+      index_size_bytes = sizeof(uint32_t);
+    }
+    break;
+  }
+
+  return index_size_bytes;
 }

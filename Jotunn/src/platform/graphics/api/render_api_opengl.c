@@ -4,6 +4,16 @@
 #include <GLFW/glfw3.h>
 #include <stdio.h>
 
+static void _opengl_render_api_apply_blend_mode(
+  const enum render_api_blend_mode_t in_blend_mode);
+
+// Restricts drawing to in_scissor's rectangle when it is enabled, and lifts
+//  the restriction otherwise
+//
+//  in:     in_scissor
+static void _opengl_render_api_apply_scissor(
+  const struct render_api_scissor_t* in_scissor);
+
 static GLenum get_gl_element_data_type(
   enum render_api_element_data_type_t data_type)
 {
@@ -95,7 +105,7 @@ static void opengl_render_api_bind(
   if (render_api->active_render_flags & BLEND_FLAG)
   {
     glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    _opengl_render_api_apply_blend_mode(render_api->blend_mode);
   }
   else
   {
@@ -119,17 +129,20 @@ static void opengl_render_api_bind(
   {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
-}
-
-static void opengl_render_api_set_clear_color(
-  const fvector4 color)
-{
-  glClearColor(color.comp.w, color.comp.x, color.comp.y, color.comp.z);
+  //
+  _opengl_render_api_apply_scissor(&(render_api->scissor));
 }
 
 static void opengl_render_api_clear(
   struct render_api_implementation_t* render_api)
 {
+  const fvector4 clear_color = render_api->clear_color;
+  glClearColor(
+    clear_color.comp.w,
+    clear_color.comp.x,
+    clear_color.comp.y,
+    clear_color.comp.z);
+
   GLbitfield flags = 0x0000;
 
   if (render_api->active_render_flags & COLOR_FLAG)
@@ -185,12 +198,6 @@ void platform_render_api_bind(
   opengl_render_api_bind(render_api);
 }
 
-void platform_render_api_set_clear_color(
-  const fvector4 color)
-{
-  opengl_render_api_set_clear_color(color);
-}
-
 void platform_render_api_clear(
   struct render_api_implementation_t* render_api)
 {
@@ -205,6 +212,37 @@ void platform_render_api_draw_elements(
 {
   opengl_render_api_draw_elements(
     draw_mode, element_count, element_data_type, indices);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_apply_scissor()
+ *
+ ******************************************************************************/
+void platform_render_api_apply_scissor(
+  const struct render_api_implementation_t* in_render_api)
+{
+  _opengl_render_api_apply_scissor(&(in_render_api->scissor));
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_draw_elements_base_vertex()
+ *
+ ******************************************************************************/
+void platform_render_api_draw_elements_base_vertex(
+  const enum render_api_draw_mode_t in_draw_mode,
+  const uint32_t in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const uintptr_t in_index_offset_bytes,
+  const int32_t in_base_vertex)
+{
+  glDrawElementsBaseVertex(
+    get_gl_draw_mode(in_draw_mode),
+    (GLsizei)in_element_count,
+    get_gl_element_data_type(in_element_data_type),
+    (const void*)in_index_offset_bytes,
+    in_base_vertex);
 }
 
 void platform_render_api_draw_triangle_fan(
@@ -223,4 +261,59 @@ void platform_render_api_set_line_width(
   float line_width)
 {
   opengl_render_api_set_line_width(line_width);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _opengl_render_api_apply_blend_mode()
+ *
+ ******************************************************************************/
+static void _opengl_render_api_apply_blend_mode(
+  const enum render_api_blend_mode_t in_blend_mode)
+{
+  switch (in_blend_mode)
+  {
+    case RENDER_API_BLEND_MODE_PREMULTIPLIED_ALPHA:
+    {
+      glBlendFunc(
+        GL_ONE,
+        GL_ONE_MINUS_SRC_ALPHA);
+    }
+    break;
+    case RENDER_API_BLEND_MODE_ALPHA:
+    default:
+    {
+      // Alpha accumulates as coverage rather than being scaled by itself, so
+      //  partially transparent results stay correct when composited later
+      glBlendFuncSeparate(
+        GL_SRC_ALPHA,
+        GL_ONE_MINUS_SRC_ALPHA,
+        GL_ONE,
+        GL_ONE_MINUS_SRC_ALPHA);
+    }
+    break;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _opengl_render_api_apply_scissor()
+ *
+ ******************************************************************************/
+static void _opengl_render_api_apply_scissor(
+  const struct render_api_scissor_t* in_scissor)
+{
+  if (in_scissor->is_enabled)
+  {
+    glEnable(GL_SCISSOR_TEST);
+    glScissor(
+      in_scissor->x_pixels,
+      in_scissor->y_pixels,
+      in_scissor->width_pixels,
+      in_scissor->height_pixels);
+  }
+  else
+  {
+    glDisable(GL_SCISSOR_TEST);
+  }
 }

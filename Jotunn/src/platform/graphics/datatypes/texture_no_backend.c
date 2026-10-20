@@ -25,3 +25,14 @@ void platform_texture_2d_bind(
   const unsigned int texture_slot)
 {
 }
+
+void platform_texture_2d_set_sub_data(
+  const struct texture_2d_t* in_texture,
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels,
+  const uint32_t in_row_length_pixels,
+  const void* in_data)
+{
+}

@@ -15,6 +15,30 @@ struct window_t;
 
 /************************************************************
  *
+ * Enum Definitions
+ *
+ ************************************************************/
+
+// Mouse cursor shapes a window can show while the cursor is over it
+enum window_cursor_shape_t
+{
+  WINDOW_CURSOR_SHAPE_HIDDEN = 0x00,
+  WINDOW_CURSOR_SHAPE_ARROW,
+  WINDOW_CURSOR_SHAPE_TEXT_INPUT,
+  WINDOW_CURSOR_SHAPE_RESIZE_ALL,
+  WINDOW_CURSOR_SHAPE_RESIZE_NS,
+  WINDOW_CURSOR_SHAPE_RESIZE_EW,
+  WINDOW_CURSOR_SHAPE_RESIZE_NESW,
+  WINDOW_CURSOR_SHAPE_RESIZE_NWSE,
+  WINDOW_CURSOR_SHAPE_HAND,
+  WINDOW_CURSOR_SHAPE_WAIT,
+  WINDOW_CURSOR_SHAPE_PROGRESS,
+  WINDOW_CURSOR_SHAPE_NOT_ALLOWED,
+  WINDOW_CURSOR_SHAPE_COUNT
+};
+
+/************************************************************
+ *
  * Struct Definitions
  *
  ************************************************************/
@@ -101,3 +125,26 @@ void window_set_viewport(
 void window_set_background_color(
   struct window_t* window,
   const fvector4 color);
+
+// Changes the cursor shown while the cursor is over the window. Shapes the
+//  platform lacks fall back to the arrow
+//
+//  in:     in_window, in_cursor_shape
+void window_set_cursor_shape(
+  const struct window_t* in_window,
+  const enum window_cursor_shape_t in_cursor_shape);
+
+// Reads the system clipboard as UTF-8 text
+//
+//  in:     in_window
+//  ret:    The clipboard's text, valid until the clipboard next changes or is
+//            read; NULL when it holds no text
+const char* window_get_clipboard_text(
+  const struct window_t* in_window);
+
+// Replaces the system clipboard's contents with UTF-8 text
+//
+//  in:     in_window, in_text
+void window_set_clipboard_text(
+  const struct window_t* in_window,
+  const char* in_text);

@@ -12,45 +12,47 @@ set(
 
 find_package(Freetype REQUIRED)
 
+# Dear ImGui and its extensions don't depend on a graphics API; Jotunn feeds
+#  them input from its own events and draws them through renderer_2d
+add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
+add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimplot)
+
+# cimnodes ships without a CMakeLists.txt, so its target is defined here,
+#  building imnodes against cimgui's Dear ImGui rather than a copy of its own
+add_library(
+  cimnodes
+  SHARED
+  ${JotunnC_SOURCE_DIR}/vendor/cimnodes/cimnodes.cpp
+  ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes/imnodes.cpp)
+
+target_compile_definitions(
+  cimnodes
+  PRIVATE
+  # The namespace cimnodes' generated wrappers call into
+  IMNODES_NAMESPACE=imnodes
+  # Matches the configuration cimgui compiles imgui with
+  IMGUI_USER_CONFIG="../cimconfig.h")
+
+target_include_directories(
+  cimnodes
+  PUBLIC
+  ${JotunnC_SOURCE_DIR}/vendor/cimnodes
+  PRIVATE
+  ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes)
+
+target_link_libraries(
+  cimnodes
+  PUBLIC
+  cimgui)
+
+set_target_properties(
+  cimnodes
+  PROPERTIES
+  PREFIX "")
+
 if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   find_package(glfw3 REQUIRED)
   find_package(GLEW REQUIRED)
-
-  add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
-  add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimplot)
-
-  # cimnodes ships without a CMakeLists.txt, so its target is defined here,
-  #  building imnodes against cimgui's Dear ImGui rather than a copy of its own
-  add_library(
-    cimnodes
-    SHARED
-    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/cimnodes.cpp
-    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes/imnodes.cpp)
-
-  target_compile_definitions(
-    cimnodes
-    PRIVATE
-    # The namespace cimnodes' generated wrappers call into
-    IMNODES_NAMESPACE=imnodes
-    # Matches the configuration cimgui compiles imgui with
-    IMGUI_USER_CONFIG="../cimconfig.h")
-
-  target_include_directories(
-    cimnodes
-    PUBLIC
-    ${JotunnC_SOURCE_DIR}/vendor/cimnodes
-    PRIVATE
-    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes)
-
-  target_link_libraries(
-    cimnodes
-    PUBLIC
-    cimgui)
-
-  set_target_properties(
-    cimnodes
-    PROPERTIES
-    PREFIX "")
 else()
 
 endif()
@@ -63,6 +65,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/application/window_layer.c
   # ${JotunnC_SOURCE_DIR}/src/core/application/ui_element.c
   ${JotunnC_SOURCE_DIR}/src/core/application/ui_layer.c
+  ${JotunnC_SOURCE_DIR}/src/core/application/ui/ui_layer_imgui.c
 
   ${JotunnC_SOURCE_DIR}/src/core/utils/util.c
 
@@ -83,7 +86,8 @@ set(APP_SRCS
 
   ${JotunnC_SOURCE_DIR}/src/math/fvector.c
   ${JotunnC_SOURCE_DIR}/src/math/fmatrix.c
-  ${JotunnC_SOURCE_DIR}/src/math/fquaternion.c)
+  ${JotunnC_SOURCE_DIR}/src/math/fquaternion.c
+  ${JotunnC_SOURCE_DIR}/src/math/u8vector.c)
 
 if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   message("Graphics backend is OpenGL")
@@ -91,10 +95,6 @@ if (GRAPHICS_BACKEND STREQUAL "OPENGL")
   set(
     PLATFORM_SRCS
     ${JotunnC_SOURCE_DIR}/src/platform/application/window_gl.c
-    ${JotunnC_SOURCE_DIR}/src/platform/application/ui/ui_layer_gl_imgui.c
-
-    ${JotunnC_SOURCE_DIR}/vendor/cimgui/imgui/backends/imgui_impl_glfw.cpp
-    ${JotunnC_SOURCE_DIR}/vendor/cimgui/imgui/backends/imgui_impl_opengl3.cpp
 
     ${JotunnC_SOURCE_DIR}/src/platform/graphics/api/render_api_opengl.c
     ${JotunnC_SOURCE_DIR}/src/platform/graphics/datatypes/framebuffer_gl.c
@@ -136,8 +136,6 @@ target_compile_definitions(
   DEBUG
 
   CIMGUI_DEFINE_ENUMS_AND_STRUCTS
-  CIMGUI_USE_GLFW
-  CIMGUI_USE_OPENGL3
 )
 
 target_include_directories(

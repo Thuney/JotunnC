@@ -70,6 +70,41 @@ void platform_texture_2d_set_data(
   gl_texture_2d_set_data(texture, data, data_size_bytes);
 }
 
+/*******************************************************************************
+ *
+ *   Function: platform_texture_2d_set_sub_data()
+ *
+ ******************************************************************************/
+void platform_texture_2d_set_sub_data(
+  const struct texture_2d_t* in_texture,
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels,
+  const uint32_t in_row_length_pixels,
+  const void* in_data)
+{
+  glPixelStorei(
+    GL_UNPACK_ROW_LENGTH,
+    (GLint)in_row_length_pixels);
+
+  glTextureSubImage2D(
+    in_texture->texture_id,
+    0,
+    (GLint)in_x_pixels,
+    (GLint)in_y_pixels,
+    (GLsizei)in_width_pixels,
+    (GLsizei)in_height_pixels,
+    gl_get_texture_data_format(in_texture->data_format),
+    GL_UNSIGNED_BYTE,
+    in_data);
+
+  // Zero means rows are tightly packed, which every other upload assumes
+  glPixelStorei(
+    GL_UNPACK_ROW_LENGTH,
+    0);
+}
+
 void platform_texture_2d_bind(
   const struct texture_2d_t* texture,
   const unsigned int texture_slot)

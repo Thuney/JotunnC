@@ -15,7 +15,7 @@ void platform_vertex_buffer_bind(
 
 void platform_vertex_buffer_buffer_data(
   struct vertex_buffer_t* vertex_buffer,
-  float* data,
+  const void* data,
   unsigned int data_bytes,
   enum buffer_data_usage_t usage_type)
 {
@@ -44,7 +44,7 @@ void platform_element_buffer_bind(
 
 void platform_element_buffer_buffer_data(
   struct element_buffer_t* element_buffer,
-  unsigned int* index_data,
+  const void* index_data,
   unsigned int data_bytes,
   enum buffer_data_usage_t usage_type)
 {

@@ -2,6 +2,7 @@
 
 #include "fvector.h"
 #include "shader.h"
+#include "u8vector.h"
 #include "vertexarray.h"
 #include "vertexbuffer.h"
 
@@ -54,6 +55,14 @@ enum renderable_2d_line_vertex_attribute_t
   _LINE_2D_ATTRIBUTE_NUM
 };
 
+enum renderable_2d_mesh_vertex_attribute_t
+{
+  RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_POSITION = 0x00,
+  RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_TEXTURE_COORDINATES,
+  RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_COLOR,
+  RENDERABLE_2D_MESH_VERTEX_ATTRIBUTE_COUNT
+};
+
 //
 
 struct renderable_2d_triangle_vertex_t
@@ -86,6 +95,15 @@ struct renderable_2d_line_vertex_t
 {
   fvector3 position;
   fvector4 color;
+};
+
+// A vertex of an arbitrary textured, colored mesh. Packed to 20 bytes, with
+//  the color normalized from bytes as it is read by the shader
+struct renderable_2d_mesh_vertex_t
+{
+  fvector2 position;
+  fvector2 texture_coordinate;
+  union u8vector4_t color;
 };
 
 //
@@ -149,6 +167,15 @@ struct renderable_2d_line_data_t
   struct renderable_2d_line_vertex_t* vertex_data_ptr;
 };
 
+// GPU objects for meshes, which are uploaded whole as they are drawn rather
+//  than accumulated into a batch, so no CPU-side storage is kept
+struct renderable_2d_mesh_data_t
+{
+  struct vertex_array_t vao;
+  struct vertex_buffer_t vbo;
+  struct element_buffer_t ebo;
+};
+
 //
 
 void renderable_2d_triangle_data_init(
@@ -182,3 +209,19 @@ void renderable_2d_circle_data_cleanup(
   struct renderable_2d_circle_data_t* circle_data);
 void renderable_2d_line_data_cleanup(
   struct renderable_2d_line_data_t* line_data);
+
+// Creates the vertex array and buffers for meshes and binds the mesh vertex
+//  layout to in_shader_program's attributes
+//
+//  in:     in_shader_program
+//  out:    out_mesh_data
+void renderable_2d_mesh_data_init(
+  struct renderable_2d_mesh_data_t* out_mesh_data,
+  struct shader_program_t* in_shader_program);
+
+// Destroys the vertex array and buffers created by
+//  renderable_2d_mesh_data_init()
+//
+//  in/out: inout_mesh_data
+void renderable_2d_mesh_data_cleanup(
+  struct renderable_2d_mesh_data_t* inout_mesh_data);

@@ -122,6 +122,12 @@ void renderer_window_layer_init(
     parent_window,
     tag);
 
+  // Layers are drawn into framebuffers cleared to transparent black, which
+  //  leaves their contents premultiplied by alpha
+  render_api_set_blend_mode(
+    &(renderer->base.render_api),
+    RENDER_API_BLEND_MODE_PREMULTIPLIED_ALPHA);
+
   renderer->base.renderer_begin_scene = &(renderer_window_layer_begin_scene);
   renderer->base.renderer_end_scene   = &(renderer_window_layer_end_scene);
 

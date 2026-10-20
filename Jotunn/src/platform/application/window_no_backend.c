@@ -54,3 +54,21 @@ void window_graphics_set_background_color(
 {
   return;
 }
+
+void window_graphics_set_cursor_shape(
+  const struct window_t* in_window,
+  const enum window_cursor_shape_t in_cursor_shape)
+{
+}
+
+const char* window_graphics_get_clipboard_text(
+  const struct window_t* in_window)
+{
+  return NULL;
+}
+
+void window_graphics_set_clipboard_text(
+  const struct window_t* in_window,
+  const char* in_text)
+{
+}
