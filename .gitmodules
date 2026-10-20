@@ -5,3 +5,6 @@
 	path = Jotunn/vendor/cimplot
 	url = https://github.com/cimgui/cimplot.git
 	branch = master
+[submodule "Jotunn/vendor/cimnodes"]
+	path = Jotunn/vendor/cimnodes
+	url = https://github.com/cimgui/cimnodes.git

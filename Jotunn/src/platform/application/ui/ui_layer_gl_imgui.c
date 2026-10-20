@@ -9,11 +9,13 @@
 #include "cimgui_impl.h"
 
 #include "cimplot.h"
+#include "cimnodes.h"
 
 struct ui_layer_gl_imgui_data_t
 {
   ImGuiContext *ui_context;
   ImPlotContext *ui_plot_context;
+  ImNodesContext *ui_nodes_context;
   ImGuiIO *ui_io;
 
   ImGuiViewport* ui_viewport;
@@ -69,10 +71,11 @@ static void ui_layer_gl_imgui_init(
   struct ui_layer_gl_imgui_data_t *imgui_data =
     (struct ui_layer_gl_imgui_data_t*)ui_layer->ui_layer_data;
 
-  imgui_data->ui_context      = igCreateContext(NULL);
-  imgui_data->ui_plot_context = ImPlot_CreateContext();
-  imgui_data->ui_io           = igGetIO_ContextPtr(imgui_data->ui_context);
-  imgui_data->ui_viewport     = igGetMainViewport();
+  imgui_data->ui_context       = igCreateContext(NULL);
+  imgui_data->ui_plot_context  = ImPlot_CreateContext();
+  imgui_data->ui_nodes_context = imnodes_CreateContext();
+  imgui_data->ui_io            = igGetIO_ContextPtr(imgui_data->ui_context);
+  imgui_data->ui_viewport      = igGetMainViewport();
 
   imgui_data->ui_io->ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
@@ -93,6 +96,7 @@ static void ui_layer_gl_imgui_cleanup(
   struct ui_layer_gl_imgui_data_t *imgui_data =
     (struct ui_layer_gl_imgui_data_t*)ui_layer->ui_layer_data;
 
+  imnodes_DestroyContext(imgui_data->ui_nodes_context);
   ImPlot_DestroyContext(imgui_data->ui_plot_context);
   igDestroyContext(imgui_data->ui_context);
 

@@ -18,6 +18,39 @@ if (GRAPHICS_BACKEND STREQUAL "OPENGL")
 
   add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
   add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimplot)
+
+  # cimnodes ships without a CMakeLists.txt, so its target is defined here,
+  #  building imnodes against cimgui's Dear ImGui rather than a copy of its own
+  add_library(
+    cimnodes
+    SHARED
+    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/cimnodes.cpp
+    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes/imnodes.cpp)
+
+  target_compile_definitions(
+    cimnodes
+    PRIVATE
+    # The namespace cimnodes' generated wrappers call into
+    IMNODES_NAMESPACE=imnodes
+    # Matches the configuration cimgui compiles imgui with
+    IMGUI_USER_CONFIG="../cimconfig.h")
+
+  target_include_directories(
+    cimnodes
+    PUBLIC
+    ${JotunnC_SOURCE_DIR}/vendor/cimnodes
+    PRIVATE
+    ${JotunnC_SOURCE_DIR}/vendor/cimnodes/imnodes)
+
+  target_link_libraries(
+    cimnodes
+    PUBLIC
+    cimgui)
+
+  set_target_properties(
+    cimnodes
+    PROPERTIES
+    PREFIX "")
 else()
 
 endif()
@@ -117,13 +150,15 @@ target_link_libraries(
   JotunnC 
   PUBLIC 
   cimgui 
-  cimplot)
+  cimplot
+  cimnodes)
 
 target_include_directories(
   JotunnC 
   PUBLIC 
   cimgui 
-  cimplot)
+  cimplot
+  cimnodes)
 
 target_link_libraries(
   JotunnC 
