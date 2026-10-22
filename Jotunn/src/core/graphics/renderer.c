@@ -2,6 +2,8 @@
 
 #include "allocator.h"
 
+#include "../diagnostics/diagnostics_internal.h"
+
 #include <memory.h>
 #include <stdlib.h>
 
@@ -34,6 +36,8 @@ void renderer_base_cleanup(
 void renderer_base_begin_scene(
   struct renderer_base_t* renderer)
 {
+  diagnostics_internal_scene_begin(renderer);
+
   render_api_bind(&(renderer->render_api));
   render_api_clear(&(renderer->render_api));
   renderer->renderer_begin_scene((void*)renderer);
@@ -43,4 +47,7 @@ void renderer_base_end_scene(
   struct renderer_base_t* renderer)
 {
   renderer->renderer_end_scene((void*)renderer);
+
+  // Closed after the renderer's own end, which may still draw what it batched
+  diagnostics_internal_scene_end();
 }

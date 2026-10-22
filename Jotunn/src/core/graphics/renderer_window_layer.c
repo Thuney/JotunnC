@@ -2,6 +2,8 @@
 #include "log.h"
 
 #include "util.h"
+
+#include "../diagnostics/diagnostics_internal.h"
 #include "window_layer.h"
 
 #ifdef DEBUG
@@ -169,6 +171,10 @@ void renderer_window_layer_begin_scene(
   struct renderer_window_layer_t *renderer_window_layer =
     (struct renderer_window_layer_t *)renderer;
 
+  // Called directly rather than through renderer_base_begin_scene(), so the
+  //  scene is marked here
+  diagnostics_internal_scene_begin(&(renderer_window_layer->base));
+
   framebuffer_unbind();
 
   render_api_bind(&(renderer_window_layer->base.render_api));
@@ -184,6 +190,8 @@ void renderer_window_layer_end_scene(
   vertex_array_unbind();
 
   framebuffer_unbind();
+
+  diagnostics_internal_scene_end();
 }
 
 void renderer_window_layer_draw_layer(

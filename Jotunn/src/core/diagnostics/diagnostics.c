@@ -3,6 +3,7 @@
 
 #include "allocator.h"
 #include "application.h"
+#include "renderer.h"
 #include "resource.h"
 #include "window.h"
 
@@ -91,6 +92,17 @@ static void _diagnostics_describe_event(
   const struct event_base_t* in_event,
   char* out_text,
   const size_t in_text_length);
+
+// Finds a renderer's slot, taking a new one the first time it's seen; the
+//  last slot is shared by every renderer once the rest are taken
+//
+//  in:     in_renderer
+//  ret:    The index of the renderer's slot
+static uint8_t _diagnostics_find_renderer(
+  const struct renderer_base_t* in_renderer);
+
+// Moves each renderer's counts for the frame just ended to its last frame's
+static void _diagnostics_record_rendering(void);
 
 // Finds the tag of the window an event came from
 //
@@ -292,6 +304,8 @@ void diagnostics_internal_frame_end(void)
   _diagnostics_record_heap();
   _diagnostics_record_resources();
 
+  _diagnostics_record_rendering();
+
   _diagnostics_history_push(
     &(diagnostics_state.events.per_frame),
     (float)diagnostics_state.events.frame_count);
@@ -464,6 +478,71 @@ void diagnostics_internal_events_clear(void)
 {
   diagnostics_state.events.next_index = 0;
   diagnostics_state.events.count = 0;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_scene_begin()
+ *
+ ******************************************************************************/
+void diagnostics_internal_scene_begin(
+  const struct renderer_base_t* in_renderer)
+{
+  struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
+  const uint8_t renderer_index = _diagnostics_find_renderer(in_renderer);
+
+  // A scene too deep to track is charged to the deepest one tracked
+  if (rendering->scene_depth < DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH)
+  {
+    rendering->scene_renderer_indices[rendering->scene_depth] = renderer_index;
+  }
+
+  rendering->scene_depth++;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_scene_end()
+ *
+ ******************************************************************************/
+void diagnostics_internal_scene_end(void)
+{
+  if (diagnostics_state.rendering.scene_depth > 0)
+  {
+    diagnostics_state.rendering.scene_depth--;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_count_draw()
+ *
+ ******************************************************************************/
+void diagnostics_internal_count_draw(
+  const uint32_t in_element_count)
+{
+  struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
+
+  uint8_t renderer_index;
+  if (rendering->scene_depth == 0)
+  {
+    renderer_index = _diagnostics_find_renderer(NULL);
+  }
+  else if (rendering->scene_depth > DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH)
+  {
+    renderer_index = rendering->scene_renderer_indices[DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH - 1];
+  }
+  else
+  {
+    renderer_index = rendering->scene_renderer_indices[rendering->scene_depth - 1];
+  }
+
+  struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[renderer_index]);
+
+  renderer->frame_draw_calls++;
+  renderer->frame_elements += in_element_count;
+  renderer->last_frame = diagnostics_state.frame_count;
+  rendering->frame_draw_calls++;
 }
 
 /*******************************************************************************
@@ -790,6 +869,98 @@ static void _diagnostics_describe_event(
     }
     break;
   }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_find_renderer()
+ *
+ ******************************************************************************/
+static uint8_t _diagnostics_find_renderer(
+  const struct renderer_base_t* in_renderer)
+{
+  struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
+
+  uint8_t renderer_index = 0;
+  while ((renderer_index < rendering->renderer_count) &&
+         (rendering->renderers[renderer_index].renderer != in_renderer))
+  {
+    renderer_index++;
+  }
+
+  if (renderer_index == rendering->renderer_count)
+  {
+    if (rendering->renderer_count < DIAGNOSTICS_INTERNAL_MAX_RENDERERS)
+    {
+      rendering->renderer_count++;
+    }
+    else
+    {
+      renderer_index = (DIAGNOSTICS_INTERNAL_MAX_RENDERERS - 1);
+    }
+
+    rendering->renderers[renderer_index].renderer = in_renderer;
+  }
+
+  struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[renderer_index]);
+
+  // Named afresh each time, as a renderer gone may leave its address to
+  //  another
+  if (in_renderer == NULL)
+  {
+    snprintf(
+      renderer->name,
+      sizeof(renderer->name),
+      "outside any scene");
+  }
+  else
+  {
+    const char* window_tag =
+      ((in_renderer->parent_window != NULL) &&
+       (in_renderer->parent_window->metadata.tag != NULL)) ?
+        in_renderer->parent_window->metadata.tag :
+        "";
+
+    snprintf(
+      renderer->name,
+      sizeof(renderer->name),
+      "%s: %s",
+      window_tag,
+      (in_renderer->tag != NULL) ? in_renderer->tag : "unnamed");
+  }
+
+  renderer->last_frame = diagnostics_state.frame_count;
+
+  return renderer_index;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_record_rendering()
+ *
+ ******************************************************************************/
+static void _diagnostics_record_rendering(void)
+{
+  struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
+
+  for (uint8_t i = 0; i < rendering->renderer_count; i++)
+  {
+    struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
+
+    renderer->draw_calls = renderer->frame_draw_calls;
+    renderer->elements = renderer->frame_elements;
+    _diagnostics_history_push(
+      &(renderer->draw_calls_per_frame),
+      (float)renderer->frame_draw_calls);
+
+    renderer->frame_draw_calls = 0;
+    renderer->frame_elements = 0;
+  }
+
+  _diagnostics_history_push(
+    &(rendering->draw_calls_per_frame),
+    (float)rendering->frame_draw_calls);
+  rendering->frame_draw_calls = 0;
 }
 
 /*******************************************************************************

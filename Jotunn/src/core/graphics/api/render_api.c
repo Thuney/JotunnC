@@ -1,5 +1,7 @@
 #include "render_api.h"
 
+#include "../../diagnostics/diagnostics_internal.h"
+
 extern void platform_render_api_init(struct render_api_implementation_t* render_api);
 extern void platform_render_api_bind(struct render_api_implementation_t* render_api);
 extern void platform_render_api_clear(struct render_api_implementation_t* render_api);
@@ -98,6 +100,8 @@ void render_api_draw_elements(
 {
   platform_render_api_draw_elements(
     draw_mode, element_count, element_data_type, indices);
+
+  diagnostics_internal_count_draw(element_count);
 }
 
 /*******************************************************************************
@@ -154,18 +158,24 @@ void render_api_draw_elements_base_vertex(
     in_element_data_type,
     in_index_offset_bytes,
     in_base_vertex);
+
+  diagnostics_internal_count_draw(in_element_count);
 }
 
 void render_api_draw_triangle_fan(
   unsigned int vertex_count)
 {
   platform_render_api_draw_triangle_fan(vertex_count);
+
+  diagnostics_internal_count_draw(vertex_count);
 }
 
 void render_api_draw_lines(
   unsigned int vertex_count)
 {
   platform_render_api_draw_lines(vertex_count);
+
+  diagnostics_internal_count_draw(vertex_count);
 }
 
 void render_api_set_line_width(

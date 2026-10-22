@@ -53,6 +53,12 @@ static void _diagnostics_panel_draw_overview(
 static void _diagnostics_panel_draw_timing(
   const struct diagnostics_internal_state_t* in_state);
 
+// Draws the Rendering tab: draw calls per frame, by renderer
+//
+//  in:     in_state
+static void _diagnostics_panel_draw_rendering(
+  const struct diagnostics_internal_state_t* in_state);
+
 // Draws the Memory tab: the heap, by allocator tag
 //
 //  in:     in_state
@@ -185,6 +191,15 @@ void diagnostics_internal_panel_draw(
             0))
       {
         _diagnostics_panel_draw_timing(state);
+        igEndTabItem();
+      }
+
+      if (igBeginTabItem(
+            "Rendering",
+            NULL,
+            0))
+      {
+        _diagnostics_panel_draw_rendering(state);
         igEndTabItem();
       }
 
@@ -398,6 +413,123 @@ static void _diagnostics_panel_draw_timing(
       _diagnostics_panel_plot_history(
         in_state->zones[i].name,
         &(in_state->zones[i].milliseconds));
+    }
+
+    ImPlot_EndPlot();
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_panel_draw_rendering()
+ *
+ ******************************************************************************/
+static void _diagnostics_panel_draw_rendering(
+  const struct diagnostics_internal_state_t* in_state)
+{
+  const struct diagnostics_internal_rendering_t* rendering = &(in_state->rendering);
+
+  if (_diagnostics_panel_begin_summary_table(
+        "draw_call_summary",
+        "Draw calls"))
+  {
+    _diagnostics_panel_draw_summary_row(
+      "Every renderer",
+      &(rendering->draw_calls_per_frame),
+      0);
+
+    // Only the renderers at work in the last frame, as one gone may leave
+    //  its slot behind
+    for (uint8_t i = 0; i < rendering->renderer_count; i++)
+    {
+      const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
+
+      if ((renderer->last_frame + 1) >= in_state->frame_count)
+      {
+        _diagnostics_panel_draw_summary_row(
+          renderer->name,
+          &(renderer->draw_calls_per_frame),
+          0);
+      }
+    }
+
+    igEndTable();
+  }
+
+  if (igBeginTable(
+        "renderer_elements",
+        3,
+        (ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV),
+        (ImVec2_c){ 0.0f, 0.0f },
+        0.0f))
+  {
+    igTableSetupColumn(
+      "Last frame",
+      ImGuiTableColumnFlags_WidthStretch,
+      0.0f,
+      0);
+    igTableSetupColumn(
+      "Draw calls",
+      ImGuiTableColumnFlags_WidthFixed,
+      _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS,
+      0);
+    igTableSetupColumn(
+      "Elements",
+      ImGuiTableColumnFlags_WidthFixed,
+      _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS,
+      0);
+    igTableHeadersRow();
+
+    for (uint8_t i = 0; i < rendering->renderer_count; i++)
+    {
+      const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
+
+      if ((renderer->last_frame + 1) < in_state->frame_count)
+      {
+        continue;
+      }
+
+      igTableNextRow(
+        0,
+        0.0f);
+      igTableNextColumn();
+      igText(
+        "%s",
+        renderer->name);
+      igTableNextColumn();
+      igText(
+        "%u",
+        renderer->draw_calls);
+      igTableNextColumn();
+      igText(
+        "%llu",
+        (unsigned long long)renderer->elements);
+    }
+
+    igEndTable();
+  }
+
+  igTextDisabled("Elements are the indices, or vertices, the draw calls drew");
+
+  if (_diagnostics_panel_begin_history_plot(
+        "##draw_calls",
+        "draw calls",
+        _diagnostics_panel_get_history_maximum(&(rendering->draw_calls_per_frame))))
+  {
+    _diagnostics_panel_plot_history(
+      "every renderer",
+      &(rendering->draw_calls_per_frame));
+
+    for (uint8_t i = 0; i < rendering->renderer_count; i++)
+    {
+      const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
+
+      if ((renderer->last_frame + 1) >= in_state->frame_count)
+      {
+        _diagnostics_panel_plot_history(
+          renderer->name,
+          &(renderer->draw_calls_per_frame));
+      }
     }
 
     ImPlot_EndPlot();

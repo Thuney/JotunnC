@@ -2,6 +2,7 @@
 
 #include "allocator.h"
 #include "event.h"
+#include "renderer.h"
 #include "resource.h"
 #include "ui_layer.h"
 #include "window.h"
@@ -187,6 +188,16 @@ static void _diagnostics_overlay_create_layer(
   resource_set_name(
     &(inout_overlay->ui_layer.ui_framebuffer.resource),
     "diagnostics overlay");
+
+  // Every UI layer's renderer shares one tag, so the overlay's is retagged to
+  //  tell its draws apart from the application's UI
+  struct renderer_base_t* renderer = &(inout_overlay->ui_layer.ui_renderer_2d.base);
+
+  allocator_free(renderer->tag);
+  renderer->tag =
+    allocator_duplicate_string(
+      "diagnostics overlay",
+      ALLOCATOR_TAG_RENDERER);
 
   inout_overlay->is_layer_created = true;
 }

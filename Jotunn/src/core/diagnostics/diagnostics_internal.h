@@ -13,6 +13,7 @@
 #include <stdint.h>
 
 struct application_t;
+struct renderer_base_t;
 struct texture_2d_t;
 struct window_layer_t;
 struct window_t;
@@ -51,6 +52,8 @@ enum diagnostics_internal_engine_zone_t
 #define DIAGNOSTICS_INTERNAL_LOG_LENGTH 256
 #define DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH 256
 #define DIAGNOSTICS_INTERNAL_EVENT_TEXT_LENGTH 96
+#define DIAGNOSTICS_INTERNAL_MAX_RENDERERS 16
+#define DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH 8
 
 /*******************************************************************************
  *
@@ -141,6 +144,35 @@ struct diagnostics_internal_events_t
   struct diagnostics_internal_history_t per_frame;
 };
 
+// What one renderer drew. Draws are charged to the renderer whose scene is
+//  open, or to the slot for renderer NULL when none is
+struct diagnostics_internal_renderer_t
+{
+  // Compared, never dereferenced, since the renderer may be gone
+  const struct renderer_base_t* renderer;
+  // The renderer's window's tag and its own
+  char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  // The last frame the renderer opened a scene or drew in
+  uint64_t last_frame;
+  // Counted this frame, then moved to the last frame's at its end
+  uint32_t frame_draw_calls;
+  uint64_t frame_elements;
+  uint32_t draw_calls;
+  uint64_t elements;
+  struct diagnostics_internal_history_t draw_calls_per_frame;
+};
+
+struct diagnostics_internal_rendering_t
+{
+  struct diagnostics_internal_renderer_t renderers[DIAGNOSTICS_INTERNAL_MAX_RENDERERS];
+  uint8_t renderer_count;
+  // The renderers whose scenes are open, innermost last
+  uint8_t scene_renderer_indices[DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH];
+  uint8_t scene_depth;
+  uint32_t frame_draw_calls;
+  struct diagnostics_internal_history_t draw_calls_per_frame;
+};
+
 struct diagnostics_internal_tab_t
 {
   char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
@@ -181,6 +213,8 @@ struct diagnostics_internal_state_t
   struct diagnostics_internal_log_t log;
 
   struct diagnostics_internal_events_t events;
+
+  struct diagnostics_internal_rendering_t rendering;
 };
 
 /*******************************************************************************
@@ -319,12 +353,39 @@ void diagnostics_internal_events_set_paused(
 // Empties the event log, keeping the counts per type
 void diagnostics_internal_events_clear(void);
 
+/*******************************************************************************
+ *
+ *   RENDERING
+ *
+ ******************************************************************************/
+
+// Marks a renderer's scene as open, charging draws to it until the matching
+//  diagnostics_internal_scene_end()
+//
+//  in:     in_renderer
+void diagnostics_internal_scene_begin(
+  const struct renderer_base_t* in_renderer);
+
+// Closes the scene most recently opened
+void diagnostics_internal_scene_end(void);
+
+// Counts a draw call against the renderer whose scene is open
+//
+//  in:     in_element_count
+void diagnostics_internal_count_draw(
+  const uint32_t in_element_count);
+
 #else
 
 #define diagnostics_internal_log_record(in_level, in_text) \
   ((void)(in_level), (void)(in_text))
 #define diagnostics_internal_event_record(in_app, in_event) \
   ((void)(in_app), (void)(in_event))
+#define diagnostics_internal_scene_begin(in_renderer) \
+  ((void)(in_renderer))
+#define diagnostics_internal_scene_end() ((void)0)
+#define diagnostics_internal_count_draw(in_element_count) \
+  ((void)(in_element_count))
 #define diagnostics_internal_frame_begin(in_target_interval_seconds) \
   ((void)(in_target_interval_seconds))
 #define diagnostics_internal_frame_end() ((void)0)
