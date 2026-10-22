@@ -5,6 +5,7 @@
 //  JOTUNN_DIAGNOSTICS the hooks compile to nothing
 
 #include "diagnostics.h"
+#include "log.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -43,9 +44,10 @@ enum diagnostics_internal_engine_zone_t
 #include "allocator.h"
 
 #define DIAGNOSTICS_INTERNAL_HISTORY_LENGTH 512
-#define DIAGNOSTICS_INTERNAL_MAX_ZONES 32
+#define DIAGNOSTICS_INTERNAL_MAX_ZONES 64
 #define DIAGNOSTICS_INTERNAL_MAX_TABS 8
 #define DIAGNOSTICS_INTERNAL_NAME_LENGTH 48
+#define DIAGNOSTICS_INTERNAL_LOG_LENGTH 256
 
 /*******************************************************************************
  *
@@ -79,6 +81,24 @@ struct diagnostics_internal_zone_t
   // Summed over every entry this frame
   double frame_seconds;
   struct diagnostics_internal_history_t milliseconds;
+};
+
+struct diagnostics_internal_log_entry_t
+{
+  enum log_level_t level;
+  // The frame being recorded when the message was written
+  uint64_t frame;
+  char text[LOG_MESSAGE_MAX_LENGTH];
+};
+
+// The most recent log messages, kept in a ring like the histories
+struct diagnostics_internal_log_t
+{
+  struct diagnostics_internal_log_entry_t entries[DIAGNOSTICS_INTERNAL_LOG_LENGTH];
+  uint32_t next_index;
+  uint32_t count;
+  // Every message written at each level, including those since displaced
+  uint64_t level_counts[LOG_LEVEL_COUNT];
 };
 
 struct diagnostics_internal_tab_t
@@ -117,6 +137,8 @@ struct diagnostics_internal_state_t
 
   struct diagnostics_internal_tab_t tabs[DIAGNOSTICS_INTERNAL_MAX_TABS];
   uint8_t tab_count;
+
+  struct diagnostics_internal_log_t log;
 };
 
 /*******************************************************************************
@@ -202,8 +224,27 @@ void diagnostics_internal_panel_draw(
   bool* inout_is_open,
   const struct texture_2d_t* in_target_texture);
 
+/*******************************************************************************
+ *
+ *   LOG
+ *
+ ******************************************************************************/
+
+// Keeps a log message for the Log tab, displacing the oldest once the log is
+//  full
+//
+//  in:     in_level, in_text
+void diagnostics_internal_log_record(
+  const enum log_level_t in_level,
+  const char* in_text);
+
+// Empties the log kept for the Log tab, keeping the counts per level
+void diagnostics_internal_log_clear(void);
+
 #else
 
+#define diagnostics_internal_log_record(in_level, in_text) \
+  ((void)(in_level), (void)(in_text))
 #define diagnostics_internal_frame_begin(in_target_interval_seconds) \
   ((void)(in_target_interval_seconds))
 #define diagnostics_internal_frame_end() ((void)0)

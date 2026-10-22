@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "log.h"
 #include "allocator.h"
 #include "../resource_internal.h"
 #include "util.h"
@@ -90,28 +91,32 @@ int shader_program_init_filepath(
 
   error = vertex_shader_init_filepath(&vertex_shader, vertex_shader_filepath);
   if (error)
-    fprintf(
-      stdout,
-      "Error occurred during vertex shader init - Filepath = %s\n",
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error occurred during vertex shader init - Filepath = %s",
       vertex_shader_filepath);
 
   error =
     fragment_shader_init_filepath(&fragment_shader, fragment_shader_filepath);
   if (error)
-    fprintf(
-      stdout,
-      "Error occurred during fragment shader init - Filepath = %s\n",
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error occurred during fragment shader init - Filepath = %s",
       fragment_shader_filepath);
 
   error = shader_program_init(shader_program, &vertex_shader, &fragment_shader);
   if (error)
-    fprintf(stdout, "Error occurred during shader program init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error occurred during shader program init");
 
   shader_program_bind_fragment_data_location(shader_program, 0, "fColor");
 
   error = shader_program_link(shader_program);
   if (error)
-    fprintf(stdout, "Error occurred during shader program linkage\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error occurred during shader program linkage");
 
   vertex_shader_destroy(&vertex_shader);
   fragment_shader_destroy(&fragment_shader);

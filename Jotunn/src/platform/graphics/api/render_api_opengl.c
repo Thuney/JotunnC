@@ -1,4 +1,5 @@
 #include "render_api.h"
+#include "log.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -93,7 +94,9 @@ static void opengl_render_api_init(
   struct render_api_implementation_t* render_api)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing OpenGL Render API\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Initializing OpenGL Render API");
 #endif
 
   glEnable(GL_LINE_SMOOTH);

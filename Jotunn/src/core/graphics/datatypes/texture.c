@@ -1,4 +1,5 @@
 #include "texture.h"
+#include "log.h"
 
 #include "allocator.h"
 #include "../resource_internal.h"
@@ -151,10 +152,10 @@ void texture_2d_set_data(
   if (data_size_bytes != (texture->width * texture->height * texture->channels))
   {
   #ifdef DEBUG
-    fprintf(
-      stdout,
+    log_write(
+      LOG_LEVEL_ERROR,
       "Provided data_size_bytes does not equal expected (computed) "
-      "data_size_bytes\n");
+      "data_size_bytes");
   #endif
 
     return;

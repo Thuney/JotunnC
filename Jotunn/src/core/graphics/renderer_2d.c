@@ -1,4 +1,5 @@
 #include "renderer_2d.h"
+#include "log.h"
 
 #include "framebuffer.h"
 #include "util.h"
@@ -268,7 +269,9 @@ static void renderer_2d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/triangle_2d_shader.frag"));
 #ifdef DEBUG
   if (error)
-    fprintf(stdout, "Error during triangle shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during triangle shader init");
 #endif
   error = shader_program_init_filepath(
     &data->quad_shader,
@@ -276,7 +279,9 @@ static void renderer_2d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/quad_2d_shader.frag"));
 #ifdef DEBUG
   if (error)
-    fprintf(stdout, "Error during quad shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during quad shader init");
 #endif
   error = shader_program_init_filepath(
     &data->textured_quad_shader,
@@ -284,7 +289,9 @@ static void renderer_2d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/textured_quad_2d_shader.frag"));
 #ifdef DEBUG
   if (error)
-    fprintf(stdout, "Error during quad shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during quad shader init");
 #endif
   error = shader_program_init_filepath(
     &data->circle_shader,
@@ -292,7 +299,9 @@ static void renderer_2d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/circle_2d_shader.frag"));
 #ifdef DEBUG
   if (error)
-    fprintf(stdout, "Error during circle shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during circle shader init");
 #endif
   error = shader_program_init_filepath(
     &data->line_shader,
@@ -300,7 +309,9 @@ static void renderer_2d_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/line_2d_shader.frag"));
 #ifdef DEBUG
   if (error)
-    fprintf(stdout, "Error during line shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during line shader init");
 #endif
   error = shader_program_init_filepath(
     &(data->mesh_shader),
@@ -309,9 +320,9 @@ static void renderer_2d_data_init(
 #ifdef DEBUG
   if (error)
   {
-    fprintf(
-      stdout,
-      "Error during mesh shader init\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during mesh shader init");
   }
 #endif
 
@@ -391,7 +402,9 @@ void renderer_2d_init(
   renderer->base.renderer_end_scene = &renderer_2d_end_scene;
 
 #ifdef DEBUG
-  fprintf(stdout, "Initializing renderer_2d\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Initializing renderer_2d");
 #endif
 
   // Batch stuff

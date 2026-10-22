@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "log.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -25,7 +26,10 @@ static int gl_vertex_shader_init(
     // If an error occurs during compilation, we grab the error log
     glGetShaderInfoLog(
       shader->vertex_shader, 512, NULL, shader->compilation_log);
-    fprintf(stdout, "%s\n", shader->compilation_log);
+    log_write(
+      LOG_LEVEL_ERROR,
+      "%s",
+      shader->compilation_log);
   }
   return shader->compilation_status;
    #endif
@@ -51,7 +55,10 @@ static int gl_fragment_shader_init(
     // If an error occurs during compilation, we grab the error log
     glGetShaderInfoLog(
       shader->fragment_shader, 512, NULL, shader->compilation_log);
-    fprintf(stdout, "%s\n", shader->compilation_log);
+    log_write(
+      LOG_LEVEL_ERROR,
+      "%s",
+      shader->compilation_log);
   }
   return shader->compilation_status;
    #endif
@@ -90,7 +97,10 @@ static int gl_shader_program_link(
     // If an error occurs during compilation, we grab the error log
     glGetProgramInfoLog(
       shader_program->shader_program, 512, NULL, shader_program->link_log);
-    fprintf(stdout, "%s\n", shader_program->link_log);
+    log_write(
+      LOG_LEVEL_ERROR,
+      "%s",
+      shader_program->link_log);
   }
   return shader_program->link_status;
    #endif
@@ -186,7 +196,9 @@ static void gl_shader_program_set_uniform(
     default:
     {
          #ifdef DEBUG
-      fprintf(stdout, "Unknown shader uniform enum type\n");
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Unknown shader uniform enum type");
          #endif
     }
     break;

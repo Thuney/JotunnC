@@ -14,6 +14,7 @@
 #include "application.h"
 #include "framebuffer.h"
 #include "fvector.h"
+#include "log.h"
 #include "render_api.h"
 #include "window_layer.h"
 
@@ -119,7 +120,9 @@ uint8_t window_init(
   const uint8_t error = window_graphics_init(window);
 
 #ifdef DEBUG
-  if (error) fprintf(stdout, "Error during window_graphics_init\n");
+  if (error) log_write(
+    LOG_LEVEL_ERROR,
+    "Error during window_graphics_init");
 #endif
 
   if (!error)
@@ -154,7 +157,9 @@ uint8_t window_add_layer(
   struct window_layer_t* new_window_layer)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Adding layer to window\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Adding layer to window");
   #endif
 
   uint8_t error = 0U;
@@ -171,7 +176,9 @@ uint8_t window_add_layer(
     error |= 1U;
 
     #ifdef DEBUG
-    fprintf(stdout, "Error adding layer to window\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error adding layer to window");
     #endif
   }
 

@@ -1,4 +1,5 @@
 #include "renderer_window_layer.h"
+#include "log.h"
 
 #include "util.h"
 #include "window_layer.h"
@@ -142,7 +143,9 @@ void renderer_window_layer_init(
   renderer->base.renderer_end_scene   = &(renderer_window_layer_end_scene);
 
 #ifdef DEBUG
-  fprintf(stdout, "Initializing renderer_window_layer\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Initializing renderer_window_layer");
 #endif
 
   renderer_window_layer_data_init(

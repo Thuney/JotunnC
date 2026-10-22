@@ -1,4 +1,5 @@
 #include "util.h"
+#include "log.h"
 
 #include "allocator.h"
 
@@ -13,9 +14,9 @@ char* read_raw_file_contents(
   if (file == NULL)
   {
   #ifdef DEBUG
-    fprintf(
-      stdout,
-      "Failed to open %s\n",
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Failed to open %s",
       file_path);
   #endif
 
@@ -41,7 +42,9 @@ char* read_raw_file_contents(
   if (buffer == NULL)
   {
   #ifdef DEBUG
-    fprintf(stdout, "Memory alloc fails\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Memory alloc fails");
   #endif
   }
   else
@@ -56,7 +59,9 @@ char* read_raw_file_contents(
     if (read_size_bytes != (size_t)file_size_bytes)
     {
     #ifdef DEBUG
-      fprintf(stdout, "Entire read fails\n");
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Entire read fails");
     #endif
 
       allocator_free(buffer);

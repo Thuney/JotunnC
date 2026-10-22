@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "application.h"
+#include "log.h"
 #include "event.h"
 #include "fvector.h"
 #include "render_api.h"
@@ -116,7 +117,9 @@ uint8_t window_graphics_init(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Found OpenGL Backend\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Found OpenGL Backend");
 #endif
 
   return window_gl_init(window);
@@ -483,9 +486,9 @@ static void gl_window_error_callback(
   const char* description)
 {
   #ifdef DEBUG
-  fprintf(
-    stdout,
-    "Error Callback - Code: %d, Description: %s\n",
+  log_write(
+    LOG_LEVEL_ERROR,
+    "Error Callback - Code: %d, Description: %s",
     error_code,
     description);
   #endif
@@ -525,7 +528,9 @@ static uint8_t window_gl_init(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing OpenGL Window\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Initializing OpenGL Window");
 #endif
 
   // Handle GLFW initialization
@@ -548,10 +553,14 @@ static uint8_t window_gl_init(
 #ifdef DEBUG
   else
   {
-    fprintf(stdout, "GLFW initialization failed\n");
+    log_write(
+      LOG_LEVEL_ERROR,
+      "GLFW initialization failed");
   }
 
-  fprintf(stdout, "Creating Window\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Creating Window");
 #endif
 
   // Create window via GLFW
@@ -588,7 +597,9 @@ static uint8_t window_gl_init(
   GLenum gl_error = GL_NO_ERROR;
 
 #ifdef DEBUG
-  fprintf(stdout, "End of Window Graphics Init - Clearing error queue\n");
+  log_write(
+    LOG_LEVEL_DEBUG,
+    "End of Window Graphics Init - Clearing error queue");
 #endif
 
   do
@@ -596,13 +607,19 @@ static uint8_t window_gl_init(
     gl_error = glGetError();
 
   #ifdef DEBUG
-    fprintf(stdout, "Error Code: %d\n", gl_error);
+    // The queue always ends with GL_NO_ERROR, which isn't worth a warning
+    log_write(
+      (gl_error == GL_NO_ERROR) ? LOG_LEVEL_DEBUG : LOG_LEVEL_WARNING,
+      "Error Code: %d",
+      gl_error);
   #endif
 
   } while (gl_error != GL_NO_ERROR);
 
 #ifdef DEBUG
-  fprintf(stdout, "Done clearing error queue\n");
+  log_write(
+    LOG_LEVEL_DEBUG,
+    "Done clearing error queue");
 #endif
 
   return !(is_glfw_initialized && is_glew_initialized);
@@ -649,7 +666,9 @@ static void window_gl_cleanup(
   struct window_t* window)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up OpenGL Window\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Cleaning up OpenGL Window");
 #endif
 
   if (is_glfw_initialized)

@@ -10,12 +10,14 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <string.h>
 
 #define _DIAGNOSTICS_PANEL_PLOT_HEIGHT_PIXELS 180.0f
 #define _DIAGNOSTICS_PANEL_PREVIEW_SIZE_PIXELS 256.0f
 #define _DIAGNOSTICS_PANEL_RESOURCE_LIST_HEIGHT_PIXELS 240.0f
 #define _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS 72.0f
 #define _DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH 32
+#define _DIAGNOSTICS_PANEL_FILTER_TEXT_LENGTH 128
 
 /*******************************************************************************
  *
@@ -26,6 +28,11 @@
 // Textures rendered into by the graphics API are stored bottom row first, so
 //  previews are shown flipped unless asked otherwise
 static bool is_preview_flipped = true;
+
+// The Log tab's filters and whether it follows new messages
+static bool is_log_level_shown[LOG_LEVEL_COUNT] = { true, true, true, true };
+static char log_filter_text[_DIAGNOSTICS_PANEL_FILTER_TEXT_LENGTH] = "";
+static bool is_log_auto_scrolled = true;
 
 /*******************************************************************************
  *
@@ -57,6 +64,12 @@ static void _diagnostics_panel_draw_memory(
 static void _diagnostics_panel_draw_resources(
   const struct diagnostics_internal_state_t* in_state,
   const struct texture_2d_t* in_target_texture);
+
+// Draws the Log tab: the log's recent messages, filtered by level and text
+//
+//  in:     in_state
+static void _diagnostics_panel_draw_log(
+  const struct diagnostics_internal_state_t* in_state);
 
 // Starts a table summarizing histories, one per row, with columns for the
 //  latest value, the average, the 99th percentile and the maximum
@@ -184,6 +197,15 @@ void diagnostics_internal_panel_draw(
         _diagnostics_panel_draw_resources(
           state,
           in_target_texture);
+        igEndTabItem();
+      }
+
+      if (igBeginTabItem(
+            "Log",
+            NULL,
+            0))
+      {
+        _diagnostics_panel_draw_log(state);
         igEndTabItem();
       }
 
@@ -674,6 +696,114 @@ static void _diagnostics_panel_draw_resources(
 
     ImPlot_EndPlot();
   }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_panel_draw_log()
+ *
+ ******************************************************************************/
+static void _diagnostics_panel_draw_log(
+  const struct diagnostics_internal_state_t* in_state)
+{
+  static const ImVec4_c level_colors[LOG_LEVEL_COUNT] =
+  {
+    [LOG_LEVEL_DEBUG]   = { 0.60f, 0.60f, 0.60f, 1.0f },
+    [LOG_LEVEL_INFO]    = { 0.90f, 0.90f, 0.90f, 1.0f },
+    [LOG_LEVEL_WARNING] = { 1.00f, 0.80f, 0.30f, 1.0f },
+    [LOG_LEVEL_ERROR]   = { 1.00f, 0.40f, 0.40f, 1.0f },
+  };
+
+  const struct diagnostics_internal_log_t* log = &(in_state->log);
+
+  for (int level = 0; level < LOG_LEVEL_COUNT; level++)
+  {
+    char label[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
+    snprintf(
+      label,
+      sizeof(label),
+      "%s (%llu)",
+      log_get_level_name((enum log_level_t)level),
+      (unsigned long long)log->level_counts[level]);
+
+    igCheckbox(
+      label,
+      &(is_log_level_shown[level]));
+    igSameLine(
+      0.0f,
+      -1.0f);
+  }
+
+  if (igSmallButton("Clear"))
+  {
+    diagnostics_internal_log_clear();
+  }
+
+  igSetNextItemWidth(240.0f);
+  igInputText(
+    "Filter",
+    log_filter_text,
+    sizeof(log_filter_text),
+    0,
+    NULL,
+    NULL);
+  igSameLine(
+    0.0f,
+    -1.0f);
+  igCheckbox(
+    "Follow new messages",
+    &(is_log_auto_scrolled));
+
+  // Ended whether or not the child is visible
+  if (igBeginChild_Str(
+        "log_messages",
+        (ImVec2_c){ 0.0f, 0.0f },
+        ImGuiChildFlags_Borders,
+        0))
+  {
+    // Once the ring is full its oldest message is the next to be overwritten
+    const uint32_t first_index =
+      (log->count == DIAGNOSTICS_INTERNAL_LOG_LENGTH) ?
+        log->next_index :
+        0;
+
+    for (uint32_t i = 0; i < log->count; i++)
+    {
+      const struct diagnostics_internal_log_entry_t* entry =
+        &(log->entries[(first_index + i) % DIAGNOSTICS_INTERNAL_LOG_LENGTH]);
+
+      const bool is_level_valid =
+        ((unsigned int)entry->level < (unsigned int)LOG_LEVEL_COUNT);
+
+      if (!is_level_valid ||
+          !is_log_level_shown[entry->level] ||
+          ((log_filter_text[0] != '\0') &&
+           (strstr(entry->text, log_filter_text) == NULL)))
+      {
+        continue;
+      }
+
+      igPushStyleColor_Vec4(
+        ImGuiCol_Text,
+        level_colors[entry->level]);
+      igTextWrapped(
+        "%6llu  %-7s  %s",
+        (unsigned long long)entry->frame,
+        log_get_level_name(entry->level),
+        entry->text);
+      igPopStyleColor(1);
+    }
+
+    // Kept at the bottom while it's there already, so scrolling up to read
+    //  isn't undone by the next message
+    if (is_log_auto_scrolled &&
+        (igGetScrollY() >= igGetScrollMaxY()))
+    {
+      igSetScrollHereY(1.0f);
+    }
+  }
+
+  igEndChild();
 }
 
 /*******************************************************************************

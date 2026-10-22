@@ -1,13 +1,16 @@
 #include <stdio.h>
 
 #include "window.h"
+#include "log.h"
 
 // Extern function definitions
 uint8_t window_graphics_init(
   struct window_t* window)
 {
    #ifdef DEBUG
-  printf("No graphics backend!\n");
+  log_write(
+    LOG_LEVEL_ERROR,
+    "No graphics backend!");
    #endif
 
   window->metadata.signaled_close = 1;

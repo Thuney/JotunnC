@@ -1,4 +1,5 @@
 #include "vertexbuffer.h"
+#include "log.h"
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -142,12 +143,21 @@ static void gl_error_check(
 
   if (_gl_error == GL_NO_ERROR)
   {
-    vprintf(success_string, args);
+    log_write_va(
+      LOG_LEVEL_DEBUG,
+      success_string,
+      args);
   }
   else
   {
-    vprintf(error_string, args);
-    printf("--> Error Code: %d\n", _gl_error);
+    log_write_va(
+      LOG_LEVEL_ERROR,
+      error_string,
+      args);
+    log_write(
+      LOG_LEVEL_ERROR,
+      "--> Error Code: %d",
+      _gl_error);
   }
 
   va_end(args);

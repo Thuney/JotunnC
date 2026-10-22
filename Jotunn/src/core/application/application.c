@@ -10,6 +10,7 @@
 
 /** Local Includes  **/
 #include "allocator.h"
+#include "log.h"
 #include "render_api.h"
 #include "resource.h"
 #include "util.h"
@@ -35,10 +36,10 @@ uint8_t application_init(
   const uint8_t max_windows)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Initializing application\n");
-
-  fprintf(stdout, PATH_FROM_JOTUNN_ROOT(""));
-  fprintf(stdout, "\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Initializing application, with Jotunn at %s",
+    PATH_FROM_JOTUNN_ROOT(""));
 #endif
 
   uint8_t error = 0;
@@ -89,7 +90,9 @@ uint8_t application_start(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Starting application\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Starting application");
 #endif
 
   timestep_reset(&app->timer);
@@ -142,7 +145,9 @@ void application_run(
             app->running = 0U;
 
           #ifdef DEBUG
-            fprintf(stdout, "Window signaled to close\n");
+            log_write(
+              LOG_LEVEL_INFO,
+              "Window signaled to close");
           #endif
           }
         }
@@ -169,7 +174,9 @@ uint8_t application_stop(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Stopping application\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Stopping application");
 #endif
 
   app->running = 0;
@@ -186,7 +193,9 @@ void application_cleanup(
   struct application_t* app)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up application\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Cleaning up application");
 #endif
 
   if (app->running) {
@@ -358,7 +367,9 @@ uint8_t application_add_window(
   struct window_t* new_window)
 {
     #ifdef DEBUG
-  fprintf(stdout, "Adding window to application\n");
+  log_write(
+    LOG_LEVEL_INFO,
+    "Adding window to application");
     #endif
 
   uint8_t error = 0U;

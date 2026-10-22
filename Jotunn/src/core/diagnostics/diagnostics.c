@@ -255,6 +255,49 @@ void diagnostics_internal_count_idle_call(void)
 
 /*******************************************************************************
  *
+ *   Function: diagnostics_internal_log_record()
+ *
+ ******************************************************************************/
+void diagnostics_internal_log_record(
+  const enum log_level_t in_level,
+  const char* in_text)
+{
+  struct diagnostics_internal_log_t* log = &(diagnostics_state.log);
+  struct diagnostics_internal_log_entry_t* entry = &(log->entries[log->next_index]);
+
+  entry->level = in_level;
+  entry->frame = diagnostics_state.frame_count;
+  snprintf(
+    entry->text,
+    sizeof(entry->text),
+    "%s",
+    in_text);
+
+  log->next_index = (log->next_index + 1) % DIAGNOSTICS_INTERNAL_LOG_LENGTH;
+  if (log->count < DIAGNOSTICS_INTERNAL_LOG_LENGTH)
+  {
+    log->count++;
+  }
+
+  if ((unsigned int)in_level < (unsigned int)LOG_LEVEL_COUNT)
+  {
+    log->level_counts[in_level]++;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_log_clear()
+ *
+ ******************************************************************************/
+void diagnostics_internal_log_clear(void)
+{
+  diagnostics_state.log.next_index = 0;
+  diagnostics_state.log.count = 0;
+}
+
+/*******************************************************************************
+ *
  *   Function: diagnostics_internal_get_state()
  *
  ******************************************************************************/

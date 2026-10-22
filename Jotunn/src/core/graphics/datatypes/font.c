@@ -1,4 +1,5 @@
 #include "font.h"
+#include "log.h"
 
 #include "allocator.h"
 
@@ -80,7 +81,9 @@ void font_init()
     if (!error)
     {
          #ifdef DEBUG
-      fprintf(stdout, "Loaded FreeType Library\n");
+      log_write(
+        LOG_LEVEL_INFO,
+        "Loaded FreeType Library");
          #endif
 
       freetype_initialized = 1;
@@ -105,7 +108,9 @@ void font_cleanup()
     if (!error)
     {
     #ifdef DEBUG
-      fprintf(stdout, "Cleaning up FreeType Library\n");
+      log_write(
+        LOG_LEVEL_INFO,
+        "Cleaning up FreeType Library");
     #endif
 
       freetype_initialized = 0;
@@ -159,9 +164,9 @@ static int typeface_render_char(
 #ifdef DEBUG
   if (error)
   {
-    fprintf(
-      stdout,
-      "Error loading glyph '%c' - glyph_index = %u\n",
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error loading glyph '%c' - glyph_index = %u",
       charcode,
       glyph_index);
   }
@@ -172,9 +177,9 @@ static int typeface_render_char(
 #ifdef DEBUG
   if (error)
   {
-    fprintf(
-      stdout,
-      "Error rendering glyph for char '%c' - glyph_index = %u\n",
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error rendering glyph for char '%c' - glyph_index = %u",
       charcode,
       glyph_index);
   }
@@ -277,12 +282,16 @@ void typeface_init(
   #ifdef DEBUG
     if (error == FT_Err_Unknown_File_Format)
     {
-      fprintf(stdout, "Error loading TypeFace - Unknown File Format\n");
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Error loading TypeFace - Unknown File Format");
     }
     else if (error)
     {
-      fprintf(
-        stdout, "Error loading TypeFace - Generic Error - Code = %u\n", error);
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Error loading TypeFace - Generic Error - Code = %u",
+        error);
     }
   #endif
 
@@ -317,7 +326,9 @@ void typeface_cleanup(
     if (!error)
     {
     #ifdef DEBUG
-      fprintf(stdout, "Cleaning up TypeFace\n");
+      log_write(
+        LOG_LEVEL_INFO,
+        "Cleaning up TypeFace");
     #endif
 
       typeface->is_loaded = 0;
@@ -429,9 +440,9 @@ const struct glyph_t* typeface_get_glyph_from_char(
   #ifdef DEBUG
     else
     {
-      fprintf(
-        stdout,
-        "Attempted to load char outside of char range loaded by typeface\n");
+      log_write(
+        LOG_LEVEL_WARNING,
+        "Attempted to load char outside of char range loaded by typeface");
     }
   #endif
   }
