@@ -278,10 +278,19 @@ uint8_t window_run(
   current_layer = window->layers;
   for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
   {
+    const uint16_t layer_zone =
+      diagnostics_internal_get_layer_zone(
+        window,
+        i);
+
+    diagnostics_zone_begin(layer_zone);
+
     _window_render_layer(
       window,
       *current_layer,
       window->metadata.resized);
+
+    diagnostics_zone_end(layer_zone);
   }
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);

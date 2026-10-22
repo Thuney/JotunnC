@@ -235,6 +235,15 @@ void diagnostics_internal_frame_end(void);
 // Counts a pass through the application loop that rendered nothing
 void diagnostics_internal_count_idle_call(void);
 
+// Finds the zone timing one of a window's layers, registering it the first
+//  time; it's named after the window's tag and the layer's position
+//
+//  in:     in_window, in_layer_index
+//  ret:    The zone's id; DIAGNOSTICS_ZONE_INVALID when every zone is taken
+uint16_t diagnostics_internal_get_layer_zone(
+  const struct window_t* in_window,
+  const uint8_t in_layer_index);
+
 // Reads what the diagnostics have collected
 //
 //  ret:    The collected state
@@ -390,6 +399,8 @@ void diagnostics_internal_count_draw(
   ((void)(in_target_interval_seconds))
 #define diagnostics_internal_frame_end() ((void)0)
 #define diagnostics_internal_count_idle_call() ((void)0)
+#define diagnostics_internal_get_layer_zone(in_window, in_layer_index) \
+  ((void)(in_window), (void)(in_layer_index), (uint16_t)DIAGNOSTICS_ZONE_INVALID)
 #define diagnostics_internal_overlay_event_react(inout_window, inout_event) \
   ((void)(inout_window), (void)(inout_event), false)
 #define diagnostics_internal_overlay_prepare(inout_window) \

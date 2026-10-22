@@ -547,6 +547,28 @@ void diagnostics_internal_count_draw(
 
 /*******************************************************************************
  *
+ *   Function: diagnostics_internal_get_layer_zone()
+ *
+ ******************************************************************************/
+uint16_t diagnostics_internal_get_layer_zone(
+  const struct window_t* in_window,
+  const uint8_t in_layer_index)
+{
+  char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  snprintf(
+    name,
+    sizeof(name),
+    "%s layer %u",
+    (in_window->metadata.tag != NULL) ? in_window->metadata.tag : "window",
+    (unsigned int)in_layer_index);
+
+  // Looked up by name every time, so a window gone can't leave a stale zone
+  //  to one that takes its place
+  return diagnostics_zone_register(name);
+}
+
+/*******************************************************************************
+ *
  *   Function: diagnostics_internal_get_state()
  *
  ******************************************************************************/
