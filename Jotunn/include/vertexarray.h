@@ -1,10 +1,13 @@
 #pragma once
 
+#include "resource.h"
 #include "vertexattribute.h"
 
 struct vertex_array_t
 {
   unsigned int vertex_array;
+  // Its entry in the resource registry
+  struct resource_t resource;
 };
 
 void vertex_array_init(

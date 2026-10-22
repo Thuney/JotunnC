@@ -1,5 +1,7 @@
 #include "vertexarray.h"
 
+#include "../resource_internal.h"
+
 extern void platform_vertex_array_init(struct vertex_array_t* vertex_array, int num);
 extern void platform_vertex_array_bind(struct vertex_array_t* vertex_array);
 extern void platform_vertex_array_unbind();
@@ -10,7 +12,20 @@ void vertex_array_init(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  platform_vertex_array_init(vertex_array, num);
+  // Each array has its own registry entry, so they're created one at a time
+  //  rather than with their names packed together
+  for (int i = 0; i < num; i++)
+  {
+    platform_vertex_array_init(
+      &(vertex_array[i]),
+      1);
+
+    // A vertex array only records how its buffers are read
+    resource_internal_register(
+      &(vertex_array[i].resource),
+      RESOURCE_KIND_VERTEX_ARRAY,
+      0);
+  }
 }
 
 void vertex_array_bind(
@@ -35,5 +50,12 @@ void vertex_array_destroy(
   struct vertex_array_t* vertex_array,
   int num)
 {
-  platform_vertex_array_destroy(vertex_array, num);
+  for (int i = 0; i < num; i++)
+  {
+    platform_vertex_array_destroy(
+      &(vertex_array[i]),
+      1);
+
+    resource_internal_unregister(&(vertex_array[i].resource));
+  }
 }

@@ -1,5 +1,6 @@
 #include "shader.h"
 #include "allocator.h"
+#include "../resource_internal.h"
 #include "util.h"
 
 #include <memory.h>
@@ -125,6 +126,13 @@ int shader_program_init(
 {
   int success = platform_shader_program_init(
     shader_program, vertex_shader, fragment_shader);
+
+  // The program exists whether or not its shaders could be attached
+  resource_internal_register(
+    &(shader_program->resource),
+    RESOURCE_KIND_SHADER_PROGRAM,
+    0);
+
   return !success;
 }
 
@@ -201,4 +209,6 @@ void shader_program_destroy(
   struct shader_program_t* shader_program)
 {
   platform_shader_program_destroy(shader_program);
+
+  resource_internal_unregister(&(shader_program->resource));
 }

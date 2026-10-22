@@ -397,6 +397,9 @@ int typeface_load_glyph_atlas(
     texture_atlas_texture,
     pixel_data_rgba,
     texture_atlas_width * texture_atlas_height * 4);
+  resource_set_name(
+    &(texture_atlas_texture->resource),
+    "glyph atlas");
 
   allocator_free(pixel_data_rgba);
   allocator_free(pixel_data_bitmap);

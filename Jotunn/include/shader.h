@@ -3,6 +3,7 @@
 #include <stdint.h>
 
 #include "fmatrix.h"
+#include "resource.h"
 #include "vertexattribute.h"
 
 enum shader_program_uniform_t
@@ -21,6 +22,8 @@ enum shader_program_uniform_t
 struct shader_program_t
 {
   unsigned int shader_program;
+  // Its entry in the resource registry
+  struct resource_t resource;
 
 #ifdef DEBUG
   int link_status;

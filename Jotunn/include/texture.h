@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fvector.h"
+#include "resource.h"
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -47,6 +48,8 @@ struct texture_2d_t
   // Set while the texture holds graphics memory, from texture_2d_init() until
   //  texture_2d_cleanup()
   unsigned int is_loaded;
+  // Its entry in the resource registry
+  struct resource_t resource;
 };
 
 struct subtexture_2d_t

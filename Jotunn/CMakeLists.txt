@@ -75,6 +75,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer_2d.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer_window_layer.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderable_2d_primitive.c
+  ${JotunnC_SOURCE_DIR}/src/core/graphics/resource.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/camera.c
 
   ${JotunnC_SOURCE_DIR}/src/core/graphics/datatypes/font.c

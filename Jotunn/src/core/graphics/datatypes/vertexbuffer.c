@@ -1,5 +1,7 @@
 #include "vertexbuffer.h"
 
+#include "../resource_internal.h"
+
 extern void platform_vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num);
@@ -17,7 +19,7 @@ extern void platform_vertex_buffer_destroy(
   struct vertex_buffer_t* vertex_buffer,
   int num);
 
-extern int platform_element_buffer_init(
+extern void platform_element_buffer_init(
   struct element_buffer_t* element_buffer,
   int num);
 extern void platform_element_buffer_bind(struct element_buffer_t* element_buffer);
@@ -36,7 +38,19 @@ void vertex_buffer_init(
   struct vertex_buffer_t* vertex_buffer,
   int num)
 {
-  platform_vertex_buffer_init(vertex_buffer, num);
+  // Each buffer has its own registry entry, so they're created one at a time
+  //  rather than with their names packed together
+  for (int i = 0; i < num; i++)
+  {
+    platform_vertex_buffer_init(
+      &(vertex_buffer[i]),
+      1);
+
+    resource_internal_register(
+      &(vertex_buffer[i].resource),
+      RESOURCE_KIND_VERTEX_BUFFER,
+      0);
+  }
 }
 
 void vertex_buffer_bind(
@@ -53,6 +67,11 @@ void vertex_buffer_buffer_data(
 {
   platform_vertex_buffer_buffer_data(
     vertex_buffer, data, data_bytes, usage_type);
+
+  // The buffer's storage is replaced with data_bytes of it
+  resource_internal_set_size(
+    &(vertex_buffer->resource),
+    data_bytes);
 }
 
 void vertex_buffer_buffer_sub_data(
@@ -67,7 +86,14 @@ void vertex_buffer_destroy(
   struct vertex_buffer_t* vertex_buffer,
   int num)
 {
-  platform_vertex_buffer_destroy(vertex_buffer, num);
+  for (int i = 0; i < num; i++)
+  {
+    platform_vertex_buffer_destroy(
+      &(vertex_buffer[i]),
+      1);
+
+    resource_internal_unregister(&(vertex_buffer[i].resource));
+  }
 }
 
 //
@@ -76,7 +102,22 @@ int element_buffer_init(
   struct element_buffer_t* element_buffer,
   int num)
 {
-  return platform_element_buffer_init(element_buffer, num);
+  // Each buffer has its own registry entry, so they're created one at a time
+  //  rather than with their names packed together
+  for (int i = 0; i < num; i++)
+  {
+    platform_element_buffer_init(
+      &(element_buffer[i]),
+      1);
+
+    resource_internal_register(
+      &(element_buffer[i].resource),
+      RESOURCE_KIND_ELEMENT_BUFFER,
+      0);
+  }
+
+  // Creating buffer names can't fail
+  return 0;
 }
 
 void element_buffer_bind(
@@ -93,11 +134,23 @@ void element_buffer_buffer_data(
 {
   platform_element_buffer_buffer_data(
     element_buffer, index_data, data_bytes, usage_type);
+
+  // The buffer's storage is replaced with data_bytes of it
+  resource_internal_set_size(
+    &(element_buffer->resource),
+    data_bytes);
 }
 
 void element_buffer_destroy(
   struct element_buffer_t* element_buffer,
   int num)
 {
-  platform_element_buffer_destroy(element_buffer, num);
+  for (int i = 0; i < num; i++)
+  {
+    platform_element_buffer_destroy(
+      &(element_buffer[i]),
+      1);
+
+    resource_internal_unregister(&(element_buffer[i].resource));
+  }
 }

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "resource.h"
+
 enum buffer_data_usage_t
 {
   STREAM_DRAW = 0x00,
@@ -16,6 +18,8 @@ enum buffer_data_usage_t
 struct vertex_buffer_t
 {
   unsigned int vertex_buffer;
+  // Its entry in the resource registry
+  struct resource_t resource;
 };
 
 void vertex_buffer_init(
@@ -38,6 +42,8 @@ void vertex_buffer_destroy(
 struct element_buffer_t
 {
   unsigned int element_buffer;
+  // Its entry in the resource registry
+  struct resource_t resource;
 };
 
 int element_buffer_init(

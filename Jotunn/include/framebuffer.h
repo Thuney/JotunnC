@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resource.h"
 #include "texture.h"
 
 #include <stdint.h>
@@ -15,6 +16,8 @@ struct color_buffer_t
 struct render_buffer_t
 {
   unsigned int rbo;
+  // Its entry in the resource registry
+  struct resource_t resource;
 };
 
 //
@@ -24,6 +27,8 @@ struct framebuffer_t
   unsigned int frame_buffer;
   struct color_buffer_t color_buffer;
   struct render_buffer_t depth_stencil_buffer;
+  // Its entry in the resource registry; the attachments have their own
+  struct resource_t resource;
 };
 
 //

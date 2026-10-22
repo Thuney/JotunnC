@@ -1,10 +1,15 @@
 #include "framebuffer.h"
 
+#include "../resource_internal.h"
+
 #ifdef DEBUG
     #include <stdio.h>
 #endif
 
 #include <stdlib.h>
+
+// Render buffers hold 24 bits of depth and 8 of stencil per pixel
+#define _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL 4
 
 extern void platform_framebuffer_init(
   struct framebuffer_t* frame_buffer);
@@ -82,6 +87,19 @@ void framebuffer_init(
     &(frame_buffer->depth_stencil_buffer));
 
   framebuffer_unbind();
+
+  // The framebuffer object holds no memory of its own; its attachments do
+  resource_internal_register(
+    &(frame_buffer->resource),
+    RESOURCE_KIND_FRAMEBUFFER,
+    0);
+
+  resource_set_name(
+    &(frame_buffer->color_buffer.texture.resource),
+    "framebuffer color");
+  resource_set_name(
+    &(frame_buffer->depth_stencil_buffer.resource),
+    "framebuffer depth-stencil");
 }
 
 void framebuffer_resize(
@@ -135,6 +153,8 @@ void framebuffer_cleanup(
 
   color_buffer_cleanup(&(frame_buffer->color_buffer));
   render_buffer_cleanup(&(frame_buffer->depth_stencil_buffer));
+
+  resource_internal_unregister(&(frame_buffer->resource));
 }
 
 //
@@ -153,6 +173,11 @@ void render_buffer_init(
   unsigned int height)
 {
   platform_render_buffer_init(render_buffer, width, height);
+
+  resource_internal_register(
+    &(render_buffer->resource),
+    RESOURCE_KIND_RENDER_BUFFER,
+    ((size_t)width * height * _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
 }
 
 void color_buffer_bind(
@@ -181,6 +206,10 @@ void render_buffer_resize(
   unsigned int new_height)
 {
   platform_render_buffer_resize(render_buffer, new_width, new_height);
+
+  resource_internal_set_size(
+    &(render_buffer->resource),
+    ((size_t)new_width * new_height * _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
 }
 
 void color_buffer_cleanup(
@@ -199,4 +228,7 @@ void render_buffer_cleanup(
 #ifdef DEBUG
   fprintf(stdout, "Cleaning up render buffer\n");
 #endif
+
+  // The render buffer itself is deleted along with its framebuffer
+  resource_internal_unregister(&(render_buffer->resource));
 }

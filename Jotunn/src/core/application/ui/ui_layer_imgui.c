@@ -655,6 +655,9 @@ static void _ui_layer_imgui_update_texture(
         texture,
         (unsigned char*)ImTextureData_GetPixels(inout_texture_data),
         (unsigned int)ImTextureData_GetSizeInBytes(inout_texture_data));
+      resource_set_name(
+        &(texture->resource),
+        "imgui");
 
       // Every ImTextureID in Jotunn is a texture_2d_t*
       ImTextureData_SetTexID(

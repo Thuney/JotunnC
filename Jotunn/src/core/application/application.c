@@ -11,9 +11,16 @@
 /** Local Includes  **/
 #include "allocator.h"
 #include "render_api.h"
+#include "resource.h"
 #include "util.h"
 
 static struct event_app_tick_t app_tick_event;
+
+#ifdef DEBUG
+// Prints the heap memory and graphics resources still alive once the
+//  application has cleaned up, each of which is a leak
+static void _application_report_leaks(void);
+#endif
 
 /************************************************************
  *
@@ -196,6 +203,10 @@ void application_cleanup(
   app->max_windows = 0;
   app->num_windows = 0;
   allocator_free(app->windows);
+
+#ifdef DEBUG
+  _application_report_leaks();
+#endif
 }
 
 void application_bind_custom_events(
@@ -357,3 +368,35 @@ uint8_t application_add_window(
 
   return error;
 }
+
+#ifdef DEBUG
+
+/*******************************************************************************
+ *
+ *   Function: _application_report_leaks()
+ *
+ ******************************************************************************/
+static void _application_report_leaks(void)
+{
+  for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++)
+  {
+    struct allocator_tag_stats_t stats;
+    allocator_get_tag_stats(
+      (enum allocator_tag_t)tag,
+      &(stats));
+
+    if (stats.live_count > 0)
+    {
+      fprintf(
+        stdout,
+        "Live heap memory: %s, %zu bytes in %llu blocks\n",
+        allocator_get_tag_name((enum allocator_tag_t)tag),
+        stats.live_bytes,
+        (unsigned long long)stats.live_count);
+    }
+  }
+
+  resource_log_live();
+}
+
+#endif

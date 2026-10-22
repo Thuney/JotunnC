@@ -1,6 +1,7 @@
 #include "texture.h"
 
 #include "allocator.h"
+#include "../resource_internal.h"
 
 #include <memory.h>
 
@@ -47,6 +48,13 @@ extern void platform_texture_2d_resize(
   struct texture_2d_t* texture,
   unsigned int new_width,
   unsigned int new_height);
+
+// Estimates the graphics memory behind a texture from its size and format
+//
+//  in:     in_texture
+//  ret:    The estimate in bytes; 0 for an unknown format
+static size_t _texture_2d_get_size_bytes(
+  const struct texture_2d_t* in_texture);
 
 void texture_2d_init(
   struct texture_2d_t* texture,
@@ -96,6 +104,11 @@ void texture_2d_init(
   platform_texture_2d_init(texture, wrap);
 
   texture->is_loaded = 1;
+
+  resource_internal_register(
+    &(texture->resource),
+    RESOURCE_KIND_TEXTURE,
+    _texture_2d_get_size_bytes(texture));
 }
 
 void texture_2d_cleanup(
@@ -105,6 +118,8 @@ void texture_2d_cleanup(
   {
     platform_texture_2d_cleanup(texture);
   }
+
+  resource_internal_unregister(&(texture->resource));
 
   texture->texture_id = -1;
   texture->width = -1;
@@ -122,6 +137,10 @@ void texture_2d_resize(
   texture->width  = new_width;
   texture->height = new_height;
   platform_texture_2d_resize(texture, new_width, new_height);
+
+  resource_internal_set_size(
+    &(texture->resource),
+    _texture_2d_get_size_bytes(texture));
 }
 
 void texture_2d_set_data(
@@ -248,4 +267,49 @@ void texture_2d_bind(
   const unsigned int texture_slot)
 {
   platform_texture_2d_bind(texture, texture_slot);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _texture_2d_get_size_bytes()
+ *
+ ******************************************************************************/
+static size_t _texture_2d_get_size_bytes(
+  const struct texture_2d_t* in_texture)
+{
+  size_t bytes_per_pixel;
+
+  switch (in_texture->internal_format)
+  {
+    case TEXTURE_2D_INTERNAL_FORMAT_RED:
+    {
+      bytes_per_pixel = 1;
+    }
+    break;
+    case TEXTURE_2D_INTERNAL_FORMAT_RG:
+    {
+      bytes_per_pixel = 2;
+    }
+    break;
+    case TEXTURE_2D_INTERNAL_FORMAT_RGB:
+    {
+      bytes_per_pixel = 3;
+    }
+    break;
+    // Depth is stored in at least 24 bits, so is counted as 32 like the rest
+    case TEXTURE_2D_INTERNAL_FORMAT_RGBA:
+    case TEXTURE_2D_INTERNAL_FORMAT_DEPTH_COMPONENT:
+    case TEXTURE_2D_INTERNAL_FORMAT_DEPTH_STENCIL:
+    {
+      bytes_per_pixel = 4;
+    }
+    break;
+    default:
+    {
+      bytes_per_pixel = 0;
+    }
+    break;
+  }
+
+  return ((size_t)in_texture->width * in_texture->height * bytes_per_pixel);
 }
