@@ -15,7 +15,48 @@ find_package(Freetype REQUIRED)
 # Dear ImGui and its extensions don't depend on a graphics API; Jotunn feeds
 #  them input from its own events and draws them through renderer_2d
 add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimgui)
-add_subdirectory(${JotunnC_SOURCE_DIR}/vendor/cimplot)
+
+# cimplot's own CMakeLists.txt compiles a second copy of Dear ImGui into
+#  cimplot.so, leaving two ImGuis whose globals (the current context, the
+#  allocator) only agree because of which library the loader finds first.
+#  Its target is defined here instead, building ImPlot against cimgui's
+add_library(
+  cimplot
+  SHARED
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot/cimplot.cpp
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot/implot/implot.cpp
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot/implot/implot_demo.cpp
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot/implot/implot_items.cpp)
+
+target_compile_definitions(
+  cimplot
+  PRIVATE
+  # Matches the configuration cimgui compiles imgui with
+  IMGUI_USER_CONFIG="../cimconfig.h")
+
+target_include_directories(
+  cimplot
+  PUBLIC
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot/implot)
+
+target_link_libraries(
+  cimplot
+  PUBLIC
+  cimgui)
+
+set_target_properties(
+  cimplot
+  PROPERTIES
+  PREFIX ""
+  # The standard cimplot's own CMakeLists.txt builds with
+  CXX_STANDARD 11)
+
+# Set as the cimplot project would, for those that find its sources this way
+set(
+  cimplot_SOURCE_DIR
+  ${JotunnC_SOURCE_DIR}/vendor/cimplot
+  CACHE INTERNAL "cimplot checkout")
 
 # cimnodes ships without a CMakeLists.txt, so its target is defined here,
 #  building imnodes against cimgui's Dear ImGui rather than a copy of its own
@@ -141,8 +182,7 @@ target_compile_definitions(
 target_include_directories(
   JotunnC
   PUBLIC
-  ${JotunnC_SOURCE_DIR}/include/
-  ${cimplot_SOURCE_DIR}/)
+  ${JotunnC_SOURCE_DIR}/include/)
 
 target_link_libraries(
   JotunnC 
