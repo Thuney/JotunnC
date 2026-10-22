@@ -67,6 +67,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/application/ui_layer.c
   ${JotunnC_SOURCE_DIR}/src/core/application/ui/ui_layer_imgui.c
 
+  ${JotunnC_SOURCE_DIR}/src/core/utils/allocator.c
   ${JotunnC_SOURCE_DIR}/src/core/utils/util.c
 
   ${JotunnC_SOURCE_DIR}/src/core/graphics/api/render_api.c

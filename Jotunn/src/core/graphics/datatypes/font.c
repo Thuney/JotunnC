@@ -1,5 +1,10 @@
 #include "font.h"
 
+#include "allocator.h"
+
+#include <ft2build.h>
+#include FT_MODULE_H
+
 #include <math.h>
 #include <memory.h>
 
@@ -7,8 +12,46 @@
    #include <stdio.h>
 #endif
 
+// Allocates for FreeType
+//
+//  in:     in_memory, in_size_bytes
+//  ret:    The memory; NULL when it can't be allocated
+static void* _font_freetype_allocate(
+  FT_Memory in_memory,
+  long in_size_bytes);
+
+// Releases memory FreeType allocated
+//
+//  in:     in_memory
+//  in/out: inout_block
+static void _font_freetype_free(
+  FT_Memory in_memory,
+  void* inout_block);
+
+// Resizes memory FreeType allocated
+//
+//  in:     in_memory, in_current_size_bytes, in_new_size_bytes
+//  in/out: inout_block
+//  ret:    The resized memory, which may have moved; NULL when it can't be
+//            resized, leaving inout_block as it was
+static void* _font_freetype_reallocate(
+  FT_Memory in_memory,
+  long in_current_size_bytes,
+  long in_new_size_bytes,
+  void* inout_block);
+
 static FT_Library font_library;
 static unsigned int freetype_initialized = 0;
+
+// FreeType allocates through Jotunn, so its memory is counted too. It keeps
+//  this for the library's lifetime, so it can't live on the stack
+static struct FT_MemoryRec_ font_freetype_memory =
+{
+  .user    = NULL,
+  .alloc   = &(_font_freetype_allocate),
+  .free    = &(_font_freetype_free),
+  .realloc = &(_font_freetype_reallocate)
+};
 
 void font_init()
 {
@@ -16,7 +59,17 @@ void font_init()
 
   if (!freetype_initialized)
   {
-    error = FT_Init_FreeType(&font_library);
+    // What FT_Init_FreeType() does, but with Jotunn's allocator
+    error =
+      FT_New_Library(
+        &(font_freetype_memory),
+        &(font_library));
+
+    if (!error)
+    {
+      FT_Add_Default_Modules(font_library);
+      FT_Set_Default_Properties(font_library);
+    }
 
       #ifdef DEBUG
     if (error)
@@ -41,7 +94,7 @@ void font_cleanup()
 
   if (freetype_initialized)
   {
-    error = FT_Done_FreeType(font_library);
+    error = FT_Done_Library(font_library);
 
   #ifdef DEBUG
     if (error)
@@ -66,8 +119,11 @@ static unsigned char* grayscale_bitmap_data_to_rgba_texture_data(
   const int bitmap_width,
   const int bitmap_height)
 {
-  unsigned char* char_rgba_data = (unsigned char*)calloc(
-    bitmap_height * bitmap_width * 4, sizeof(unsigned char));
+  unsigned char* char_rgba_data =
+    (unsigned char*)allocator_allocate_zeroed(
+      (bitmap_height * bitmap_width * 4),
+      sizeof(unsigned char),
+      ALLOCATOR_TAG_FONT);
 
   unsigned int i, j, bitmap_i, bitmap_j;
 
@@ -290,7 +346,10 @@ int typeface_load_glyph_atlas(
   struct glyph_t* texture_atlas_glyphs = &(typeface->glyphs[0]);
 
   unsigned char* pixel_data_bitmap =
-    (unsigned char*)calloc(texture_atlas_width * texture_atlas_height, 1);
+    (unsigned char*)allocator_allocate_zeroed(
+      (texture_atlas_width * texture_atlas_height),
+      1,
+      ALLOCATOR_TAG_FONT);
   int pen_x = 0, pen_y = 0;
 
   char cur_char;
@@ -339,8 +398,8 @@ int typeface_load_glyph_atlas(
     pixel_data_rgba,
     texture_atlas_width * texture_atlas_height * 4);
 
-  free(pixel_data_rgba);
-  free(pixel_data_bitmap);
+  allocator_free(pixel_data_rgba);
+  allocator_free(pixel_data_bitmap);
 
   return error;
 }
@@ -407,4 +466,65 @@ fvector2 typeface_calculate_string_dimensions(
   }
 
   return string_dimensions;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _font_freetype_allocate()
+ *
+ ******************************************************************************/
+static void* _font_freetype_allocate(
+  FT_Memory in_memory,
+  long in_size_bytes)
+{
+  (void)in_memory;
+
+  if (in_size_bytes < 0)
+  {
+    return NULL;
+  }
+
+  return allocator_allocate(
+    (size_t)in_size_bytes,
+    ALLOCATOR_TAG_FREETYPE);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _font_freetype_free()
+ *
+ ******************************************************************************/
+static void _font_freetype_free(
+  FT_Memory in_memory,
+  void* inout_block)
+{
+  (void)in_memory;
+
+  allocator_free(inout_block);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _font_freetype_reallocate()
+ *
+ ******************************************************************************/
+static void* _font_freetype_reallocate(
+  FT_Memory in_memory,
+  long in_current_size_bytes,
+  long in_new_size_bytes,
+  void* inout_block)
+{
+  (void)in_memory;
+  // The allocator knows each block's size already
+  (void)in_current_size_bytes;
+
+  if (in_new_size_bytes < 0)
+  {
+    return NULL;
+  }
+
+  return allocator_reallocate(
+    inout_block,
+    (size_t)in_new_size_bytes,
+    ALLOCATOR_TAG_FREETYPE);
 }

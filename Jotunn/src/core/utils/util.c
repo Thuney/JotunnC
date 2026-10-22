@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include "allocator.h"
+
 #include <memory.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,39 +10,61 @@ char* read_raw_file_contents(
   const char* file_path)
 {
   FILE* file = fopen(file_path, "r");
+  if (file == NULL)
+  {
+  #ifdef DEBUG
+    fprintf(
+      stdout,
+      "Failed to open %s\n",
+      file_path);
+  #endif
 
-  long file_size_bytes;
-  char* buffer;
+    return NULL;
+  }
 
   // Find end of file
   fseek(file, 0L, SEEK_END);
-  file_size_bytes = ftell(file);
+  const long file_size_bytes = ftell(file);
   rewind(file);
 
-  buffer = (char*)calloc(1, file_size_bytes + 1);
-  if (!buffer)
+  char* buffer = NULL;
+  if (file_size_bytes >= 0)
   {
-    fclose(file);
-      #ifdef DEBUG
-    fprintf(stdout, "Memory alloc fails\n");
-      #endif
+    // Zeroed, so the contents are followed by a terminator
+    buffer =
+      (char*)allocator_allocate_zeroed(
+        1,
+        ((size_t)file_size_bytes + 1),
+        ALLOCATOR_TAG_FILE);
   }
 
-  if (1 != fread(buffer, file_size_bytes, 1, file))
+  if (buffer == NULL)
   {
-    fclose(file);
-    free(buffer);
-      #ifdef DEBUG
-    fprintf(stdout, "Entire read fails\n");
-      #endif
+  #ifdef DEBUG
+    fprintf(stdout, "Memory alloc fails\n");
+  #endif
   }
   else
   {
-    fclose(file);
+    const size_t read_size_bytes =
+      fread(
+        buffer,
+        1,
+        (size_t)file_size_bytes,
+        file);
+
+    if (read_size_bytes != (size_t)file_size_bytes)
+    {
+    #ifdef DEBUG
+      fprintf(stdout, "Entire read fails\n");
+    #endif
+
+      allocator_free(buffer);
+      buffer = NULL;
+    }
   }
 
-   #ifdef DEBUG
-  // fprintf(stdout, "Shader File Contents:\n%s"), buffer);
-   #endif
+  fclose(file);
+
   return buffer;
 }

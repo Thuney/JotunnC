@@ -5,6 +5,8 @@
 
 #include "vertexattribute.h"
 
+#include "allocator.h"
+
 extern void platform_vertex_attribute_init(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int index,
@@ -24,9 +26,10 @@ void vertex_attribute_init(
   unsigned int stride,
   void* ptr_offset_to_attrib)
 {
-  int name_length = strlen(attribute_name);
-  vertex_attribute->attribute_name = (char*)malloc((name_length + 1) * sizeof(char));
-  strcpy(vertex_attribute->attribute_name, attribute_name);
+  vertex_attribute->attribute_name =
+    allocator_duplicate_string(
+      attribute_name,
+      ALLOCATOR_TAG_RENDERER);
 
   platform_vertex_attribute_init(
     vertex_attribute,
@@ -44,7 +47,7 @@ void vertex_attribute_cleanup(
 {
   for (unsigned int i = 0; i < num; i++)
   {
-    free(vertex_attribute[i].attribute_name);
+    allocator_free(vertex_attribute[i].attribute_name);
     vertex_attribute[i].attribute_name = 0;
   }
 }

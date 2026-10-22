@@ -10,6 +10,7 @@
 #include <string.h>
 
 /** Local Includes  **/
+#include "allocator.h"
 #include "application.h"
 #include "fvector.h"
 #include "render_api.h"
@@ -60,9 +61,10 @@ static void window_set_metadata(
     struct event_base_t*))
 {
   // Store our window tag
-  const int tag_length = strlen(tag);
-  metadata->tag = (char*)malloc((tag_length + 1) * sizeof(char));
-  strcpy(metadata->tag, tag);
+  metadata->tag =
+    allocator_duplicate_string(
+      tag,
+      ALLOCATOR_TAG_WINDOW);
 
   // Assign window properties
   metadata->width  = width;
@@ -118,8 +120,10 @@ uint8_t window_init(
 
     window->max_layers = max_window_layers;
     window->num_layers = 0;
-    window->layers = (struct window_layer_t**)
-      malloc(window->max_layers * sizeof(struct window_layer_t*));
+    window->layers =
+      (struct window_layer_t**)allocator_allocate(
+        (window->max_layers * sizeof(struct window_layer_t*)),
+        ALLOCATOR_TAG_WINDOW);
   }
 
   return error;
@@ -296,14 +300,14 @@ uint8_t window_run(
 void window_cleanup(
   struct window_t* window)
 {
-  free(window->metadata.tag);
+  allocator_free(window->metadata.tag);
   window->metadata.tag = 0;
 
   renderer_window_layer_cleanup(&(window->window_layer_renderer));
 
   window->max_layers = 0;
   window->num_layers = 0;
-  free(window->layers);
+  allocator_free(window->layers);
 
   window_graphics_cleanup(window);
 }

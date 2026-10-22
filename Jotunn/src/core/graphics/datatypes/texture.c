@@ -1,6 +1,16 @@
 #include "texture.h"
 
+#include "allocator.h"
+
 #include <memory.h>
+
+// stb_image allocates through Jotunn, so its memory is counted too
+#define STBI_MALLOC(size_bytes) \
+  allocator_allocate((size_bytes), ALLOCATOR_TAG_STB_IMAGE)
+#define STBI_REALLOC(memory, size_bytes) \
+  allocator_reallocate((memory), (size_bytes), ALLOCATOR_TAG_STB_IMAGE)
+#define STBI_FREE(memory) \
+  allocator_free(memory)
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>

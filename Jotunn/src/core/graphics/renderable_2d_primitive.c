@@ -8,6 +8,8 @@
 
 #include "renderable_2d_primitive.h"
 
+#include "allocator.h"
+
 const fvector3 triangle_2d_position_data[3] =
   {
     [0] = {{0.0f, 0.0f, 0.0f}},
@@ -323,8 +325,10 @@ void renderable_2d_triangle_data_init(
     shader_program);
 
   triangle_data->vertex_data_base =
-    (struct renderable_2d_triangle_vertex_t*)calloc(
-      max_vertices, sizeof(struct renderable_2d_triangle_vertex_t));
+    (struct renderable_2d_triangle_vertex_t*)allocator_allocate_zeroed(
+      max_vertices,
+      sizeof(struct renderable_2d_triangle_vertex_t),
+      ALLOCATOR_TAG_RENDERER);
   triangle_data->vertex_data_ptr = triangle_data->vertex_data_base;
 
   unsigned int triangle_indices[max_indices];
@@ -370,8 +374,11 @@ void renderable_2d_quad_data_init(
     _QUAD_2D_ATTRIBUTE_NUM,
     shader_program);
 
-  quad_data->vertex_data_base = (struct renderable_2d_quad_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_quad_vertex_t));
+  quad_data->vertex_data_base =
+    (struct renderable_2d_quad_vertex_t*)allocator_allocate_zeroed(
+      max_vertices,
+      sizeof(struct renderable_2d_quad_vertex_t),
+      ALLOCATOR_TAG_RENDERER);
   quad_data->vertex_data_ptr = quad_data->vertex_data_base;
 
   unsigned int quad_indices[max_indices];
@@ -422,8 +429,10 @@ void renderable_2d_textured_quad_data_init(
     shader_program);
 
   textured_quad_data->vertex_data_base =
-    (struct renderable_2d_textured_quad_vertex_t*)calloc(
-      max_vertices, sizeof(struct renderable_2d_textured_quad_vertex_t));
+    (struct renderable_2d_textured_quad_vertex_t*)allocator_allocate_zeroed(
+      max_vertices,
+      sizeof(struct renderable_2d_textured_quad_vertex_t),
+      ALLOCATOR_TAG_RENDERER);
   textured_quad_data->vertex_data_ptr = textured_quad_data->vertex_data_base;
 
   unsigned int textured_quad_indices[max_indices];
@@ -479,8 +488,11 @@ void renderable_2d_circle_data_init(
     _CIRCLE_2D_ATTRIBUTE_NUM,
     shader_program);
 
-  circle_data->vertex_data_base = (struct renderable_2d_circle_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_circle_vertex_t));
+  circle_data->vertex_data_base =
+    (struct renderable_2d_circle_vertex_t*)allocator_allocate_zeroed(
+      max_vertices,
+      sizeof(struct renderable_2d_circle_vertex_t),
+      ALLOCATOR_TAG_RENDERER);
   circle_data->vertex_data_ptr = circle_data->vertex_data_base;
 
   unsigned int circle_indices[max_indices];
@@ -542,8 +554,11 @@ void renderable_2d_line_data_init(
     _LINE_2D_ATTRIBUTE_NUM,
     shader_program);
 
-  line_data->vertex_data_base = (struct renderable_2d_line_vertex_t*)calloc(
-    max_vertices, sizeof(struct renderable_2d_line_vertex_t));
+  line_data->vertex_data_base =
+    (struct renderable_2d_line_vertex_t*)allocator_allocate_zeroed(
+      max_vertices,
+      sizeof(struct renderable_2d_line_vertex_t),
+      ALLOCATOR_TAG_RENDERER);
   line_data->vertex_data_ptr = line_data->vertex_data_base;
 
   vertex_buffer_buffer_data(
@@ -583,7 +598,7 @@ void renderable_2d_triangle_data_cleanup(
   vertex_buffer_destroy(&triangle_data->vbo, 1);
   element_buffer_destroy(&triangle_data->ebo, 1);
 
-  free(triangle_data->vertex_data_base);
+  allocator_free(triangle_data->vertex_data_base);
 }
 
 void renderable_2d_quad_data_cleanup(
@@ -593,7 +608,7 @@ void renderable_2d_quad_data_cleanup(
   vertex_buffer_destroy(&quad_data->vbo, 1);
   element_buffer_destroy(&quad_data->ebo, 1);
 
-  free(quad_data->vertex_data_base);
+  allocator_free(quad_data->vertex_data_base);
 }
 
 void renderable_2d_textured_quad_data_cleanup(
@@ -603,7 +618,7 @@ void renderable_2d_textured_quad_data_cleanup(
   vertex_buffer_destroy(&quad_data->vbo, 1);
   element_buffer_destroy(&quad_data->ebo, 1);
 
-  free(quad_data->vertex_data_base);
+  allocator_free(quad_data->vertex_data_base);
 }
 
 void renderable_2d_circle_data_cleanup(
@@ -613,7 +628,7 @@ void renderable_2d_circle_data_cleanup(
   vertex_buffer_destroy(&circle_data->vbo, 1);
   element_buffer_destroy(&circle_data->ebo, 1);
 
-  free(circle_data->vertex_data_base);
+  allocator_free(circle_data->vertex_data_base);
 }
 
 void renderable_2d_line_data_cleanup(
@@ -622,7 +637,7 @@ void renderable_2d_line_data_cleanup(
   vertex_array_destroy(&line_data->vao, 1);
   vertex_buffer_destroy(&line_data->vbo, 1);
 
-  free(line_data->vertex_data_base);
+  allocator_free(line_data->vertex_data_base);
 }
 
 /*******************************************************************************

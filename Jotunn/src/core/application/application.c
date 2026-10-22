@@ -9,6 +9,7 @@
 #include <string.h>
 
 /** Local Includes  **/
+#include "allocator.h"
 #include "render_api.h"
 #include "util.h"
 
@@ -35,15 +36,18 @@ uint8_t application_init(
 
   memset(app, 0, sizeof(struct application_t));
 
-  const int name_length = strlen(app_name);
-  app->name = (char*)malloc((name_length + 1) * sizeof(char));
-  strcpy(app->name, app_name);
+  app->name =
+    allocator_duplicate_string(
+      app_name,
+      ALLOCATOR_TAG_APPLICATION);
 
   app->max_windows = max_windows;
   app->num_windows = 0;
 
-  app->windows = (struct window_t**)
-    malloc(app->max_windows * sizeof(struct window_t*));
+  app->windows =
+    (struct window_t**)allocator_allocate(
+      (app->max_windows * sizeof(struct window_t*)),
+      ALLOCATOR_TAG_APPLICATION);
 
   app->current_window = NULL;
 
@@ -172,7 +176,7 @@ void application_cleanup(
     application_stop(app);
   }
 
-  free(app->name);
+  allocator_free(app->name);
   app->name = 0;
 
   if (app->num_windows)
@@ -191,7 +195,7 @@ void application_cleanup(
 
   app->max_windows = 0;
   app->num_windows = 0;
-  free(app->windows);
+  allocator_free(app->windows);
 }
 
 void application_bind_custom_events(

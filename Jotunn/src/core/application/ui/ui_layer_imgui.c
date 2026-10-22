@@ -1,5 +1,6 @@
 #include "ui_layer_imgui.h"
 
+#include "allocator.h"
 #include "event.h"
 #include "renderer_2d.h"
 #include "texture.h"
@@ -181,6 +182,18 @@ static void _ui_layer_imgui_reset_render_state(
   const ImDrawList* in_draw_list,
   const ImDrawCmd* in_command);
 
+// Allocator hooks for ImGui, which ImPlot and imnodes allocate through too
+//
+//  in:     in_size_bytes, in_user_data
+//  in/out: inout_memory
+//  ret:    The memory; NULL when it can't be allocated
+static void* _ui_layer_imgui_allocate(
+  size_t in_size_bytes,
+  void* in_user_data);
+static void _ui_layer_imgui_free(
+  void* inout_memory,
+  void* in_user_data);
+
 /*******************************************************************************
  *
  *   Function: ui_layer_imgui_init()
@@ -190,11 +203,20 @@ void ui_layer_imgui_init(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data =
-    (struct ui_layer_imgui_data_t*)calloc(
+    (struct ui_layer_imgui_data_t*)allocator_allocate_zeroed(
       1,
-      sizeof(struct ui_layer_imgui_data_t));
+      sizeof(struct ui_layer_imgui_data_t),
+      ALLOCATOR_TAG_UI);
 
   inout_ui_layer->ui_layer_data = data;
+
+  // ImGui's allocator is shared by every context, and each block must be
+  //  freed by the allocator that made it, so it's set before ImGui first
+  //  allocates; setting it again for a later layer changes nothing
+  igSetAllocatorFunctions(
+    &(_ui_layer_imgui_allocate),
+    &(_ui_layer_imgui_free),
+    NULL);
 
   // Creating a context only makes it current when none is, so each one is
   //  made current explicitly before the next is created from it
@@ -275,8 +297,8 @@ void ui_layer_imgui_cleanup(
   ImPlot_DestroyContext(data->plot_context);
   igDestroyContext(data->context);
 
-  free(data->submeshes);
-  free(data);
+  allocator_free(data->submeshes);
+  allocator_free(data);
 
   inout_ui_layer->ui_layer_data = NULL;
 }
@@ -617,9 +639,10 @@ static void _ui_layer_imgui_update_texture(
     {
       // ImGui's atlas defaults to RGBA32, the only format handled here
       struct texture_2d_t* texture =
-        (struct texture_2d_t*)calloc(
+        (struct texture_2d_t*)allocator_allocate_zeroed(
           1,
-          sizeof(struct texture_2d_t));
+          sizeof(struct texture_2d_t),
+          ALLOCATOR_TAG_UI);
 
       texture_2d_init(
         texture,
@@ -702,7 +725,7 @@ static void _ui_layer_imgui_destroy_texture(
   if (texture != NULL)
   {
     texture_2d_cleanup(texture);
-    free(texture);
+    allocator_free(texture);
   }
 
   ImTextureData_SetTexID(
@@ -861,9 +884,10 @@ static void _ui_layer_imgui_reserve_submeshes(
   }
 
   inout_data->submeshes =
-    (struct renderer_2d_submesh_t*)realloc(
+    (struct renderer_2d_submesh_t*)allocator_reallocate(
       inout_data->submeshes,
-      (capacity * sizeof(struct renderer_2d_submesh_t)));
+      (capacity * sizeof(struct renderer_2d_submesh_t)),
+      ALLOCATOR_TAG_UI);
   inout_data->submesh_capacity = capacity;
 }
 
@@ -957,4 +981,34 @@ static void _ui_layer_imgui_reset_render_state(
 {
   (void)in_draw_list;
   (void)in_command;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _ui_layer_imgui_allocate()
+ *
+ ******************************************************************************/
+static void* _ui_layer_imgui_allocate(
+  size_t in_size_bytes,
+  void* in_user_data)
+{
+  (void)in_user_data;
+
+  return allocator_allocate(
+    in_size_bytes,
+    ALLOCATOR_TAG_IMGUI);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _ui_layer_imgui_free()
+ *
+ ******************************************************************************/
+static void _ui_layer_imgui_free(
+  void* inout_memory,
+  void* in_user_data)
+{
+  (void)in_user_data;
+
+  allocator_free(inout_memory);
 }

@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "allocator.h"
 #include "util.h"
 
 #include <memory.h>
@@ -62,7 +63,7 @@ int vertex_shader_init_filepath(
 {
   char* file_contents = read_raw_file_contents(filepath);
   int success = platform_vertex_shader_init(shader, file_contents);
-  free(file_contents);
+  allocator_free(file_contents);
   return !success;
 }
 
@@ -72,7 +73,7 @@ int fragment_shader_init_filepath(
 {
   char* file_contents = read_raw_file_contents(filepath);
   int success = platform_fragment_shader_init(shader, file_contents);
-  free(file_contents);
+  allocator_free(file_contents);
   return !success;
 }
 

@@ -1,5 +1,7 @@
 #include "renderer.h"
 
+#include "allocator.h"
+
 #include <memory.h>
 #include <stdlib.h>
 
@@ -12,9 +14,10 @@ void renderer_base_init(
 {
   renderer->parent_window = parent_window;
 
-  int tag_length = strlen(tag);
-  renderer->tag = (char*)malloc((tag_length + 1) * sizeof(char));
-  strcpy(renderer->tag, tag);
+  renderer->tag =
+    allocator_duplicate_string(
+      tag,
+      ALLOCATOR_TAG_RENDERER);
 
   render_api_init(&(renderer->render_api), render_flags);
 
@@ -24,7 +27,7 @@ void renderer_base_init(
 void renderer_base_cleanup(
   struct renderer_base_t* renderer)
 {
-  free(renderer->tag);
+  allocator_free(renderer->tag);
   renderer->tag = 0;
 }
 
