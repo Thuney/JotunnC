@@ -272,6 +272,9 @@ uint8_t window_run(
 
   struct window_layer_t** current_layer;
 
+  // The GPU's time on each part of the frame is marked as it's submitted
+  diagnostics_internal_gpu_frame_begin(window);
+
   // Render our layers to their respective framebuffers, bottom to top
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
@@ -291,6 +294,10 @@ uint8_t window_run(
       window->metadata.resized);
 
     diagnostics_zone_end(layer_zone);
+
+    diagnostics_internal_gpu_mark_layer(
+      window,
+      i);
   }
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
@@ -318,6 +325,10 @@ uint8_t window_run(
       window,
       overlay_layer,
       is_overlay_resized);
+
+    diagnostics_internal_gpu_mark(
+      window,
+      "diagnostics overlay");
   }
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_OVERLAY);
@@ -346,6 +357,11 @@ uint8_t window_run(
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 
+  diagnostics_internal_gpu_mark(
+    window,
+    "composite");
+  diagnostics_internal_gpu_frame_end(window);
+
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
   window_graphics_run(window);
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
@@ -371,6 +387,8 @@ void window_cleanup(
   // Releasing the window renderer's graphics resources needs the window's
   //  graphics context, which nothing else leaves current
   window_set_context(window);
+
+  diagnostics_internal_gpu_cleanup(window);
 
   renderer_window_layer_cleanup(&(window->window_layer_renderer));
 

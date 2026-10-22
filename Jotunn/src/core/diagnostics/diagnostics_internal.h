@@ -54,6 +54,10 @@ enum diagnostics_internal_engine_zone_t
 #define DIAGNOSTICS_INTERNAL_EVENT_TEXT_LENGTH 96
 #define DIAGNOSTICS_INTERNAL_MAX_RENDERERS 16
 #define DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH 8
+// GPU timestamps are read this many frames after they're recorded, at most
+#define DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY 4
+#define DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS 16
+#define DIAGNOSTICS_INTERNAL_GPU_MAX_WINDOWS 8
 
 /*******************************************************************************
  *
@@ -82,6 +86,8 @@ struct diagnostics_internal_summary_t
 struct diagnostics_internal_zone_t
 {
   char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  // Timed by the GPU, with its results arriving a few frames late
+  bool is_gpu;
   bool is_open;
   double begin_seconds;
   // Summed over every entry this frame
@@ -173,6 +179,41 @@ struct diagnostics_internal_rendering_t
   struct diagnostics_internal_history_t draw_calls_per_frame;
 };
 
+// The timestamps recorded through one frame of a window. The GPU time spent
+//  between each mark and the one before it is charged to the later mark's zone
+struct diagnostics_internal_gpu_frame_t
+{
+  uint32_t timestamp_names[DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS];
+  uint16_t zone_ids[DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS];
+  uint8_t mark_count;
+  // From the first mark to the last
+  uint16_t frame_zone_id;
+  // Recorded, and waiting for the GPU to reach its timestamps
+  bool is_pending;
+};
+
+// A window's GPU timing. Its timestamps belong to the window's graphics
+//  context, so every window needs its own
+struct diagnostics_internal_gpu_window_t
+{
+  // Compared, never dereferenced, outside of the window's own calls
+  const struct window_t* window;
+  bool is_created;
+  struct diagnostics_internal_gpu_frame_t frames[DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY];
+  uint8_t current_frame;
+  bool is_frame_open;
+};
+
+struct diagnostics_internal_gpu_t
+{
+  bool is_support_checked;
+  bool is_supported;
+  struct diagnostics_internal_gpu_window_t windows[DIAGNOSTICS_INTERNAL_GPU_MAX_WINDOWS];
+  uint8_t window_count;
+  // Frames left untimed, as the GPU was still behind on the oldest ones
+  uint64_t skipped_frame_count;
+};
+
 struct diagnostics_internal_tab_t
 {
   char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
@@ -215,6 +256,8 @@ struct diagnostics_internal_state_t
   struct diagnostics_internal_events_t events;
 
   struct diagnostics_internal_rendering_t rendering;
+
+  struct diagnostics_internal_gpu_t gpu;
 };
 
 /*******************************************************************************
@@ -364,6 +407,48 @@ void diagnostics_internal_events_clear(void);
 
 /*******************************************************************************
  *
+ *   GPU TIMING
+ *
+ ******************************************************************************/
+
+// Starts timing a window's frame on the GPU, first collecting any earlier
+//  frames' results the GPU has finished. The window's graphics context must
+//  be current, as for every GPU timing call
+//
+//  in:     in_window
+void diagnostics_internal_gpu_frame_begin(
+  const struct window_t* in_window);
+
+// Marks the end of a part of a window's frame on the GPU, named after the
+//  window's tag and in_part
+//
+//  in:     in_window, in_part
+void diagnostics_internal_gpu_mark(
+  const struct window_t* in_window,
+  const char* in_part);
+
+// Marks the end of one of a window's layers on the GPU
+//
+//  in:     in_window, in_layer_index
+void diagnostics_internal_gpu_mark_layer(
+  const struct window_t* in_window,
+  const uint8_t in_layer_index);
+
+// Ends a window's frame on the GPU; its results are collected once the GPU
+//  reaches its end
+//
+//  in:     in_window
+void diagnostics_internal_gpu_frame_end(
+  const struct window_t* in_window);
+
+// Releases a window's GPU timing
+//
+//  in:     in_window
+void diagnostics_internal_gpu_cleanup(
+  const struct window_t* in_window);
+
+/*******************************************************************************
+ *
  *   RENDERING
  *
  ******************************************************************************/
@@ -393,6 +478,16 @@ void diagnostics_internal_count_draw(
 #define diagnostics_internal_scene_begin(in_renderer) \
   ((void)(in_renderer))
 #define diagnostics_internal_scene_end() ((void)0)
+#define diagnostics_internal_gpu_frame_begin(in_window) \
+  ((void)(in_window))
+#define diagnostics_internal_gpu_mark(in_window, in_part) \
+  ((void)(in_window), (void)(in_part))
+#define diagnostics_internal_gpu_mark_layer(in_window, in_layer_index) \
+  ((void)(in_window), (void)(in_layer_index))
+#define diagnostics_internal_gpu_frame_end(in_window) \
+  ((void)(in_window))
+#define diagnostics_internal_gpu_cleanup(in_window) \
+  ((void)(in_window))
 #define diagnostics_internal_count_draw(in_element_count) \
   ((void)(in_element_count))
 #define diagnostics_internal_frame_begin(in_target_interval_seconds) \

@@ -137,3 +137,50 @@ void render_api_draw_triangle_fan(unsigned int vertex_count);
 void render_api_draw_lines(unsigned int vertex_count);
 
 void render_api_set_line_width(const float width);
+
+/*******************************************************************************
+ *
+ *   GPU TIMESTAMPS
+ *
+ ******************************************************************************/
+
+// Timestamps mark when the GPU reaches a point in the commands submitted to
+//  it; the difference between two is how long the GPU spent on the commands
+//  between them. Their names belong to the graphics context current when
+//  they were created, which must be current to use them
+
+// Checks for timestamp support in the current graphics context
+//
+//  ret:    true when timestamps are supported; otherwise false
+bool render_api_has_timestamps(void);
+
+// Creates timestamps
+//
+//  in:     in_count
+//  out:    out_names
+void render_api_create_timestamps(
+  uint32_t* out_names,
+  const uint32_t in_count);
+
+// Deletes timestamps
+//
+//  in:     in_names, in_count
+void render_api_delete_timestamps(
+  const uint32_t* in_names,
+  const uint32_t in_count);
+
+// Has the GPU record the time when it reaches this point in its commands
+//
+//  in:     in_name
+void render_api_record_timestamp(
+  const uint32_t in_name);
+
+// Reads a recorded timestamp, without waiting for the GPU
+//
+//  in:     in_name
+//  out:    out_time_nanoseconds
+//  ret:    true when the GPU has reached the timestamp; otherwise false, with
+//            out_time_nanoseconds untouched
+bool render_api_read_timestamp(
+  const uint32_t in_name,
+  uint64_t* out_time_nanoseconds);

@@ -47,11 +47,18 @@ static bool is_log_auto_scrolled = true;
 static void _diagnostics_panel_draw_overview(
   const struct diagnostics_internal_state_t* in_state);
 
-// Draws the Timing tab: every zone's time per frame
+// Draws the Timing tab: every zone's time per frame, on the CPU and the GPU
 //
 //  in:     in_state
 static void _diagnostics_panel_draw_timing(
   const struct diagnostics_internal_state_t* in_state);
+
+// Draws a table and a plot of every zone timed on the CPU, or on the GPU
+//
+//  in:     in_state, in_is_gpu
+static void _diagnostics_panel_draw_zones(
+  const struct diagnostics_internal_state_t* in_state,
+  const bool in_is_gpu);
 
 // Draws the Rendering tab: draw calls per frame, by renderer
 //
@@ -375,18 +382,58 @@ static void _diagnostics_panel_draw_overview(
 static void _diagnostics_panel_draw_timing(
   const struct diagnostics_internal_state_t* in_state)
 {
+  _diagnostics_panel_draw_zones(
+    in_state,
+    false);
+
+  igSeparatorText("GPU");
+
+  const struct diagnostics_internal_gpu_t* gpu = &(in_state->gpu);
+
+  if (!gpu->is_support_checked)
+  {
+    igTextDisabled("GPU timing starts with the first frame");
+  }
+  else if (!gpu->is_supported)
+  {
+    igTextDisabled("The graphics driver doesn't support GPU timestamps");
+  }
+  else
+  {
+    igTextDisabled(
+      "Measured by the GPU, arriving a few frames late; %llu frames left untimed",
+      (unsigned long long)gpu->skipped_frame_count);
+
+    _diagnostics_panel_draw_zones(
+      in_state,
+      true);
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_panel_draw_zones()
+ *
+ ******************************************************************************/
+static void _diagnostics_panel_draw_zones(
+  const struct diagnostics_internal_state_t* in_state,
+  const bool in_is_gpu)
+{
   float y_maximum = 0.0f;
 
   if (_diagnostics_panel_begin_summary_table(
-        "timing_summary",
-        "Zone (ms)"))
+        in_is_gpu ? "gpu_zone_summary" : "cpu_zone_summary",
+        in_is_gpu ? "GPU zone (ms)" : "CPU zone (ms)"))
   {
     for (uint16_t i = 0; i < in_state->zone_count; i++)
     {
-      _diagnostics_panel_draw_summary_row(
-        in_state->zones[i].name,
-        &(in_state->zones[i].milliseconds),
-        2);
+      if (in_state->zones[i].is_gpu == in_is_gpu)
+      {
+        _diagnostics_panel_draw_summary_row(
+          in_state->zones[i].name,
+          &(in_state->zones[i].milliseconds),
+          2);
+      }
     }
 
     igEndTable();
@@ -394,6 +441,11 @@ static void _diagnostics_panel_draw_timing(
 
   for (uint16_t i = 0; i < in_state->zone_count; i++)
   {
+    if (in_state->zones[i].is_gpu != in_is_gpu)
+    {
+      continue;
+    }
+
     const float zone_maximum =
       _diagnostics_panel_get_history_maximum(&(in_state->zones[i].milliseconds));
 
@@ -404,15 +456,18 @@ static void _diagnostics_panel_draw_timing(
   }
 
   if (_diagnostics_panel_begin_history_plot(
-        "##zone_times",
+        in_is_gpu ? "##gpu_zone_times" : "##cpu_zone_times",
         "ms",
         y_maximum))
   {
     for (uint16_t i = 0; i < in_state->zone_count; i++)
     {
-      _diagnostics_panel_plot_history(
-        in_state->zones[i].name,
-        &(in_state->zones[i].milliseconds));
+      if (in_state->zones[i].is_gpu == in_is_gpu)
+      {
+        _diagnostics_panel_plot_history(
+          in_state->zones[i].name,
+          &(in_state->zones[i].milliseconds));
+      }
     }
 
     ImPlot_EndPlot();

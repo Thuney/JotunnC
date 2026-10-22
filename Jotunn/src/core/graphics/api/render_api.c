@@ -3,6 +3,18 @@
 #include "../../diagnostics/diagnostics_internal.h"
 
 extern void platform_render_api_init(struct render_api_implementation_t* render_api);
+extern bool platform_render_api_has_timestamps(void);
+extern void platform_render_api_create_timestamps(
+  uint32_t* out_names,
+  const uint32_t in_count);
+extern void platform_render_api_delete_timestamps(
+  const uint32_t* in_names,
+  const uint32_t in_count);
+extern void platform_render_api_record_timestamp(
+  const uint32_t in_name);
+extern bool platform_render_api_read_timestamp(
+  const uint32_t in_name,
+  uint64_t* out_time_nanoseconds);
 extern void platform_render_api_bind(struct render_api_implementation_t* render_api);
 extern void platform_render_api_clear(struct render_api_implementation_t* render_api);
 // Restricts drawing to the implementation's scissor rectangle when it is
@@ -182,4 +194,67 @@ void render_api_set_line_width(
   const float width)
 {
   platform_render_api_set_line_width(width);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_has_timestamps()
+ *
+ ******************************************************************************/
+bool render_api_has_timestamps(void)
+{
+  return platform_render_api_has_timestamps();
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_create_timestamps()
+ *
+ ******************************************************************************/
+void render_api_create_timestamps(
+  uint32_t* out_names,
+  const uint32_t in_count)
+{
+  platform_render_api_create_timestamps(
+    out_names,
+    in_count);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_delete_timestamps()
+ *
+ ******************************************************************************/
+void render_api_delete_timestamps(
+  const uint32_t* in_names,
+  const uint32_t in_count)
+{
+  platform_render_api_delete_timestamps(
+    in_names,
+    in_count);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_record_timestamp()
+ *
+ ******************************************************************************/
+void render_api_record_timestamp(
+  const uint32_t in_name)
+{
+  platform_render_api_record_timestamp(in_name);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_read_timestamp()
+ *
+ ******************************************************************************/
+bool render_api_read_timestamp(
+  const uint32_t in_name,
+  uint64_t* out_time_nanoseconds)
+{
+  return platform_render_api_read_timestamp(
+    in_name,
+    out_time_nanoseconds);
 }

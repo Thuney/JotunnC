@@ -3,6 +3,7 @@
 
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <assert.h>
 #include <stdio.h>
 
 static void _opengl_render_api_apply_blend_mode(
@@ -264,6 +265,94 @@ void platform_render_api_set_line_width(
   float line_width)
 {
   opengl_render_api_set_line_width(line_width);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_has_timestamps()
+ *
+ ******************************************************************************/
+bool platform_render_api_has_timestamps(void)
+{
+  // Timestamp queries are core from OpenGL 3.3
+  return (GLEW_VERSION_3_3 ||
+          GLEW_ARB_timer_query);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_create_timestamps()
+ *
+ ******************************************************************************/
+void platform_render_api_create_timestamps(
+  uint32_t* out_names,
+  const uint32_t in_count)
+{
+  static_assert(
+    sizeof(GLuint) == sizeof(uint32_t),
+    "Query names are expected to be 32 bits wide");
+
+  glGenQueries(
+    (GLsizei)in_count,
+    (GLuint*)out_names);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_delete_timestamps()
+ *
+ ******************************************************************************/
+void platform_render_api_delete_timestamps(
+  const uint32_t* in_names,
+  const uint32_t in_count)
+{
+  glDeleteQueries(
+    (GLsizei)in_count,
+    (const GLuint*)in_names);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_record_timestamp()
+ *
+ ******************************************************************************/
+void platform_render_api_record_timestamp(
+  const uint32_t in_name)
+{
+  glQueryCounter(
+    in_name,
+    GL_TIMESTAMP);
+}
+
+/*******************************************************************************
+ *
+ *   Function: platform_render_api_read_timestamp()
+ *
+ ******************************************************************************/
+bool platform_render_api_read_timestamp(
+  const uint32_t in_name,
+  uint64_t* out_time_nanoseconds)
+{
+  GLint is_available = GL_FALSE;
+  glGetQueryObjectiv(
+    in_name,
+    GL_QUERY_RESULT_AVAILABLE,
+    &(is_available));
+
+  if (is_available == GL_FALSE)
+  {
+    return false;
+  }
+
+  GLuint64 time_nanoseconds = 0;
+  glGetQueryObjectui64v(
+    in_name,
+    GL_QUERY_RESULT,
+    &(time_nanoseconds));
+
+  *out_time_nanoseconds = (uint64_t)time_nanoseconds;
+
+  return true;
 }
 
 /*******************************************************************************

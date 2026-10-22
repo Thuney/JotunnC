@@ -3,6 +3,7 @@
 
 #include "allocator.h"
 #include "application.h"
+#include "render_api.h"
 #include "renderer.h"
 #include "resource.h"
 #include "window.h"
@@ -70,6 +71,41 @@ static_assert(
  *
  ******************************************************************************/
 
+// Finds the zone registered under a name, timed on the CPU or the GPU,
+//  registering it the first time
+//
+//  in:     in_name, in_is_gpu
+//  ret:    The zone's id; DIAGNOSTICS_ZONE_INVALID when every zone is taken
+static uint16_t _diagnostics_register_zone(
+  const char* in_name,
+  const bool in_is_gpu);
+
+// Finds the zone timing part of a window's frame, named after the window's
+//  tag and in_part, registering it the first time
+//
+//  in:     in_window, in_part, in_is_gpu
+//  ret:    The zone's id; DIAGNOSTICS_ZONE_INVALID when every zone is taken
+static uint16_t _diagnostics_get_window_zone(
+  const struct window_t* in_window,
+  const char* in_part,
+  const bool in_is_gpu);
+
+// Finds a window's GPU timing, taking a slot for it when asked to and it has
+//  none yet
+//
+//  in:     in_window, in_should_create
+//  ret:    The window's GPU timing; NULL when it has none
+static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
+  const struct window_t* in_window,
+  const bool in_should_create);
+
+// Charges the GPU time of every pending frame the GPU has finished to its
+//  zones
+//
+//  in/out: inout_gpu_window
+static void _diagnostics_collect_gpu_frames(
+  struct diagnostics_internal_gpu_window_t* inout_gpu_window);
+
 // Adds a value to a history, displacing the oldest once it's full
 //
 //  in:     in_value
@@ -129,32 +165,9 @@ static int _diagnostics_compare_floats(
 uint16_t diagnostics_zone_register(
   const char* in_name)
 {
-  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++)
-  {
-    if (strncmp(
-          diagnostics_state.zones[i].name,
-          in_name,
-          (DIAGNOSTICS_INTERNAL_NAME_LENGTH - 1)) == 0)
-    {
-      return i;
-    }
-  }
-
-  if (diagnostics_state.zone_count >= DIAGNOSTICS_INTERNAL_MAX_ZONES)
-  {
-    return DIAGNOSTICS_ZONE_INVALID;
-  }
-
-  const uint16_t zone_id = diagnostics_state.zone_count;
-  diagnostics_state.zone_count++;
-
-  snprintf(
-    diagnostics_state.zones[zone_id].name,
-    DIAGNOSTICS_INTERNAL_NAME_LENGTH,
-    "%s",
-    in_name);
-
-  return zone_id;
+  return _diagnostics_register_zone(
+    in_name,
+    false);
 }
 
 /*******************************************************************************
@@ -554,17 +567,215 @@ uint16_t diagnostics_internal_get_layer_zone(
   const struct window_t* in_window,
   const uint8_t in_layer_index)
 {
-  char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  char part[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
   snprintf(
-    name,
-    sizeof(name),
-    "%s layer %u",
-    (in_window->metadata.tag != NULL) ? in_window->metadata.tag : "window",
+    part,
+    sizeof(part),
+    "layer %u",
     (unsigned int)in_layer_index);
 
-  // Looked up by name every time, so a window gone can't leave a stale zone
-  //  to one that takes its place
-  return diagnostics_zone_register(name);
+  return _diagnostics_get_window_zone(
+    in_window,
+    part,
+    false);
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_gpu_frame_begin()
+ *
+ ******************************************************************************/
+void diagnostics_internal_gpu_frame_begin(
+  const struct window_t* in_window)
+{
+  struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
+
+  if (!gpu->is_support_checked)
+  {
+    gpu->is_supported = render_api_has_timestamps();
+    gpu->is_support_checked = true;
+  }
+
+  if (!gpu->is_supported)
+  {
+    return;
+  }
+
+  struct diagnostics_internal_gpu_window_t* gpu_window =
+    _diagnostics_find_gpu_window(
+      in_window,
+      true);
+
+  if (gpu_window == NULL)
+  {
+    return;
+  }
+
+  if (!gpu_window->is_created)
+  {
+    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
+    {
+      render_api_create_timestamps(
+        gpu_window->frames[i].timestamp_names,
+        DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS);
+    }
+
+    gpu_window->is_created = true;
+  }
+
+  _diagnostics_collect_gpu_frames(gpu_window);
+
+  struct diagnostics_internal_gpu_frame_t* frame =
+    &(gpu_window->frames[gpu_window->current_frame]);
+
+  // Its timestamps are still in use, so this frame goes untimed rather than
+  //  waiting for the GPU
+  if (frame->is_pending)
+  {
+    gpu_window->is_frame_open = false;
+    gpu->skipped_frame_count++;
+    return;
+  }
+
+  frame->mark_count = 0;
+  gpu_window->is_frame_open = true;
+
+  // The first mark only starts the first part
+  diagnostics_internal_gpu_mark(
+    in_window,
+    NULL);
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_gpu_mark()
+ *
+ ******************************************************************************/
+void diagnostics_internal_gpu_mark(
+  const struct window_t* in_window,
+  const char* in_part)
+{
+  struct diagnostics_internal_gpu_window_t* gpu_window =
+    _diagnostics_find_gpu_window(
+      in_window,
+      false);
+
+  if ((gpu_window == NULL) ||
+      !gpu_window->is_frame_open)
+  {
+    return;
+  }
+
+  struct diagnostics_internal_gpu_frame_t* frame =
+    &(gpu_window->frames[gpu_window->current_frame]);
+
+  if (frame->mark_count >= DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS)
+  {
+    return;
+  }
+
+  frame->zone_ids[frame->mark_count] =
+    (in_part != NULL) ?
+      _diagnostics_get_window_zone(
+        in_window,
+        in_part,
+        true) :
+      DIAGNOSTICS_ZONE_INVALID;
+
+  render_api_record_timestamp(frame->timestamp_names[frame->mark_count]);
+  frame->mark_count++;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_gpu_mark_layer()
+ *
+ ******************************************************************************/
+void diagnostics_internal_gpu_mark_layer(
+  const struct window_t* in_window,
+  const uint8_t in_layer_index)
+{
+  char part[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  snprintf(
+    part,
+    sizeof(part),
+    "layer %u",
+    (unsigned int)in_layer_index);
+
+  diagnostics_internal_gpu_mark(
+    in_window,
+    part);
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_gpu_frame_end()
+ *
+ ******************************************************************************/
+void diagnostics_internal_gpu_frame_end(
+  const struct window_t* in_window)
+{
+  struct diagnostics_internal_gpu_window_t* gpu_window =
+    _diagnostics_find_gpu_window(
+      in_window,
+      false);
+
+  if ((gpu_window == NULL) ||
+      !gpu_window->is_frame_open)
+  {
+    return;
+  }
+
+  struct diagnostics_internal_gpu_frame_t* frame =
+    &(gpu_window->frames[gpu_window->current_frame]);
+
+  frame->frame_zone_id =
+    _diagnostics_get_window_zone(
+      in_window,
+      "frame",
+      true);
+  frame->is_pending = true;
+
+  gpu_window->current_frame = (gpu_window->current_frame + 1) % DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY;
+  gpu_window->is_frame_open = false;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_gpu_cleanup()
+ *
+ ******************************************************************************/
+void diagnostics_internal_gpu_cleanup(
+  const struct window_t* in_window)
+{
+  struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
+  struct diagnostics_internal_gpu_window_t* gpu_window =
+    _diagnostics_find_gpu_window(
+      in_window,
+      false);
+
+  if (gpu_window == NULL)
+  {
+    return;
+  }
+
+  if (gpu_window->is_created)
+  {
+    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
+    {
+      render_api_delete_timestamps(
+        gpu_window->frames[i].timestamp_names,
+        DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS);
+    }
+  }
+
+  // The last window's timing takes the slot, keeping the rest packed
+  gpu->window_count--;
+  *gpu_window = gpu->windows[gpu->window_count];
+  memset(
+    &(gpu->windows[gpu->window_count]),
+    0,
+    sizeof(struct diagnostics_internal_gpu_window_t));
 }
 
 /*******************************************************************************
@@ -640,6 +851,168 @@ void diagnostics_internal_history_summarize(
   out_summary->average = (float)(sum / in_history->count);
   out_summary->percentile_99 = sorted_values[percentile_99_index];
   out_summary->maximum = sorted_values[in_history->count - 1];
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_register_zone()
+ *
+ ******************************************************************************/
+static uint16_t _diagnostics_register_zone(
+  const char* in_name,
+  const bool in_is_gpu)
+{
+  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++)
+  {
+    if ((diagnostics_state.zones[i].is_gpu == in_is_gpu) &&
+        (strncmp(
+           diagnostics_state.zones[i].name,
+           in_name,
+           (DIAGNOSTICS_INTERNAL_NAME_LENGTH - 1)) == 0))
+    {
+      return i;
+    }
+  }
+
+  if (diagnostics_state.zone_count >= DIAGNOSTICS_INTERNAL_MAX_ZONES)
+  {
+    return DIAGNOSTICS_ZONE_INVALID;
+  }
+
+  const uint16_t zone_id = diagnostics_state.zone_count;
+  diagnostics_state.zone_count++;
+
+  snprintf(
+    diagnostics_state.zones[zone_id].name,
+    DIAGNOSTICS_INTERNAL_NAME_LENGTH,
+    "%s",
+    in_name);
+  diagnostics_state.zones[zone_id].is_gpu = in_is_gpu;
+
+  return zone_id;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_get_window_zone()
+ *
+ ******************************************************************************/
+static uint16_t _diagnostics_get_window_zone(
+  const struct window_t* in_window,
+  const char* in_part,
+  const bool in_is_gpu)
+{
+  char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  snprintf(
+    name,
+    sizeof(name),
+    "%s %s",
+    (in_window->metadata.tag != NULL) ? in_window->metadata.tag : "window",
+    in_part);
+
+  // Looked up by name every time, so a window gone can't leave a stale zone
+  //  to one that takes its place
+  return _diagnostics_register_zone(
+    name,
+    in_is_gpu);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_find_gpu_window()
+ *
+ ******************************************************************************/
+static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
+  const struct window_t* in_window,
+  const bool in_should_create)
+{
+  struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
+
+  for (uint8_t i = 0; i < gpu->window_count; i++)
+  {
+    if (gpu->windows[i].window == in_window)
+    {
+      return &(gpu->windows[i]);
+    }
+  }
+
+  if (!in_should_create ||
+      (gpu->window_count >= DIAGNOSTICS_INTERNAL_GPU_MAX_WINDOWS))
+  {
+    return NULL;
+  }
+
+  struct diagnostics_internal_gpu_window_t* gpu_window = &(gpu->windows[gpu->window_count]);
+  gpu->window_count++;
+
+  memset(
+    gpu_window,
+    0,
+    sizeof(struct diagnostics_internal_gpu_window_t));
+  gpu_window->window = in_window;
+
+  return gpu_window;
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_collect_gpu_frames()
+ *
+ ******************************************************************************/
+static void _diagnostics_collect_gpu_frames(
+  struct diagnostics_internal_gpu_window_t* inout_gpu_window)
+{
+  for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
+  {
+    struct diagnostics_internal_gpu_frame_t* frame = &(inout_gpu_window->frames[i]);
+
+    if (!frame->is_pending)
+    {
+      continue;
+    }
+
+    if (frame->mark_count == 0)
+    {
+      frame->is_pending = false;
+      continue;
+    }
+
+    // A frame is charged only once every one of its timestamps is ready, as
+    //  their results needn't arrive in order
+    uint64_t times_nanoseconds[DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS];
+    bool is_ready = true;
+
+    for (uint8_t mark = 0; is_ready && (mark < frame->mark_count); mark++)
+    {
+      is_ready =
+        render_api_read_timestamp(
+          frame->timestamp_names[mark],
+          &(times_nanoseconds[mark]));
+    }
+
+    if (!is_ready)
+    {
+      continue;
+    }
+
+    for (uint8_t mark = 1; mark < frame->mark_count; mark++)
+    {
+      if (frame->zone_ids[mark] < diagnostics_state.zone_count)
+      {
+        diagnostics_state.zones[frame->zone_ids[mark]].frame_seconds +=
+          ((double)(times_nanoseconds[mark] - times_nanoseconds[mark - 1]) / 1000000000.0);
+      }
+    }
+
+    if (frame->frame_zone_id < diagnostics_state.zone_count)
+    {
+      diagnostics_state.zones[frame->frame_zone_id].frame_seconds +=
+        ((double)(times_nanoseconds[frame->mark_count - 1] - times_nanoseconds[0]) /
+         1000000000.0);
+    }
+
+    frame->is_pending = false;
+  }
 }
 
 /*******************************************************************************

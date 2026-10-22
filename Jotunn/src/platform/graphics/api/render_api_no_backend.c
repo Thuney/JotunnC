@@ -58,3 +58,42 @@ void platform_render_api_draw_elements_base_vertex(
   const int32_t in_base_vertex)
 {
 }
+
+bool platform_render_api_has_timestamps(void)
+{
+  return false;
+}
+
+void platform_render_api_create_timestamps(
+  uint32_t* out_names,
+  const uint32_t in_count)
+{
+  for (uint32_t i = 0; i < in_count; i++)
+  {
+    out_names[i] = 0;
+  }
+}
+
+void platform_render_api_delete_timestamps(
+  const uint32_t* in_names,
+  const uint32_t in_count)
+{
+  (void)in_names;
+  (void)in_count;
+}
+
+void platform_render_api_record_timestamp(
+  const uint32_t in_name)
+{
+  (void)in_name;
+}
+
+bool platform_render_api_read_timestamp(
+  const uint32_t in_name,
+  uint64_t* out_time_nanoseconds)
+{
+  (void)in_name;
+  (void)out_time_nanoseconds;
+
+  return false;
+}
