@@ -5,13 +5,14 @@
 //  JOTUNN_DIAGNOSTICS the hooks compile to nothing
 
 #include "diagnostics.h"
+#include "event.h"
 #include "log.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 
-struct event_base_t;
+struct application_t;
 struct texture_2d_t;
 struct window_layer_t;
 struct window_t;
@@ -48,6 +49,8 @@ enum diagnostics_internal_engine_zone_t
 #define DIAGNOSTICS_INTERNAL_MAX_TABS 8
 #define DIAGNOSTICS_INTERNAL_NAME_LENGTH 48
 #define DIAGNOSTICS_INTERNAL_LOG_LENGTH 256
+#define DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH 256
+#define DIAGNOSTICS_INTERNAL_EVENT_TEXT_LENGTH 96
 
 /*******************************************************************************
  *
@@ -101,6 +104,43 @@ struct diagnostics_internal_log_t
   uint64_t level_counts[LOG_LEVEL_COUNT];
 };
 
+// One event, as it was after every handler had seen it
+struct diagnostics_internal_event_entry_t
+{
+  enum event_type_t type;
+  bool is_handled;
+  // The frame being recorded when the event arrived
+  uint64_t frame;
+  // The tag of the window the event came from; empty for application events
+  char window_tag[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
+  char details[DIAGNOSTICS_INTERNAL_EVENT_TEXT_LENGTH];
+};
+
+struct diagnostics_internal_event_type_stats_t
+{
+  uint64_t count;
+  uint64_t handled_count;
+  // Counted, but left out of the event log, as frequent events would crowd
+  //  everything else out of it
+  bool is_excluded;
+  bool has_latest;
+  struct diagnostics_internal_event_entry_t latest;
+};
+
+// The most recent events, kept in a ring like the histories
+struct diagnostics_internal_events_t
+{
+  struct diagnostics_internal_event_entry_t entries[DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH];
+  uint32_t next_index;
+  uint32_t count;
+  // While paused, events are counted but the log is left as it is
+  bool is_paused;
+  struct diagnostics_internal_event_type_stats_t types[EVENT_TYPE_COUNT];
+  // Events other than application ticks this frame
+  uint64_t frame_count;
+  struct diagnostics_internal_history_t per_frame;
+};
+
 struct diagnostics_internal_tab_t
 {
   char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
@@ -139,6 +179,8 @@ struct diagnostics_internal_state_t
   uint8_t tab_count;
 
   struct diagnostics_internal_log_t log;
+
+  struct diagnostics_internal_events_t events;
 };
 
 /*******************************************************************************
@@ -241,10 +283,48 @@ void diagnostics_internal_log_record(
 // Empties the log kept for the Log tab, keeping the counts per level
 void diagnostics_internal_log_clear(void);
 
+/*******************************************************************************
+ *
+ *   EVENTS
+ *
+ ******************************************************************************/
+
+// Records an event once every handler has seen it
+//
+//  in:     in_app, in_event
+void diagnostics_internal_event_record(
+  const struct application_t* in_app,
+  const struct event_base_t* in_event);
+
+// Names a type of event for display
+//
+//  in:     in_type
+//  ret:    The type's name, or "unknown" when in_type isn't valid
+const char* diagnostics_internal_event_get_type_name(
+  const enum event_type_t in_type);
+
+// Includes a type of event in the event log, or leaves it out
+//
+//  in:     in_type, in_is_excluded
+void diagnostics_internal_events_set_excluded(
+  const enum event_type_t in_type,
+  const bool in_is_excluded);
+
+// Pauses or resumes the event log; events are counted either way
+//
+//  in:     in_is_paused
+void diagnostics_internal_events_set_paused(
+  const bool in_is_paused);
+
+// Empties the event log, keeping the counts per type
+void diagnostics_internal_events_clear(void);
+
 #else
 
 #define diagnostics_internal_log_record(in_level, in_text) \
   ((void)(in_level), (void)(in_text))
+#define diagnostics_internal_event_record(in_app, in_event) \
+  ((void)(in_app), (void)(in_event))
 #define diagnostics_internal_frame_begin(in_target_interval_seconds) \
   ((void)(in_target_interval_seconds))
 #define diagnostics_internal_frame_end() ((void)0)

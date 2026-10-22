@@ -27,7 +27,9 @@ enum event_type_t
   EVENT_MOUSE_BUTTON,
   EVENT_MOUSE_MOVED,
   EVENT_MOUSE_SCROLLED,
-  EVENT_MOUSE_ENTERED
+  EVENT_MOUSE_ENTERED,
+
+  EVENT_TYPE_COUNT
 };
 
 // Physical keys, independent of the windowing backend. Laid out in groups

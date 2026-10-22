@@ -250,7 +250,13 @@ void application_on_event(
     app->function_event_react(app, event);
 
     if (event->handled)
+    {
+      diagnostics_internal_event_record(
+        app,
+        event);
+
       return;
+    }
   }
 
   switch (event->event_type)
@@ -355,6 +361,11 @@ void application_on_event(
       cur_window++;
     }
   }
+
+  // Recorded once every handler has seen it, so it's known whether one took it
+  diagnostics_internal_event_record(
+    app,
+    event);
 }
 
 /************************************************************

@@ -2,7 +2,9 @@
 #include "diagnostics_internal.h"
 
 #include "allocator.h"
+#include "application.h"
 #include "resource.h"
+#include "window.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,8 +27,41 @@ static struct diagnostics_internal_state_t diagnostics_state =
     [DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE] = { .name = "composite" },
     [DIAGNOSTICS_INTERNAL_ZONE_PRESENT]   = { .name = "present" },
   },
-  .zone_count = DIAGNOSTICS_INTERNAL_ZONE_ENGINE_COUNT
+  .zone_count = DIAGNOSTICS_INTERNAL_ZONE_ENGINE_COUNT,
+  // Each arrives every frame, or nearly, so they'd crowd out everything else
+  .events =
+  {
+    .types =
+    {
+      [EVENT_APP_TICK]    = { .is_excluded = true },
+      [EVENT_MOUSE_MOVED] = { .is_excluded = true },
+    }
+  }
 };
+
+static const char* const diagnostics_event_type_names[] =
+{
+  [EVENT_WINDOW_CLOSE]      = "window close",
+  [EVENT_WINDOW_RESIZE]     = "window resize",
+  [EVENT_WINDOW_FOCUS]      = "window focus",
+  [EVENT_WINDOW_LOST_FOCUS] = "window lost focus",
+  [EVENT_WINDOW_MOVED]      = "window moved",
+  [EVENT_APP_TICK]          = "app tick",
+  [EVENT_APP_UPDATE]        = "app update",
+  [EVENT_APP_RENDER]        = "app render",
+  [EVENT_KEY_PRESSED]       = "key pressed",
+  [EVENT_KEY_RELEASED]      = "key released",
+  [EVENT_KEY_TYPED]         = "key typed",
+  [EVENT_MOUSE_BUTTON]      = "mouse button",
+  [EVENT_MOUSE_MOVED]       = "mouse moved",
+  [EVENT_MOUSE_SCROLLED]    = "mouse scrolled",
+  [EVENT_MOUSE_ENTERED]     = "mouse entered",
+};
+
+static_assert(
+  (sizeof(diagnostics_event_type_names) / sizeof(diagnostics_event_type_names[0])) ==
+    EVENT_TYPE_COUNT,
+  "Every event type needs a name");
 
 /*******************************************************************************
  *
@@ -47,6 +82,23 @@ static void _diagnostics_record_heap(void);
 
 // Records the graphics memory held at the end of the frame
 static void _diagnostics_record_resources(void);
+
+// Writes an event's particulars, such as a key or a position, for display
+//
+//  in:     in_event, in_text_length
+//  out:    out_text
+static void _diagnostics_describe_event(
+  const struct event_base_t* in_event,
+  char* out_text,
+  const size_t in_text_length);
+
+// Finds the tag of the window an event came from
+//
+//  in:     in_app, in_event
+//  ret:    The window's tag; "" for application events and unknown windows
+static const char* _diagnostics_find_event_window_tag(
+  const struct application_t* in_app,
+  const struct event_base_t* in_event);
 
 // Orders floats for qsort()
 //
@@ -240,6 +292,11 @@ void diagnostics_internal_frame_end(void)
   _diagnostics_record_heap();
   _diagnostics_record_resources();
 
+  _diagnostics_history_push(
+    &(diagnostics_state.events.per_frame),
+    (float)diagnostics_state.events.frame_count);
+  diagnostics_state.events.frame_count = 0;
+
   diagnostics_state.frame_count++;
 }
 
@@ -294,6 +351,119 @@ void diagnostics_internal_log_clear(void)
 {
   diagnostics_state.log.next_index = 0;
   diagnostics_state.log.count = 0;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_event_record()
+ *
+ ******************************************************************************/
+void diagnostics_internal_event_record(
+  const struct application_t* in_app,
+  const struct event_base_t* in_event)
+{
+  if ((unsigned int)in_event->event_type >= (unsigned int)EVENT_TYPE_COUNT)
+  {
+    return;
+  }
+
+  struct diagnostics_internal_events_t* events = &(diagnostics_state.events);
+  struct diagnostics_internal_event_type_stats_t* type_stats =
+    &(events->types[in_event->event_type]);
+
+  struct diagnostics_internal_event_entry_t entry =
+    {
+      .type = in_event->event_type,
+      .is_handled = (in_event->handled != 0U),
+      .frame = diagnostics_state.frame_count
+    };
+  snprintf(
+    entry.window_tag,
+    sizeof(entry.window_tag),
+    "%s",
+    _diagnostics_find_event_window_tag(
+      in_app,
+      in_event));
+  _diagnostics_describe_event(
+    in_event,
+    entry.details,
+    sizeof(entry.details));
+
+  type_stats->count++;
+  if (entry.is_handled)
+  {
+    type_stats->handled_count++;
+  }
+  type_stats->latest = entry;
+  type_stats->has_latest = true;
+
+  if (in_event->event_type != EVENT_APP_TICK)
+  {
+    events->frame_count++;
+  }
+
+  if (events->is_paused ||
+      type_stats->is_excluded)
+  {
+    return;
+  }
+
+  events->entries[events->next_index] = entry;
+  events->next_index = (events->next_index + 1) % DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH;
+  if (events->count < DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH)
+  {
+    events->count++;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_event_get_type_name()
+ *
+ ******************************************************************************/
+const char* diagnostics_internal_event_get_type_name(
+  const enum event_type_t in_type)
+{
+  return ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT) ?
+    diagnostics_event_type_names[in_type] :
+    "unknown";
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_events_set_excluded()
+ *
+ ******************************************************************************/
+void diagnostics_internal_events_set_excluded(
+  const enum event_type_t in_type,
+  const bool in_is_excluded)
+{
+  if ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT)
+  {
+    diagnostics_state.events.types[in_type].is_excluded = in_is_excluded;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_events_set_paused()
+ *
+ ******************************************************************************/
+void diagnostics_internal_events_set_paused(
+  const bool in_is_paused)
+{
+  diagnostics_state.events.is_paused = in_is_paused;
+}
+
+/*******************************************************************************
+ *
+ *   Function: diagnostics_internal_events_clear()
+ *
+ ******************************************************************************/
+void diagnostics_internal_events_clear(void)
+{
+  diagnostics_state.events.next_index = 0;
+  diagnostics_state.events.count = 0;
 }
 
 /*******************************************************************************
@@ -447,6 +617,235 @@ static void _diagnostics_record_resources(void)
   _diagnostics_history_push(
     &(diagnostics_state.resource_live_megabytes),
     (float)((double)live_bytes / (1024.0 * 1024.0)));
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_describe_event()
+ *
+ ******************************************************************************/
+static void _diagnostics_describe_event(
+  const struct event_base_t* in_event,
+  char* out_text,
+  const size_t in_text_length)
+{
+  out_text[0] = '\0';
+
+  switch (in_event->event_type)
+  {
+    case EVENT_WINDOW_RESIZE:
+    {
+      const struct event_window_resize_t* event =
+        (const struct event_window_resize_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%d x %d",
+        event->width,
+        event->height);
+    }
+    break;
+
+    case EVENT_WINDOW_FOCUS:
+    {
+      const struct event_window_focus_t* event =
+        (const struct event_window_focus_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%s",
+        event->focused ? "gained" : "lost");
+    }
+    break;
+
+    case EVENT_APP_TICK:
+    {
+      const struct event_app_tick_t* event =
+        (const struct event_app_tick_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%.2f ms since the last",
+        (event->delta_time_seconds * 1000.0f));
+    }
+    break;
+
+    case EVENT_KEY_PRESSED:
+    {
+      const struct event_key_pressed_t* event =
+        (const struct event_key_pressed_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "key %d, modifiers 0x%02x%s",
+        (int)event->key,
+        (unsigned int)event->modifiers,
+        event->is_repeat ? ", repeating" : "");
+    }
+    break;
+
+    case EVENT_KEY_RELEASED:
+    {
+      const struct event_key_released_t* event =
+        (const struct event_key_released_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "key %d, modifiers 0x%02x",
+        (int)event->key,
+        (unsigned int)event->modifiers);
+    }
+    break;
+
+    case EVENT_KEY_TYPED:
+    {
+      const struct event_key_typed_t* event =
+        (const struct event_key_typed_t*)in_event;
+
+      // Printable ASCII is shown as itself as well
+      if ((event->codepoint >= 0x20U) &&
+          (event->codepoint < 0x7FU))
+      {
+        snprintf(
+          out_text,
+          in_text_length,
+          "'%c' (U+%04X)",
+          (char)event->codepoint,
+          (unsigned int)event->codepoint);
+      }
+      else
+      {
+        snprintf(
+          out_text,
+          in_text_length,
+          "U+%04X",
+          (unsigned int)event->codepoint);
+      }
+    }
+    break;
+
+    case EVENT_MOUSE_BUTTON:
+    {
+      const struct event_mouse_button_t* event =
+        (const struct event_mouse_button_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "button %d %s, modifiers 0x%02x",
+        event->button,
+        (event->action == 1) ? "pressed" : "released",
+        (unsigned int)event->mods);
+    }
+    break;
+
+    case EVENT_MOUSE_MOVED:
+    {
+      const struct event_mouse_moved_t* event =
+        (const struct event_mouse_moved_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%.1f, %.1f",
+        (double)event->x,
+        (double)event->y);
+    }
+    break;
+
+    case EVENT_MOUSE_SCROLLED:
+    {
+      const struct event_mouse_scrolled_t* event =
+        (const struct event_mouse_scrolled_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%.2f, %.2f",
+        (double)event->x_offset,
+        (double)event->y_offset);
+    }
+    break;
+
+    case EVENT_MOUSE_ENTERED:
+    {
+      const struct event_mouse_entered_t* event =
+        (const struct event_mouse_entered_t*)in_event;
+
+      snprintf(
+        out_text,
+        in_text_length,
+        "%s",
+        event->is_entered ? "entered" : "left");
+    }
+    break;
+
+    default:
+    {
+    }
+    break;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_find_event_window_tag()
+ *
+ ******************************************************************************/
+static const char* _diagnostics_find_event_window_tag(
+  const struct application_t* in_app,
+  const struct event_base_t* in_event)
+{
+  // Only these carry their window; the lost focus and moved events have no
+  //  structure of their own yet
+  const void* window_handle = NULL;
+
+  switch (in_event->event_type)
+  {
+    case EVENT_WINDOW_CLOSE:
+    case EVENT_WINDOW_RESIZE:
+    case EVENT_WINDOW_FOCUS:
+    case EVENT_KEY_PRESSED:
+    case EVENT_KEY_RELEASED:
+    case EVENT_KEY_TYPED:
+    case EVENT_MOUSE_BUTTON:
+    case EVENT_MOUSE_MOVED:
+    case EVENT_MOUSE_SCROLLED:
+    case EVENT_MOUSE_ENTERED:
+    {
+      // Each of these keeps its window's handle straight after the base
+      window_handle = ((const struct event_window_close_t*)in_event)->window_handle;
+    }
+    break;
+
+    default:
+    {
+    }
+    break;
+  }
+
+  if (window_handle == NULL)
+  {
+    return "";
+  }
+
+  for (uint8_t i = 0; i < in_app->num_windows; i++)
+  {
+    const struct window_t* window = in_app->windows[i];
+
+    if ((window->context_data.window_handle == window_handle) &&
+        (window->metadata.tag != NULL))
+    {
+      return window->metadata.tag;
+    }
+  }
+
+  return "";
 }
 
 /*******************************************************************************

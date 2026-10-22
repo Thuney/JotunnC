@@ -15,6 +15,7 @@
 #define _DIAGNOSTICS_PANEL_PLOT_HEIGHT_PIXELS 180.0f
 #define _DIAGNOSTICS_PANEL_PREVIEW_SIZE_PIXELS 256.0f
 #define _DIAGNOSTICS_PANEL_RESOURCE_LIST_HEIGHT_PIXELS 240.0f
+#define _DIAGNOSTICS_PANEL_EVENT_LIST_HEIGHT_PIXELS 220.0f
 #define _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS 72.0f
 #define _DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH 32
 #define _DIAGNOSTICS_PANEL_FILTER_TEXT_LENGTH 128
@@ -64,6 +65,13 @@ static void _diagnostics_panel_draw_memory(
 static void _diagnostics_panel_draw_resources(
   const struct diagnostics_internal_state_t* in_state,
   const struct texture_2d_t* in_target_texture);
+
+// Draws the Events tab: counts and the latest of each type of event, and a log
+//  of recent events
+//
+//  in:     in_state
+static void _diagnostics_panel_draw_events(
+  const struct diagnostics_internal_state_t* in_state);
 
 // Draws the Log tab: the log's recent messages, filtered by level and text
 //
@@ -197,6 +205,15 @@ void diagnostics_internal_panel_draw(
         _diagnostics_panel_draw_resources(
           state,
           in_target_texture);
+        igEndTabItem();
+      }
+
+      if (igBeginTabItem(
+            "Events",
+            NULL,
+            0))
+      {
+        _diagnostics_panel_draw_events(state);
         igEndTabItem();
       }
 
@@ -693,6 +710,218 @@ static void _diagnostics_panel_draw_resources(
     _diagnostics_panel_plot_history(
       "graphics memory",
       &(in_state->resource_live_megabytes));
+
+    ImPlot_EndPlot();
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: _diagnostics_panel_draw_events()
+ *
+ ******************************************************************************/
+static void _diagnostics_panel_draw_events(
+  const struct diagnostics_internal_state_t* in_state)
+{
+  const struct diagnostics_internal_events_t* events = &(in_state->events);
+
+  if (igBeginTable(
+        "event_types",
+        5,
+        (ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV),
+        (ImVec2_c){ 0.0f, 0.0f },
+        0.0f))
+  {
+    igTableSetupColumn(
+      "Type",
+      ImGuiTableColumnFlags_WidthFixed,
+      130.0f,
+      0);
+    igTableSetupColumn(
+      "Count",
+      ImGuiTableColumnFlags_WidthFixed,
+      _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS,
+      0);
+    igTableSetupColumn(
+      "Handled",
+      ImGuiTableColumnFlags_WidthFixed,
+      _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS,
+      0);
+    igTableSetupColumn(
+      "Logged",
+      ImGuiTableColumnFlags_WidthFixed,
+      48.0f,
+      0);
+    igTableSetupColumn(
+      "Latest",
+      ImGuiTableColumnFlags_WidthStretch,
+      0.0f,
+      0);
+    igTableHeadersRow();
+
+    // Only the types seen so far, to keep the table short
+    for (int type = 0; type < EVENT_TYPE_COUNT; type++)
+    {
+      const struct diagnostics_internal_event_type_stats_t* type_stats = &(events->types[type]);
+
+      if (type_stats->count == 0)
+      {
+        continue;
+      }
+
+      igPushID_Int(type);
+
+      igTableNextRow(
+        0,
+        0.0f);
+      igTableNextColumn();
+      igText(
+        "%s",
+        diagnostics_internal_event_get_type_name((enum event_type_t)type));
+      igTableNextColumn();
+      igText(
+        "%llu",
+        (unsigned long long)type_stats->count);
+      igTableNextColumn();
+      igText(
+        "%llu",
+        (unsigned long long)type_stats->handled_count);
+      igTableNextColumn();
+
+      bool is_logged = !type_stats->is_excluded;
+      if (igCheckbox(
+            "##logged",
+            &(is_logged)))
+      {
+        diagnostics_internal_events_set_excluded(
+          (enum event_type_t)type,
+          !is_logged);
+      }
+
+      igTableNextColumn();
+      if (type_stats->has_latest)
+      {
+        igText(
+          "frame %llu  %s  %s",
+          (unsigned long long)type_stats->latest.frame,
+          type_stats->latest.window_tag,
+          type_stats->latest.details);
+      }
+
+      igPopID();
+    }
+
+    igEndTable();
+  }
+
+  bool is_paused = events->is_paused;
+  if (igCheckbox(
+        "Pause the log",
+        &(is_paused)))
+  {
+    diagnostics_internal_events_set_paused(is_paused);
+  }
+
+  igSameLine(
+    0.0f,
+    -1.0f);
+
+  if (igSmallButton("Clear"))
+  {
+    diagnostics_internal_events_clear();
+  }
+
+  if (igBeginTable(
+        "event_log",
+        5,
+        (ImGuiTableFlags_RowBg | ImGuiTableFlags_BordersInnerV | ImGuiTableFlags_ScrollY),
+        (ImVec2_c){ 0.0f, _DIAGNOSTICS_PANEL_EVENT_LIST_HEIGHT_PIXELS },
+        0.0f))
+  {
+    igTableSetupScrollFreeze(
+      0,
+      1);
+    igTableSetupColumn(
+      "Frame",
+      ImGuiTableColumnFlags_WidthFixed,
+      56.0f,
+      0);
+    igTableSetupColumn(
+      "Type",
+      ImGuiTableColumnFlags_WidthFixed,
+      130.0f,
+      0);
+    igTableSetupColumn(
+      "Window",
+      ImGuiTableColumnFlags_WidthFixed,
+      110.0f,
+      0);
+    igTableSetupColumn(
+      "Handled",
+      ImGuiTableColumnFlags_WidthFixed,
+      56.0f,
+      0);
+    igTableSetupColumn(
+      "Details",
+      ImGuiTableColumnFlags_WidthStretch,
+      0.0f,
+      0);
+    igTableHeadersRow();
+
+    // Once the ring is full its oldest event is the next to be overwritten
+    const uint32_t first_index =
+      (events->count == DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH) ?
+        events->next_index :
+        0;
+
+    for (uint32_t i = 0; i < events->count; i++)
+    {
+      const struct diagnostics_internal_event_entry_t* entry =
+        &(events->entries[(first_index + i) % DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH]);
+
+      igTableNextRow(
+        0,
+        0.0f);
+      igTableNextColumn();
+      igText(
+        "%llu",
+        (unsigned long long)entry->frame);
+      igTableNextColumn();
+      igText(
+        "%s",
+        diagnostics_internal_event_get_type_name(entry->type));
+      igTableNextColumn();
+      igText(
+        "%s",
+        entry->window_tag);
+      igTableNextColumn();
+      igText(
+        "%s",
+        entry->is_handled ? "yes" : "");
+      igTableNextColumn();
+      igText(
+        "%s",
+        entry->details);
+    }
+
+    // Kept at the bottom while it's there already, as in the Log tab
+    if (!events->is_paused &&
+        (igGetScrollY() >= igGetScrollMaxY()))
+    {
+      igSetScrollHereY(1.0f);
+    }
+
+    igEndTable();
+  }
+
+  if (_diagnostics_panel_begin_history_plot(
+        "##events_per_frame",
+        "events",
+        _diagnostics_panel_get_history_maximum(&(events->per_frame))))
+  {
+    _diagnostics_panel_plot_history(
+      "events per frame, besides ticks",
+      &(events->per_frame));
 
     ImPlot_EndPlot();
   }
