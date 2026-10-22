@@ -1,7 +1,8 @@
 #pragma once
 
-// Jotunn's log. Messages are written to stdout, and in builds with
-//  diagnostics are also kept for the Log tab of the diagnostics overlay
+// Jotunn's log. In builds with diagnostics, messages are kept for the Log tab
+//  of the diagnostics overlay rather than written to stdout; in builds
+//  without, there is nowhere else to show them, so they go to stdout
 
 #include <stdarg.h>
 

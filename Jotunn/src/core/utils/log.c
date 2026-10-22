@@ -73,14 +73,19 @@ void log_write_va(
     message[length] = '\0';
   }
 
+#ifdef JOTUNN_DIAGNOSTICS
+  diagnostics_internal_log_record(
+    in_level,
+    message);
+#else
+  // Without the diagnostics' Log tab, stdout is the only place to show it
+  (void)in_level;
+
   fprintf(
     stdout,
     "%s\n",
     message);
-
-  diagnostics_internal_log_record(
-    in_level,
-    message);
+#endif
 }
 
 /*******************************************************************************
