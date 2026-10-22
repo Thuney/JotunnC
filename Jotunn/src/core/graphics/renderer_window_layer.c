@@ -101,6 +101,16 @@ static void renderer_window_layer_data_cleanup(
   struct renderer_window_layer_data_t *data)
 {
   shader_program_destroy(&data->framebuffer_shader);
+
+  vertex_array_destroy(
+    &(data->vao),
+    1);
+  vertex_buffer_destroy(
+    &(data->vbo),
+    1);
+  element_buffer_destroy(
+    &(data->ebo),
+    1);
 }
 
 //
@@ -146,6 +156,8 @@ void renderer_window_layer_cleanup(
   vertex_array_unbind();
 
   renderer_window_layer_data_cleanup(&(renderer->render_data));
+
+  renderer_base_cleanup(&(renderer->base));
 }
 
 void renderer_window_layer_begin_scene(

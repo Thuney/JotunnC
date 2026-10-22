@@ -406,6 +406,8 @@ void renderer_2d_cleanup(
   vertex_array_unbind();
 
   renderer_2d_data_cleanup(&renderer->render_data);
+
+  renderer_base_cleanup(&(renderer->base));
 }
 
 void renderer_2d_begin_scene(

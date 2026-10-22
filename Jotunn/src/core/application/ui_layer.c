@@ -114,6 +114,8 @@ void ui_layer_cleanup(
 
   ui_layer_imgui_cleanup(ui_layer);
 
+  renderer_2d_cleanup(&(ui_layer->ui_renderer_2d));
+
   framebuffer_cleanup(&(ui_layer->ui_framebuffer));
 
   window_release_context(parent_window);
