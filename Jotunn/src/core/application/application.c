@@ -14,6 +14,8 @@
 #include "resource.h"
 #include "util.h"
 
+#include "../diagnostics/diagnostics_internal.h"
+
 static struct event_app_tick_t app_tick_event;
 
 #ifdef DEBUG
@@ -120,6 +122,8 @@ void application_run(
 
     if (app_tick_event.delta_time_seconds >= seconds_between_frames)
     {
+      diagnostics_internal_frame_begin(seconds_between_frames);
+
       application_on_event(app, &(app_tick_event.base));
 
       // Pointer to first window, to be iterated over
@@ -146,6 +150,12 @@ void application_run(
       }
 
       app_tick_event.delta_time_seconds = 0.0f;
+
+      diagnostics_internal_frame_end();
+    }
+    else
+    {
+      diagnostics_internal_count_idle_call();
     }
   }
 }

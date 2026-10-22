@@ -122,11 +122,39 @@ else()
   )
 endif()
 
+# The diagnostics overlay, toggled with F3 in each window: frame timing, heap
+#  memory and graphics resources. Switched off, its sources aren't built and
+#  its hooks compile to nothing
+option(
+  JOTUNN_ENABLE_DIAGNOSTICS
+  "Build Jotunn's diagnostics overlay"
+  ON)
+
+if (JOTUNN_ENABLE_DIAGNOSTICS)
+  set(
+    DIAGNOSTICS_SRCS
+    ${JotunnC_SOURCE_DIR}/src/core/diagnostics/diagnostics.c
+    ${JotunnC_SOURCE_DIR}/src/core/diagnostics/diagnostics_overlay.c
+    ${JotunnC_SOURCE_DIR}/src/core/diagnostics/diagnostics_panel.c)
+else()
+  set(
+    DIAGNOSTICS_SRCS)
+endif()
+
 add_library(
   JotunnC
   SHARED
   ${APP_SRCS}
-  ${PLATFORM_SRCS})
+  ${PLATFORM_SRCS}
+  ${DIAGNOSTICS_SRCS})
+
+if (JOTUNN_ENABLE_DIAGNOSTICS)
+  # Public, as it decides what diagnostics.h declares
+  target_compile_definitions(
+    JotunnC
+    PUBLIC
+    JOTUNN_DIAGNOSTICS)
+endif()
 
 target_compile_definitions(
   JotunnC

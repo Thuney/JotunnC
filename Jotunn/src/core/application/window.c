@@ -12,9 +12,14 @@
 /** Local Includes  **/
 #include "allocator.h"
 #include "application.h"
+#include "framebuffer.h"
 #include "fvector.h"
 #include "render_api.h"
 #include "window_layer.h"
+
+#include "../diagnostics/diagnostics_internal.h"
+
+#include <stdbool.h>
 
 /************************************************************
  *
@@ -44,6 +49,16 @@ extern const char* window_graphics_get_clipboard_text(
 extern void window_graphics_set_clipboard_text(
   const struct window_t* in_window,
   const char* in_text);
+
+// Renders a layer to its framebuffer, first resizing the framebuffer and
+//  reprojecting the layer's camera to the window's size when asked to
+//
+//  in:     in_should_resize
+//  in/out: inout_window, inout_layer
+static void _window_render_layer(
+  struct window_t* inout_window,
+  struct window_layer_t* inout_layer,
+  const bool in_should_resize);
 
 /************************************************************
  *
@@ -186,6 +201,17 @@ void window_handle_event(
   struct window_t* window,
   struct event_base_t* event)
 {
+  // The diagnostics overlay is drawn over every layer, so it sees events first
+  const bool is_taken_by_overlay =
+    diagnostics_internal_overlay_event_react(
+      window,
+      event);
+
+  if (is_taken_by_overlay)
+  {
+    return;
+  }
+
   // Layers see events top to bottom, so that one drawn over another (such as
   //  a UI) can claim an event before anything underneath it reacts
   for (uint8_t i = window->num_layers; i > 0; i--)
@@ -227,7 +253,10 @@ uint8_t window_run(
   // #endif
 
   window_set_context(window);
+
+  diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_EVENTS);
   window_graphics_poll_events(window);
+  diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_EVENTS);
 
   if (window->metadata.resized)
   {
@@ -237,42 +266,48 @@ uint8_t window_run(
   struct window_layer_t** current_layer;
 
   // Render our layers to their respective framebuffers, bottom to top
+  diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
+
   current_layer = window->layers;
   for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
   {
-    framebuffer_bind((*current_layer)->framebuffer);
-
-    if (window->metadata.resized)
-    {
-      framebuffer_resize(
-        (*current_layer)->framebuffer,
-        window->metadata.width,
-        window->metadata.height);
-
-      (*current_layer)->camera->camera_reproject(
-        (*current_layer)->camera,
-        (float)window->metadata.width,
-        (float)window->metadata.height,
-        (*current_layer)->camera->near_plane,
-        (*current_layer)->camera->far_plane);
-    }
-
-    renderer_base_begin_scene((*current_layer)->renderer);
-
-    if ((*current_layer)->function_custom_window_layer_run)
-    {
-      (*current_layer)->function_custom_window_layer_run(*(current_layer));
-    }
-
-    renderer_base_end_scene((*current_layer)->renderer);
+    _window_render_layer(
+      window,
+      *current_layer,
+      window->metadata.resized);
   }
+
+  diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
   if (window->metadata.resized)
   {
     window->metadata.resized = 0;
   }
 
+  // The diagnostics overlay, while shown, goes over every layer. It isn't
+  //  rendered while hidden, so its size is checked rather than the window's
+  //  resized flag
+  diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_OVERLAY);
+
+  struct window_layer_t* overlay_layer = diagnostics_internal_overlay_prepare(window);
+  if (overlay_layer != NULL)
+  {
+    const struct texture_2d_t* overlay_texture =
+      &(overlay_layer->framebuffer->color_buffer.texture);
+    const bool is_overlay_resized =
+      ((overlay_texture->width != window->metadata.width) ||
+       (overlay_texture->height != window->metadata.height));
+
+    _window_render_layer(
+      window,
+      overlay_layer,
+      is_overlay_resized);
+  }
+
+  diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_OVERLAY);
+
   // Render our layers to the default (window) framebuffer, bottom to top
+  diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 
   renderer_window_layer_begin_scene(&(window->window_layer_renderer));
 
@@ -283,9 +318,21 @@ uint8_t window_run(
       &(window->window_layer_renderer), *current_layer, i);
   }
 
+  if (overlay_layer != NULL)
+  {
+    renderer_window_layer_draw_layer(
+      &(window->window_layer_renderer),
+      overlay_layer,
+      window->num_layers);
+  }
+
   renderer_window_layer_end_scene(&(window->window_layer_renderer));
 
+  diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
+
+  diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
   window_graphics_run(window);
+  diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
 
   window_release_context(window);
 
@@ -302,6 +349,12 @@ void window_cleanup(
 {
   allocator_free(window->metadata.tag);
   window->metadata.tag = 0;
+
+  diagnostics_internal_overlay_cleanup(window);
+
+  // Releasing the window renderer's graphics resources needs the window's
+  //  graphics context, which nothing else leaves current
+  window_set_context(window);
 
   renderer_window_layer_cleanup(&(window->window_layer_renderer));
 
@@ -397,4 +450,41 @@ void window_set_clipboard_text(
   window_graphics_set_clipboard_text(
     in_window,
     in_text);
+}
+
+/*******************************************************************************
+ *
+ *   Function: _window_render_layer()
+ *
+ ******************************************************************************/
+static void _window_render_layer(
+  struct window_t* inout_window,
+  struct window_layer_t* inout_layer,
+  const bool in_should_resize)
+{
+  framebuffer_bind(inout_layer->framebuffer);
+
+  if (in_should_resize)
+  {
+    framebuffer_resize(
+      inout_layer->framebuffer,
+      inout_window->metadata.width,
+      inout_window->metadata.height);
+
+    inout_layer->camera->camera_reproject(
+      inout_layer->camera,
+      (float)inout_window->metadata.width,
+      (float)inout_window->metadata.height,
+      inout_layer->camera->near_plane,
+      inout_layer->camera->far_plane);
+  }
+
+  renderer_base_begin_scene(inout_layer->renderer);
+
+  if (inout_layer->function_custom_window_layer_run)
+  {
+    inout_layer->function_custom_window_layer_run(inout_layer);
+  }
+
+  renderer_base_end_scene(inout_layer->renderer);
 }

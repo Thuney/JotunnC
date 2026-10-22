@@ -43,6 +43,7 @@ static const char* const allocator_tag_names[] =
   [ALLOCATOR_TAG_UI]          = "ui",
   [ALLOCATOR_TAG_FONT]        = "font",
   [ALLOCATOR_TAG_FILE]        = "file",
+  [ALLOCATOR_TAG_DIAGNOSTICS] = "diagnostics",
   [ALLOCATOR_TAG_IMGUI]       = "imgui",
   [ALLOCATOR_TAG_FREETYPE]    = "freetype",
   [ALLOCATOR_TAG_STB_IMAGE]   = "stb_image",

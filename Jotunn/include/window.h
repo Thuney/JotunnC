@@ -9,6 +9,7 @@
 /** Forward Declarations **/
 struct application_t;
 struct camera_base_t;
+struct diagnostics_overlay_t;
 struct event_base_t;
 struct renderer_base_t;
 struct window_t;
@@ -74,6 +75,9 @@ struct window_t
   uint8_t max_layers;
 
   struct renderer_window_layer_t window_layer_renderer;
+  // Created when diagnostics are first shown in the window, and only in builds
+  //  with JOTUNN_DIAGNOSTICS; otherwise NULL
+  struct diagnostics_overlay_t* diagnostics_overlay;
   //
   void (*function_event_react)(
     struct window_t* window,
