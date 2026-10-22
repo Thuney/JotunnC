@@ -632,8 +632,6 @@ static void _ui_layer_imgui_update_texture(
         texture,
         (unsigned char*)ImTextureData_GetPixels(inout_texture_data),
         (unsigned int)ImTextureData_GetSizeInBytes(inout_texture_data));
-      // ImGui owns the pixels, so the texture must not keep or free them
-      texture->data = NULL;
 
       // Every ImTextureID in Jotunn is a texture_2d_t*
       ImTextureData_SetTexID(

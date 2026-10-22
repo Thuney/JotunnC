@@ -189,6 +189,8 @@ void color_buffer_cleanup(
 #ifdef DEBUG
   fprintf(stdout, "Cleaning up color buffer\n");
 #endif
+
+  texture_2d_cleanup(&(color_buffer->texture));
 }
 
 void render_buffer_cleanup(

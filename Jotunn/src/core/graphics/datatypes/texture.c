@@ -84,6 +84,8 @@ void texture_2d_init(
   }
 
   platform_texture_2d_init(texture, wrap);
+
+  texture->is_loaded = 1;
 }
 
 void texture_2d_cleanup(
@@ -94,19 +96,12 @@ void texture_2d_cleanup(
     platform_texture_2d_cleanup(texture);
   }
 
-  // If you opt to be the owner of this texture's data, unbind the data pointer before calling texture cleanup
-  if (texture->data)
-  {
-    stbi_image_free(texture->data);
-  }
-
-  texture->data_size_bytes = -1;
   texture->texture_id = -1;
   texture->width = -1;
   texture->height = -1;
-  texture->data = 0;
   texture->data_format = -1;
   texture->internal_format = -1;
+  texture->is_loaded = 0;
 }
 
 void texture_2d_resize(
@@ -136,12 +131,7 @@ void texture_2d_set_data(
     return;
   }
 
-  texture->data = data;
-  texture->data_size_bytes = data_size_bytes;
-
   platform_texture_2d_set_data(texture, data, data_size_bytes);
-
-  texture->is_loaded = 1;
 }
 
 /*******************************************************************************
@@ -175,7 +165,7 @@ void texture_2d_create_from_file_path(
 {
   stbi_set_flip_vertically_on_load(flip_vertically);
 
-  texture->data =
+  unsigned char* data =
     stbi_load(
       filepath,
       (int*)&(texture->width),
@@ -183,7 +173,7 @@ void texture_2d_create_from_file_path(
       &(texture->channels),
       0);
 
-  texture->data_size_bytes =
+  const unsigned int data_size_bytes =
     (texture->width * texture->height * texture->channels);
 
   switch (texture->channels)
@@ -217,17 +207,14 @@ void texture_2d_create_from_file_path(
       stdout,
       "Texture Data Size Bytes = %u, Texture Channels = %u, Texture Data "
       "Format = %u, Texture Internal Format = %u\n",
-      texture->data_size_bytes,
+      data_size_bytes,
       texture->channels,
       texture->data_format,
       texture->internal_format);
   #endif
 
-  if (texture->data)
+  if (data)
   {
-    // Indicate that we are already loaded so we don't needlessly re-set fields
-    texture->is_loaded = 1;
-
     texture_2d_init(
       texture,
       texture->width,
@@ -238,8 +225,11 @@ void texture_2d_create_from_file_path(
 
     texture_2d_set_data(
       texture,
-      texture->data,
-      texture->data_size_bytes);
+      data,
+      data_size_bytes);
+
+    // The pixels live on in the texture's graphics memory
+    stbi_image_free(data);
   }
 }
 

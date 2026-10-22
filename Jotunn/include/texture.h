@@ -34,18 +34,18 @@ enum texture_2d_data_format_t
   TEXTURE_2D_DATA_FORMAT_DEPTH_STENCIL,
 };
 
+// A texture never owns pixel data; whatever is uploaded to it stays with the
+//  caller
 struct texture_2d_t
 {
-  unsigned char* data;
-  unsigned int data_size_bytes;
-  //
   unsigned int texture_id;
   unsigned int width, height;
   int channels;
 
   enum texture_2d_internal_format_t internal_format;
   enum texture_2d_data_format_t data_format;
-  //
+  // Set while the texture holds graphics memory, from texture_2d_init() until
+  //  texture_2d_cleanup()
   unsigned int is_loaded;
 };
 
@@ -70,6 +70,11 @@ void texture_2d_resize(
   unsigned int new_width,
   unsigned int new_height);
 
+// Uploads the whole of an initialized texture's pixels. The texture doesn't
+//  keep data, so the caller may release it as soon as this returns
+//
+//  in:     data, data_size_bytes
+//  in/out: texture
 void texture_2d_set_data(
   struct texture_2d_t* texture,
   unsigned char* data,

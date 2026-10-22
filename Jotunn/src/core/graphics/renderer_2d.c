@@ -343,8 +343,6 @@ static void renderer_2d_data_init(
     &(data->white_texture),
     white_texture_pixels,
     sizeof(white_texture_pixels));
-  // The pixels are static, so the texture must not try to free them
-  data->white_texture.data = NULL;
 
   data->line_width = 5.0f;
 

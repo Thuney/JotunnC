@@ -25,7 +25,7 @@ void vertex_attribute_init(
   void* ptr_offset_to_attrib)
 {
   int name_length = strlen(attribute_name);
-  vertex_attribute->attribute_name = (char*)malloc(name_length * sizeof(char));
+  vertex_attribute->attribute_name = (char*)malloc((name_length + 1) * sizeof(char));
   strcpy(vertex_attribute->attribute_name, attribute_name);
 
   platform_vertex_attribute_init(
@@ -42,7 +42,7 @@ void vertex_attribute_cleanup(
   struct vertex_attribute_t* vertex_attribute,
   unsigned int num)
 {
-  for (int i = 0; i < num; i++, vertex_attribute++)
+  for (unsigned int i = 0; i < num; i++)
   {
     free(vertex_attribute[i].attribute_name);
     vertex_attribute[i].attribute_name = 0;

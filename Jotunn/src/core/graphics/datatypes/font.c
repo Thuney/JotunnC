@@ -197,8 +197,10 @@ static int typeface_cleanup_glyph_atlas(
     glyph->glyph_texture.parent_texture = 0;
   }
 
-  if (&typeface->glyph_atlas.is_loaded)
-    texture_2d_cleanup(&typeface->glyph_atlas);
+  if (typeface->glyph_atlas.is_loaded)
+  {
+    texture_2d_cleanup(&(typeface->glyph_atlas));
+  }
 
   return error;
 }
@@ -337,6 +339,7 @@ int typeface_load_glyph_atlas(
     pixel_data_rgba,
     texture_atlas_width * texture_atlas_height * 4);
 
+  free(pixel_data_rgba);
   free(pixel_data_bitmap);
 
   return error;
