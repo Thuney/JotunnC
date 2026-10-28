@@ -7,4 +7,5 @@
 	branch = master
 [submodule "Jotunn/vendor/cimnodes"]
 	path = Jotunn/vendor/cimnodes
-	url = https://github.com/cimgui/cimnodes.git
+	url = git@github.com:Thuney/cimnodes.git
+	branch = imnodes/fix/keep-per-frame-buffers
