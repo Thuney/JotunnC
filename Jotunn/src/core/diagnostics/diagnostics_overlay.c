@@ -61,7 +61,7 @@ bool diagnostics_internal_overlay_event_react(
   struct window_t* inout_window,
   struct event_base_t* inout_event)
 {
-  if (inout_event->event_type == EVENT_KEY_PRESSED)
+  if (inout_event->event_type == EVENT_TYPE_KEY_PRESSED)
   {
     const struct event_key_pressed_t* key_event =
       (const struct event_key_pressed_t*)inout_event;
@@ -86,7 +86,7 @@ bool diagnostics_internal_overlay_event_react(
 
       inout_window->diagnostics_overlay->is_visible =
         !inout_window->diagnostics_overlay->is_visible;
-      inout_event->handled = 1U;
+      inout_event->is_handled = 1U;
 
       return true;
     }
@@ -102,7 +102,7 @@ bool diagnostics_internal_overlay_event_react(
   }
 
   // The UI layer marks the input its UI captures as handled
-  const bool was_handled = (inout_event->handled != 0U);
+  const bool was_handled = (inout_event->is_handled != 0U);
   struct window_layer_t* layer = &(overlay->ui_layer.ui_window_layer);
 
   layer->function_event_react(
@@ -110,7 +110,7 @@ bool diagnostics_internal_overlay_event_react(
     layer,
     inout_event);
 
-  return (!was_handled && (inout_event->handled != 0U));
+  return (!was_handled && (inout_event->is_handled != 0U));
 }
 
 /*******************************************************************************

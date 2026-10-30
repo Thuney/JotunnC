@@ -1,56 +1,102 @@
 #include "render_api.h"
+#include "../../../core/graphics/api/render_api_internal.h"
 
-void platform_render_api_init(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_init()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_init(
+  const struct render_api_implementation_t* in_render_api)
 {
   return 0;
 }
 
-void platform_render_api_bind(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_bind()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_bind(
+  const struct render_api_implementation_t* in_render_api)
 {
   return 0;
 }
 
-void platform_render_api_clear(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_clear()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_clear(
+  const struct render_api_implementation_t* in_render_api)
 {
   return 0;
 }
 
-void platform_render_api_draw_elements(
-  enum render_api_draw_mode_t draw_mode,
-  unsigned int element_count,
-  const enum render_api_element_data_type_t element_data_type,
-  const void* indices)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_elements()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_elements(
+  const enum render_api_draw_mode_t in_draw_mode,
+  const unsigned int in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const void* in_indices)
 {
   return 0;
 }
 
-void platform_render_api_draw_triangle_fan(
-  unsigned int vertex_count)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_triangle_fan()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_triangle_fan(
+  const unsigned int in_vertex_count)
 {
   return 0;
 }
 
-void platform_render_api_draw_lines(
-  unsigned int vertex_count)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_lines()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_lines(
+  const unsigned int in_vertex_count)
 {
   return 0;
 }
 
-void platform_render_api_set_line_width(
-  float line_width)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_set_line_width()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_set_line_width(
+  const float in_line_width_pixels)
 {
   return 0;
 }
 
-void platform_render_api_apply_scissor(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_apply_scissor()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_apply_scissor(
   const struct render_api_implementation_t* in_render_api)
 {
 }
 
-void platform_render_api_draw_elements_base_vertex(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_elements_base_vertex()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_elements_base_vertex(
   const enum render_api_draw_mode_t in_draw_mode,
   const uint32_t in_element_count,
   const enum render_api_element_data_type_t in_element_data_type,
@@ -59,12 +105,22 @@ void platform_render_api_draw_elements_base_vertex(
 {
 }
 
-bool platform_render_api_has_timestamps(void)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_has_timestamps()
+ *
+ ******************************************************************************/
+bool render_api_internal_platform_has_timestamps(void)
 {
   return false;
 }
 
-void platform_render_api_create_timestamps(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_create_timestamps()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_create_timestamps(
   uint32_t* out_names,
   const uint32_t in_count)
 {
@@ -74,7 +130,12 @@ void platform_render_api_create_timestamps(
   }
 }
 
-void platform_render_api_delete_timestamps(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_delete_timestamps()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_delete_timestamps(
   const uint32_t* in_names,
   const uint32_t in_count)
 {
@@ -82,13 +143,23 @@ void platform_render_api_delete_timestamps(
   (void)in_count;
 }
 
-void platform_render_api_record_timestamp(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_record_timestamp()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_record_timestamp(
   const uint32_t in_name)
 {
   (void)in_name;
 }
 
-bool platform_render_api_read_timestamp(
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_read_timestamp()
+ *
+ ******************************************************************************/
+bool render_api_internal_platform_read_timestamp(
   const uint32_t in_name,
   uint64_t* out_time_nanoseconds)
 {

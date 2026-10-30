@@ -1,4 +1,5 @@
 #include "render_api.h"
+#include "../../../core/graphics/api/render_api_internal.h"
 #include "log.h"
 
 #include <GL/glew.h>
@@ -6,30 +7,108 @@
 #include <assert.h>
 #include <stdio.h>
 
-static void _opengl_render_api_apply_blend_mode(
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
+
+// Translates an element data type to OpenGL's
+//
+//  in:     in_data_type
+//  ret:    The OpenGL type; GL_INVALID_ENUM when in_data_type isn't valid
+static GLenum render_api_opengl_get_element_data_type(
+  const enum render_api_element_data_type_t in_data_type);
+
+// Translates a draw mode to OpenGL's
+//
+//  in:     in_draw_mode
+//  ret:    The OpenGL mode; GL_INVALID_ENUM when in_draw_mode isn't valid
+static GLenum render_api_opengl_get_draw_mode(
+  const enum render_api_draw_mode_t in_draw_mode);
+
+// Turns on line smoothing in the current context; in_render_api is unused
+//
+//  in:     in_render_api
+static void render_api_opengl_init(
+  const struct render_api_implementation_t* in_render_api);
+
+// Applies an implementation's blend, depth and wireframe flags, blend mode and
+//  scissor to the current context
+//
+//  in:     in_render_api
+static void render_api_opengl_bind(
+  const struct render_api_implementation_t* in_render_api);
+
+// Clears the color and depth buffers the implementation's flags ask for, the
+//  color buffer to its clear color
+//
+//  in:     in_render_api
+static void render_api_opengl_clear(
+  const struct render_api_implementation_t* in_render_api);
+
+// Draws indexed geometry with glDrawElements()
+//
+//  in:     in_draw_mode, in_element_count, in_element_data_type, in_indices
+static void render_api_opengl_draw_elements(
+  const enum render_api_draw_mode_t in_draw_mode,
+  const unsigned int in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const void* in_indices);
+
+// Draws the first in_vertex_count vertices of the bound vertex array as a
+//  triangle fan
+//
+//  in:     in_vertex_count
+static void render_api_opengl_draw_triangle_fan(
+  const unsigned int in_vertex_count);
+
+// Draws the first in_vertex_count vertices of the bound vertex array as
+//  separate lines, one per pair
+//
+//  in:     in_vertex_count
+static void render_api_opengl_draw_lines(
+  const unsigned int in_vertex_count);
+
+// Sets the width lines are drawn with
+//
+//  in:     in_line_width_pixels
+static void render_api_opengl_set_line_width(
+  const float in_line_width_pixels);
+
+// Sets the blend function for a blend mode; an unknown mode blends as
+//  RENDER_API_BLEND_MODE_ALPHA
+//
+//  in:     in_blend_mode
+static void _render_api_opengl_apply_blend_mode(
   const enum render_api_blend_mode_t in_blend_mode);
 
 // Restricts drawing to in_scissor's rectangle when it is enabled, and lifts
 //  the restriction otherwise
 //
 //  in:     in_scissor
-static void _opengl_render_api_apply_scissor(
+static void _render_api_opengl_apply_scissor(
   const struct render_api_scissor_t* in_scissor);
 
-static GLenum get_gl_element_data_type(
-  enum render_api_element_data_type_t data_type)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_get_element_data_type()
+ *
+ ******************************************************************************/
+static GLenum render_api_opengl_get_element_data_type(
+  const enum render_api_element_data_type_t in_data_type)
 {
   GLenum gl_data_type;
 
-  switch (data_type)
+  switch (in_data_type)
   {
-    case ELEMENT_UNSIGNED_BYTE:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_BYTE:
       gl_data_type = GL_UNSIGNED_BYTE;
       break;
-    case ELEMENT_UNSIGNED_SHORT:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_SHORT:
       gl_data_type = GL_UNSIGNED_SHORT;
       break;
-    case ELEMENT_UNSIGNED_INT:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT:
       gl_data_type = GL_UNSIGNED_INT;
       break;
     default:
@@ -40,47 +119,52 @@ static GLenum get_gl_element_data_type(
   return gl_data_type;
 }
 
-static GLenum get_gl_draw_mode(
-  enum render_api_draw_mode_t draw_mode)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_get_draw_mode()
+ *
+ ******************************************************************************/
+static GLenum render_api_opengl_get_draw_mode(
+  const enum render_api_draw_mode_t in_draw_mode)
 {
   GLenum gl_draw_mode;
 
-  switch (draw_mode)
+  switch (in_draw_mode)
   {
-    case DRAW_TYPE_POINTS:
+    case RENDER_API_DRAW_MODE_POINTS:
       gl_draw_mode = GL_POINTS;
       break;
-    case DRAW_TYPE_LINE_STRIP:
+    case RENDER_API_DRAW_MODE_LINE_STRIP:
       gl_draw_mode = GL_LINE_STRIP;
       break;
-    case DRAW_TYPE_LINE_LOOP:
+    case RENDER_API_DRAW_MODE_LINE_LOOP:
       gl_draw_mode = GL_LINE_LOOP;
       break;
-    case DRAW_TYPE_LINES:
+    case RENDER_API_DRAW_MODE_LINES:
       gl_draw_mode = GL_LINES;
       break;
-    case DRAW_TYPE_LINE_STRIP_ADJACENCY:
+    case RENDER_API_DRAW_MODE_LINE_STRIP_ADJACENCY:
       gl_draw_mode = GL_LINE_STRIP_ADJACENCY;
       break;
-    case DRAW_TYPE_LINES_ADJACENCY:
+    case RENDER_API_DRAW_MODE_LINES_ADJACENCY:
       gl_draw_mode = GL_LINES_ADJACENCY;
       break;
-    case DRAW_TYPE_TRIANGLE_STRIP:
+    case RENDER_API_DRAW_MODE_TRIANGLE_STRIP:
       gl_draw_mode = GL_TRIANGLE_STRIP;
       break;
-    case DRAW_TYPE_TRIANGLE_FAN:
+    case RENDER_API_DRAW_MODE_TRIANGLE_FAN:
       gl_draw_mode = GL_TRIANGLE_FAN;
       break;
-    case DRAW_TYPE_TRIANGLES:
+    case RENDER_API_DRAW_MODE_TRIANGLES:
       gl_draw_mode = GL_TRIANGLES;
       break;
-    case DRAW_TYPE_TRIANGLE_STRIP_ADJACENCY:
+    case RENDER_API_DRAW_MODE_TRIANGLE_STRIP_ADJACENCY:
       gl_draw_mode = GL_TRIANGLE_STRIP_ADJACENCY;
       break;
-    case DRAW_TYPE_TRIANGLES_ADJACENCY:
+    case RENDER_API_DRAW_MODE_TRIANGLES_ADJACENCY:
       gl_draw_mode = GL_TRIANGLES_ADJACENCY;
       break;
-    case DRAW_TYPE_PATCHES:
+    case RENDER_API_DRAW_MODE_PATCHES:
       gl_draw_mode = GL_PATCHES;
       break;
     default:
@@ -91,8 +175,13 @@ static GLenum get_gl_draw_mode(
   return gl_draw_mode;
 }
 
-static void opengl_render_api_init(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_init()
+ *
+ ******************************************************************************/
+static void render_api_opengl_init(
+  const struct render_api_implementation_t* in_render_api)
 {
 #ifdef DEBUG
   log_write(
@@ -103,20 +192,25 @@ static void opengl_render_api_init(
   glEnable(GL_LINE_SMOOTH);
 }
 
-static void opengl_render_api_bind(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_bind()
+ *
+ ******************************************************************************/
+static void render_api_opengl_bind(
+  const struct render_api_implementation_t* in_render_api)
 {
-  if (render_api->active_render_flags & BLEND_FLAG)
+  if (in_render_api->active_render_flags & RENDER_API_RENDER_FLAGS_BLEND)
   {
     glEnable(GL_BLEND);
-    _opengl_render_api_apply_blend_mode(render_api->blend_mode);
+    _render_api_opengl_apply_blend_mode(in_render_api->blend_mode);
   }
   else
   {
     glDisable(GL_BLEND);
   }
   //
-  if (render_api->active_render_flags & DEPTH_FLAG)
+  if (in_render_api->active_render_flags & RENDER_API_RENDER_FLAGS_DEPTH)
   {
     glEnable(GL_DEPTH_TEST);
   }
@@ -125,7 +219,7 @@ static void opengl_render_api_bind(
     glDisable(GL_DEPTH_TEST);
   }
   //
-  if (render_api->active_render_flags & WIREFRAME_FLAG)
+  if (in_render_api->active_render_flags & RENDER_API_RENDER_FLAGS_WIREFRAME)
   {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   }
@@ -134,13 +228,18 @@ static void opengl_render_api_bind(
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
   }
   //
-  _opengl_render_api_apply_scissor(&(render_api->scissor));
+  _render_api_opengl_apply_scissor(&(in_render_api->scissor));
 }
 
-static void opengl_render_api_clear(
-  struct render_api_implementation_t* render_api)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_clear()
+ *
+ ******************************************************************************/
+static void render_api_opengl_clear(
+  const struct render_api_implementation_t* in_render_api)
 {
-  const fvector4 clear_color = render_api->clear_color;
+  const union fvector4_t clear_color = in_render_api->clear_color;
   glClearColor(
     clear_color.comp.w,
     clear_color.comp.x,
@@ -149,92 +248,132 @@ static void opengl_render_api_clear(
 
   GLbitfield flags = 0x0000;
 
-  if (render_api->active_render_flags & COLOR_FLAG)
+  if (in_render_api->active_render_flags & RENDER_API_RENDER_FLAGS_COLOR)
     flags |= GL_COLOR_BUFFER_BIT;
-  if (render_api->active_render_flags & DEPTH_FLAG)
+  if (in_render_api->active_render_flags & RENDER_API_RENDER_FLAGS_DEPTH)
     flags |= GL_DEPTH_BUFFER_BIT;
 
   glClear(flags);
 }
 
-static void opengl_render_api_draw_elements(
-  enum render_api_draw_mode_t draw_mode,
-  unsigned int element_count,
-  const enum render_api_element_data_type_t element_data_type,
-  const void* indices)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_draw_elements()
+ *
+ ******************************************************************************/
+static void render_api_opengl_draw_elements(
+  const enum render_api_draw_mode_t in_draw_mode,
+  const unsigned int in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const void* in_indices)
 {
   glDrawElements(
-    get_gl_draw_mode(draw_mode),
-    element_count,
-    get_gl_element_data_type(element_data_type),
-    indices);
+    render_api_opengl_get_draw_mode(in_draw_mode),
+    in_element_count,
+    render_api_opengl_get_element_data_type(in_element_data_type),
+    in_indices);
 }
 
-static void opengl_render_api_draw_triangle_fan(
-  unsigned int vertex_count)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_draw_triangle_fan()
+ *
+ ******************************************************************************/
+static void render_api_opengl_draw_triangle_fan(
+  const unsigned int in_vertex_count)
 {
-  glDrawArrays(get_gl_draw_mode(DRAW_TYPE_TRIANGLE_FAN), 0, vertex_count);
+  glDrawArrays(render_api_opengl_get_draw_mode(RENDER_API_DRAW_MODE_TRIANGLE_FAN), 0, in_vertex_count);
 }
 
-static void opengl_render_api_draw_lines(
-  unsigned int vertex_count)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_draw_lines()
+ *
+ ******************************************************************************/
+static void render_api_opengl_draw_lines(
+  const unsigned int in_vertex_count)
 {
-  glDrawArrays(get_gl_draw_mode(DRAW_TYPE_LINES), 0, vertex_count);
+  glDrawArrays(render_api_opengl_get_draw_mode(RENDER_API_DRAW_MODE_LINES), 0, in_vertex_count);
 }
 
-static void opengl_render_api_set_line_width(
-  float line_width)
+/*******************************************************************************
+ *
+ *   Function: render_api_opengl_set_line_width()
+ *
+ ******************************************************************************/
+static void render_api_opengl_set_line_width(
+  const float in_line_width_pixels)
 {
-  glLineWidth(line_width);
+  glLineWidth(in_line_width_pixels);
 }
 
 //
 
-void platform_render_api_init(
-  struct render_api_implementation_t* render_api)
-{
-  opengl_render_api_init(render_api);
-}
-
-void platform_render_api_bind(
-  struct render_api_implementation_t* render_api)
-{
-  opengl_render_api_bind(render_api);
-}
-
-void platform_render_api_clear(
-  struct render_api_implementation_t* render_api)
-{
-  opengl_render_api_clear(render_api);
-}
-
-void platform_render_api_draw_elements(
-  enum render_api_draw_mode_t draw_mode,
-  unsigned int element_count,
-  const enum render_api_element_data_type_t element_data_type,
-  const void* indices)
-{
-  opengl_render_api_draw_elements(
-    draw_mode, element_count, element_data_type, indices);
-}
-
 /*******************************************************************************
  *
- *   Function: platform_render_api_apply_scissor()
+ *   Function: render_api_internal_platform_init()
  *
  ******************************************************************************/
-void platform_render_api_apply_scissor(
+void render_api_internal_platform_init(
   const struct render_api_implementation_t* in_render_api)
 {
-  _opengl_render_api_apply_scissor(&(in_render_api->scissor));
+  render_api_opengl_init(in_render_api);
 }
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_draw_elements_base_vertex()
+ *   Function: render_api_internal_platform_bind()
  *
  ******************************************************************************/
-void platform_render_api_draw_elements_base_vertex(
+void render_api_internal_platform_bind(
+  const struct render_api_implementation_t* in_render_api)
+{
+  render_api_opengl_bind(in_render_api);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_clear()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_clear(
+  const struct render_api_implementation_t* in_render_api)
+{
+  render_api_opengl_clear(in_render_api);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_elements()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_elements(
+  const enum render_api_draw_mode_t in_draw_mode,
+  const unsigned int in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const void* in_indices)
+{
+  render_api_opengl_draw_elements(
+    in_draw_mode, in_element_count, in_element_data_type, in_indices);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_apply_scissor()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_apply_scissor(
+  const struct render_api_implementation_t* in_render_api)
+{
+  _render_api_opengl_apply_scissor(&(in_render_api->scissor));
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_elements_base_vertex()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_elements_base_vertex(
   const enum render_api_draw_mode_t in_draw_mode,
   const uint32_t in_element_count,
   const enum render_api_element_data_type_t in_element_data_type,
@@ -242,37 +381,52 @@ void platform_render_api_draw_elements_base_vertex(
   const int32_t in_base_vertex)
 {
   glDrawElementsBaseVertex(
-    get_gl_draw_mode(in_draw_mode),
+    render_api_opengl_get_draw_mode(in_draw_mode),
     (GLsizei)in_element_count,
-    get_gl_element_data_type(in_element_data_type),
+    render_api_opengl_get_element_data_type(in_element_data_type),
     (const void*)in_index_offset_bytes,
     in_base_vertex);
 }
 
-void platform_render_api_draw_triangle_fan(
-  unsigned int vertex_count)
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_draw_triangle_fan()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_draw_triangle_fan(
+  const unsigned int in_vertex_count)
 {
-  opengl_render_api_draw_triangle_fan(vertex_count);
-}
-
-void platform_render_api_draw_lines(
-  unsigned int vertex_count)
-{
-  opengl_render_api_draw_lines(vertex_count);
-}
-
-void platform_render_api_set_line_width(
-  float line_width)
-{
-  opengl_render_api_set_line_width(line_width);
+  render_api_opengl_draw_triangle_fan(in_vertex_count);
 }
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_has_timestamps()
+ *   Function: render_api_internal_platform_draw_lines()
  *
  ******************************************************************************/
-bool platform_render_api_has_timestamps(void)
+void render_api_internal_platform_draw_lines(
+  const unsigned int in_vertex_count)
+{
+  render_api_opengl_draw_lines(in_vertex_count);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_set_line_width()
+ *
+ ******************************************************************************/
+void render_api_internal_platform_set_line_width(
+  const float in_line_width_pixels)
+{
+  render_api_opengl_set_line_width(in_line_width_pixels);
+}
+
+/*******************************************************************************
+ *
+ *   Function: render_api_internal_platform_has_timestamps()
+ *
+ ******************************************************************************/
+bool render_api_internal_platform_has_timestamps(void)
 {
   // Timestamp queries are core from OpenGL 3.3
   return (GLEW_VERSION_3_3 ||
@@ -281,10 +435,10 @@ bool platform_render_api_has_timestamps(void)
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_create_timestamps()
+ *   Function: render_api_internal_platform_create_timestamps()
  *
  ******************************************************************************/
-void platform_render_api_create_timestamps(
+void render_api_internal_platform_create_timestamps(
   uint32_t* out_names,
   const uint32_t in_count)
 {
@@ -299,10 +453,10 @@ void platform_render_api_create_timestamps(
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_delete_timestamps()
+ *   Function: render_api_internal_platform_delete_timestamps()
  *
  ******************************************************************************/
-void platform_render_api_delete_timestamps(
+void render_api_internal_platform_delete_timestamps(
   const uint32_t* in_names,
   const uint32_t in_count)
 {
@@ -313,10 +467,10 @@ void platform_render_api_delete_timestamps(
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_record_timestamp()
+ *   Function: render_api_internal_platform_record_timestamp()
  *
  ******************************************************************************/
-void platform_render_api_record_timestamp(
+void render_api_internal_platform_record_timestamp(
   const uint32_t in_name)
 {
   glQueryCounter(
@@ -326,10 +480,10 @@ void platform_render_api_record_timestamp(
 
 /*******************************************************************************
  *
- *   Function: platform_render_api_read_timestamp()
+ *   Function: render_api_internal_platform_read_timestamp()
  *
  ******************************************************************************/
-bool platform_render_api_read_timestamp(
+bool render_api_internal_platform_read_timestamp(
   const uint32_t in_name,
   uint64_t* out_time_nanoseconds)
 {
@@ -357,10 +511,10 @@ bool platform_render_api_read_timestamp(
 
 /*******************************************************************************
  *
- *   Function: _opengl_render_api_apply_blend_mode()
+ *   Function: _render_api_opengl_apply_blend_mode()
  *
  ******************************************************************************/
-static void _opengl_render_api_apply_blend_mode(
+static void _render_api_opengl_apply_blend_mode(
   const enum render_api_blend_mode_t in_blend_mode)
 {
   switch (in_blend_mode)
@@ -389,10 +543,10 @@ static void _opengl_render_api_apply_blend_mode(
 
 /*******************************************************************************
  *
- *   Function: _opengl_render_api_apply_scissor()
+ *   Function: _render_api_opengl_apply_scissor()
  *
  ******************************************************************************/
-static void _opengl_render_api_apply_scissor(
+static void _render_api_opengl_apply_scissor(
   const struct render_api_scissor_t* in_scissor)
 {
   if (in_scissor->is_enabled)

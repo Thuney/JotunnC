@@ -17,7 +17,14 @@
 
 #include "../diagnostics/diagnostics_internal.h"
 
+// Sent to the application each frame, carrying the time since the last one
 static struct event_app_tick_t app_tick_event;
+
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
 
 #ifdef DEBUG
 // Prints the heap memory and graphics resources still alive once the
@@ -25,15 +32,15 @@ static struct event_app_tick_t app_tick_event;
 static void _application_report_leaks(void);
 #endif
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_init()
+ *   Function: application_init()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_init(
-  struct application_t* app,
-  const char* app_name,
-  const uint8_t max_windows)
+  struct application_t* out_app,
+  const char* in_app_name,
+  const uint8_t in_max_windows)
 {
 #ifdef DEBUG
   log_write(
@@ -44,50 +51,50 @@ uint8_t application_init(
 
   uint8_t error = 0;
 
-  memset(app, 0, sizeof(struct application_t));
+  memset(out_app, 0, sizeof(struct application_t));
 
-  app->name =
+  out_app->name =
     allocator_duplicate_string(
-      app_name,
+      in_app_name,
       ALLOCATOR_TAG_APPLICATION);
 
-  app->max_windows = max_windows;
-  app->num_windows = 0;
+  out_app->max_windows = in_max_windows;
+  out_app->num_windows = 0;
 
-  app->windows =
+  out_app->windows =
     (struct window_t**)allocator_allocate(
-      (app->max_windows * sizeof(struct window_t*)),
+      (out_app->max_windows * sizeof(struct window_t*)),
       ALLOCATOR_TAG_APPLICATION);
 
-  app->current_window = NULL;
+  out_app->current_window = NULL;
 
   font_init();
 
-  timestep_init(&app->timer);
+  timestep_init(&out_app->timer);
 
   app_tick_event =
     (struct event_app_tick_t)
     {
       .base = (struct event_base_t)
         {
-          .event_type = EVENT_APP_TICK,
-          .handled = 0U
+          .event_type = EVENT_TYPE_APP_TICK,
+          .is_handled = 0U
         },
       .delta_time_seconds = 0.0f
     };
 
-  app->function_event_react = NULL;
+  out_app->function_event_react = NULL;
 
   return error;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_start()
+ *   Function: application_start()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_start(
-  struct application_t* app)
+  struct application_t* inout_app)
 {
 #ifdef DEBUG
   log_write(
@@ -95,28 +102,28 @@ uint8_t application_start(
     "Starting application");
 #endif
 
-  timestep_reset(&app->timer);
-  app->running = 1;
+  timestep_reset(&inout_app->timer);
+  inout_app->running = 1;
 
   return 0;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_run()
+ *   Function: application_run()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_run(
-  struct application_t* app)
+  struct application_t* inout_app)
 {
   const float seconds_between_frames = 0.01f;
 
-  if ((app->num_windows > 0) &&
-      app->running)
+  if ((inout_app->num_windows > 0) &&
+      inout_app->running)
   {
-    timestep_step(&(app->timer));
-    app_tick_event.delta_time_seconds += app->timer.delta_time_seconds;
-    app_tick_event.base.handled = 0U;
+    timestep_step(&(inout_app->timer));
+    app_tick_event.delta_time_seconds += inout_app->timer.delta_time_seconds;
+    app_tick_event.base.is_handled = 0U;
 
     // #ifdef DEBUG
     //     fprintf(stdout, "App Time (sec): %f -- Delta (sec): %f\n", app->timer.current_time_seconds, app_tick_event.delta_time_seconds);
@@ -127,22 +134,22 @@ void application_run(
     {
       diagnostics_internal_frame_begin(seconds_between_frames);
 
-      application_on_event(app, &(app_tick_event.base));
+      application_on_event(inout_app, &(app_tick_event.base));
 
       // Pointer to first window, to be iterated over
-      struct window_t** cur_window = app->windows;
-      for (uint8_t i = 0U; i < app->num_windows; i++)
+      struct window_t** cur_window = inout_app->windows;
+      for (uint8_t i = 0U; i < inout_app->num_windows; i++)
       {
         // #ifdef DEBUG
         //     fprintf(stdout, "Running Window %s\n", cur_window->metadata.tag);
         // #endif
 
-        if ((*cur_window)->metadata.visible)
+        if ((*cur_window)->metadata.is_visible)
         {
-          const uint8_t signaled_close = window_run(*cur_window);
-          if (signaled_close)
+          const uint8_t should_close = window_run(*cur_window);
+          if (should_close)
           {
-            app->running = 0U;
+            inout_app->running = 0U;
 
           #ifdef DEBUG
             log_write(
@@ -165,13 +172,13 @@ void application_run(
   }
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_stop()
+ *   Function: application_stop()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_stop(
-  struct application_t* app)
+  struct application_t* inout_app)
 {
 #ifdef DEBUG
   log_write(
@@ -179,18 +186,18 @@ uint8_t application_stop(
     "Stopping application");
 #endif
 
-  app->running = 0;
+  inout_app->running = 0;
 
   return 0;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_cleanup()
+ *   Function: application_cleanup()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_cleanup(
-  struct application_t* app)
+  struct application_t* inout_app)
 {
 #ifdef DEBUG
   log_write(
@@ -198,18 +205,18 @@ void application_cleanup(
     "Cleaning up application");
 #endif
 
-  if (app->running) {
-    application_stop(app);
+  if (inout_app->running) {
+    application_stop(inout_app);
   }
 
-  allocator_free(app->name);
-  app->name = 0;
+  allocator_free(inout_app->name);
+  inout_app->name = 0;
 
-  if (app->num_windows)
+  if (inout_app->num_windows)
   {
     // Pointer to first window, to be iterated over
-    struct window_t** cur_window = app->windows;
-    for (uint8_t i = 0U; i < app->num_windows; i++)
+    struct window_t** cur_window = inout_app->windows;
+    for (uint8_t i = 0U; i < inout_app->num_windows; i++)
     {
       window_cleanup(*cur_window);
       cur_window++;
@@ -219,63 +226,68 @@ void application_cleanup(
   font_cleanup();
   timestep_cleanup();
 
-  app->max_windows = 0;
-  app->num_windows = 0;
-  allocator_free(app->windows);
+  inout_app->max_windows = 0;
+  inout_app->num_windows = 0;
+  allocator_free(inout_app->windows);
 
 #ifdef DEBUG
   _application_report_leaks();
 #endif
 }
 
+/*******************************************************************************
+ *
+ *   Function: application_bind_custom_events()
+ *
+ ******************************************************************************/
 void application_bind_custom_events(
-  struct application_t* app,
-  void (*custom_event_function)(struct application_t*,
-                                struct event_base_t*))
+  struct application_t* inout_app,
+  void (*in_custom_event_function)(struct application_t* inout_app,
+                                struct event_base_t* inout_event))
 {
-  app->function_event_react = custom_event_function;
+  inout_app->function_event_react = in_custom_event_function;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_on_event()
+ *   Function: application_on_event()
  *
- ************************************************************/
+ ******************************************************************************/
 void application_on_event(
-  struct application_t* app,
-  struct event_base_t* event)
+  struct application_t* inout_app,
+  struct event_base_t* inout_event)
 {
-  if (app->function_event_react)
+  if (inout_app->function_event_react)
   {
-    app->function_event_react(app, event);
+    inout_app->function_event_react(inout_app, inout_event);
 
-    if (event->handled)
+    if (inout_event->is_handled)
     {
       diagnostics_internal_event_record(
-        app,
-        event);
+        inout_app,
+        inout_event);
 
       return;
     }
   }
 
-  switch (event->event_type)
+  switch (inout_event->event_type)
   {
-    case EVENT_WINDOW_RESIZE:
+    case EVENT_TYPE_WINDOW_RESIZE:
     {
-      // Should be safe cast from base to derived form with base as first element
+      // A safe cast from base to derived, as the base is the first member
       struct event_window_resize_t* window_resize_event =
-        (struct event_window_resize_t*)event;
+        (struct event_window_resize_t*)inout_event;
 
       uint32_t new_width, new_height;
       new_width = window_resize_event->width;
       new_height = window_resize_event->height;
 
-      if (app->num_windows)
+      if (inout_app->num_windows)
       {
         // Pointer to first window, to be iterated over
-        struct window_t** cur_window = app->windows;
-        for (uint8_t i = 0U; i < app->num_windows; i++)
+        struct window_t** cur_window = inout_app->windows;
+        for (uint8_t i = 0U; i < inout_app->num_windows; i++)
         {
           if ((*cur_window)->context_data.window_handle ==
               window_resize_event->window_handle)
@@ -288,7 +300,7 @@ void application_on_event(
 
             (*cur_window)->metadata.width = new_width;
             (*cur_window)->metadata.height = new_height;
-            (*cur_window)->metadata.resized = 1;
+            (*cur_window)->metadata.is_resized = 1;
           }
 
           cur_window++;
@@ -297,19 +309,19 @@ void application_on_event(
     }
     break;
 
-    case EVENT_WINDOW_FOCUS:
+    case EVENT_TYPE_WINDOW_FOCUS:
     {
-      // Should be safe cast from base to derived form with base as first element
+      // A safe cast from base to derived, as the base is the first member
       struct event_window_focus_t* window_focus_event =
-        (struct event_window_focus_t*)event;
+        (struct event_window_focus_t*)inout_event;
 
-      if (window_focus_event->focused)
+      if (window_focus_event->is_focused)
       {
-        if (app->num_windows)
+        if (inout_app->num_windows)
         {
           // Pointer to first window, to be iterated over
-          struct window_t** cur_window = app->windows;
-          for (uint8_t i = 0U; i < app->num_windows; i++)
+          struct window_t** cur_window = inout_app->windows;
+          for (uint8_t i = 0U; i < inout_app->num_windows; i++)
           {
             if ((*cur_window)->context_data.window_handle ==
                 window_focus_event->window_handle)
@@ -320,7 +332,7 @@ void application_on_event(
             //           (*cur_window)->metadata.tag);
             // #endif
 
-              app->current_window = (*cur_window);
+              inout_app->current_window = (*cur_window);
               break;
             }
             cur_window++;
@@ -330,15 +342,15 @@ void application_on_event(
     }
     break;
 
-    case EVENT_MOUSE_MOVED:
+    case EVENT_TYPE_MOUSE_MOVED:
     {
-      // Should be safe cast from base to derived form with base as first element
+      // A safe cast from base to derived, as the base is the first member
       struct event_mouse_moved_t* mouse_moved_event =
-        (struct event_mouse_moved_t*)event;
+        (struct event_mouse_moved_t*)inout_event;
 
       float x, y;
       x = mouse_moved_event->x;
-      y = (app->current_window->metadata.height - mouse_moved_event->y);
+      y = (inout_app->current_window->metadata.height - mouse_moved_event->y);
     }
     break;
 
@@ -350,13 +362,13 @@ void application_on_event(
 
   // Custom events
 
-  if (!event->handled)
+  if (!inout_event->is_handled)
   {
     // Pointer to first window, to be iterated over
-    struct window_t** cur_window = app->windows;
-    for (uint8_t i = 0U; i < app->num_windows; i++)
+    struct window_t** cur_window = inout_app->windows;
+    for (uint8_t i = 0U; i < inout_app->num_windows; i++)
     {
-      window_handle_event(*cur_window, event);
+      window_handle_event(*cur_window, inout_event);
 
       cur_window++;
     }
@@ -364,18 +376,18 @@ void application_on_event(
 
   // Recorded once every handler has seen it, so it's known whether one took it
   diagnostics_internal_event_record(
-    app,
-    event);
+    inout_app,
+    inout_event);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: application_add_window()
+ *   Function: application_add_window()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t application_add_window(
-  struct application_t* app,
-  struct window_t* new_window)
+  struct application_t* inout_app,
+  struct window_t* in_new_window)
 {
     #ifdef DEBUG
   log_write(
@@ -385,13 +397,13 @@ uint8_t application_add_window(
 
   uint8_t error = 0U;
 
-  if (app->num_windows < app->max_windows)
+  if (inout_app->num_windows < inout_app->max_windows)
   {
     struct window_t** window_ptr;
-    window_ptr = (app->windows + app->num_windows);
-    *window_ptr = new_window;
-    app->current_window = *window_ptr;
-    app->num_windows++;
+    window_ptr = (inout_app->windows + inout_app->num_windows);
+    *window_ptr = in_new_window;
+    inout_app->current_window = *window_ptr;
+    inout_app->num_windows++;
   }
   else
   {

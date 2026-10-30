@@ -1,13 +1,31 @@
 #pragma once
 
-typedef union fquaternion_t
+// Float quaternions
+
+/*******************************************************************************
+ *
+ *   TYPES
+ *
+ ******************************************************************************/
+
+// A quaternion, with its components ordered w, x, y, z
+union fquaternion_t
 {
   float quat[4];
 
-  struct comp_t
+  struct fquaternion_components_t
   {
     float w, x, y, z;
   } comp;
-} fquaternion;
+};
 
-void fquaternion_init(fquaternion* quaternion);
+/*******************************************************************************
+ *
+ *   INITIALIZATION
+ *
+ ******************************************************************************/
+
+// Zeroes a quaternion
+//
+//  out:    out_quaternion
+void fquaternion_init(union fquaternion_t* out_quaternion);

@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "../../../core/graphics/datatypes/shader_internal.h"
 #include "log.h"
 
 #include <GL/glew.h>
@@ -8,183 +9,328 @@
    #include <stdio.h>
 #endif
 
-static int gl_vertex_shader_init(
-  struct vertex_shader_t* shader,
-  const char* vertex_shader_src)
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
+
+// Creates a vertex shader and compiles it from source, logging the
+//  compiler's messages in DEBUG builds when it fails
+//
+//  in:     in_vertex_shader_src
+//  out:    out_shader
+//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
+//            builds check, so other builds always return 1
+static int vertex_shader_gl_init(
+  struct shader_vertex_t* out_shader,
+  const char* in_vertex_shader_src);
+
+// Creates a fragment shader and compiles it from source, logging the
+//  compiler's messages in DEBUG builds when it fails
+//
+//  in:     in_fragment_shader_src
+//  out:    out_shader
+//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
+//            builds check, so other builds always return 1
+static int fragment_shader_gl_init(
+  struct shader_fragment_t* out_shader,
+  const char* in_fragment_shader_src);
+
+// Creates a shader program and attaches a vertex and a fragment shader to it
+//
+//  in:     in_vertex_shader, in_fragment_shader
+//  out:    out_shader_program
+//  ret:    1
+static int shader_program_gl_init(
+  struct shader_program_t* out_shader_program,
+  const struct shader_vertex_t* in_vertex_shader,
+  const struct shader_fragment_t* in_fragment_shader);
+
+// Links the shaders attached to a program, logging the linker's messages in
+//  DEBUG builds when it fails
+//
+//  in/out: inout_shader_program
+//  ret:    Nonzero when the program linked; 0 when it didn't. Only DEBUG
+//            builds check, so other builds always return 1
+static int shader_program_gl_link(
+  struct shader_program_t* inout_shader_program);
+
+// Makes a linked program the one used for drawing
+//
+//  in:     in_shader_program
+static void shader_program_gl_use(
+  const struct shader_program_t* in_shader_program);
+
+// Binds a fragment shader output variable to a draw buffer, taking effect
+//  when the program is next linked
+//
+//  in:     in_shader_program, in_buffer_index, in_var_name
+static void shader_program_gl_bind_fragment_data_location(
+  const struct shader_program_t* in_shader_program,
+  const unsigned int in_buffer_index,
+  const char* in_var_name);
+
+// Finds the location of a vertex attribute in a linked program
+//
+//  in:     in_shader_program, in_attribute_name
+//  ret:    The attribute's location; -1 when the program has no active
+//            attribute of that name
+static int shader_program_gl_get_attribute_location(
+  const struct shader_program_t* in_shader_program,
+  const char* in_attribute_name);
+
+// Sets a uniform of the program in use, looking it up by name in
+//  in_shader_program. in_uniform_data points to a value of the C type that
+//  matches in_uniform_type (an int for SHADER_PROGRAM_UNIFORM_BOOL); an
+//  unknown type is logged in DEBUG builds and otherwise ignored
+//
+//  in:     in_shader_program, in_uniform_name, in_uniform_data,
+//            in_uniform_type
+static void shader_program_gl_set_uniform(
+  const struct shader_program_t* in_shader_program,
+  const char* in_uniform_name,
+  const void* in_uniform_data,
+  const enum shader_program_uniform_t in_uniform_type);
+
+// Deletes a vertex shader
+//
+//  in/out: inout_shader
+static void vertex_shader_gl_destroy(
+  struct shader_vertex_t* inout_shader);
+
+// Deletes a fragment shader
+//
+//  in/out: inout_shader
+static void fragment_shader_gl_destroy(
+  struct shader_fragment_t* inout_shader);
+
+// Deletes a shader program
+//
+//  in/out: inout_shader_program
+static void shader_program_gl_destroy(
+  struct shader_program_t* inout_shader_program);
+
+/*******************************************************************************
+ *
+ *   Function: vertex_shader_gl_init()
+ *
+ ******************************************************************************/
+static int vertex_shader_gl_init(
+  struct shader_vertex_t* out_shader,
+  const char* in_vertex_shader_src)
 {
   // Create and compile our vertex shader from our vertex shader source code
-  shader->vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(shader->vertex_shader, 1, &vertex_shader_src, NULL);
-  glCompileShader(shader->vertex_shader);
+  out_shader->vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+  glShaderSource(out_shader->vertex_shader, 1, &in_vertex_shader_src, NULL);
+  glCompileShader(out_shader->vertex_shader);
 
    #ifdef DEBUG
-  // Get the status of our shader compilation. If successful, compilation_status = 1
+  // Get the status of our shader compilation. If successful,
+  //  compilation_status = 1
   glGetShaderiv(
-    shader->vertex_shader, GL_COMPILE_STATUS, &shader->compilation_status);
-  if (!shader->compilation_status)
+    out_shader->vertex_shader, GL_COMPILE_STATUS, &out_shader->compilation_status);
+  if (!out_shader->compilation_status)
   {
     // If an error occurs during compilation, we grab the error log
     glGetShaderInfoLog(
-      shader->vertex_shader, 512, NULL, shader->compilation_log);
+      out_shader->vertex_shader, 512, NULL, out_shader->compilation_log);
     log_write(
       LOG_LEVEL_ERROR,
       "%s",
-      shader->compilation_log);
+      out_shader->compilation_log);
   }
-  return shader->compilation_status;
+  return out_shader->compilation_status;
    #endif
 
   return 1;
 }
 
-static int gl_fragment_shader_init(
-  struct fragment_shader_t* shader,
-  const char* fragment_shader_src)
+/*******************************************************************************
+ *
+ *   Function: fragment_shader_gl_init()
+ *
+ ******************************************************************************/
+static int fragment_shader_gl_init(
+  struct shader_fragment_t* out_shader,
+  const char* in_fragment_shader_src)
 {
-  // Create and compile our vertex shader from our vertex shader source code
-  shader->fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(shader->fragment_shader, 1, &fragment_shader_src, NULL);
-  glCompileShader(shader->fragment_shader);
+  // Create and compile our fragment shader from our fragment shader source code
+  out_shader->fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+  glShaderSource(out_shader->fragment_shader, 1, &in_fragment_shader_src, NULL);
+  glCompileShader(out_shader->fragment_shader);
 
    #ifdef DEBUG
-  // Get the status of our shader compilation. If successful, compilation_status = 1
+  // Get the status of our shader compilation. If successful,
+  //  compilation_status = 1
   glGetShaderiv(
-    shader->fragment_shader, GL_COMPILE_STATUS, &shader->compilation_status);
-  if (!shader->compilation_status)
+    out_shader->fragment_shader, GL_COMPILE_STATUS, &out_shader->compilation_status);
+  if (!out_shader->compilation_status)
   {
     // If an error occurs during compilation, we grab the error log
     glGetShaderInfoLog(
-      shader->fragment_shader, 512, NULL, shader->compilation_log);
+      out_shader->fragment_shader, 512, NULL, out_shader->compilation_log);
     log_write(
       LOG_LEVEL_ERROR,
       "%s",
-      shader->compilation_log);
+      out_shader->compilation_log);
   }
-  return shader->compilation_status;
+  return out_shader->compilation_status;
    #endif
 
   return 1;
 }
 
-static int gl_shader_program_init(
-  struct shader_program_t* shader_program,
-  struct vertex_shader_t* vertex_shader,
-  struct fragment_shader_t* fragment_shader)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_init()
+ *
+ ******************************************************************************/
+static int shader_program_gl_init(
+  struct shader_program_t* out_shader_program,
+  const struct shader_vertex_t* in_vertex_shader,
+  const struct shader_fragment_t* in_fragment_shader)
 {
   // Create a shader program and add our vertex and fragment shaders to it
-  shader_program->shader_program = glCreateProgram();
-  glAttachShader(shader_program->shader_program, vertex_shader->vertex_shader);
+  out_shader_program->shader_program = glCreateProgram();
+  glAttachShader(out_shader_program->shader_program, in_vertex_shader->vertex_shader);
   glAttachShader(
-    shader_program->shader_program, fragment_shader->fragment_shader);
+    out_shader_program->shader_program, in_fragment_shader->fragment_shader);
 
   return 1;
 }
 
-static int gl_shader_program_link(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_link()
+ *
+ ******************************************************************************/
+static int shader_program_gl_link(
+  struct shader_program_t* inout_shader_program)
 {
-  // Link the individual shaders together in the shader program and set the program to be used
-  glLinkProgram(shader_program->shader_program);
+  // Link the individual shaders together in the shader program
+  glLinkProgram(inout_shader_program->shader_program);
 
    #ifdef DEBUG
-  // Get the status of our shader program linking. If successful, link_status = 1
+  // Get the status of our shader program linking. If successful,
+  //  link_status = 1
   glGetProgramiv(
-    shader_program->shader_program,
+    inout_shader_program->shader_program,
     GL_LINK_STATUS,
-    &shader_program->link_status);
-  if (!shader_program->link_status)
+    &inout_shader_program->link_status);
+  if (!inout_shader_program->link_status)
   {
-    // If an error occurs during compilation, we grab the error log
+    // If an error occurs during linking, we grab the error log
     glGetProgramInfoLog(
-      shader_program->shader_program, 512, NULL, shader_program->link_log);
+      inout_shader_program->shader_program, 512, NULL, inout_shader_program->link_log);
     log_write(
       LOG_LEVEL_ERROR,
       "%s",
-      shader_program->link_log);
+      inout_shader_program->link_log);
   }
-  return shader_program->link_status;
+  return inout_shader_program->link_status;
    #endif
 
   return 1;
 }
 
-static void gl_shader_program_use(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_use()
+ *
+ ******************************************************************************/
+static void shader_program_gl_use(
+  const struct shader_program_t* in_shader_program)
 {
-  glUseProgram(shader_program->shader_program);
+  glUseProgram(in_shader_program->shader_program);
 }
 
-static void gl_shader_program_bind_fragment_data_location(
-  struct shader_program_t* shader_program,
-  unsigned int buffer_index,
-  const char* var_name)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_bind_fragment_data_location()
+ *
+ ******************************************************************************/
+static void shader_program_gl_bind_fragment_data_location(
+  const struct shader_program_t* in_shader_program,
+  const unsigned int in_buffer_index,
+  const char* in_var_name)
 {
   glBindFragDataLocation(
-    shader_program->shader_program, buffer_index, var_name);
+    in_shader_program->shader_program, in_buffer_index, in_var_name);
 }
 
-static int gl_shader_program_get_attribute_location(
-  struct shader_program_t* shader_program,
-  const char* attribute_name)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_get_attribute_location()
+ *
+ ******************************************************************************/
+static int shader_program_gl_get_attribute_location(
+  const struct shader_program_t* in_shader_program,
+  const char* in_attribute_name)
 {
-  return glGetAttribLocation(shader_program->shader_program, attribute_name);
+  return glGetAttribLocation(in_shader_program->shader_program, in_attribute_name);
 }
 
-static void gl_shader_program_set_uniform(
-  struct shader_program_t* shader_program,
-  const char* uniform_name,
-  void* uniform_data,
-  const enum shader_program_uniform_t uniform_type)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_set_uniform()
+ *
+ ******************************************************************************/
+static void shader_program_gl_set_uniform(
+  const struct shader_program_t* in_shader_program,
+  const char* in_uniform_name,
+  const void* in_uniform_data,
+  const enum shader_program_uniform_t in_uniform_type)
 {
   GLint uniform_location =
-    glGetUniformLocation(shader_program->shader_program, uniform_name);
+    glGetUniformLocation(in_shader_program->shader_program, in_uniform_name);
 
-  switch (uniform_type)
+  switch (in_uniform_type)
   {
-    case SHADER_BOOL:
+    case SHADER_PROGRAM_UNIFORM_BOOL:
     {
-      glUniform1i(uniform_location, *((int*)uniform_data));
+      glUniform1i(uniform_location, *((const int*)in_uniform_data));
     }
     break;
-    case SHADER_INT:
+    case SHADER_PROGRAM_UNIFORM_INT:
     {
-      int uniform_val = (*((int*)uniform_data));
+      int uniform_val = (*((const int*)in_uniform_data));
       glUniform1i(uniform_location, uniform_val);
     }
     break;
-    case SHADER_FLOAT:
+    case SHADER_PROGRAM_UNIFORM_FLOAT:
     {
-      glUniform1f(uniform_location, *((float*)uniform_data));
+      glUniform1f(uniform_location, *((const float*)in_uniform_data));
     }
     break;
-    case SHADER_FVEC2:
+    case SHADER_PROGRAM_UNIFORM_FVEC2:
     {
-      glUniform2fv(uniform_location, 1, (GLfloat*)uniform_data);
+      glUniform2fv(uniform_location, 1, (const GLfloat*)in_uniform_data);
     }
     break;
-    case SHADER_FVEC3:
+    case SHADER_PROGRAM_UNIFORM_FVEC3:
     {
-      glUniform3fv(uniform_location, 1, (GLfloat*)uniform_data);
+      glUniform3fv(uniform_location, 1, (const GLfloat*)in_uniform_data);
     }
     break;
-    case SHADER_FVEC4:
+    case SHADER_PROGRAM_UNIFORM_FVEC4:
     {
-      glUniform4fv(uniform_location, 1, (GLfloat*)uniform_data);
+      glUniform4fv(uniform_location, 1, (const GLfloat*)in_uniform_data);
     }
     break;
-    case SHADER_FMAT2x2:
+    case SHADER_PROGRAM_UNIFORM_FMAT2X2:
     {
-      glUniformMatrix2fv(uniform_location, 1, GL_FALSE, (GLfloat*)uniform_data);
+      glUniformMatrix2fv(uniform_location, 1, GL_FALSE, (const GLfloat*)in_uniform_data);
     }
     break;
-    case SHADER_FMAT3x3:
+    case SHADER_PROGRAM_UNIFORM_FMAT3X3:
     {
-      glUniformMatrix3fv(uniform_location, 1, GL_FALSE, (GLfloat*)uniform_data);
+      glUniformMatrix3fv(uniform_location, 1, GL_FALSE, (const GLfloat*)in_uniform_data);
     }
     break;
-    case SHADER_FMAT4x4:
+    case SHADER_PROGRAM_UNIFORM_FMAT4X4:
     {
-      fmatrix_4x4* matrix = (fmatrix_4x4*)uniform_data;
+      const union fmatrix_4x4_t* matrix = (const union fmatrix_4x4_t*)in_uniform_data;
 
       // #ifdef DEBUG
       //    fmatrix_4x4_print(matrix);
@@ -209,111 +355,174 @@ static void gl_shader_program_set_uniform(
   // #endif
 }
 
-static void gl_vertex_shader_destroy(
-  struct vertex_shader_t* shader)
+/*******************************************************************************
+ *
+ *   Function: vertex_shader_gl_destroy()
+ *
+ ******************************************************************************/
+static void vertex_shader_gl_destroy(
+  struct shader_vertex_t* inout_shader)
 {
-  glDeleteShader(shader->vertex_shader);
+  glDeleteShader(inout_shader->vertex_shader);
 }
 
-static void gl_fragment_shader_destroy(
-  struct fragment_shader_t* shader)
+/*******************************************************************************
+ *
+ *   Function: fragment_shader_gl_destroy()
+ *
+ ******************************************************************************/
+static void fragment_shader_gl_destroy(
+  struct shader_fragment_t* inout_shader)
 {
-  glDeleteShader(shader->fragment_shader);
+  glDeleteShader(inout_shader->fragment_shader);
 }
 
-static void gl_shader_program_destroy(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_gl_destroy()
+ *
+ ******************************************************************************/
+static void shader_program_gl_destroy(
+  struct shader_program_t* inout_shader_program)
 {
-  glDeleteProgram(shader_program->shader_program);
+  glDeleteProgram(inout_shader_program->shader_program);
 }
 
-// Extern functions
-
-int platform_vertex_shader_init(
-  struct vertex_shader_t* shader,
-  const char* vertex_shader_src)
+/*******************************************************************************
+ *
+ *   Function: vertex_shader_internal_platform_init()
+ *
+ ******************************************************************************/
+int vertex_shader_internal_platform_init(
+  struct shader_vertex_t* out_shader,
+  const char* in_vertex_shader_src)
 {
-  return gl_vertex_shader_init(shader, vertex_shader_src);
+  return vertex_shader_gl_init(out_shader, in_vertex_shader_src);
 }
 
-int platform_fragment_shader_init(
-  struct fragment_shader_t* shader,
-  const char* fragment_shader_src)
+/*******************************************************************************
+ *
+ *   Function: fragment_shader_internal_platform_init()
+ *
+ ******************************************************************************/
+int fragment_shader_internal_platform_init(
+  struct shader_fragment_t* out_shader,
+  const char* in_fragment_shader_src)
 {
-  return gl_fragment_shader_init(shader, fragment_shader_src);
+  return fragment_shader_gl_init(out_shader, in_fragment_shader_src);
 }
 
-int platform_shader_program_init(
-  struct shader_program_t* shader_program,
-  struct vertex_shader_t* vertex_shader,
-  struct fragment_shader_t* fragment_shader)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_init()
+ *
+ ******************************************************************************/
+int shader_program_internal_platform_init(
+  struct shader_program_t* out_shader_program,
+  const struct shader_vertex_t* in_vertex_shader,
+  const struct shader_fragment_t* in_fragment_shader)
 {
-  return gl_shader_program_init(shader_program, vertex_shader, fragment_shader);
+  return shader_program_gl_init(out_shader_program, in_vertex_shader, in_fragment_shader);
 }
 
-//
 
-int platform_shader_program_link(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_link()
+ *
+ ******************************************************************************/
+int shader_program_internal_platform_link(
+  struct shader_program_t* inout_shader_program)
 {
-  return gl_shader_program_link(shader_program);
+  return shader_program_gl_link(inout_shader_program);
 }
 
-//
 
-void platform_shader_program_use(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_use()
+ *
+ ******************************************************************************/
+void shader_program_internal_platform_use(
+  const struct shader_program_t* in_shader_program)
 {
-  gl_shader_program_use(shader_program);
+  shader_program_gl_use(in_shader_program);
 }
 
-//
 
-void platform_shader_program_bind_fragment_data_location(
-  struct shader_program_t* shader_program,
-  unsigned int buffer_index,
-  const char* var_name)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_bind_fragment_data_location()
+ *
+ ******************************************************************************/
+void shader_program_internal_platform_bind_fragment_data_location(
+  const struct shader_program_t* in_shader_program,
+  const unsigned int in_buffer_index,
+  const char* in_var_name)
 {
-  gl_shader_program_bind_fragment_data_location(
-    shader_program, buffer_index, var_name);
+  shader_program_gl_bind_fragment_data_location(
+    in_shader_program, in_buffer_index, in_var_name);
 }
 
-int platform_shader_program_get_attribute_location(
-  struct shader_program_t* shader_program,
-  const char* attribute_name)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_get_attribute_location()
+ *
+ ******************************************************************************/
+int shader_program_internal_platform_get_attribute_location(
+  const struct shader_program_t* in_shader_program,
+  const char* in_attribute_name)
 {
-  return gl_shader_program_get_attribute_location(
-    shader_program, attribute_name);
+  return shader_program_gl_get_attribute_location(
+    in_shader_program, in_attribute_name);
 }
 
-//
 
-void platform_shader_program_set_uniform(
-  struct shader_program_t* shader_program,
-  const char* uniform_name,
-  void* uniform_data,
-  const enum shader_program_uniform_t uniform_type)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_set_uniform()
+ *
+ ******************************************************************************/
+void shader_program_internal_platform_set_uniform(
+  const struct shader_program_t* in_shader_program,
+  const char* in_uniform_name,
+  const void* in_uniform_data,
+  const enum shader_program_uniform_t in_uniform_type)
 {
-  gl_shader_program_set_uniform(
-    shader_program, uniform_name, uniform_data, uniform_type);
+  shader_program_gl_set_uniform(
+    in_shader_program, in_uniform_name, in_uniform_data, in_uniform_type);
 }
 
-//
 
-void platform_vertex_shader_destroy(
-  struct vertex_shader_t* shader)
+/*******************************************************************************
+ *
+ *   Function: vertex_shader_internal_platform_destroy()
+ *
+ ******************************************************************************/
+void vertex_shader_internal_platform_destroy(
+  struct shader_vertex_t* inout_shader)
 {
-  gl_vertex_shader_destroy(shader);
+  vertex_shader_gl_destroy(inout_shader);
 }
 
-void platform_fragment_shader_destroy(
-  struct fragment_shader_t* shader)
+/*******************************************************************************
+ *
+ *   Function: fragment_shader_internal_platform_destroy()
+ *
+ ******************************************************************************/
+void fragment_shader_internal_platform_destroy(
+  struct shader_fragment_t* inout_shader)
 {
-  gl_fragment_shader_destroy(shader);
+  fragment_shader_gl_destroy(inout_shader);
 }
 
-void platform_shader_program_destroy(
-  struct shader_program_t* shader_program)
+/*******************************************************************************
+ *
+ *   Function: shader_program_internal_platform_destroy()
+ *
+ ******************************************************************************/
+void shader_program_internal_platform_destroy(
+  struct shader_program_t* inout_shader_program)
 {
-  gl_shader_program_destroy(shader_program);
+  shader_program_gl_destroy(inout_shader_program);
 }

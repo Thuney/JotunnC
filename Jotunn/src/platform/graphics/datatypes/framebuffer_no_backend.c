@@ -1,70 +1,122 @@
 #include "framebuffer.h"
 
-void platform_framebuffer_init(
-  struct framebuffer_t* frame_buffer)
+#include "../../../core/graphics/datatypes/framebuffer_internal.h"
+
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_init()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_init(
+  struct framebuffer_t* out_frame_buffer)
 {
   return;
 }
 
-void platform_color_buffer_init(
-  struct color_buffer_t* color_buffer,
-  const int width,
-  const int height)
+/*******************************************************************************
+ *
+ *   Function: color_buffer_internal_platform_init()
+ *
+ ******************************************************************************/
+void color_buffer_internal_platform_init(
+  struct framebuffer_color_buffer_t* inout_color_buffer,
+  const unsigned int in_width_pixels,
+  const unsigned int in_height_pixels)
 {
   return;
 }
 
-void platform_render_buffer_init(
-  struct render_buffer_t* render_buffer,
-  const int width,
-  const int height)
+/*******************************************************************************
+ *
+ *   Function: render_buffer_internal_platform_init()
+ *
+ ******************************************************************************/
+void render_buffer_internal_platform_init(
+  struct framebuffer_render_buffer_t* out_render_buffer,
+  const unsigned int in_width_pixels,
+  const unsigned int in_height_pixels)
 {
   return;
 }
 
-void platform_color_buffer_resize(
-  struct color_buffer_t* color_buffer,
-  const int new_width,
-  const int new_height)
+/*******************************************************************************
+ *
+ *   Function: color_buffer_internal_platform_resize()
+ *
+ ******************************************************************************/
+void color_buffer_internal_platform_resize(
+  struct framebuffer_color_buffer_t* inout_color_buffer,
+  const unsigned int in_new_width_pixels,
+  const unsigned int in_new_height_pixels)
 {
   return;
 }
 
-void platform_render_buffer_resize(
-  struct render_buffer_t* render_buffer,
-  const int new_width,
-  const int new_height)
+/*******************************************************************************
+ *
+ *   Function: render_buffer_internal_platform_resize()
+ *
+ ******************************************************************************/
+void render_buffer_internal_platform_resize(
+  const struct framebuffer_render_buffer_t* in_render_buffer,
+  const unsigned int in_new_width_pixels,
+  const unsigned int in_new_height_pixels)
 {
   return;
 }
 
-void platform_framebuffer_attach_color_buffer(
-  struct framebuffer_t* frame_buffer,
-  struct color_buffer_t* color_buffer)
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_attach_color_buffer()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_attach_color_buffer(
+  const struct framebuffer_t* in_frame_buffer,
+  const struct framebuffer_color_buffer_t* in_color_buffer)
 {
   return;
 }
 
-void platform_framebuffer_attach_render_buffer(
-  struct framebuffer_t* frame_buffer,
-  struct render_buffer_t* render_buffer)
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_attach_render_buffer()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_attach_render_buffer(
+  const struct framebuffer_t* in_frame_buffer,
+  const struct framebuffer_render_buffer_t* in_render_buffer)
 {
   return;
 }
 
-void platform_framebuffer_bind(
-  struct framebuffer_t* frame_buffer)
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_bind()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_bind(
+  const struct framebuffer_t* in_frame_buffer)
 {
   return;
 }
 
-void platform_framebuffer_unbind()
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_unbind()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_unbind()
 {
   return;
 }
 
-void platform_framebuffer_cleanup(
-  struct framebuffer_t* frame_buffer)
+/*******************************************************************************
+ *
+ *   Function: framebuffer_internal_platform_cleanup()
+ *
+ ******************************************************************************/
+void framebuffer_internal_platform_cleanup(
+  const struct framebuffer_t* in_frame_buffer)
 {
   return;
 }

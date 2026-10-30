@@ -6,8 +6,11 @@
 static struct application_t jotunn_app;
 static struct ball_window_t ball_window;
 
-//
-
+/*******************************************************************************
+ *
+ *   Function: main()
+ *
+ ******************************************************************************/
 int main(int argc, char **argv)
 {
   const uint8_t max_windows = 1;

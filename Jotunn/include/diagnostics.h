@@ -53,7 +53,8 @@ void diagnostics_zone_end(
 //  the tab is open
 //
 //  in:     in_name, in_function_draw, in_user_data
-//  ret:    true when the tab was added; false when every tab is taken
+//  ret:    true when the tab was added; false when in_function_draw is NULL
+//            or every tab is taken
 bool diagnostics_tab_add(
   const char* in_name,
   void (*in_function_draw)(void* inout_user_data),

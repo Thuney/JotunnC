@@ -7,17 +7,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-char* read_raw_file_contents(
-  const char* file_path)
+/*******************************************************************************
+ *
+ *   Function: util_read_raw_file_contents()
+ *
+ ******************************************************************************/
+char* util_read_raw_file_contents(
+  const char* in_file_path)
 {
-  FILE* file = fopen(file_path, "r");
+  FILE* file = fopen(in_file_path, "r");
   if (file == NULL)
   {
   #ifdef DEBUG
     log_write(
       LOG_LEVEL_ERROR,
       "Failed to open %s",
-      file_path);
+      in_file_path);
   #endif
 
     return NULL;

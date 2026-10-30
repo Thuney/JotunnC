@@ -1,59 +1,100 @@
 #include "vertexbuffer.h"
+#include "../../../core/graphics/datatypes/vertex_buffer_internal.h"
 
-void platform_vertex_buffer_init(
-  struct vertex_buffer_t* vertex_buffer,
-  int num)
+/*******************************************************************************
+ *
+ *   Function: vertex_buffer_internal_platform_init()
+ *
+ ******************************************************************************/
+void vertex_buffer_internal_platform_init(
+  struct vertex_buffer_t* out_vertex_buffer,
+  const int in_num)
 {
   return 0;
 }
 
-void platform_vertex_buffer_bind(
-  struct vertex_buffer_t* vertex_buffer)
+/*******************************************************************************
+ *
+ *   Function: vertex_buffer_internal_platform_bind()
+ *
+ ******************************************************************************/
+void vertex_buffer_internal_platform_bind(
+  const struct vertex_buffer_t* in_vertex_buffer)
 {
   return 0;
 }
 
-void platform_vertex_buffer_buffer_data(
-  struct vertex_buffer_t* vertex_buffer,
-  const void* data,
-  unsigned int data_bytes,
-  enum buffer_data_usage_t usage_type)
+/*******************************************************************************
+ *
+ *   Function: vertex_buffer_internal_platform_set_data()
+ *
+ ******************************************************************************/
+void vertex_buffer_internal_platform_set_data(
+  const struct vertex_buffer_t* in_vertex_buffer,
+  const void* in_data,
+  const unsigned int in_data_bytes,
+  const enum vertex_buffer_data_usage_t in_usage_type)
 {
   return 0;
 }
 
-void platform_vertex_buffer_destroy(
-  struct vertex_buffer_t* vertex_buffer,
-  int num)
+/*******************************************************************************
+ *
+ *   Function: vertex_buffer_internal_platform_destroy()
+ *
+ ******************************************************************************/
+void vertex_buffer_internal_platform_destroy(
+  struct vertex_buffer_t* inout_vertex_buffer,
+  const int in_num)
 {
   return 0;
 }
 
-void platform_element_buffer_init(
-  struct element_buffer_t* element_buffer,
-  int num)
+/*******************************************************************************
+ *
+ *   Function: element_buffer_internal_platform_init()
+ *
+ ******************************************************************************/
+void element_buffer_internal_platform_init(
+  struct element_buffer_t* out_element_buffer,
+  const int in_num)
 {
   return 0;
 }
 
-void platform_element_buffer_bind(
-  struct element_buffer_t* element_buffer)
+/*******************************************************************************
+ *
+ *   Function: element_buffer_internal_platform_bind()
+ *
+ ******************************************************************************/
+void element_buffer_internal_platform_bind(
+  const struct element_buffer_t* in_element_buffer)
 {
   return 0;
 }
 
-void platform_element_buffer_buffer_data(
-  struct element_buffer_t* element_buffer,
-  const void* index_data,
-  unsigned int data_bytes,
-  enum buffer_data_usage_t usage_type)
+/*******************************************************************************
+ *
+ *   Function: element_buffer_internal_platform_buffer_data()
+ *
+ ******************************************************************************/
+void element_buffer_internal_platform_buffer_data(
+  const struct element_buffer_t* in_element_buffer,
+  const void* in_index_data,
+  const unsigned int in_data_bytes,
+  const enum vertex_buffer_data_usage_t in_usage_type)
 {
   return 0;
 }
 
-void platform_element_buffer_destroy(
-  struct element_buffer_t* element_buffer,
-  int num)
+/*******************************************************************************
+ *
+ *   Function: element_buffer_internal_platform_destroy()
+ *
+ ******************************************************************************/
+void element_buffer_internal_platform_destroy(
+  struct element_buffer_t* inout_element_buffer,
+  const int in_num)
 {
   return 0;
 }

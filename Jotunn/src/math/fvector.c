@@ -4,293 +4,439 @@
 #include "fvector.h"
 
 #ifdef DEBUG
+
+/*******************************************************************************
+ *
+ *   Function: fvector2_print()
+ *
+ ******************************************************************************/
 void fvector2_print(
-  const fvector2* vector)
+  const union fvector2_t* in_vector)
 {
   fprintf(
-    stdout, "fvector2 - X = %f, Y = %f\n", vector->comp.x, vector->comp.y);
+    stdout, "fvector2 - X = %f, Y = %f\n", in_vector->comp.x, in_vector->comp.y);
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_print()
+ *
+ ******************************************************************************/
 void fvector3_print(
-  const fvector3* vector)
+  const union fvector3_t* in_vector)
 {
   fprintf(
     stdout,
     "fvector3 - X = %f, Y = %f, Z = %f\n",
-    vector->comp.x,
-    vector->comp.y,
-    vector->comp.z);
+    in_vector->comp.x,
+    in_vector->comp.y,
+    in_vector->comp.z);
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector4_print()
+ *
+ ******************************************************************************/
 void fvector4_print(
-  const fvector4* vector)
+  const union fvector4_t* in_vector)
 {
   fprintf(
     stdout,
     "fvector4 - W = %f, X = %f, Y = %f, Z = %f\n",
-    vector->comp.w,
-    vector->comp.x,
-    vector->comp.y,
-    vector->comp.z);
+    in_vector->comp.w,
+    in_vector->comp.x,
+    in_vector->comp.y,
+    in_vector->comp.z);
 }
+
 #endif
 
+/*******************************************************************************
+ *
+ *   Function: fvector2_init()
+ *
+ ******************************************************************************/
 void fvector2_init(
-  fvector2* vector)
+  union fvector2_t* out_vector)
 {
-  memset(vector, 0, sizeof(fvector2));
+  memset(out_vector, 0, sizeof(union fvector2_t));
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_init()
+ *
+ ******************************************************************************/
 void fvector3_init(
-  fvector3* vector)
+  union fvector3_t* out_vector)
 {
-  memset(vector, 0, sizeof(fvector3));
+  memset(out_vector, 0, sizeof(union fvector3_t));
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector4_init()
+ *
+ ******************************************************************************/
 void fvector4_init(
-  fvector4* vector)
+  union fvector4_t* out_vector)
 {
-  memset(vector, 0, sizeof(fvector4));
+  memset(out_vector, 0, sizeof(union fvector4_t));
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector2_set()
+ *
+ ******************************************************************************/
 void fvector2_set(
-  fvector2* vector,
-  const float x,
-  const float y)
+  union fvector2_t* out_vector,
+  const float in_x,
+  const float in_y)
 {
-  vector->comp.x = x;
-  vector->comp.y = y;
+  out_vector->comp.x = in_x;
+  out_vector->comp.y = in_y;
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_set()
+ *
+ ******************************************************************************/
 void fvector3_set(
-  fvector3* vector,
-  const float x,
-  const float y,
-  const float z)
+  union fvector3_t* out_vector,
+  const float in_x,
+  const float in_y,
+  const float in_z)
 {
-  vector->comp.x = x;
-  vector->comp.y = y;
-  vector->comp.z = z;
+  out_vector->comp.x = in_x;
+  out_vector->comp.y = in_y;
+  out_vector->comp.z = in_z;
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector4_set()
+ *
+ ******************************************************************************/
 void fvector4_set(
-  fvector4* vector,
-  const float w,
-  const float x,
-  const float y,
-  const float z)
+  union fvector4_t* out_vector,
+  const float in_w,
+  const float in_x,
+  const float in_y,
+  const float in_z)
 {
-  vector->comp.w = w;
-  vector->comp.x = x;
-  vector->comp.y = y;
-  vector->comp.z = z;
+  out_vector->comp.w = in_w;
+  out_vector->comp.x = in_x;
+  out_vector->comp.y = in_y;
+  out_vector->comp.z = in_z;
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector2_setv()
+ *
+ ******************************************************************************/
 void fvector2_setv(
-  fvector2* dest_vector,
-  const fvector2 src_vector)
+  union fvector2_t* out_vector,
+  const union fvector2_t in_vector)
 {
-  fvector2_set(dest_vector, src_vector.comp.x, src_vector.comp.y);
+  fvector2_set(out_vector, in_vector.comp.x, in_vector.comp.y);
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_setv()
+ *
+ ******************************************************************************/
 void fvector3_setv(
-  fvector3* dest_vector,
-  const fvector3 src_vector)
+  union fvector3_t* out_vector,
+  const union fvector3_t in_vector)
 {
   fvector3_set(
-    dest_vector, src_vector.comp.x, src_vector.comp.y, src_vector.comp.z);
+    out_vector, in_vector.comp.x, in_vector.comp.y, in_vector.comp.z);
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector4_setv()
+ *
+ ******************************************************************************/
 void fvector4_setv(
-  fvector4* dest_vector,
-  const fvector4 src_vector)
+  union fvector4_t* out_vector,
+  const union fvector4_t in_vector)
 {
   fvector4_set(
-    dest_vector,
-    src_vector.comp.w,
-    src_vector.comp.x,
-    src_vector.comp.y,
-    src_vector.comp.z);
+    out_vector,
+    in_vector.comp.w,
+    in_vector.comp.x,
+    in_vector.comp.y,
+    in_vector.comp.z);
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector2_magnitude()
+ *
+ ******************************************************************************/
 float fvector2_magnitude(
-  const fvector2* vector)
+  const union fvector2_t* in_vector)
 {
   float magnitude;
   magnitude = sqrtf(
-    (vector->comp.x * vector->comp.x) + (vector->comp.y * vector->comp.y));
+    (in_vector->comp.x * in_vector->comp.x) + (in_vector->comp.y * in_vector->comp.y));
   return magnitude;
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_magnitude()
+ *
+ ******************************************************************************/
 float fvector3_magnitude(
-  const fvector3* vector)
+  const union fvector3_t* in_vector)
 {
   float magnitude;
   magnitude = sqrtf(
-    (vector->comp.x * vector->comp.x) + (vector->comp.y * vector->comp.y) +
-    (vector->comp.z * vector->comp.z));
+    (in_vector->comp.x * in_vector->comp.x) + (in_vector->comp.y * in_vector->comp.y) +
+    (in_vector->comp.z * in_vector->comp.z));
   return magnitude;
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector4_magnitude()
+ *
+ ******************************************************************************/
 float fvector4_magnitude(
-  const fvector4* vector)
+  const union fvector4_t* in_vector)
 {
   float magnitude;
   magnitude = sqrtf(
-    (vector->comp.w * vector->comp.w) + (vector->comp.x * vector->comp.x) +
-    (vector->comp.y * vector->comp.y) + (vector->comp.z * vector->comp.z));
+    (in_vector->comp.w * in_vector->comp.w) + (in_vector->comp.x * in_vector->comp.x) +
+    (in_vector->comp.y * in_vector->comp.y) + (in_vector->comp.z * in_vector->comp.z));
   return magnitude;
 }
 
-fvector2 fvector2_normalize(
-  const fvector2* vector)
+/*******************************************************************************
+ *
+ *   Function: fvector2_normalize()
+ *
+ ******************************************************************************/
+union fvector2_t fvector2_normalize(
+  const union fvector2_t* in_vector)
 {
-  // float magnitude = fvector2_magnitude(vector);
-  // return (fvector2) { (vector->comp.x / magnitude), (vector->comp.y / magnitude) };
-
-  return fvector2_scale(vector, 1.0f / fvector2_magnitude(vector));
+  return fvector2_scale(in_vector, 1.0f / fvector2_magnitude(in_vector));
 }
 
-fvector3 fvector3_normalize(
-  const fvector3* vector)
+/*******************************************************************************
+ *
+ *   Function: fvector3_normalize()
+ *
+ ******************************************************************************/
+union fvector3_t fvector3_normalize(
+  const union fvector3_t* in_vector)
 {
-  return fvector3_scale(vector, 1.0f / fvector3_magnitude(vector));
+  return fvector3_scale(in_vector, 1.0f / fvector3_magnitude(in_vector));
 }
 
-fvector4 fvector4_normalize(
-  const fvector4* vector)
+/*******************************************************************************
+ *
+ *   Function: fvector4_normalize()
+ *
+ ******************************************************************************/
+union fvector4_t fvector4_normalize(
+  const union fvector4_t* in_vector)
 {
-  return fvector4_scale(vector, 1.0f / fvector4_magnitude(vector));
+  return fvector4_scale(in_vector, 1.0f / fvector4_magnitude(in_vector));
 }
 
-fvector2 fvector2_add(
-  const fvector2* vector1,
-  const fvector2* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector2_add()
+ *
+ ******************************************************************************/
+union fvector2_t fvector2_add(
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2)
 {
-  fvector2 resultant;
-  resultant.comp.x = (vector1->comp.x + vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y + vector2->comp.y);
+  union fvector2_t resultant;
+  resultant.comp.x = (in_vector1->comp.x + in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y + in_vector2->comp.y);
 
   return resultant;
 }
 
-fvector3 fvector3_add(
-  const fvector3* vector1,
-  const fvector3* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector3_add()
+ *
+ ******************************************************************************/
+union fvector3_t fvector3_add(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2)
 {
-  fvector3 resultant;
-  resultant.comp.x = (vector1->comp.x + vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y + vector2->comp.y);
-  resultant.comp.z = (vector1->comp.z + vector2->comp.z);
+  union fvector3_t resultant;
+  resultant.comp.x = (in_vector1->comp.x + in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y + in_vector2->comp.y);
+  resultant.comp.z = (in_vector1->comp.z + in_vector2->comp.z);
 
   return resultant;
 }
 
-fvector4 fvector4_add(
-  const fvector4* vector1,
-  const fvector4* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector4_add()
+ *
+ ******************************************************************************/
+union fvector4_t fvector4_add(
+  const union fvector4_t* in_vector1,
+  const union fvector4_t* in_vector2)
 {
-  fvector4 resultant;
-  resultant.comp.x = (vector1->comp.w + vector2->comp.w);
-  resultant.comp.x = (vector1->comp.x + vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y + vector2->comp.y);
-  resultant.comp.z = (vector1->comp.z + vector2->comp.z);
+  union fvector4_t resultant;
+  resultant.comp.x = (in_vector1->comp.w + in_vector2->comp.w);
+  resultant.comp.x = (in_vector1->comp.x + in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y + in_vector2->comp.y);
+  resultant.comp.z = (in_vector1->comp.z + in_vector2->comp.z);
 
   return resultant;
 }
 
-fvector2 fvector2_subtract(
-  const fvector2* vector1,
-  const fvector2* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector2_subtract()
+ *
+ ******************************************************************************/
+union fvector2_t fvector2_subtract(
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2)
 {
-  fvector2 resultant;
-  resultant.comp.x = (vector1->comp.x - vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y - vector2->comp.y);
+  union fvector2_t resultant;
+  resultant.comp.x = (in_vector1->comp.x - in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y - in_vector2->comp.y);
 
   return resultant;
 }
 
-fvector3 fvector3_subtract(
-  const fvector3* vector1,
-  const fvector3* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector3_subtract()
+ *
+ ******************************************************************************/
+union fvector3_t fvector3_subtract(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2)
 {
-  fvector3 resultant;
-  resultant.comp.x = (vector1->comp.x - vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y - vector2->comp.y);
-  resultant.comp.z = (vector1->comp.z - vector2->comp.z);
+  union fvector3_t resultant;
+  resultant.comp.x = (in_vector1->comp.x - in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y - in_vector2->comp.y);
+  resultant.comp.z = (in_vector1->comp.z - in_vector2->comp.z);
 
   return resultant;
 }
 
-fvector4 fvector4_subtract(
-  const fvector4* vector1,
-  const fvector4* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector4_subtract()
+ *
+ ******************************************************************************/
+union fvector4_t fvector4_subtract(
+  const union fvector4_t* in_vector1,
+  const union fvector4_t* in_vector2)
 {
-  fvector4 resultant;
-  resultant.comp.x = (vector1->comp.w - vector2->comp.w);
-  resultant.comp.x = (vector1->comp.x - vector2->comp.x);
-  resultant.comp.y = (vector1->comp.y - vector2->comp.y);
-  resultant.comp.z = (vector1->comp.z - vector2->comp.z);
+  union fvector4_t resultant;
+  resultant.comp.x = (in_vector1->comp.w - in_vector2->comp.w);
+  resultant.comp.x = (in_vector1->comp.x - in_vector2->comp.x);
+  resultant.comp.y = (in_vector1->comp.y - in_vector2->comp.y);
+  resultant.comp.z = (in_vector1->comp.z - in_vector2->comp.z);
 
   return resultant;
 }
 
-// <V>*s
-fvector2 fvector2_scale(
-  const fvector2* vector,
-  float scalar)
+/*******************************************************************************
+ *
+ *   Function: fvector2_scale()
+ *
+ ******************************************************************************/
+union fvector2_t fvector2_scale(
+  const union fvector2_t* in_vector,
+  const float in_scalar)
 {
-  return (fvector2){(vector->comp.x * scalar), (vector->comp.y * scalar)};
+  return (union fvector2_t){(in_vector->comp.x * in_scalar), (in_vector->comp.y * in_scalar)};
 }
 
-fvector3 fvector3_scale(
-  const fvector3* vector,
-  float scalar)
+/*******************************************************************************
+ *
+ *   Function: fvector3_scale()
+ *
+ ******************************************************************************/
+union fvector3_t fvector3_scale(
+  const union fvector3_t* in_vector,
+  const float in_scalar)
 {
-  return (fvector3){(vector->comp.x * scalar),
-                    vector->comp.y * scalar,
-                    (vector->comp.z * scalar)};
+  return (union fvector3_t){(in_vector->comp.x * in_scalar),
+                    in_vector->comp.y * in_scalar,
+                    (in_vector->comp.z * in_scalar)};
 }
 
-fvector4 fvector4_scale(
-  const fvector4* vector,
-  float scalar)
+/*******************************************************************************
+ *
+ *   Function: fvector4_scale()
+ *
+ ******************************************************************************/
+union fvector4_t fvector4_scale(
+  const union fvector4_t* in_vector,
+  const float in_scalar)
 {
-  return (fvector4){(vector->comp.w * scalar),
-                    vector->comp.x * scalar,
-                    vector->comp.y * scalar,
-                    (vector->comp.z * scalar)};
+  return (union fvector4_t){(in_vector->comp.w * in_scalar),
+                    in_vector->comp.x * in_scalar,
+                    in_vector->comp.y * in_scalar,
+                    (in_vector->comp.z * in_scalar)};
 }
 
-// <V1> dot product <V2>
+/*******************************************************************************
+ *
+ *   Function: fvector2_dot()
+ *
+ ******************************************************************************/
 float fvector2_dot(
-  const fvector2* vector1,
-  const fvector2* vector2)
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2)
 {
   return (
-    (vector1->comp.x * vector2->comp.x) + (vector1->comp.y * vector2->comp.y));
+    (in_vector1->comp.x * in_vector2->comp.x) + (in_vector1->comp.y * in_vector2->comp.y));
 }
 
+/*******************************************************************************
+ *
+ *   Function: fvector3_dot()
+ *
+ ******************************************************************************/
 float fvector3_dot(
-  const fvector3* vector1,
-  const fvector3* vector2)
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2)
 {
   return (
-    (vector1->comp.x * vector2->comp.x) + (vector1->comp.y * vector2->comp.y) +
-    (vector1->comp.z * vector2->comp.z));
+    (in_vector1->comp.x * in_vector2->comp.x) + (in_vector1->comp.y * in_vector2->comp.y) +
+    (in_vector1->comp.z * in_vector2->comp.z));
 }
 
-// <V1> cross product <V2>
-fvector3 fvector3_cross(
-  const fvector3* vector1,
-  const fvector3* vector2)
+/*******************************************************************************
+ *
+ *   Function: fvector3_cross()
+ *
+ ******************************************************************************/
+union fvector3_t fvector3_cross(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2)
 {
-  fvector3 resultant;
+  union fvector3_t resultant;
   resultant.comp.x =
-    ((vector1->comp.y * vector2->comp.z) - (vector1->comp.z * vector2->comp.y));
+    ((in_vector1->comp.y * in_vector2->comp.z) - (in_vector1->comp.z * in_vector2->comp.y));
   resultant.comp.y =
-    ((vector1->comp.z * vector2->comp.x) - (vector1->comp.x * vector2->comp.z));
+    ((in_vector1->comp.z * in_vector2->comp.x) - (in_vector1->comp.x * in_vector2->comp.z));
   resultant.comp.z =
-    ((vector1->comp.x * vector2->comp.y) - (vector1->comp.y * vector2->comp.x));
+    ((in_vector1->comp.x * in_vector2->comp.y) - (in_vector1->comp.y * in_vector2->comp.x));
   return resultant;
 }

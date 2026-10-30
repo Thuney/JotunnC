@@ -1,14 +1,21 @@
 #pragma once
 
-/** Local Includes  **/
+// Square float matrices, stored row major: mat[row][col], with buf holding
+//  the same elements row after row. Points are row vectors multiplied on the
+//  left of a transform, so a 4x4 transform keeps its translation in the last
+//  row, and the product of A and B transforms by A, then by B. Stored this
+//  way, a transform can be handed to OpenGL untransposed
+
 #include "fvector.h"
 
-/************************************************************
+/*******************************************************************************
  *
- * Union Definitions
+ *   TYPES
  *
- ************************************************************/
-typedef union fmatrix_2x2_t
+ ******************************************************************************/
+
+// A 2x2 matrix
+union fmatrix_2x2_t
 {
   // Buffer Form
   float buf[4];
@@ -22,9 +29,10 @@ typedef union fmatrix_2x2_t
      | mat[1][0] / buf[2] || mat[1][1] / buf[3] |
      --------------------------------------------
   */
-} fmatrix_2x2;
+};
 
-typedef union fmatrix_3x3_t
+// A 3x3 matrix
+union fmatrix_3x3_t
 {
   // Buffer Form
   float buf[9];
@@ -39,136 +47,316 @@ typedef union fmatrix_3x3_t
      | mat[2][0] / buf[6] || mat[2][1] / buf[7] || mat[2][2] / buf[8] |
      ------------------------------------------------------------------
   */
-} fmatrix_3x3;
+};
 
-typedef union fmatrix_4x4_t
+// A 4x4 matrix, most often a transform
+union fmatrix_4x4_t
 {
   // Buffer Form
   float buf[16];
   // Matrix form - row major - mat[row][col]
   float mat[4][4];
   /*
-     ----------------------------------------------------------------------------------------------
-     | mat[0][0] / buf[0]  || mat[0][1] / buf[1]  || mat[0][2] / buf[2]   || mat[0][3] / buf[3]  ||
-     ----------------------------------------------------------------------------------------------
-     | mat[1][0] / buf[4]  || mat[1][1] / buf[5]  || mat[1][2] / buf[6]   || mat[1][3] / buf[7]  ||
-     ----------------------------------------------------------------------------------------------
-     | mat[2][0] / buf[8]  || mat[2][1] / buf[9]  || mat[2][2] / buf[10]  || mat[2][3] / buf[11] ||
-     ----------------------------------------------------------------------------------------------
-     | mat[3][0] / buf[12] || mat[3][1] / buf[13] || mat[3][2] / buf[14]  || mat[3][3] / buf[15] ||
-     ----------------------------------------------------------------------------------------------
+     The buf index of each mat[row][col]:
+
+              col 0   col 1   col 2   col 3
+       row 0    0       1       2       3
+       row 1    4       5       6       7
+       row 2    8       9      10      11
+       row 3   12      13      14      15
   */
-} fmatrix_4x4;
+};
 
-/************************************************************
+/*******************************************************************************
  *
- * Interface Functions
+ *   DEBUGGING
  *
- ************************************************************/
+ ******************************************************************************/
+
 #ifdef DEBUG
-  int fmatrix_2x2_are_equal(
-    const fmatrix_2x2* matrix1,
-    const fmatrix_2x2* matrix2);
-  int fmatrix_3x3_are_equal(
-    const fmatrix_3x3* matrix1,
-    const fmatrix_3x3* matrix2);
-  int fmatrix_4x4_are_equal(
-    const fmatrix_4x4* matrix1,
-    const fmatrix_4x4* matrix2);
 
-  int fmatrix_2x2_is_identity(
-    const fmatrix_2x2* matrix);
-  int fmatrix_3x3_is_identity(
-    const fmatrix_3x3* matrix);
-  int fmatrix_4x4_is_identity(
-    const fmatrix_4x4* matrix);
+// Compares two 2x2 matrices element by element, to within 0.001
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    1 when every element matches; otherwise 0
+int fmatrix_2x2_are_equal(
+  const union fmatrix_2x2_t* in_matrix1,
+  const union fmatrix_2x2_t* in_matrix2);
 
-  void fmatrix_2x2_print(
-    const fmatrix_2x2* matrix);
-  void fmatrix_3x3_print(
-    const fmatrix_3x3* matrix);
-  void fmatrix_4x4_print(
-    const fmatrix_4x4* matrix);
+// Compares two 3x3 matrices element by element, to within 0.001
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    1 when every element matches; otherwise 0
+int fmatrix_3x3_are_equal(
+  const union fmatrix_3x3_t* in_matrix1,
+  const union fmatrix_3x3_t* in_matrix2);
+
+// Compares two 4x4 matrices element by element, to within 0.001
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    1 when every element matches; otherwise 0
+int fmatrix_4x4_are_equal(
+  const union fmatrix_4x4_t* in_matrix1,
+  const union fmatrix_4x4_t* in_matrix2);
+
+// Checks whether a 2x2 matrix is the identity, to within 0.0001 per element
+//
+//  in:     in_matrix
+//  ret:    1 when in_matrix is the identity; otherwise 0
+int fmatrix_2x2_is_identity(
+  const union fmatrix_2x2_t* in_matrix);
+
+// Checks whether a 3x3 matrix is the identity, to within 0.0001 per element
+//
+//  in:     in_matrix
+//  ret:    1 when in_matrix is the identity; otherwise 0
+int fmatrix_3x3_is_identity(
+  const union fmatrix_3x3_t* in_matrix);
+
+// Checks whether a 4x4 matrix is the identity, to within 0.0001 per element
+//
+//  in:     in_matrix
+//  ret:    1 when in_matrix is the identity; otherwise 0
+int fmatrix_4x4_is_identity(
+  const union fmatrix_4x4_t* in_matrix);
+
+// Prints each element of a 2x2 matrix to stdout, with its row and column
+//
+//  in:     in_matrix
+void fmatrix_2x2_print(
+  const union fmatrix_2x2_t* in_matrix);
+
+// Prints each element of a 3x3 matrix to stdout, with its row and column
+//
+//  in:     in_matrix
+void fmatrix_3x3_print(
+  const union fmatrix_3x3_t* in_matrix);
+
+// Prints each element of a 4x4 matrix to stdout, with its row and column
+//
+//  in:     in_matrix
+void fmatrix_4x4_print(
+  const union fmatrix_4x4_t* in_matrix);
+
 #endif
 
+/*******************************************************************************
+ *
+ *   INITIALIZATION
+ *
+ ******************************************************************************/
+
+// Sets a 2x2 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_2x2_identity(
-  fmatrix_2x2* matrix);
+  union fmatrix_2x2_t* out_matrix);
+
+// Sets a 3x3 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_3x3_identity(
-  fmatrix_3x3* matrix);
+  union fmatrix_3x3_t* out_matrix);
+
+// Sets a 4x4 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_4x4_identity(
-  fmatrix_4x4* matrix);
+  union fmatrix_4x4_t* out_matrix);
 
-void fmatrix_2x2_transpose(
-  fmatrix_2x2* matrix);
-void fmatrix_3x3_transpose(
-  fmatrix_3x3* matrix);
-void fmatrix_4x4_transpose(
-  fmatrix_4x4* matrix);
-
+// Initializes a 2x2 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_2x2_init(
-  fmatrix_2x2* matrix);
+  union fmatrix_2x2_t* out_matrix);
+
+// Initializes a 3x3 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_3x3_init(
-  fmatrix_3x3* matrix);
+  union fmatrix_3x3_t* out_matrix);
+
+// Initializes a 4x4 matrix to the identity
+//
+//  out:    out_matrix
 void fmatrix_4x4_init(
-  fmatrix_4x4* matrix);
+  union fmatrix_4x4_t* out_matrix);
 
+// Sets a 2x2 matrix's elements from a row-major array, in_data[row][col]
+//
+//  in:     in_data
+//  out:    out_matrix
 void fmatrix_2x2_set(
-  fmatrix_2x2* matrix,
-  const float mat_data[2][2]);
+  union fmatrix_2x2_t* out_matrix,
+  const float in_data[2][2]);
+
+// Sets a 3x3 matrix's elements from a row-major array, in_data[row][col]
+//
+//  in:     in_data
+//  out:    out_matrix
 void fmatrix_3x3_set(
-  fmatrix_3x3* matrix,
-  const float mat_data[3][3]);
+  union fmatrix_3x3_t* out_matrix,
+  const float in_data[3][3]);
+
+// Sets a 4x4 matrix's elements from a row-major array, in_data[row][col]
+//
+//  in:     in_data
+//  out:    out_matrix
 void fmatrix_4x4_set(
-  fmatrix_4x4* matrix,
-  const float mat_data[4][4]);
+  union fmatrix_4x4_t* out_matrix,
+  const float in_data[4][4]);
 
-fmatrix_2x2 fmatrix_2x2_add(
-  const fmatrix_2x2* matrix1,
-  const fmatrix_2x2* matrix2);
-fmatrix_3x3 fmatrix_3x3_add(
-  const fmatrix_3x3* matrix1,
-  const fmatrix_3x3* matrix2);
-fmatrix_4x4 fmatrix_4x4_add(
-  const fmatrix_4x4* matrix1,
-  const fmatrix_4x4* matrix2);
+/*******************************************************************************
+ *
+ *   ARITHMETIC
+ *
+ ******************************************************************************/
 
-fmatrix_2x2 fmatrix_2x2_subtract(
-  const fmatrix_2x2* matrix1,
-  const fmatrix_2x2* matrix2);
-fmatrix_3x3 fmatrix_3x3_subtract(
-  const fmatrix_3x3* matrix1,
-  const fmatrix_3x3* matrix2);
-fmatrix_4x4 fmatrix_4x4_subtract(
-  const fmatrix_4x4* matrix1,
-  const fmatrix_4x4* matrix2);
+// Transposes a 2x2 matrix in place
+//
+//  in/out: inout_matrix
+void fmatrix_2x2_transpose(
+  union fmatrix_2x2_t* inout_matrix);
 
-fmatrix_2x2 fmatrix_2x2_scale(
-  const fmatrix_2x2* matrix,
-  const float scalar);
-fmatrix_3x3 fmatrix_3x3_scale(
-  const fmatrix_3x3* matrix,
-  const float scalar);
-fmatrix_4x4 fmatrix_4x4_scale(
-  const fmatrix_4x4* matrix,
-  const float scalar);
+// Transposes a 3x3 matrix in place
+//
+//  in/out: inout_matrix
+void fmatrix_3x3_transpose(
+  union fmatrix_3x3_t* inout_matrix);
 
-fmatrix_2x2 fmatrix_2x2_multiply(
-  const fmatrix_2x2* matrix1,
-  const fmatrix_2x2* matrix2);
-fmatrix_3x3 fmatrix_3x3_multiply(
-  const fmatrix_3x3* matrix1,
-  const fmatrix_3x3* matrix2);
-fmatrix_4x4 fmatrix_4x4_multiply(
-  const fmatrix_4x4* matrix1,
-  const fmatrix_4x4* matrix2);
+// Transposes a 4x4 matrix in place
+//
+//  in/out: inout_matrix
+void fmatrix_4x4_transpose(
+  union fmatrix_4x4_t* inout_matrix);
 
-fmatrix_4x4 fmatrix_4x4_transform_translate(
-  fmatrix_4x4* matrix,
-  const fvector3 translation);
-fmatrix_4x4 fmatrix_4x4_transform_scale(
-  fmatrix_4x4* matrix,
-  const fvector3 scale_factors);
+// Adds two 2x2 matrices
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 + in_matrix2
+union fmatrix_2x2_t fmatrix_2x2_add(
+  const union fmatrix_2x2_t* in_matrix1,
+  const union fmatrix_2x2_t* in_matrix2);
 
-fvector3 fmatrix_4x4_transform_point(
-  const fmatrix_4x4* matrix,
-  const fvector3 point);
+// Adds two 3x3 matrices
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 + in_matrix2
+union fmatrix_3x3_t fmatrix_3x3_add(
+  const union fmatrix_3x3_t* in_matrix1,
+  const union fmatrix_3x3_t* in_matrix2);
+
+// Adds two 4x4 matrices
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 + in_matrix2
+union fmatrix_4x4_t fmatrix_4x4_add(
+  const union fmatrix_4x4_t* in_matrix1,
+  const union fmatrix_4x4_t* in_matrix2);
+
+// Subtracts one 2x2 matrix from another
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 - in_matrix2
+union fmatrix_2x2_t fmatrix_2x2_subtract(
+  const union fmatrix_2x2_t* in_matrix1,
+  const union fmatrix_2x2_t* in_matrix2);
+
+// Subtracts one 3x3 matrix from another
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 - in_matrix2
+union fmatrix_3x3_t fmatrix_3x3_subtract(
+  const union fmatrix_3x3_t* in_matrix1,
+  const union fmatrix_3x3_t* in_matrix2);
+
+// Subtracts one 4x4 matrix from another
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 - in_matrix2
+union fmatrix_4x4_t fmatrix_4x4_subtract(
+  const union fmatrix_4x4_t* in_matrix1,
+  const union fmatrix_4x4_t* in_matrix2);
+
+// Multiplies every element of a 2x2 matrix by a scalar
+//
+//  in:     in_matrix, in_scalar
+//  ret:    The scaled matrix
+union fmatrix_2x2_t fmatrix_2x2_scale(
+  const union fmatrix_2x2_t* in_matrix,
+  const float in_scalar);
+
+// Multiplies every element of a 3x3 matrix by a scalar
+//
+//  in:     in_matrix, in_scalar
+//  ret:    The scaled matrix
+union fmatrix_3x3_t fmatrix_3x3_scale(
+  const union fmatrix_3x3_t* in_matrix,
+  const float in_scalar);
+
+// Multiplies every element of a 4x4 matrix by a scalar
+//
+//  in:     in_matrix, in_scalar
+//  ret:    The scaled matrix
+union fmatrix_4x4_t fmatrix_4x4_scale(
+  const union fmatrix_4x4_t* in_matrix,
+  const float in_scalar);
+
+// Multiplies two 2x2 matrices; as transforms, the product applies
+//  in_matrix1, then in_matrix2
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 * in_matrix2
+union fmatrix_2x2_t fmatrix_2x2_multiply(
+  const union fmatrix_2x2_t* in_matrix1,
+  const union fmatrix_2x2_t* in_matrix2);
+
+// Multiplies two 3x3 matrices; as transforms, the product applies
+//  in_matrix1, then in_matrix2
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 * in_matrix2
+union fmatrix_3x3_t fmatrix_3x3_multiply(
+  const union fmatrix_3x3_t* in_matrix1,
+  const union fmatrix_3x3_t* in_matrix2);
+
+// Multiplies two 4x4 matrices; as transforms, the product applies
+//  in_matrix1, then in_matrix2
+//
+//  in:     in_matrix1, in_matrix2
+//  ret:    in_matrix1 * in_matrix2
+union fmatrix_4x4_t fmatrix_4x4_multiply(
+  const union fmatrix_4x4_t* in_matrix1,
+  const union fmatrix_4x4_t* in_matrix2);
+
+/*******************************************************************************
+ *
+ *   TRANSFORMS
+ *
+ ******************************************************************************/
+
+// Follows a transform with a translation
+//
+//  in:     in_matrix, in_translation
+//  ret:    A transform applying in_matrix, then the translation
+union fmatrix_4x4_t fmatrix_4x4_transform_translate(
+  const union fmatrix_4x4_t* in_matrix,
+  const union fvector3_t in_translation);
+
+// Follows a transform with a scaling along each axis
+//
+//  in:     in_matrix, in_scale_factors
+//  ret:    A transform applying in_matrix, then the scaling
+union fmatrix_4x4_t fmatrix_4x4_transform_scale(
+  const union fmatrix_4x4_t* in_matrix,
+  const union fvector3_t in_scale_factors);
+
+// Transforms a point, as the row vector (x, y, z, 1). The result isn't
+//  divided by its fourth component, so this suits affine transforms rather
+//  than projections
+//
+//  in:     in_matrix, in_point
+//  ret:    The transformed point
+union fvector3_t fmatrix_4x4_transform_point(
+  const union fmatrix_4x4_t* in_matrix,
+  const union fvector3_t in_point);

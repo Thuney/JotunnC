@@ -4,67 +4,74 @@
 #include <stdio.h>
 
 #include "vertexattribute.h"
+#include "vertex_attribute_internal.h"
 
 #include "allocator.h"
 
-extern void platform_vertex_attribute_init(
-  struct vertex_attribute_t* vertex_attribute,
-  unsigned int index,
-  int size,
-  enum vertex_attribute_data_type_t data_type,
-  unsigned int should_normalize,
-  unsigned int stride,
-  void* ptr_offset_to_attrib);
-
+/*******************************************************************************
+ *
+ *   Function: vertex_attribute_init()
+ *
+ ******************************************************************************/
 void vertex_attribute_init(
-  struct vertex_attribute_t* vertex_attribute,
-  char* attribute_name,
-  unsigned int index,
-  int size,
-  enum vertex_attribute_data_type_t data_type,
-  unsigned int should_normalize,
-  unsigned int stride,
-  void* ptr_offset_to_attrib)
+  struct vertex_attribute_t* out_vertex_attribute,
+  const char* in_attribute_name,
+  const unsigned int in_index,
+  const int in_size,
+  const enum vertex_attribute_data_type_t in_data_type,
+  const unsigned int in_should_normalize,
+  const unsigned int in_stride,
+  void* in_ptr_offset_to_attrib)
 {
-  vertex_attribute->attribute_name =
+  out_vertex_attribute->attribute_name =
     allocator_duplicate_string(
-      attribute_name,
+      in_attribute_name,
       ALLOCATOR_TAG_RENDERER);
 
-  platform_vertex_attribute_init(
-    vertex_attribute,
-    index,
-    size,
-    data_type,
-    should_normalize,
-    stride,
-    ptr_offset_to_attrib);
+  vertex_attribute_internal_platform_init(
+    out_vertex_attribute,
+    in_index,
+    in_size,
+    in_data_type,
+    in_should_normalize,
+    in_stride,
+    in_ptr_offset_to_attrib);
 }
 
+/*******************************************************************************
+ *
+ *   Function: vertex_attribute_cleanup()
+ *
+ ******************************************************************************/
 void vertex_attribute_cleanup(
-  struct vertex_attribute_t* vertex_attribute,
-  unsigned int num)
+  struct vertex_attribute_t* inout_vertex_attribute,
+  const unsigned int in_num)
 {
-  for (unsigned int i = 0; i < num; i++)
+  for (unsigned int i = 0; i < in_num; i++)
   {
-    allocator_free(vertex_attribute[i].attribute_name);
-    vertex_attribute[i].attribute_name = 0;
+    allocator_free(inout_vertex_attribute[i].attribute_name);
+    inout_vertex_attribute[i].attribute_name = 0;
   }
 }
 
 #ifdef DEBUG
+/*******************************************************************************
+ *
+ *   Function: vertex_attribute_print()
+ *
+ ******************************************************************************/
 void vertex_attribute_print(
-  struct vertex_attribute_t* vertex_attribute)
+  const struct vertex_attribute_t* in_vertex_attribute)
 {
   fprintf(
     stdout,
     "Vertex Attribute - Name: %s, Index: %u, Size: %u, Data Type: %u, "
     "Normalize: %u, Stride: %u\n",
-    vertex_attribute->attribute_name,
-    vertex_attribute->index,
-    vertex_attribute->size,
-    vertex_attribute->data_type,
-    vertex_attribute->should_normalize,
-    vertex_attribute->stride);
+    in_vertex_attribute->attribute_name,
+    in_vertex_attribute->index,
+    in_vertex_attribute->size,
+    in_vertex_attribute->data_type,
+    in_vertex_attribute->should_normalize,
+    in_vertex_attribute->stride);
 }
 #endif

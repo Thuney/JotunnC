@@ -13,6 +13,12 @@
    #include <stdio.h>
 #endif
 
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
+
 // Allocates for FreeType
 //
 //  in:     in_memory, in_size_bytes
@@ -41,8 +47,55 @@ static void* _font_freetype_reallocate(
   long in_new_size_bytes,
   void* inout_block);
 
+// Expands a one-byte-per-pixel grayscale bitmap to RGBA, copying each gray
+//  value into all four channels
+//
+//  in:     in_bitmap_data, in_bitmap_width, in_bitmap_height
+//  ret:    The RGBA pixels, which the caller releases with allocator_free()
+static unsigned char* font_convert_grayscale_to_rgba(
+  const unsigned char* in_bitmap_data,
+  const int in_bitmap_width,
+  const int in_bitmap_height);
+
+// Loads a character's glyph into the typeface's glyph slot and renders it to
+//  a grayscale bitmap there. Errors are logged in DEBUG builds
+//
+//  in:     in_typeface, in_charcode
+//  ret:    0 on success; otherwise the bitwise OR of the FreeType errors from
+//            loading and rendering the glyph
+static int font_typeface_render_char(
+  const struct font_typeface_t* in_typeface,
+  const char in_charcode);
+
+// Copies the glyph just rendered into the atlas bitmap at the pen, fills in
+//  its glyph from the typeface's glyph slot, and advances the pen past it
+//
+//  in:     in_typeface, in_atlas_texture, in_atlas_width, in_atlas_height,
+//            in_pen_y, in_char_code, in_bitmap
+//  in/out: inout_pen_x
+//  out:    out_glyph, out_atlas_bitmap
+//  ret:    0, always
+static int font_typeface_add_bitmap_to_glyph_atlas(
+  const struct font_typeface_t* in_typeface,
+  struct texture_2d_t* in_atlas_texture,
+  struct font_glyph_t* out_glyph,
+  unsigned char* out_atlas_bitmap,
+  const int in_atlas_width,
+  const int in_atlas_height,
+  int* inout_pen_x,
+  const int* in_pen_y,
+  const char in_char_code,
+  const FT_Bitmap* in_bitmap);
+
+// Detaches the glyphs from the glyph atlas and releases the atlas texture
+//
+//  in/out: inout_typeface
+//  ret:    0, always
+static int font_typeface_cleanup_glyph_atlas(
+  struct font_typeface_t* inout_typeface);
+
 static FT_Library font_library;
-static unsigned int freetype_initialized = 0;
+static unsigned int is_freetype_initialized = 0;
 
 // FreeType allocates through Jotunn, so its memory is counted too. It keeps
 //  this for the library's lifetime, so it can't live on the stack
@@ -54,11 +107,16 @@ static struct FT_MemoryRec_ font_freetype_memory =
   .realloc = &(_font_freetype_reallocate)
 };
 
-void font_init()
+/*******************************************************************************
+ *
+ *   Function: font_init()
+ *
+ ******************************************************************************/
+void font_init(void)
 {
   int error;
 
-  if (!freetype_initialized)
+  if (!is_freetype_initialized)
   {
     // What FT_Init_FreeType() does, but with Jotunn's allocator
     error =
@@ -86,16 +144,21 @@ void font_init()
         "Loaded FreeType Library");
          #endif
 
-      freetype_initialized = 1;
+      is_freetype_initialized = 1;
     }
   }
 }
 
-void font_cleanup()
+/*******************************************************************************
+ *
+ *   Function: font_cleanup()
+ *
+ ******************************************************************************/
+void font_cleanup(void)
 {
   int error;
 
-  if (freetype_initialized)
+  if (is_freetype_initialized)
   {
     error = FT_Done_Library(font_library);
 
@@ -113,53 +176,62 @@ void font_cleanup()
         "Cleaning up FreeType Library");
     #endif
 
-      freetype_initialized = 0;
+      is_freetype_initialized = 0;
     }
   }
 }
 
-//
-static unsigned char* grayscale_bitmap_data_to_rgba_texture_data(
-  unsigned char* char_bitmap_data,
-  const int bitmap_width,
-  const int bitmap_height)
+/*******************************************************************************
+ *
+ *   Function: font_convert_grayscale_to_rgba()
+ *
+ ******************************************************************************/
+static unsigned char* font_convert_grayscale_to_rgba(
+  const unsigned char* in_bitmap_data,
+  const int in_bitmap_width,
+  const int in_bitmap_height)
 {
   unsigned char* char_rgba_data =
     (unsigned char*)allocator_allocate_zeroed(
-      (bitmap_height * bitmap_width * 4),
+      (in_bitmap_height * in_bitmap_width * 4),
       sizeof(unsigned char),
       ALLOCATOR_TAG_FONT);
 
   unsigned int i, j, bitmap_i, bitmap_j;
 
-  for (j = 0, bitmap_j = 0; bitmap_j < bitmap_height; j += 4, bitmap_j++)
+  for (j = 0, bitmap_j = 0; bitmap_j < in_bitmap_height; j += 4, bitmap_j++)
   {
-    for (i = 0, bitmap_i = 0; bitmap_i < bitmap_width; i += 4, bitmap_i++)
+    for (i = 0, bitmap_i = 0; bitmap_i < in_bitmap_width; i += 4, bitmap_i++)
     {
       const char char_bitmap_val =
-        char_bitmap_data[bitmap_width * bitmap_j + bitmap_i];
+        in_bitmap_data[in_bitmap_width * bitmap_j + bitmap_i];
 
-      char_rgba_data[bitmap_width * j + i + 0] = char_bitmap_val;
-      char_rgba_data[bitmap_width * j + i + 1] = char_bitmap_val;
-      char_rgba_data[bitmap_width * j + i + 2] = char_bitmap_val;
-      char_rgba_data[bitmap_width * j + i + 3] = char_bitmap_val;
+      char_rgba_data[in_bitmap_width * j + i + 0] = char_bitmap_val;
+      char_rgba_data[in_bitmap_width * j + i + 1] = char_bitmap_val;
+      char_rgba_data[in_bitmap_width * j + i + 2] = char_bitmap_val;
+      char_rgba_data[in_bitmap_width * j + i + 3] = char_bitmap_val;
     }
   }
 
   return char_rgba_data;
 }
 
-static int typeface_render_char(
-  struct typeface_t* typeface,
-  const char charcode)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_render_char()
+ *
+ ******************************************************************************/
+static int font_typeface_render_char(
+  const struct font_typeface_t* in_typeface,
+  const char in_charcode)
 {
   int error = 0;
 
   FT_UInt glyph_index = 0;
 
-  glyph_index = FT_Get_Char_Index(typeface->typeface, charcode);
+  glyph_index = FT_Get_Char_Index(in_typeface->typeface, in_charcode);
 
-  error |= FT_Load_Glyph(typeface->typeface, glyph_index, FT_LOAD_DEFAULT);
+  error |= FT_Load_Glyph(in_typeface->typeface, glyph_index, FT_LOAD_DEFAULT);
 
 #ifdef DEBUG
   if (error)
@@ -167,12 +239,12 @@ static int typeface_render_char(
     log_write(
       LOG_LEVEL_ERROR,
       "Error loading glyph '%c' - glyph_index = %u",
-      charcode,
+      in_charcode,
       glyph_index);
   }
 #endif
 
-  error |= FT_Render_Glyph(typeface->typeface->glyph, FT_RENDER_MODE_NORMAL);
+  error |= FT_Render_Glyph(in_typeface->typeface->glyph, FT_RENDER_MODE_NORMAL);
 
 #ifdef DEBUG
   if (error)
@@ -180,7 +252,7 @@ static int typeface_render_char(
     log_write(
       LOG_LEVEL_ERROR,
       "Error rendering glyph for char '%c' - glyph_index = %u",
-      charcode,
+      in_charcode,
       glyph_index);
   }
 #endif
@@ -188,96 +260,109 @@ static int typeface_render_char(
   return error;
 }
 
-static int typeface_add_bitmap_to_glyph_atlas(
-  struct typeface_t* typeface,
-  struct texture_2d_t* ptr_texture_atlas_texture,
-  struct glyph_t* char_glyph_info,
-  unsigned char* texture_atlas_data_bitmap,
-  const int texture_atlas_width,
-  const int texture_atlas_height,
-  int* pen_x,
-  int* pen_y,
-  const char char_code,
-  const FT_Bitmap* char_bitmap)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_add_bitmap_to_glyph_atlas()
+ *
+ ******************************************************************************/
+static int font_typeface_add_bitmap_to_glyph_atlas(
+  const struct font_typeface_t* in_typeface,
+  struct texture_2d_t* in_atlas_texture,
+  struct font_glyph_t* out_glyph,
+  unsigned char* out_atlas_bitmap,
+  const int in_atlas_width,
+  const int in_atlas_height,
+  int* inout_pen_x,
+  const int* in_pen_y,
+  const char in_char_code,
+  const FT_Bitmap* in_bitmap)
 {
   int error = 0;
 
   int row, col;
-  for (row = 0; row < char_bitmap->rows; ++row)
+  for (row = 0; row < in_bitmap->rows; ++row)
   {
-    for (col = 0; col < char_bitmap->width; ++col)
+    for (col = 0; col < in_bitmap->width; ++col)
     {
-      const int x = (*pen_x) + col;
-      const int y = (*pen_y) + row;
+      const int x = (*inout_pen_x) + col;
+      const int y = (*in_pen_y) + row;
 
-      texture_atlas_data_bitmap[(y * texture_atlas_width) + x] =
-        char_bitmap->buffer[(row * char_bitmap->pitch) + col];
+      out_atlas_bitmap[(y * in_atlas_width) + x] =
+        in_bitmap->buffer[(row * in_bitmap->pitch) + col];
     }
   }
 
-  char_glyph_info->character_representation = char_code;
-  char_glyph_info->width = char_bitmap->width;
-  char_glyph_info->height = char_bitmap->rows;
-  char_glyph_info->offset_x = typeface->typeface->glyph->bitmap_left;
-  char_glyph_info->offset_y =
-    (char_bitmap->rows - typeface->typeface->glyph->bitmap_top);
-  char_glyph_info->advance_x = (typeface->typeface->glyph->advance.x >> 6);
+  out_glyph->character_representation = in_char_code;
+  out_glyph->width_pixels = in_bitmap->width;
+  out_glyph->height_pixels = in_bitmap->rows;
+  out_glyph->offset_x_pixels = in_typeface->typeface->glyph->bitmap_left;
+  out_glyph->offset_y_pixels =
+    (in_bitmap->rows - in_typeface->typeface->glyph->bitmap_top);
+  out_glyph->advance_x_pixels = (in_typeface->typeface->glyph->advance.x >> 6);
 
   // Compute texture coordinates for glyph on atlas (in range [0.0f, 1.0f])
   {
     float x0, y0, x1, y1;
 
-    x0 = ((float)(*pen_x) / (float)texture_atlas_width);
-    y0 = ((float)(*pen_y) / (float)texture_atlas_height);
+    x0 = ((float)(*inout_pen_x) / (float)in_atlas_width);
+    y0 = ((float)(*in_pen_y) / (float)in_atlas_height);
 
-    x1 = ((float)((*pen_x) + char_bitmap->width) / (float)texture_atlas_width);
-    y1 = ((float)((*pen_y) + char_bitmap->rows) / (float)texture_atlas_height);
+    x1 = ((float)((*inout_pen_x) + in_bitmap->width) / (float)in_atlas_width);
+    y1 = ((float)((*in_pen_y) + in_bitmap->rows) / (float)in_atlas_height);
 
-    char_glyph_info->glyph_texture =
-      (struct subtexture_2d_t){.parent_texture = ptr_texture_atlas_texture,
+    out_glyph->glyph_texture =
+      (struct texture_2d_subtexture_t){.parent_texture = in_atlas_texture,
                                .subtexture_coordinates = {{x0, y0}, {x1, y1}}};
   }
 
-  (*pen_x) += (char_bitmap->width + 1);
+  (*inout_pen_x) += (in_bitmap->width + 1);
 
   return error;
 }
 
-static int typeface_cleanup_glyph_atlas(
-  struct typeface_t* typeface)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_cleanup_glyph_atlas()
+ *
+ ******************************************************************************/
+static int font_typeface_cleanup_glyph_atlas(
+  struct font_typeface_t* inout_typeface)
 {
   int error = 0;
 
-  struct glyph_t* glyph;
+  struct font_glyph_t* glyph;
 
   unsigned int i;
   for (i = 0; i < _FONT_LOADED_GLYPHS_STRING_LEN; i++)
   {
-    glyph = &typeface->glyphs[i];
+    glyph = &inout_typeface->glyphs[i];
 
     glyph->glyph_texture.parent_texture = 0;
   }
 
-  if (typeface->glyph_atlas.is_loaded)
+  if (inout_typeface->glyph_atlas.is_loaded)
   {
-    texture_2d_cleanup(&(typeface->glyph_atlas));
+    texture_2d_cleanup(&(inout_typeface->glyph_atlas));
   }
 
   return error;
 }
 
-//
-
-void typeface_init(
-  struct typeface_t* typeface,
-  const char* ttf_file_path,
-  const unsigned int size_points)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_init()
+ *
+ ******************************************************************************/
+void font_typeface_init(
+  struct font_typeface_t* out_typeface,
+  const char* in_ttf_file_path,
+  const unsigned int in_size_pixels)
 {
   int error = 0;
 
-  if (freetype_initialized)
+  if (is_freetype_initialized)
   {
-    error |= FT_New_Face(font_library, ttf_file_path, 0, &typeface->typeface);
+    error |= FT_New_Face(font_library, in_ttf_file_path, 0, &out_typeface->typeface);
 
   #ifdef DEBUG
     if (error == FT_Err_Unknown_File_Format)
@@ -304,24 +389,29 @@ void typeface_init(
       //    fprintf(stdout, "Num Fixed Sizes = %u\n", typeface->typeface->num_fixed_sizes);
       // #endif
 
-      typeface_set_char_size(typeface, size_points);
-      error |= typeface_load_glyph_atlas(typeface);
+      font_typeface_set_char_size(out_typeface, in_size_pixels);
+      error |= font_typeface_load_glyph_atlas(out_typeface);
 
       if (!error)
-        typeface->is_loaded = 1;
+        out_typeface->is_loaded = 1;
     }
   }
 }
 
-void typeface_cleanup(
-  struct typeface_t* typeface)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_cleanup()
+ *
+ ******************************************************************************/
+void font_typeface_cleanup(
+  struct font_typeface_t* inout_typeface)
 {
   int error = 0;
 
-  if (freetype_initialized && typeface->is_loaded)
+  if (is_freetype_initialized && inout_typeface->is_loaded)
   {
-    error |= typeface_cleanup_glyph_atlas(typeface);
-    error |= FT_Done_Face(typeface->typeface);
+    error |= font_typeface_cleanup_glyph_atlas(inout_typeface);
+    error |= FT_Done_Face(inout_typeface->typeface);
 
     if (!error)
     {
@@ -331,19 +421,24 @@ void typeface_cleanup(
         "Cleaning up TypeFace");
     #endif
 
-      typeface->is_loaded = 0;
+      inout_typeface->is_loaded = 0;
     }
   }
 }
 
-int typeface_load_glyph_atlas(
-  struct typeface_t* typeface)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_load_glyph_atlas()
+ *
+ ******************************************************************************/
+int font_typeface_load_glyph_atlas(
+  struct font_typeface_t* inout_typeface)
 {
   int error = 0;
 
   // Guess at the dimension of the texture atlas
   const int glyph_height_estimate =
-    ((typeface->typeface->size->metrics.height >> 6) + 1);
+    ((inout_typeface->typeface->size->metrics.height >> 6) + 1);
   const int max_dimension =
     (glyph_height_estimate)*ceilf(sqrtf(_FONT_LOADED_GLYPHS_STRING_LEN));
 
@@ -353,8 +448,8 @@ int typeface_load_glyph_atlas(
       1; // Starting at 1, multiply width by 2 until we exceed our guess
   int texture_atlas_height = texture_atlas_width;
 
-  struct texture_2d_t* texture_atlas_texture = &(typeface->glyph_atlas);
-  struct glyph_t* texture_atlas_glyphs = &(typeface->glyphs[0]);
+  struct texture_2d_t* texture_atlas_texture = &(inout_typeface->glyph_atlas);
+  struct font_glyph_t* texture_atlas_glyphs = &(inout_typeface->glyphs[0]);
 
   unsigned char* pixel_data_bitmap =
     (unsigned char*)allocator_allocate_zeroed(
@@ -371,9 +466,9 @@ int typeface_load_glyph_atlas(
   {
     cur_char = _FONT_LOADED_GLYPHS_STRING[i];
     error |=
-      typeface_render_char(typeface, cur_char); // Load glyph into glyph slot
+      font_typeface_render_char(inout_typeface, cur_char); // Load glyph into glyph slot
 
-    char_bitmap = &(typeface->typeface->glyph->bitmap);
+    char_bitmap = &(inout_typeface->typeface->glyph->bitmap);
 
     if (pen_x + char_bitmap->width >= texture_atlas_width)
     {
@@ -381,8 +476,8 @@ int typeface_load_glyph_atlas(
       pen_y += glyph_height_estimate;
     }
 
-    typeface_add_bitmap_to_glyph_atlas(
-      typeface,
+    font_typeface_add_bitmap_to_glyph_atlas(
+      inout_typeface,
       texture_atlas_texture,
       &(texture_atlas_glyphs[i]),
       pixel_data_bitmap,
@@ -394,7 +489,7 @@ int typeface_load_glyph_atlas(
       char_bitmap);
   }
 
-  unsigned char* pixel_data_rgba = grayscale_bitmap_data_to_rgba_texture_data(
+  unsigned char* pixel_data_rgba = font_convert_grayscale_to_rgba(
     pixel_data_bitmap, texture_atlas_width, texture_atlas_height);
 
   texture_2d_init(
@@ -418,24 +513,29 @@ int typeface_load_glyph_atlas(
   return error;
 }
 
-const struct glyph_t* typeface_get_glyph_from_char(
-  const struct typeface_t* typeface,
-  const char charcode)
+/*******************************************************************************
+ *
+ *   Function: typeface_get_glyph_from_char()
+ *
+ ******************************************************************************/
+const struct font_glyph_t* typeface_get_glyph_from_char(
+  const struct font_typeface_t* in_typeface,
+  const char in_charcode)
 {
-  const struct glyph_t* char_glyph;
+  const struct font_glyph_t* char_glyph;
 
-  if (typeface->is_loaded)
+  if (in_typeface->is_loaded)
   {
     const unsigned int is_char_code_in_loaded_range =
-      (charcode >= _FONT_LOADED_GLYPHS_FIRST_CHARACTER &&
-       charcode <= _FONT_LOADED_GLYPHS_LAST_CHARACTER);
+      (in_charcode >= _FONT_LOADED_GLYPHS_FIRST_CHARACTER &&
+       in_charcode <= _FONT_LOADED_GLYPHS_LAST_CHARACTER);
     if (is_char_code_in_loaded_range)
     {
       const unsigned int index =
-        ((const unsigned int)charcode -
+        ((const unsigned int)in_charcode -
          (const unsigned int)_FONT_LOADED_GLYPHS_FIRST_CHARACTER);
 
-      char_glyph = &(typeface->glyphs[index]);
+      char_glyph = &(in_typeface->glyphs[index]);
     }
   #ifdef DEBUG
     else
@@ -450,32 +550,42 @@ const struct glyph_t* typeface_get_glyph_from_char(
   return char_glyph;
 }
 
-void typeface_set_char_size(
-  const struct typeface_t* typeface,
-  const unsigned int char_height_points)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_set_char_size()
+ *
+ ******************************************************************************/
+void font_typeface_set_char_size(
+  const struct font_typeface_t* in_typeface,
+  const unsigned int in_char_height_pixels)
 {
-  int error = FT_Set_Pixel_Sizes(typeface->typeface, 0, char_height_points);
+  int error = FT_Set_Pixel_Sizes(in_typeface->typeface, 0, in_char_height_pixels);
 }
 
-fvector2 typeface_calculate_string_dimensions(
-  const struct typeface_t* typeface,
-  const char* string,
-  int string_length)
+/*******************************************************************************
+ *
+ *   Function: font_typeface_calculate_string_dimensions()
+ *
+ ******************************************************************************/
+union fvector2_t font_typeface_calculate_string_dimensions(
+  const struct font_typeface_t* in_typeface,
+  const char* in_string,
+  const int in_string_length)
 {
-  static fvector2 string_dimensions;
-  string_dimensions = (fvector2){0.0f, 0.0f};
+  static union fvector2_t string_dimensions;
+  string_dimensions = (union fvector2_t){0.0f, 0.0f};
 
-  for (int i = 0; i < string_length; i++)
+  for (int i = 0; i < in_string_length; i++)
   {
-    char c = string[i];
+    char c = in_string[i];
 
-    const struct glyph_t* glyph = typeface_get_glyph_from_char(typeface, c);
+    const struct font_glyph_t* glyph = typeface_get_glyph_from_char(in_typeface, c);
 
-    string_dimensions.comp.x += (glyph->advance_x);
+    string_dimensions.comp.x += (glyph->advance_x_pixels);
 
-    if (glyph->height > string_dimensions.comp.y)
+    if (glyph->height_pixels > string_dimensions.comp.y)
     {
-      string_dimensions.comp.y = glyph->height;
+      string_dimensions.comp.y = glyph->height_pixels;
     }
   }
 

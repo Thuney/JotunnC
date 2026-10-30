@@ -1,65 +1,36 @@
 #include "render_api.h"
+#include "render_api_internal.h"
 
 #include "../../diagnostics/diagnostics_internal.h"
 
-extern void platform_render_api_init(struct render_api_implementation_t* render_api);
-extern bool platform_render_api_has_timestamps(void);
-extern void platform_render_api_create_timestamps(
-  uint32_t* out_names,
-  const uint32_t in_count);
-extern void platform_render_api_delete_timestamps(
-  const uint32_t* in_names,
-  const uint32_t in_count);
-extern void platform_render_api_record_timestamp(
-  const uint32_t in_name);
-extern bool platform_render_api_read_timestamp(
-  const uint32_t in_name,
-  uint64_t* out_time_nanoseconds);
-extern void platform_render_api_bind(struct render_api_implementation_t* render_api);
-extern void platform_render_api_clear(struct render_api_implementation_t* render_api);
-// Restricts drawing to the implementation's scissor rectangle when it is
-//  enabled, and lifts the restriction otherwise
-//
-//  in:     in_render_api
-extern void platform_render_api_apply_scissor(
-  const struct render_api_implementation_t* in_render_api);
-
-extern void platform_render_api_draw_elements(
-  enum render_api_draw_mode_t draw_mode,
-  unsigned int element_count,
-  const enum render_api_element_data_type_t element_data_type,
-  const void* indices);
-extern void platform_render_api_draw_elements_base_vertex(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const uint32_t in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
-  const uintptr_t in_index_offset_bytes,
-  const int32_t in_base_vertex);
-extern void platform_render_api_draw_triangle_fan(unsigned int vertex_count);
-extern void platform_render_api_draw_lines(unsigned int vertex_count);
-
-extern void platform_render_api_set_line_width(const float width);
-
-//
-
+/*******************************************************************************
+ *
+ *   Function: render_api_init()
+ *
+ ******************************************************************************/
 void render_api_init(
-  struct render_api_implementation_t* render_api,
-  const uint16_t render_flags)
+  struct render_api_implementation_t* out_render_api,
+  const uint16_t in_render_flags)
 {
-  render_api->active_render_flags = render_flags;
-  render_api->blend_mode = RENDER_API_BLEND_MODE_ALPHA;
-  fvector4_init(&(render_api->clear_color));
-  render_api->scissor =
+  out_render_api->active_render_flags = in_render_flags;
+  out_render_api->blend_mode = RENDER_API_BLEND_MODE_ALPHA;
+  fvector4_init(&(out_render_api->clear_color));
+  out_render_api->scissor =
     (struct render_api_scissor_t){
       .is_enabled = false};
 
-  platform_render_api_init(render_api);
+  render_api_internal_platform_init(out_render_api);
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_bind()
+ *
+ ******************************************************************************/
 void render_api_bind(
-  struct render_api_implementation_t* render_api)
+  const struct render_api_implementation_t* in_render_api)
 {
-  platform_render_api_bind(render_api);
+  render_api_internal_platform_bind(in_render_api);
 }
 
 /*******************************************************************************
@@ -93,27 +64,37 @@ void render_api_set_blend_mode(
  ******************************************************************************/
 void render_api_set_clear_color(
   struct render_api_implementation_t* inout_render_api,
-  const fvector4 in_color)
+  const union fvector4_t in_color)
 {
   inout_render_api->clear_color = in_color;
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_clear()
+ *
+ ******************************************************************************/
 void render_api_clear(
-  struct render_api_implementation_t* render_api)
+  const struct render_api_implementation_t* in_render_api)
 {
-  platform_render_api_clear(render_api);
+  render_api_internal_platform_clear(in_render_api);
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_draw_elements()
+ *
+ ******************************************************************************/
 void render_api_draw_elements(
-  enum render_api_draw_mode_t draw_mode,
-  unsigned int element_count,
-  const enum render_api_element_data_type_t element_data_type,
-  const void* indices)
+  const enum render_api_draw_mode_t in_draw_mode,
+  const unsigned int in_element_count,
+  const enum render_api_element_data_type_t in_element_data_type,
+  const void* in_indices)
 {
-  platform_render_api_draw_elements(
-    draw_mode, element_count, element_data_type, indices);
+  render_api_internal_platform_draw_elements(
+    in_draw_mode, in_element_count, in_element_data_type, in_indices);
 
-  diagnostics_internal_count_draw(element_count);
+  diagnostics_internal_count_draw(in_element_count);
 }
 
 /*******************************************************************************
@@ -136,7 +117,7 @@ void render_api_set_scissor(
       .width_pixels = in_width_pixels,
       .height_pixels = in_height_pixels};
 
-  platform_render_api_apply_scissor(inout_render_api);
+  render_api_internal_platform_apply_scissor(inout_render_api);
 }
 
 /*******************************************************************************
@@ -149,7 +130,7 @@ void render_api_disable_scissor(
 {
   inout_render_api->scissor.is_enabled = false;
 
-  platform_render_api_apply_scissor(inout_render_api);
+  render_api_internal_platform_apply_scissor(inout_render_api);
 }
 
 /*******************************************************************************
@@ -164,7 +145,7 @@ void render_api_draw_elements_base_vertex(
   const uintptr_t in_index_offset_bytes,
   const int32_t in_base_vertex)
 {
-  platform_render_api_draw_elements_base_vertex(
+  render_api_internal_platform_draw_elements_base_vertex(
     in_draw_mode,
     in_element_count,
     in_element_data_type,
@@ -174,26 +155,41 @@ void render_api_draw_elements_base_vertex(
   diagnostics_internal_count_draw(in_element_count);
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_draw_triangle_fan()
+ *
+ ******************************************************************************/
 void render_api_draw_triangle_fan(
-  unsigned int vertex_count)
+  const unsigned int in_vertex_count)
 {
-  platform_render_api_draw_triangle_fan(vertex_count);
+  render_api_internal_platform_draw_triangle_fan(in_vertex_count);
 
-  diagnostics_internal_count_draw(vertex_count);
+  diagnostics_internal_count_draw(in_vertex_count);
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_draw_lines()
+ *
+ ******************************************************************************/
 void render_api_draw_lines(
-  unsigned int vertex_count)
+  const unsigned int in_vertex_count)
 {
-  platform_render_api_draw_lines(vertex_count);
+  render_api_internal_platform_draw_lines(in_vertex_count);
 
-  diagnostics_internal_count_draw(vertex_count);
+  diagnostics_internal_count_draw(in_vertex_count);
 }
 
+/*******************************************************************************
+ *
+ *   Function: render_api_set_line_width()
+ *
+ ******************************************************************************/
 void render_api_set_line_width(
-  const float width)
+  const float in_line_width_pixels)
 {
-  platform_render_api_set_line_width(width);
+  render_api_internal_platform_set_line_width(in_line_width_pixels);
 }
 
 /*******************************************************************************
@@ -203,7 +199,7 @@ void render_api_set_line_width(
  ******************************************************************************/
 bool render_api_has_timestamps(void)
 {
-  return platform_render_api_has_timestamps();
+  return render_api_internal_platform_has_timestamps();
 }
 
 /*******************************************************************************
@@ -215,7 +211,7 @@ void render_api_create_timestamps(
   uint32_t* out_names,
   const uint32_t in_count)
 {
-  platform_render_api_create_timestamps(
+  render_api_internal_platform_create_timestamps(
     out_names,
     in_count);
 }
@@ -229,7 +225,7 @@ void render_api_delete_timestamps(
   const uint32_t* in_names,
   const uint32_t in_count)
 {
-  platform_render_api_delete_timestamps(
+  render_api_internal_platform_delete_timestamps(
     in_names,
     in_count);
 }
@@ -242,7 +238,7 @@ void render_api_delete_timestamps(
 void render_api_record_timestamp(
   const uint32_t in_name)
 {
-  platform_render_api_record_timestamp(in_name);
+  render_api_internal_platform_record_timestamp(in_name);
 }
 
 /*******************************************************************************
@@ -254,7 +250,7 @@ bool render_api_read_timestamp(
   const uint32_t in_name,
   uint64_t* out_time_nanoseconds)
 {
-  return platform_render_api_read_timestamp(
+  return render_api_internal_platform_read_timestamp(
     in_name,
     out_time_nanoseconds);
 }

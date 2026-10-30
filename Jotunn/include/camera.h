@@ -1,39 +1,54 @@
 #pragma once
 
+// Cameras hold the view and projection matrices a renderer draws through. An
+//  orthographic or perspective camera embeds camera_base_t as its first
+//  member; an unprojected camera is a bare camera_base_t, with identity
+//  matrices
+
 #include "fmatrix.h"
 #include "fquaternion.h"
 #include "fvector.h"
 
+/*******************************************************************************
+ *
+ *   TYPES
+ *
+ ******************************************************************************/
+
+// The kind of camera, and so the struct that embeds its camera_base_t
 enum camera_projection_t
 {
-  CAMERA_ORTHOGRAPHIC,
-  CAMERA_PERSPECTIVE,
-  CAMERA_UNPROJECTED
+  CAMERA_PROJECTION_ORTHOGRAPHIC,
+  CAMERA_PROJECTION_PERSPECTIVE,
+  CAMERA_PROJECTION_UNPROJECTED
 };
 
 struct camera_base_t
 {
   enum camera_projection_t projection_type;
 
-  fmatrix_4x4 projection_matrix;
-  fmatrix_4x4 view_matrix;
-  fmatrix_4x4 view_projection_matrix;
+  union fmatrix_4x4_t projection_matrix;
+  union fmatrix_4x4_t view_matrix;
+  union fmatrix_4x4_t view_projection_matrix;
 
-  fvector3 position;
-  fvector3 up;
-  fvector3 front;
+  union fvector3_t position;
+  union fvector3_t up;
+  union fvector3_t front;
 
   float near_plane;
   float far_plane;
-  //
-  void (*camera_reproject)(struct camera_base_t* camera,
-                           float window_width,
-                           float window_height,
-                           float near_plane,
-                           float far_plane);
+  // Fits the projection to a window of the given size, with the given clip
+  //  planes: an orthographic camera maps the window with its origin at the
+  //  bottom-left, and a perspective camera takes its aspect ratio; an
+  //  unprojected camera is left as it is. Set by the init functions
+  void (*function_reproject)(struct camera_base_t* inout_camera,
+                           const float in_window_width,
+                           const float in_window_height,
+                           const float in_near_plane,
+                           const float in_far_plane);
 };
 
-struct camera_ortho_t
+struct camera_orthographic_t
 {
   struct camera_base_t base;
   //
@@ -50,33 +65,108 @@ struct camera_perspective_t
   float aspect_ratio;
 };
 
-void camera_init_unprojected(struct camera_base_t* camera);
-void camera_init_orthographic(
-  struct camera_ortho_t* camera,
-  const fvector3 position,
-  const fvector3 up,
-  const fvector3 front);
-void camera_init_perspective(
-  struct camera_perspective_t* camera,
-  const fvector3 position,
-  const fvector3 up,
-  const fvector3 front);
+/*******************************************************************************
+ *
+ *   INITIALIZATION
+ *
+ ******************************************************************************/
 
-void camera_set_projection_orthographic(
-  struct camera_ortho_t* ortho_camera,
-  const float left,
-  const float right,
-  const float top,
-  const float bottom,
-  const float near_plane,
-  const float far_plane);
-void camera_set_projection_perspective(
-  struct camera_perspective_t* perspective_camera,
-  const float aspect_ratio,
-  const float near_plane,
-  const float far_plane);
+// Sets up a camera with no projection, whose matrices are all identity. Its
+//  position, orientation and clip planes are left unset
+//
+//  out:    out_camera
+void camera_unprojected_init(
+  struct camera_base_t* out_camera);
 
-void camera_recalculate_view_projection_matrix(struct camera_base_t* camera);
-fvector3 camera_get_front_vector(struct camera_base_t* camera);
-fvector3 camera_get_left_vector(struct camera_base_t* camera);
-fvector3 camera_get_up_vector(struct camera_base_t* camera);
+// Sets up an orthographic camera's view, at in_position looking along
+//  in_front with in_up as up. Its projection is identity until
+//  camera_orthographic_set_projection(), which must be called before the
+//  camera is reprojected
+//
+//  in:     in_position, in_up, in_front
+//  out:    out_camera
+void camera_orthographic_init(
+  struct camera_orthographic_t* out_camera,
+  const union fvector3_t in_position,
+  const union fvector3_t in_up,
+  const union fvector3_t in_front);
+
+// Sets up a perspective camera's view, at in_position looking along in_front
+//  with in_up as up. Its projection is identity until
+//  camera_perspective_set_projection(), which must be called before the
+//  camera is reprojected
+//
+//  in:     in_position, in_up, in_front
+//  out:    out_camera
+void camera_perspective_init(
+  struct camera_perspective_t* out_camera,
+  const union fvector3_t in_position,
+  const union fvector3_t in_up,
+  const union fvector3_t in_front);
+
+/*******************************************************************************
+ *
+ *   PROJECTION
+ *
+ ******************************************************************************/
+
+// Gives an orthographic camera a projection mapping the box between the given
+//  edges and clip planes to clip space, and updates its view-projection
+//  matrix
+//
+//  in:     in_left, in_right, in_top, in_bottom, in_near_plane, in_far_plane
+//  in/out: inout_camera
+void camera_orthographic_set_projection(
+  struct camera_orthographic_t* inout_camera,
+  const float in_left,
+  const float in_right,
+  const float in_top,
+  const float in_bottom,
+  const float in_near_plane,
+  const float in_far_plane);
+
+// Records a perspective camera's aspect ratio and clip planes, and updates its
+//  view-projection matrix. Not finished: the projection matrix is set to all
+//  zeros
+//
+//  in:     in_aspect_ratio, in_near_plane, in_far_plane
+//  in/out: inout_camera
+void camera_perspective_set_projection(
+  struct camera_perspective_t* inout_camera,
+  const float in_aspect_ratio,
+  const float in_near_plane,
+  const float in_far_plane);
+
+// Recomputes a camera's view-projection matrix from its view and projection
+//  matrices, after either has changed
+//
+//  in/out: inout_camera
+void camera_recalculate_view_projection_matrix(
+  struct camera_base_t* inout_camera);
+
+/*******************************************************************************
+ *
+ *   ORIENTATION
+ *
+ ******************************************************************************/
+
+// Gets the direction a camera faces
+//
+//  in:     in_camera
+//  ret:    The zero vector
+union fvector3_t camera_get_front_vector(
+  const struct camera_base_t* in_camera);
+
+// Gets the direction to a camera's left
+//
+//  in:     in_camera
+//  ret:    The zero vector
+union fvector3_t camera_get_left_vector(
+  const struct camera_base_t* in_camera);
+
+// Gets the direction above a camera
+//
+//  in:     in_camera
+//  ret:    The zero vector
+union fvector3_t camera_get_up_vector(
+  const struct camera_base_t* in_camera);

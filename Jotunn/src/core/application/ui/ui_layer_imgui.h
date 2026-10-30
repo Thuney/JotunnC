@@ -19,14 +19,14 @@ struct ui_layer_t;
 //  layer's ui_layer_data
 //
 //  in/out: inout_ui_layer
-void ui_layer_imgui_init(
+void ui_layer_internal_imgui_init(
   struct ui_layer_t* inout_ui_layer);
 
 // Releases the layer's ImGui textures and destroys its contexts. The parent
 //  window's graphics context must be current
 //
 //  in/out: inout_ui_layer
-void ui_layer_imgui_cleanup(
+void ui_layer_internal_imgui_cleanup(
   struct ui_layer_t* inout_ui_layer);
 
 /*******************************************************************************
@@ -36,17 +36,17 @@ void ui_layer_imgui_cleanup(
  ******************************************************************************/
 
 // Starts an ImGui frame; ig*, ImPlot_* and imnodes_* calls may follow until
-//  ui_layer_imgui_frame_end()
+//  ui_layer_internal_imgui_frame_end()
 //
 //  in/out: inout_ui_layer
-void ui_layer_imgui_frame_begin(
+void ui_layer_internal_imgui_frame_begin(
   struct ui_layer_t* inout_ui_layer);
 
 // Ends the ImGui frame and draws it through the layer's renderer_2d, which
 //  must be within a scene
 //
 //  in/out: inout_ui_layer
-void ui_layer_imgui_frame_end(
+void ui_layer_internal_imgui_frame_end(
   struct ui_layer_t* inout_ui_layer);
 
 /*******************************************************************************
@@ -61,6 +61,6 @@ void ui_layer_imgui_frame_end(
 //  in/out: inout_ui_layer
 //  ret:    true when ImGui wants exclusive use of the event's input device,
 //            the mouse or the keyboard; otherwise false
-bool ui_layer_imgui_event_react(
+bool ui_layer_internal_imgui_event_react(
   struct ui_layer_t* inout_ui_layer,
   const struct event_base_t* in_event);

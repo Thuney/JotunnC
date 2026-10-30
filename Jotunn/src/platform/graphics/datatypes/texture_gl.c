@@ -1,82 +1,142 @@
 #include "texture.h"
 #include "log.h"
 
+#include "../../../core/graphics/datatypes/texture_internal.h"
+
 #include <GL/glew.h>
 
 #ifdef DEBUG
   #include <stdio.h>
   #include <stdarg.h>
-
-  static void gl_error_check(
-    const char* success_string,
-    const char* error_string,
-    ...);
 #endif
 
-static GLenum gl_get_texture_data_format(
-  enum texture_2d_data_format_t data_format);
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
 
-static GLenum gl_get_texture_internal_format(
-  enum texture_2d_internal_format_t internal_format);
+// Takes OpenGL's pending error, clearing it. In DEBUG builds, logs
+//  in_success_string at debug level when there was none, and otherwise
+//  in_error_string and the error code at error level, formatting either with
+//  the remaining arguments. Its calls are all commented out at present
+//
+//  in:     in_success_string, in_error_string
+static void texture_gl_check_error(
+  const char* in_success_string,
+  const char* in_error_string,
+  ...);
 
-static void gl_texture_2d_init(
-  struct texture_2d_t* texture,
-  bool wrap);
+// Translates a texture data format to OpenGL's. The integer formats map to
+//  the plain ones, as every upload is of unsigned bytes
+//
+//  in:     in_data_format
+//  ret:    The OpenGL format; GL_INVALID_ENUM for an unknown one
+static GLenum texture_gl_get_data_format(
+  const enum texture_2d_data_format_t in_data_format);
 
-static void gl_texture_2d_cleanup(
-  struct texture_2d_t* texture);
+// Translates a texture internal format to OpenGL's
+//
+//  in:     in_internal_format
+//  ret:    The OpenGL format; GL_INVALID_ENUM for an unknown one
+static GLenum texture_gl_get_internal_format(
+  const enum texture_2d_internal_format_t in_internal_format);
 
-static void gl_texture_2d_bind(
-  const struct texture_2d_t* texture,
-  const unsigned int texture_slot);
+// Generates a texture, binds it to the active unit and to unit 0, sets linear
+//  filtering, and allocates its storage at the size and formats set in it
+//
+//  in:     in_should_wrap
+//  in/out: inout_texture
+static void texture_2d_gl_init(
+  struct texture_2d_t* inout_texture,
+  const bool in_should_wrap);
 
-static void gl_texture_2d_set_data(
-  const struct texture_2d_t* texture,
-  void* data,
-  const unsigned int data_size_bytes);
+// Deletes a texture
+//
+//  in:     in_texture
+static void texture_2d_gl_cleanup(
+  const struct texture_2d_t* in_texture);
 
-static void gl_texture_2d_resize(
-  struct texture_2d_t* texture,
-  const int new_width,
-  const int new_height);
+// Binds a texture to a texture unit
+//
+//  in:     in_texture, in_texture_slot
+static void texture_2d_gl_bind(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_texture_slot);
 
-// -----------------------------------------------------------------------------
+// Uploads the whole of a texture's pixels; in_data_size_bytes isn't used
+//
+//  in:     in_texture, in_data, in_data_size_bytes
+static void texture_2d_gl_set_data(
+  const struct texture_2d_t* in_texture,
+  const void* in_data,
+  const unsigned int in_data_size_bytes);
 
-void platform_texture_2d_init(
-  struct texture_2d_t* texture,
-  bool wrap)
+// Reallocates whichever texture is bound to the active unit at the size and
+//  formats set in in_texture; in_new_width_pixels and in_new_height_pixels
+//  aren't used
+//
+//  in:     in_texture, in_new_width_pixels, in_new_height_pixels
+static void texture_2d_gl_resize(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_new_width_pixels,
+  const unsigned int in_new_height_pixels);
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_internal_platform_init()
+ *
+ ******************************************************************************/
+void texture_2d_internal_platform_init(
+  struct texture_2d_t* inout_texture,
+  const bool in_should_wrap)
 {
-  gl_texture_2d_init(texture, wrap);
-}
-
-void platform_texture_2d_resize(
-  struct texture_2d_t* texture,
-  const int new_width,
-  const int new_height)
-{
-  gl_texture_2d_resize(texture, new_width, new_height);
-}
-
-void platform_texture_2d_cleanup(
-  struct texture_2d_t* texture)
-{
-  gl_texture_2d_cleanup(texture);
-}
-
-void platform_texture_2d_set_data(
-  const struct texture_2d_t* texture,
-  void* data,
-  const unsigned int data_size_bytes)
-{
-  gl_texture_2d_set_data(texture, data, data_size_bytes);
+  texture_2d_gl_init(inout_texture, in_should_wrap);
 }
 
 /*******************************************************************************
  *
- *   Function: platform_texture_2d_set_sub_data()
+ *   Function: texture_2d_internal_platform_resize()
  *
  ******************************************************************************/
-void platform_texture_2d_set_sub_data(
+void texture_2d_internal_platform_resize(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_new_width_pixels,
+  const unsigned int in_new_height_pixels)
+{
+  texture_2d_gl_resize(in_texture, in_new_width_pixels, in_new_height_pixels);
+}
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_internal_platform_cleanup()
+ *
+ ******************************************************************************/
+void texture_2d_internal_platform_cleanup(
+  const struct texture_2d_t* in_texture)
+{
+  texture_2d_gl_cleanup(in_texture);
+}
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_internal_platform_set_data()
+ *
+ ******************************************************************************/
+void texture_2d_internal_platform_set_data(
+  const struct texture_2d_t* in_texture,
+  const void* in_data,
+  const unsigned int in_data_size_bytes)
+{
+  texture_2d_gl_set_data(in_texture, in_data, in_data_size_bytes);
+}
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_internal_platform_set_sub_data()
+ *
+ ******************************************************************************/
+void texture_2d_internal_platform_set_sub_data(
   const struct texture_2d_t* in_texture,
   const uint32_t in_x_pixels,
   const uint32_t in_y_pixels,
@@ -96,7 +156,7 @@ void platform_texture_2d_set_sub_data(
     (GLint)in_y_pixels,
     (GLsizei)in_width_pixels,
     (GLsizei)in_height_pixels,
-    gl_get_texture_data_format(in_texture->data_format),
+    texture_gl_get_data_format(in_texture->data_format),
     GL_UNSIGNED_BYTE,
     in_data);
 
@@ -106,18 +166,26 @@ void platform_texture_2d_set_sub_data(
     0);
 }
 
-void platform_texture_2d_bind(
-  const struct texture_2d_t* texture,
-  const unsigned int texture_slot)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_internal_platform_bind()
+ *
+ ******************************************************************************/
+void texture_2d_internal_platform_bind(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_texture_slot)
 {
-  gl_texture_2d_bind(texture, texture_slot);
+  texture_2d_gl_bind(in_texture, in_texture_slot);
 }
 
-// -----------------------------------------------------------------------------
-
-static void gl_error_check(
-  const char* success_string,
-  const char* error_string,
+/*******************************************************************************
+ *
+ *   Function: texture_gl_check_error()
+ *
+ ******************************************************************************/
+static void texture_gl_check_error(
+  const char* in_success_string,
+  const char* in_error_string,
   ...)
 {
   GLenum _gl_error = GL_NO_ERROR;
@@ -125,20 +193,20 @@ static void gl_error_check(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, error_string);
+  va_start(args, in_error_string);
 
   if (_gl_error == GL_NO_ERROR)
   {
     log_write_va(
       LOG_LEVEL_DEBUG,
-      success_string,
+      in_success_string,
       args);
   }
   else
   {
     log_write_va(
       LOG_LEVEL_ERROR,
-      error_string,
+      in_error_string,
       args);
     log_write(
       LOG_LEVEL_ERROR,
@@ -150,12 +218,17 @@ static void gl_error_check(
 #endif
 }
 
-static GLenum gl_get_texture_data_format(
-  enum texture_2d_data_format_t data_format)
+/*******************************************************************************
+ *
+ *   Function: texture_gl_get_data_format()
+ *
+ ******************************************************************************/
+static GLenum texture_gl_get_data_format(
+  const enum texture_2d_data_format_t in_data_format)
 {
   GLenum gl_data_format;
 
-  switch (data_format)
+  switch (in_data_format)
   {
     case TEXTURE_2D_DATA_FORMAT_RED:
       gl_data_format = GL_RED;
@@ -210,12 +283,17 @@ static GLenum gl_get_texture_data_format(
   return gl_data_format;
 }
 
-static GLenum gl_get_texture_internal_format(
-  enum texture_2d_internal_format_t internal_format)
+/*******************************************************************************
+ *
+ *   Function: texture_gl_get_internal_format()
+ *
+ ******************************************************************************/
+static GLenum texture_gl_get_internal_format(
+  const enum texture_2d_internal_format_t in_internal_format)
 {
   GLenum gl_internal_format;
 
-  switch (internal_format)
+  switch (in_internal_format)
   {
     case TEXTURE_2D_INTERNAL_FORMAT_RED:
       gl_internal_format = GL_RED;
@@ -243,121 +321,146 @@ static GLenum gl_get_texture_internal_format(
   return gl_internal_format;
 }
 
-static void gl_texture_2d_init(
-  struct texture_2d_t* texture,
-  bool wrap)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_gl_init()
+ *
+ ******************************************************************************/
+static void texture_2d_gl_init(
+  struct texture_2d_t* inout_texture,
+  const bool in_should_wrap)
 {
-  // glCreateTextures(GL_TEXTURE_2D, 1, &texture->texture_id);
+  // glCreateTextures(GL_TEXTURE_2D, 1, &inout_texture->texture_id);
 
-  // gl_error_check(
+  // texture_gl_check_error(
   //   "No error before texture init\n",
   //   "Error occurred prior to texture init\n");
 
-  glGenTextures(1, &(texture->texture_id));
+  glGenTextures(1, &(inout_texture->texture_id));
 
-  // gl_error_check(
+  // texture_gl_check_error(
   //   "Texture initialized with ID %d\n",
   //   "Error occurred during texture generation: [ID %d]\n",
-  //   texture->texture_id);
+  //   inout_texture->texture_id);
 
-  glBindTexture(GL_TEXTURE_2D, texture->texture_id);
-  gl_texture_2d_bind(texture, 0);
+  glBindTexture(GL_TEXTURE_2D, inout_texture->texture_id);
+  texture_2d_gl_bind(inout_texture, 0);
 
   /*
    * Set the modes for texture filtering
    * 'Minimizing' filter for down-scaling textures
    * 'Magnifying' filter for up-scaling textures
    */
-  glTextureParameteri(texture->texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTextureParameteri(texture->texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  if (wrap)
+  if (in_should_wrap)
   {
     /*
      * Specify how the texture will wrap when texture coordinates are out of the normal range
      * In this case, the texture will 'repeat' for S and T texture coordinates
      */
-    glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
   }
 
   const GLenum gl_internal_format =
-    gl_get_texture_internal_format(texture->internal_format);
+    texture_gl_get_internal_format(inout_texture->internal_format);
 
   const GLenum gl_data_format =
-    gl_get_texture_data_format(texture->data_format);
+    texture_gl_get_data_format(inout_texture->data_format);
 
   glTexImage2D(
     GL_TEXTURE_2D,
     0,
     gl_internal_format,
-    texture->width,
-    texture->height,
+    inout_texture->width,
+    inout_texture->height,
     0,
     gl_data_format,
     GL_UNSIGNED_BYTE,
     NULL);
 
-  // gl_error_check(
+  // texture_gl_check_error(
   //   "Successfully specified image data for Texture ID %d\n",
   //   "Error occurred during image data specification for Texture ID %d\n",
-  //   texture->texture_id);
+  //   inout_texture->texture_id);
 }
 
-static void gl_texture_2d_cleanup(
-  struct texture_2d_t* texture)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_gl_cleanup()
+ *
+ ******************************************************************************/
+static void texture_2d_gl_cleanup(
+  const struct texture_2d_t* in_texture)
 {
-  glDeleteTextures(1, &texture->texture_id);
+  glDeleteTextures(1, &in_texture->texture_id);
 }
 
-static void gl_texture_2d_bind(
-  const struct texture_2d_t* texture,
-  const unsigned int texture_slot)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_gl_bind()
+ *
+ ******************************************************************************/
+static void texture_2d_gl_bind(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_texture_slot)
 {
-  glBindTextureUnit(texture_slot, texture->texture_id);
+  glBindTextureUnit(in_texture_slot, in_texture->texture_id);
 
-  // gl_error_check(
+  // texture_gl_check_error(
   //   "Texture ID %d bound to Texture Slot %d\n",
   //   "Error occurred while binding Texture ID %d to Texture Slot %d\n",
-  //   texture->texture_id,
-  //   texture_slot);
+  //   in_texture->texture_id,
+  //   in_texture_slot);
 }
 
-static void gl_texture_2d_set_data(
-  const struct texture_2d_t* texture,
-  void* data,
-  const unsigned int data_size_bytes)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_gl_set_data()
+ *
+ ******************************************************************************/
+static void texture_2d_gl_set_data(
+  const struct texture_2d_t* in_texture,
+  const void* in_data,
+  const unsigned int in_data_size_bytes)
 {
   glTextureSubImage2D(
-    texture->texture_id,
+    in_texture->texture_id,
     0,
     0,
     0,
-    texture->width,
-    texture->height,
-    gl_get_texture_data_format(texture->data_format),
+    in_texture->width,
+    in_texture->height,
+    texture_gl_get_data_format(in_texture->data_format),
     GL_UNSIGNED_BYTE,
-    data);
+    in_data);
   // glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-static void gl_texture_2d_resize(
-  struct texture_2d_t* texture,
-  const int new_width,
-  const int new_height)
+/*******************************************************************************
+ *
+ *   Function: texture_2d_gl_resize()
+ *
+ ******************************************************************************/
+static void texture_2d_gl_resize(
+  const struct texture_2d_t* in_texture,
+  const unsigned int in_new_width_pixels,
+  const unsigned int in_new_height_pixels)
 {
   const GLenum gl_internal_format =
-    gl_get_texture_internal_format(texture->internal_format);
+    texture_gl_get_internal_format(in_texture->internal_format);
 
   const GLenum gl_data_format =
-    gl_get_texture_data_format(texture->data_format);
+    texture_gl_get_data_format(in_texture->data_format);
 
   glTexImage2D(
     GL_TEXTURE_2D,
     0,
     gl_internal_format,
-    texture->width,
-    texture->height,
+    in_texture->width,
+    in_texture->height,
     0,
     gl_data_format,
     GL_UNSIGNED_BYTE,

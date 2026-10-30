@@ -3,9 +3,24 @@
 #include "window.h"
 #include "log.h"
 
-// Extern function definitions
-uint8_t window_graphics_init(
-  struct window_t* window)
+#include "../../core/application/window_internal.h"
+
+// Stands in for a windowing backend when Jotunn is built without one: windows
+//  fail to open, and the other hooks do nothing
+
+/*******************************************************************************
+ *
+ *   BACKEND HOOKS
+ *
+ ******************************************************************************/
+
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_init()
+ *
+ ******************************************************************************/
+uint8_t window_internal_platform_init(
+  struct window_t* inout_window)
 {
    #ifdef DEBUG
   log_write(
@@ -13,64 +28,119 @@ uint8_t window_graphics_init(
     "No graphics backend!");
    #endif
 
-  window->metadata.signaled_close = 1;
+  inout_window->metadata.should_close = 1;
 
   return 1;
 }
 
-void window_graphics_poll_events(
-  struct window_t* window)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_poll_events()
+ *
+ ******************************************************************************/
+void window_internal_platform_poll_events(
+  struct window_t* inout_window)
 {
   return;
 }
 
-void window_graphics_run(
-  struct window_t* window)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_run()
+ *
+ ******************************************************************************/
+void window_internal_platform_run(
+  const struct window_t* in_window)
 {
   return;
 }
 
-void window_graphics_cleanup(
-  struct window_t* window)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_cleanup()
+ *
+ ******************************************************************************/
+void window_internal_platform_cleanup(
+  const struct window_t* in_window)
 {
   return;
 }
 
-void window_graphics_set_context(
-  struct window_t* window)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_set_context()
+ *
+ ******************************************************************************/
+void window_internal_platform_set_context(
+  const struct window_t* in_window)
 {
   return;
 }
 
-void window_graphics_release_context(
-  struct window_t* window)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_release_context()
+ *
+ ******************************************************************************/
+void window_internal_platform_release_context(
+  const struct window_t* in_window)
 {
   return;
 }
 
-void window_graphics_set_background_color(
-  struct window_t* window,
-  float red,
-  float green,
-  float blue,
-  float alpha)
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_set_viewport()
+ *
+ ******************************************************************************/
+void window_internal_platform_set_viewport(
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels)
+{
+}
+
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_set_background_color()
+ *
+ ******************************************************************************/
+void window_internal_platform_set_background_color(
+  struct window_t* inout_window,
+  const union fvector4_t in_color)
 {
   return;
 }
 
-void window_graphics_set_cursor_shape(
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_set_cursor_shape()
+ *
+ ******************************************************************************/
+void window_internal_platform_set_cursor_shape(
   const struct window_t* in_window,
   const enum window_cursor_shape_t in_cursor_shape)
 {
 }
 
-const char* window_graphics_get_clipboard_text(
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_get_clipboard_text()
+ *
+ ******************************************************************************/
+const char* window_internal_platform_get_clipboard_text(
   const struct window_t* in_window)
 {
   return NULL;
 }
 
-void window_graphics_set_clipboard_text(
+/*******************************************************************************
+ *
+ *   Function: window_internal_platform_set_clipboard_text()
+ *
+ ******************************************************************************/
+void window_internal_platform_set_clipboard_text(
   const struct window_t* in_window,
   const char* in_text)
 {

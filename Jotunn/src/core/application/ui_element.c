@@ -4,99 +4,149 @@
 #include "string.h"
 #include "ui_layer.h"
 
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
+
+// Draws a static text element's text at the top of the space allocated to it,
+//  placed across it as the element's centering asks. in_theme is unused
 //
-fvector2 ui_element_get_effective_size(
-  struct ui_element_t* ui_element)
+//  in:     in_ui_element, in_origin_position, in_allocated_space, in_theme
+//  in/out: inout_renderer_2d
+static void ui_element_static_text_render(
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme);
+
+// Builds a transform from a scale and a translation
+//
+//  in:     in_scale_factors, in_translation_vector
+//  ret:    The transform
+static union fmatrix_4x4_t ui_element_get_transform(
+  const union fvector3_t in_scale_factors,
+  const union fvector3_t in_translation_vector);
+
+// Draws a slider at the top left of the space allocated to it: a box in the
+//  theme's background color, a line across it in the foreground color, and a
+//  mark at the slider's position in the accent color. in_allocated_space is
+//  unused
+//
+//  in:     in_ui_element, in_origin_position, in_allocated_space, in_theme
+//  in/out: inout_renderer_2d
+static void ui_element_slider_render(
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme);
+
+/*******************************************************************************
+ *
+ *   Function: ui_element_get_effective_size()
+ *
+ ******************************************************************************/
+union fvector2_t ui_element_get_effective_size(
+  const struct ui_element_t* in_ui_element)
 {
-  fvector2 effective_size =
-    (fvector2){.comp.x = (ui_element->width + 2 * ui_element->padding_x),
-               .comp.y = (ui_element->height + 2 * ui_element->padding_y)};
+  union fvector2_t effective_size =
+    (union fvector2_t){.comp.x = (in_ui_element->width + 2 * in_ui_element->padding_x),
+               .comp.y = (in_ui_element->height + 2 * in_ui_element->padding_y)};
 
   return effective_size;
 }
 
-// ------------------------------------------------------------------------------------------------------------
-
+/*******************************************************************************
+ *
+ *   Function: ui_element_init()
+ *
+ ******************************************************************************/
 void ui_element_init(
-  struct ui_element_t* ui_element,
-  enum ui_element_type_t element_type,
-  uint16_t width,
-  uint16_t height,
-  void (*function_ui_element_render)(
-    struct renderer_2d_t* renderer_2d,
-    struct ui_element_t* ui_element,
-    fvector2 origin_position,
-    fvector2 allocated_space,
-    struct ui_theme_t* ui_theme),
-  void (*function_ui_element_event_react)(
-    struct ui_element_t* ui_element,
-    struct event_base_t* event))
+  struct ui_element_t* out_ui_element,
+  const enum ui_element_type_t in_element_type,
+  const uint16_t in_width,
+  const uint16_t in_height,
+  void (*in_function_ui_element_render)(
+    struct renderer_2d_t* inout_renderer_2d,
+    const struct ui_element_t* in_ui_element,
+    const union fvector2_t in_origin_position,
+    const union fvector2_t in_allocated_space,
+    const struct ui_theme_t* in_theme),
+  void (*in_function_ui_element_event_react)(
+    struct ui_element_t* inout_ui_element,
+    struct event_base_t* inout_event))
 {
-  ui_element->element_type = element_type;
+  out_ui_element->element_type = in_element_type;
 
-  ui_element->element_centering = UI_ELEMENT_ALIGN_LEFT;
+  out_ui_element->element_centering = UI_ELEMENT_CENTERING_LEFT;
 
-  ui_element->width = width;
-  ui_element->height = height;
+  out_ui_element->width = in_width;
+  out_ui_element->height = in_height;
 
-  ui_element->padding_x = 0;
-  ui_element->padding_y = 0;
+  out_ui_element->padding_x = 0;
+  out_ui_element->padding_y = 0;
 
-  if (function_ui_element_render)
-    ui_element->function_ui_element_render = function_ui_element_render;
+  if (in_function_ui_element_render)
+    out_ui_element->function_ui_element_render = in_function_ui_element_render;
 
-  if (function_ui_element_event_react)
-    ui_element->function_ui_element_event_react = function_ui_element_event_react;
+  if (in_function_ui_element_event_react)
+    out_ui_element->function_ui_element_event_react = in_function_ui_element_event_react;
 }
 
-// ------------------------------------------------------------------------------------------------------------
-
+/*******************************************************************************
+ *
+ *   Function: ui_element_static_text_render()
+ *
+ ******************************************************************************/
 static void ui_element_static_text_render(
-  struct renderer_2d_t* renderer_2d,
-  struct ui_element_t* ui_element,
-  fvector2 origin_position,
-  fvector2 allocated_space,
-  struct ui_theme_t* theme)
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme)
 {
-  struct ui_element_static_text_t* static_text_element =
-    (struct ui_element_static_text_t*)ui_element;
+  const struct ui_element_static_text_t* static_text_element =
+    (const struct ui_element_static_text_t*)in_ui_element;
 
-  fvector2 effective_element_size = ui_element_get_effective_size(ui_element);
+  union fvector2_t effective_element_size = ui_element_get_effective_size(in_ui_element);
 
-  switch (ui_element->element_centering)
+  switch (in_ui_element->element_centering)
   {
-    case UI_ELEMENT_ALIGN_LEFT:
+    case UI_ELEMENT_CENTERING_LEFT:
     {
       renderer_2d_draw_string(
-        renderer_2d,
+        inout_renderer_2d,
         static_text_element->typeface,
-        (fvector3){origin_position.comp.x + ui_element->padding_x,
-                   origin_position.comp.y - ui_element->padding_y,
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x,
+                   in_origin_position.comp.y - in_ui_element->padding_y,
                    0.1f},
         static_text_element->static_text);
     }
     break;
-    case UI_ELEMENT_ALIGN_RIGHT:
+    case UI_ELEMENT_CENTERING_RIGHT:
     {
       renderer_2d_draw_string(
-        renderer_2d,
+        inout_renderer_2d,
         static_text_element->typeface,
-        (fvector3){origin_position.comp.x + ui_element->padding_x +
-                     allocated_space.comp.x - effective_element_size.comp.x,
-                   origin_position.comp.y - ui_element->padding_y,
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
+                     in_allocated_space.comp.x - effective_element_size.comp.x,
+                   in_origin_position.comp.y - in_ui_element->padding_y,
                    0.1f},
         static_text_element->static_text);
     }
     break;
-    case UI_ELEMENT_ALIGN_CENTER:
+    case UI_ELEMENT_CENTERING_CENTER:
     {
       renderer_2d_draw_string(
-        renderer_2d,
+        inout_renderer_2d,
         static_text_element->typeface,
-        (fvector3){origin_position.comp.x + ui_element->padding_x +
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
                      0.5f *
-                       (allocated_space.comp.x - effective_element_size.comp.x),
-                   origin_position.comp.y - ui_element->padding_y,
+                       (in_allocated_space.comp.x - effective_element_size.comp.x),
+                   in_origin_position.comp.y - in_ui_element->padding_y,
                    0.1f},
         static_text_element->static_text);
     }
@@ -104,61 +154,74 @@ static void ui_element_static_text_render(
   }
 }
 
+/*******************************************************************************
+ *
+ *   Function: ui_element_static_text_init()
+ *
+ ******************************************************************************/
 void ui_element_static_text_init(
-  struct ui_element_static_text_t* text_element,
-  char* static_text,
-  struct typeface_t* typeface)
+  struct ui_element_static_text_t* out_text_element,
+  const char* in_static_text,
+  const struct font_typeface_t* in_typeface)
 {
-  int text_length = strlen(static_text);
-  fvector2 text_dimensions =
-    typeface_calculate_string_dimensions(typeface, static_text, text_length);
+  int text_length = strlen(in_static_text);
+  union fvector2_t text_dimensions =
+    font_typeface_calculate_string_dimensions(in_typeface, in_static_text, text_length);
 
   ui_element_init(
-    &(text_element->base_element),
-    UI_ELEMENT_STATIC_TEXT,
+    &(out_text_element->base_element),
+    UI_ELEMENT_TYPE_STATIC_TEXT,
     text_dimensions.comp.x,
     text_dimensions.comp.y,
     ui_element_static_text_render,
     (void*)0);
 
-  text_element->static_text = static_text;
-  text_element->typeface = typeface;
+  out_text_element->static_text = in_static_text;
+  out_text_element->typeface = in_typeface;
 
-  text_element->base_element.padding_x = 3;
-  text_element->base_element.padding_y = 8;
+  out_text_element->base_element.padding_x = 3;
+  out_text_element->base_element.padding_y = 8;
 }
 
-// ------------------------------------------------------------------------------------------------------------
-
-static fmatrix_4x4 get_transform(
-  const fvector3 scale_factors,
-  const fvector3 translation_vector)
+/*******************************************************************************
+ *
+ *   Function: ui_element_get_transform()
+ *
+ ******************************************************************************/
+static union fmatrix_4x4_t ui_element_get_transform(
+  const union fvector3_t in_scale_factors,
+  const union fvector3_t in_translation_vector)
 {
-  fmatrix_4x4 transform_matrix;
+  union fmatrix_4x4_t transform_matrix;
   {
-    fmatrix_4x4 scale_matrix, translation_matrix;
+    union fmatrix_4x4_t scale_matrix, translation_matrix;
 
     fmatrix_4x4_init(&scale_matrix);
     fmatrix_4x4_init(&translation_matrix);
     fmatrix_4x4_init(&transform_matrix);
 
-    scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, scale_factors);
+    scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, in_scale_factors);
     translation_matrix =
-      fmatrix_4x4_transform_translate(&translation_matrix, translation_vector);
+      fmatrix_4x4_transform_translate(&translation_matrix, in_translation_vector);
     transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
   }
   return transform_matrix;
 }
 
+/*******************************************************************************
+ *
+ *   Function: ui_element_slider_render()
+ *
+ ******************************************************************************/
 static void ui_element_slider_render(
-  struct renderer_2d_t* renderer_2d,
-  struct ui_element_t* ui_element,
-  fvector2 origin_position,
-  fvector2 allocated_space,
-  struct ui_theme_t* theme)
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme)
 {
-  struct ui_element_slider_t* slider_element =
-    (struct ui_element_slider_t*)ui_element;
+  const struct ui_element_slider_t* slider_element =
+    (const struct ui_element_slider_t*)in_ui_element;
 
   float slider_range =
     (slider_element->upper_bound - slider_element->lower_bound);
@@ -168,103 +231,116 @@ static void ui_element_slider_render(
 
   uint16_t slider_margin = 10U;
 
-  const fvector3 box_scale_factors =
-    (fvector3){ui_element->width, ui_element->height, 1.0f};
+  const union fvector3_t box_scale_factors =
+    (union fvector3_t){in_ui_element->width, in_ui_element->height, 1.0f};
 
-  const fvector3 box_translation_vector = (fvector3){
-    origin_position.comp.x + ui_element->padding_x,
-    origin_position.comp.y - (ui_element->height + ui_element->padding_y),
+  const union fvector3_t box_translation_vector = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x,
+    in_origin_position.comp.y - (in_ui_element->height + in_ui_element->padding_y),
     0.1f};
 
-  fmatrix_4x4 box_transform =
-    get_transform(box_scale_factors, box_translation_vector);
+  union fmatrix_4x4_t box_transform =
+    ui_element_get_transform(box_scale_factors, box_translation_vector);
 
-  renderer_2d_draw_quad(renderer_2d, &box_transform, theme->background_color);
+  renderer_2d_draw_quad(inout_renderer_2d, &box_transform, in_theme->background_color);
 
-  const fvector3 line_point1 = (fvector3){
-    origin_position.comp.x + ui_element->padding_x + slider_margin,
-    origin_position.comp.y - ((ui_element->height / 2) + ui_element->padding_y),
+  const union fvector3_t line_point1 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x + slider_margin,
+    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
     0.2f};
 
-  const fvector3 line_point2 = (fvector3){
-    origin_position.comp.x + ui_element->width + ui_element->padding_x -
+  const union fvector3_t line_point2 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->width + in_ui_element->padding_x -
       slider_margin,
-    origin_position.comp.y - ((ui_element->height / 2) + ui_element->padding_y),
+    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
     0.2f};
 
   renderer_2d_draw_line(
-    renderer_2d, line_point1, line_point2, theme->foreground_color);
+    inout_renderer_2d, line_point1, line_point2, in_theme->foreground_color);
 
   uint16_t slider_x =
-    (ui_element->width - 2 * (ui_element->padding_x + slider_margin)) *
+    (in_ui_element->width - 2 * (in_ui_element->padding_x + slider_margin)) *
     slider_percentage;
 
-  const fvector3 slider_point1 = (fvector3){
-    origin_position.comp.x + ui_element->padding_x + slider_x,
-    origin_position.comp.y -
-      ((ui_element->height / 2) + ui_element->padding_y) + slider_margin,
+  const union fvector3_t slider_point1 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
+    in_origin_position.comp.y -
+      ((in_ui_element->height / 2) + in_ui_element->padding_y) + slider_margin,
     0.3f};
 
-  const fvector3 slider_point2 =
-    (fvector3)
+  const union fvector3_t slider_point2 =
+    (union fvector3_t)
       {
-        origin_position.comp.x + ui_element->padding_x + slider_x,
-        origin_position.comp.y -
-          ((ui_element->height / 2) + ui_element->padding_y) - slider_margin,
+        in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
+        in_origin_position.comp.y -
+          ((in_ui_element->height / 2) + in_ui_element->padding_y) - slider_margin,
         0.3f
       };
 
   renderer_2d_draw_line(
-    renderer_2d,
+    inout_renderer_2d,
     slider_point1,
     slider_point2,
-    theme->accent_color);
+    in_theme->accent_color);
 }
 
+/*******************************************************************************
+ *
+ *   Function: ui_element_slider_init()
+ *
+ ******************************************************************************/
 void ui_element_slider_init(
-  struct ui_element_slider_t* slider_element,
-  float starting_position,
-  float lower_bound,
-  float upper_bound)
+  struct ui_element_slider_t* out_slider_element,
+  const float in_starting_position,
+  const float in_lower_bound,
+  const float in_upper_bound)
 {
   ui_element_init(
-    &(slider_element->base_element),
-    UI_ELEMENT_SLIDER,
+    &(out_slider_element->base_element),
+    UI_ELEMENT_TYPE_SLIDER,
     200,
     30,
     ui_element_slider_render,
     (void*)0);
 
-  slider_element->slider_position = starting_position;
+  out_slider_element->slider_position = in_starting_position;
 
-  slider_element->lower_bound = lower_bound;
-  slider_element->upper_bound = upper_bound;
+  out_slider_element->lower_bound = in_lower_bound;
+  out_slider_element->upper_bound = in_upper_bound;
 
-  slider_element->base_element.padding_x = 0;
-  slider_element->base_element.padding_y = 0;
+  out_slider_element->base_element.padding_x = 0;
+  out_slider_element->base_element.padding_y = 0;
 }
 
-// ------------------------------------------------------------------------------------------------------------
-
+/*******************************************************************************
+ *
+ *   Function: ui_element_button_init()
+ *
+ ******************************************************************************/
 void ui_element_button_init(
-  struct ui_element_button_t* button_element)
+  struct ui_element_button_t* out_button_element)
 {
   ui_element_init(
-    &(button_element->base_element),
-    UI_ELEMENT_BUTTON,
+    &(out_button_element->base_element),
+    UI_ELEMENT_TYPE_BUTTON,
     100,
     100,
     (void*)0,
     (void*)0);
 }
 
+/*******************************************************************************
+ *
+ *   Function: ui_element_checkbox_init()
+ *
+ ******************************************************************************/
 void ui_element_checkbox_init(
-  struct ui_element_checkbox_t* checkbox_element,
-  bool start_checked)
+  struct ui_element_checkbox_t* out_checkbox_element,
+  const bool in_is_checked)
 {
   ui_element_init(
-    &(checkbox_element->base_element),
-    UI_ELEMENT_CHECKBOX,
+    &(out_checkbox_element->base_element),
+    UI_ELEMENT_TYPE_CHECKBOX,
     100,
     100,
     (void*)0,

@@ -75,6 +75,7 @@ static_assert(
  *
  ******************************************************************************/
 
+// A layer's ImGui state, kept in its ui_layer_data
 struct ui_layer_imgui_data_t
 {
   ImGuiContext* context;
@@ -94,7 +95,7 @@ struct ui_layer_imgui_data_t
 
 /*******************************************************************************
  *
- *   STATIC FUNCTION PROTOTYPES
+ *   STATIC PROTOTYPES
  *
  ******************************************************************************/
 
@@ -163,13 +164,18 @@ static void _ui_layer_imgui_update_modifiers(
 static ImGuiKey _ui_layer_imgui_translate_key(
   const enum event_key_code_t in_key);
 
-// Clipboard hooks for ImGui, reaching the window through the clipboard user
-//  data
+// Clipboard hook for ImGui, reading the clipboard of the window held in the
+//  context's clipboard user data
 //
-//  in:     in_context, in_text
+//  in:     in_context
 //  ret:    The clipboard's text, or NULL when it holds none
 static const char* _ui_layer_imgui_get_clipboard_text(
   ImGuiContext* in_context);
+
+// Clipboard hook for ImGui, setting the clipboard of the window held in the
+//  context's clipboard user data
+//
+//  in:     in_context, in_text
 static void _ui_layer_imgui_set_clipboard_text(
   ImGuiContext* in_context,
   const char* in_text);
@@ -182,24 +188,30 @@ static void _ui_layer_imgui_reset_render_state(
   const ImDrawList* in_draw_list,
   const ImDrawCmd* in_command);
 
-// Allocator hooks for ImGui, which ImPlot and imnodes allocate through too
+// Allocator hook for ImGui, which ImPlot and imnodes allocate through too.
+//  The memory is counted against ALLOCATOR_TAG_IMGUI; in_user_data is unused
 //
 //  in:     in_size_bytes, in_user_data
-//  in/out: inout_memory
 //  ret:    The memory; NULL when it can't be allocated
 static void* _ui_layer_imgui_allocate(
-  size_t in_size_bytes,
+  const size_t in_size_bytes,
   void* in_user_data);
+
+// Allocator hook for ImGui, releasing memory from _ui_layer_imgui_allocate();
+//  NULL is ignored and in_user_data is unused
+//
+//  in:     in_user_data
+//  in/out: inout_memory
 static void _ui_layer_imgui_free(
   void* inout_memory,
   void* in_user_data);
 
 /*******************************************************************************
  *
- *   Function: ui_layer_imgui_init()
+ *   Function: ui_layer_internal_imgui_init()
  *
  ******************************************************************************/
-void ui_layer_imgui_init(
+void ui_layer_internal_imgui_init(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data =
@@ -255,10 +267,10 @@ void ui_layer_imgui_init(
 
 /*******************************************************************************
  *
- *   Function: ui_layer_imgui_cleanup()
+ *   Function: ui_layer_internal_imgui_cleanup()
  *
  ******************************************************************************/
-void ui_layer_imgui_cleanup(
+void ui_layer_internal_imgui_cleanup(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data =
@@ -305,10 +317,10 @@ void ui_layer_imgui_cleanup(
 
 /*******************************************************************************
  *
- *   Function: ui_layer_imgui_frame_begin()
+ *   Function: ui_layer_internal_imgui_frame_begin()
  *
  ******************************************************************************/
-void ui_layer_imgui_frame_begin(
+void ui_layer_internal_imgui_frame_begin(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data =
@@ -343,10 +355,10 @@ void ui_layer_imgui_frame_begin(
 
 /*******************************************************************************
  *
- *   Function: ui_layer_imgui_frame_end()
+ *   Function: ui_layer_internal_imgui_frame_end()
  *
  ******************************************************************************/
-void ui_layer_imgui_frame_end(
+void ui_layer_internal_imgui_frame_end(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data =
@@ -368,10 +380,10 @@ void ui_layer_imgui_frame_end(
 
 /*******************************************************************************
  *
- *   Function: ui_layer_imgui_event_react()
+ *   Function: ui_layer_internal_imgui_event_react()
  *
  ******************************************************************************/
-bool ui_layer_imgui_event_react(
+bool ui_layer_internal_imgui_event_react(
   struct ui_layer_t* inout_ui_layer,
   const struct event_base_t* in_event)
 {
@@ -389,7 +401,7 @@ bool ui_layer_imgui_event_react(
   // Events reach every window, so input from other windows is ignored
   switch (in_event->event_type)
   {
-    case EVENT_MOUSE_MOVED:
+    case EVENT_TYPE_MOUSE_MOVED:
     {
       const struct event_mouse_moved_t* event =
         (const struct event_mouse_moved_t*)in_event;
@@ -408,7 +420,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_MOUSE_BUTTON:
+    case EVENT_TYPE_MOUSE_BUTTON:
     {
       const struct event_mouse_button_t* event =
         (const struct event_mouse_button_t*)in_event;
@@ -430,7 +442,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_MOUSE_SCROLLED:
+    case EVENT_TYPE_MOUSE_SCROLLED:
     {
       const struct event_mouse_scrolled_t* event =
         (const struct event_mouse_scrolled_t*)in_event;
@@ -447,7 +459,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_MOUSE_ENTERED:
+    case EVENT_TYPE_MOUSE_ENTERED:
     {
       const struct event_mouse_entered_t* event =
         (const struct event_mouse_entered_t*)in_event;
@@ -464,7 +476,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_KEY_PRESSED:
+    case EVENT_TYPE_KEY_PRESSED:
     {
       const struct event_key_pressed_t* event =
         (const struct event_key_pressed_t*)in_event;
@@ -489,7 +501,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_KEY_RELEASED:
+    case EVENT_TYPE_KEY_RELEASED:
     {
       const struct event_key_released_t* event =
         (const struct event_key_released_t*)in_event;
@@ -514,7 +526,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_KEY_TYPED:
+    case EVENT_TYPE_KEY_TYPED:
     {
       const struct event_key_typed_t* event =
         (const struct event_key_typed_t*)in_event;
@@ -530,7 +542,7 @@ bool ui_layer_imgui_event_react(
     }
     break;
 
-    case EVENT_WINDOW_FOCUS:
+    case EVENT_TYPE_WINDOW_FOCUS:
     {
       const struct event_window_focus_t* event =
         (const struct event_window_focus_t*)in_event;
@@ -539,7 +551,7 @@ bool ui_layer_imgui_event_react(
       {
         ImGuiIO_AddFocusEvent(
           io,
-          (event->focused != 0));
+          (event->is_focused != 0));
       }
     }
     break;
@@ -764,9 +776,9 @@ static void _ui_layer_imgui_draw(
 
   // ImGui's coordinates start at the top-left of the display and grow
   //  downward, so the camera is flipped to match for the duration of the frame
-  struct camera_ortho_t* camera = &(inout_ui_layer->ui_camera_ortho);
+  struct camera_orthographic_t* camera = &(inout_ui_layer->ui_camera_ortho);
 
-  camera_set_projection_orthographic(
+  camera_orthographic_set_projection(
     camera,
     display_position.x,
     (display_position.x + display_size.x),
@@ -789,7 +801,7 @@ static void _ui_layer_imgui_draw(
       (struct renderer_2d_mesh_t){
         .vertices = (const struct renderable_2d_mesh_vertex_t*)draw_list->VtxBuffer.Data,
         .vertex_count = (uint32_t)draw_list->VtxBuffer.Size,
-        .index_type = ELEMENT_UNSIGNED_SHORT,
+        .index_type = RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_SHORT,
         .indices = draw_list->IdxBuffer.Data,
         .index_count = (uint32_t)draw_list->IdxBuffer.Size,
         .submeshes = inout_data->submeshes,
@@ -992,7 +1004,7 @@ static void _ui_layer_imgui_reset_render_state(
  *
  ******************************************************************************/
 static void* _ui_layer_imgui_allocate(
-  size_t in_size_bytes,
+  const size_t in_size_bytes,
   void* in_user_data)
 {
   (void)in_user_data;

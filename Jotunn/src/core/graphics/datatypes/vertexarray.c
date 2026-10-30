@@ -1,61 +1,81 @@
 #include "vertexarray.h"
+#include "vertex_array_internal.h"
 
 #include "../resource_internal.h"
 
-extern void platform_vertex_array_init(struct vertex_array_t* vertex_array, int num);
-extern void platform_vertex_array_bind(struct vertex_array_t* vertex_array);
-extern void platform_vertex_array_unbind();
-extern void platform_vertex_array_set_attribute(struct vertex_array_t* vertex_array, struct vertex_attribute_t* vertex_attribute);
-extern void platform_vertex_array_destroy(struct vertex_array_t* vertex_array, int num);
-
+/*******************************************************************************
+ *
+ *   Function: vertex_array_init()
+ *
+ ******************************************************************************/
 void vertex_array_init(
-  struct vertex_array_t* vertex_array,
-  int num)
+  struct vertex_array_t* inout_vertex_array,
+  const int in_num)
 {
   // Each array has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
-  for (int i = 0; i < num; i++)
+  for (int i = 0; i < in_num; i++)
   {
-    platform_vertex_array_init(
-      &(vertex_array[i]),
+    vertex_array_internal_platform_init(
+      &(inout_vertex_array[i]),
       1);
 
     // A vertex array only records how its buffers are read
     resource_internal_register(
-      &(vertex_array[i].resource),
+      &(inout_vertex_array[i].resource),
       RESOURCE_KIND_VERTEX_ARRAY,
       0);
   }
 }
 
+/*******************************************************************************
+ *
+ *   Function: vertex_array_bind()
+ *
+ ******************************************************************************/
 void vertex_array_bind(
-  struct vertex_array_t* vertex_array)
+  const struct vertex_array_t* in_vertex_array)
 {
-  platform_vertex_array_bind(vertex_array);
+  vertex_array_internal_platform_bind(in_vertex_array);
 }
 
-void vertex_array_unbind()
+/*******************************************************************************
+ *
+ *   Function: vertex_array_unbind()
+ *
+ ******************************************************************************/
+void vertex_array_unbind(void)
 {
-  platform_vertex_array_unbind();
+  vertex_array_internal_platform_unbind();
 }
 
+/*******************************************************************************
+ *
+ *   Function: vertex_array_set_attribute()
+ *
+ ******************************************************************************/
 void vertex_array_set_attribute(
-  struct vertex_array_t* vertex_array,
-  struct vertex_attribute_t* vertex_attribute)
+  const struct vertex_array_t* in_vertex_array,
+  const struct vertex_attribute_t* in_vertex_attribute)
 {
-  platform_vertex_array_set_attribute(vertex_array, vertex_attribute);
+  vertex_array_internal_platform_set_attribute(in_vertex_array, in_vertex_attribute);
 }
 
+/*******************************************************************************
+ *
+ *   Function: vertex_array_destroy()
+ *
+ ******************************************************************************/
 void vertex_array_destroy(
-  struct vertex_array_t* vertex_array,
-  int num)
+  struct vertex_array_t* inout_vertex_array,
+  const int in_num)
 {
-  for (int i = 0; i < num; i++)
+  for (int i = 0; i < in_num; i++)
   {
-    platform_vertex_array_destroy(
-      &(vertex_array[i]),
+    vertex_array_internal_platform_destroy(
+      &(inout_vertex_array[i]),
       1);
 
-    resource_internal_unregister(&(vertex_array[i].resource));
+    resource_internal_unregister(&(inout_vertex_array[i].resource));
   }
 }

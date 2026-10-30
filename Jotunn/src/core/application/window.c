@@ -19,142 +19,135 @@
 #include "window_layer.h"
 
 #include "../diagnostics/diagnostics_internal.h"
+#include "window_internal.h"
 
 #include <stdbool.h>
 
-/************************************************************
+/*******************************************************************************
  *
- * External implementation prototypes
- *  - Implemented per back-end
+ *   STATIC PROTOTYPES
  *
- ************************************************************/
-extern uint8_t window_graphics_init(struct window_t* window);
-extern void window_graphics_poll_events(struct window_t* window);
-extern void window_graphics_run(struct window_t* window);
-extern void window_graphics_cleanup(struct window_t* window);
-extern void window_graphics_set_context(struct window_t* window);
-extern void window_graphics_release_context(struct window_t* window);
-extern void window_graphics_set_viewport(
-  uint32_t x,
-  uint32_t y,
-  uint32_t width,
-  uint32_t height);
-extern void window_graphics_set_background_color(
-  struct window_t* window,
-  const fvector4 color);
-extern void window_graphics_set_cursor_shape(
-  const struct window_t* in_window,
-  const enum window_cursor_shape_t in_cursor_shape);
-extern const char* window_graphics_get_clipboard_text(
-  const struct window_t* in_window);
-extern void window_graphics_set_clipboard_text(
-  const struct window_t* in_window,
-  const char* in_text);
+ ******************************************************************************/
+
+// Fills in a new window's metadata, copying in_tag
+//
+//  in:     in_width, in_height, in_tag, in_app_parent,
+//            in_function_event_notify
+//  out:    out_metadata
+static void window_set_metadata(
+  struct window_data_t* out_metadata,
+  const uint32_t in_width,
+  const uint32_t in_height,
+  const char* in_tag,
+  struct application_t* in_app_parent,
+  void (*in_function_event_notify)(
+    struct application_t* inout_application,
+    struct event_base_t* inout_event));
 
 // Renders a layer to its framebuffer, first resizing the framebuffer and
 //  reprojecting the layer's camera to the window's size when asked to
 //
-//  in:     in_should_resize
-//  in/out: inout_window, inout_layer
+//  in:     in_window, in_should_resize
+//  in/out: inout_layer
 static void _window_render_layer(
-  struct window_t* inout_window,
+  const struct window_t* in_window,
   struct window_layer_t* inout_layer,
   const bool in_should_resize);
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_set_metadata()
+ *   Function: window_set_metadata()
  *
- ************************************************************/
+ ******************************************************************************/
 static void window_set_metadata(
-  struct window_data_t* metadata,
-  const uint32_t width,
-  const uint32_t height,
-  const char* tag,
-  struct application_t* app_parent,
-  void (*function_event_notify)(
-    struct application_t*,
-    struct event_base_t*))
+  struct window_data_t* out_metadata,
+  const uint32_t in_width,
+  const uint32_t in_height,
+  const char* in_tag,
+  struct application_t* in_app_parent,
+  void (*in_function_event_notify)(
+    struct application_t* inout_application,
+    struct event_base_t* inout_event))
 {
   // Store our window tag
-  metadata->tag =
+  out_metadata->tag =
     allocator_duplicate_string(
-      tag,
+      in_tag,
       ALLOCATOR_TAG_WINDOW);
 
   // Assign window properties
-  metadata->width  = width;
-  metadata->height = height;
+  out_metadata->width  = in_width;
+  out_metadata->height = in_height;
 
-  metadata->signaled_close = 0;
-  metadata->visible = 1;
+  out_metadata->should_close = 0;
+  out_metadata->is_visible = 1;
 
-  metadata->parent_application    = app_parent;
-  metadata->function_event_notify = function_event_notify;
+  out_metadata->parent_application    = in_app_parent;
+  out_metadata->function_event_notify = in_function_event_notify;
 }
 
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_init()
+ *   Function: window_init()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t window_init(
-  struct window_t* window,
-  const uint8_t max_window_layers,
-  const uint32_t width,
-  const uint32_t height,
-  const char* tag,
-  struct application_t* app_parent)
+  struct window_t* out_window,
+  const uint8_t in_max_window_layers,
+  const uint32_t in_width,
+  const uint32_t in_height,
+  const char* in_tag,
+  struct application_t* in_app_parent)
 {
-  memset((void*)window, 0, sizeof(struct window_t));
+  memset((void*)out_window, 0, sizeof(struct window_t));
 
   window_set_metadata(
-    &(window->metadata),
-    width,
-    height,
-    tag,
-    app_parent,
+    &(out_window->metadata),
+    in_width,
+    in_height,
+    in_tag,
+    in_app_parent,
     &application_on_event);
 
-  const uint8_t error = window_graphics_init(window);
+  const uint8_t error = window_internal_platform_init(out_window);
 
 #ifdef DEBUG
   if (error) log_write(
     LOG_LEVEL_ERROR,
-    "Error during window_graphics_init");
+    "Error during window_internal_platform_init");
 #endif
 
   if (!error)
   {
-    window->function_event_react = 0;
+    out_window->function_event_react = 0;
 
-    window_set_context(window);
+    window_set_context(out_window);
 
     renderer_window_layer_init(
-      &(window->window_layer_renderer),
-      window,
+      &(out_window->window_layer_renderer),
+      out_window,
       "Window Renderer");
 
-    window->max_layers = max_window_layers;
-    window->num_layers = 0;
-    window->layers =
+    out_window->max_layers = in_max_window_layers;
+    out_window->num_layers = 0;
+    out_window->layers =
       (struct window_layer_t**)allocator_allocate(
-        (window->max_layers * sizeof(struct window_layer_t*)),
+        (out_window->max_layers * sizeof(struct window_layer_t*)),
         ALLOCATOR_TAG_WINDOW);
   }
 
   return error;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_add_layer()
+ *   Function: window_add_layer()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t window_add_layer(
-  struct window_t* window,
-  struct window_layer_t* new_window_layer)
+  struct window_t* inout_window,
+  struct window_layer_t* in_new_window_layer)
 {
   #ifdef DEBUG
   log_write(
@@ -164,12 +157,12 @@ uint8_t window_add_layer(
 
   uint8_t error = 0U;
 
-  if (window->num_layers < window->max_layers)
+  if (inout_window->num_layers < inout_window->max_layers)
   {
     struct window_layer_t** layer_ptr;
-    layer_ptr = (window->layers + window->num_layers);
-    *layer_ptr = new_window_layer;
-    window->num_layers++;
+    layer_ptr = (inout_window->layers + inout_window->num_layers);
+    *layer_ptr = in_new_window_layer;
+    inout_window->num_layers++;
   }
   else
   {
@@ -185,34 +178,34 @@ uint8_t window_add_layer(
   return error;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_bind_custom_events()
+ *   Function: window_bind_custom_events()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_bind_custom_events(
-  struct window_t* window,
-  void (*custom_event_function)(
-    struct window_t*,
-    struct event_base_t*))
+  struct window_t* inout_window,
+  void (*in_custom_event_function)(
+    struct window_t* inout_window,
+    struct event_base_t* inout_event))
 {
-  window->function_event_react = custom_event_function;
+  inout_window->function_event_react = in_custom_event_function;
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_handle_event()
+ *   Function: window_handle_event()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_handle_event(
-  struct window_t* window,
-  struct event_base_t* event)
+  struct window_t* inout_window,
+  struct event_base_t* inout_event)
 {
   // The diagnostics overlay is drawn over every layer, so it sees events first
   const bool is_taken_by_overlay =
     diagnostics_internal_overlay_event_react(
-      window,
-      event);
+      inout_window,
+      inout_event);
 
   if (is_taken_by_overlay)
   {
@@ -221,90 +214,90 @@ void window_handle_event(
 
   // Layers see events top to bottom, so that one drawn over another (such as
   //  a UI) can claim an event before anything underneath it reacts
-  for (uint8_t i = window->num_layers; i > 0; i--)
+  for (uint8_t i = inout_window->num_layers; i > 0; i--)
   {
-    struct window_layer_t* current_layer = window->layers[i - 1];
+    struct window_layer_t* current_layer = inout_window->layers[i - 1];
 
     if (current_layer->function_event_react)
     {
       current_layer->function_event_react(
-        window,
+        inout_window,
         current_layer,
-        event);
+        inout_event);
 
-      if (event->handled)
+      if (inout_event->is_handled)
       {
         return;
       }
     }
   }
 
-  if (window->function_event_react)
+  if (inout_window->function_event_react)
   {
-    window->function_event_react(
-      window,
-      event);
+    inout_window->function_event_react(
+      inout_window,
+      inout_event);
   }
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_run()
+ *   Function: window_run()
  *
- ************************************************************/
+ ******************************************************************************/
 uint8_t window_run(
-  struct window_t* window)
+  struct window_t* inout_window)
 {
   // #ifdef DEBUG
   //     fprintf(stdout, "Running window\n");
   // #endif
 
-  window_set_context(window);
+  window_set_context(inout_window);
 
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_EVENTS);
-  window_graphics_poll_events(window);
+  window_internal_platform_poll_events(inout_window);
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_EVENTS);
 
-  if (window->metadata.resized)
+  if (inout_window->metadata.is_resized)
   {
-    window_set_viewport(0, 0, window->metadata.width, window->metadata.height);
+    window_set_viewport(0, 0, inout_window->metadata.width, inout_window->metadata.height);
   }
 
   struct window_layer_t** current_layer;
 
   // The GPU's time on each part of the frame is marked as it's submitted
-  diagnostics_internal_gpu_frame_begin(window);
+  diagnostics_internal_gpu_frame_begin(inout_window);
 
   // Render our layers to their respective framebuffers, bottom to top
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
-  current_layer = window->layers;
-  for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
+  current_layer = inout_window->layers;
+  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++)
   {
     const uint16_t layer_zone =
       diagnostics_internal_get_layer_zone(
-        window,
+        inout_window,
         i);
 
     diagnostics_zone_begin(layer_zone);
 
     _window_render_layer(
-      window,
+      inout_window,
       *current_layer,
-      window->metadata.resized);
+      inout_window->metadata.is_resized);
 
     diagnostics_zone_end(layer_zone);
 
     diagnostics_internal_gpu_mark_layer(
-      window,
+      inout_window,
       i);
   }
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
-  if (window->metadata.resized)
+  if (inout_window->metadata.is_resized)
   {
-    window->metadata.resized = 0;
+    inout_window->metadata.is_resized = 0;
   }
 
   // The diagnostics overlay, while shown, goes over every layer. It isn't
@@ -312,22 +305,22 @@ uint8_t window_run(
   //  resized flag
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_OVERLAY);
 
-  struct window_layer_t* overlay_layer = diagnostics_internal_overlay_prepare(window);
+  struct window_layer_t* overlay_layer = diagnostics_internal_overlay_prepare(inout_window);
   if (overlay_layer != NULL)
   {
     const struct texture_2d_t* overlay_texture =
       &(overlay_layer->framebuffer->color_buffer.texture);
     const bool is_overlay_resized =
-      ((overlay_texture->width != window->metadata.width) ||
-       (overlay_texture->height != window->metadata.height));
+      ((overlay_texture->width != inout_window->metadata.width) ||
+       (overlay_texture->height != inout_window->metadata.height));
 
     _window_render_layer(
-      window,
+      inout_window,
       overlay_layer,
       is_overlay_resized);
 
     diagnostics_internal_gpu_mark(
-      window,
+      inout_window,
       "diagnostics overlay");
   }
 
@@ -336,115 +329,115 @@ uint8_t window_run(
   // Render our layers to the default (window) framebuffer, bottom to top
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 
-  renderer_window_layer_begin_scene(&(window->window_layer_renderer));
+  renderer_window_layer_begin_scene(&(inout_window->window_layer_renderer));
 
-  current_layer = window->layers;
-  for (uint8_t i = 0; i < window->num_layers; i++, current_layer++)
+  current_layer = inout_window->layers;
+  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++)
   {
-    renderer_window_layer_draw_layer(
-      &(window->window_layer_renderer), *current_layer, i);
+    renderer_window_layer_draw(
+      &(inout_window->window_layer_renderer), *current_layer, i);
   }
 
   if (overlay_layer != NULL)
   {
-    renderer_window_layer_draw_layer(
-      &(window->window_layer_renderer),
+    renderer_window_layer_draw(
+      &(inout_window->window_layer_renderer),
       overlay_layer,
-      window->num_layers);
+      inout_window->num_layers);
   }
 
-  renderer_window_layer_end_scene(&(window->window_layer_renderer));
+  renderer_window_layer_end_scene(&(inout_window->window_layer_renderer));
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 
   diagnostics_internal_gpu_mark(
-    window,
+    inout_window,
     "composite");
-  diagnostics_internal_gpu_frame_end(window);
+  diagnostics_internal_gpu_frame_end(inout_window);
 
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
-  window_graphics_run(window);
+  window_internal_platform_run(inout_window);
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_PRESENT);
 
-  window_release_context(window);
+  window_release_context(inout_window);
 
-  return (window->metadata.signaled_close);
+  return (inout_window->metadata.should_close);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_cleanup()
+ *   Function: window_cleanup()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_cleanup(
-  struct window_t* window)
+  struct window_t* inout_window)
 {
-  allocator_free(window->metadata.tag);
-  window->metadata.tag = 0;
+  allocator_free(inout_window->metadata.tag);
+  inout_window->metadata.tag = 0;
 
-  diagnostics_internal_overlay_cleanup(window);
+  diagnostics_internal_overlay_cleanup(inout_window);
 
   // Releasing the window renderer's graphics resources needs the window's
   //  graphics context, which nothing else leaves current
-  window_set_context(window);
+  window_set_context(inout_window);
 
-  diagnostics_internal_gpu_cleanup(window);
+  diagnostics_internal_gpu_cleanup(inout_window);
 
-  renderer_window_layer_cleanup(&(window->window_layer_renderer));
+  renderer_window_layer_cleanup(&(inout_window->window_layer_renderer));
 
-  window->max_layers = 0;
-  window->num_layers = 0;
-  allocator_free(window->layers);
+  inout_window->max_layers = 0;
+  inout_window->num_layers = 0;
+  allocator_free(inout_window->layers);
 
-  window_graphics_cleanup(window);
+  window_internal_platform_cleanup(inout_window);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_set_context()
+ *   Function: window_set_context()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_set_context(
-  struct window_t* window)
+  const struct window_t* in_window)
 {
-  window_graphics_set_context(window);
+  window_internal_platform_set_context(in_window);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_release_context()
+ *   Function: window_release_context()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_release_context(
-  struct window_t* window)
+  const struct window_t* in_window)
 {
-  window_graphics_release_context(window);
+  window_internal_platform_release_context(in_window);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_set_viewport()
+ *   Function: window_set_viewport()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_set_viewport(
-  uint32_t x,
-  uint32_t y,
-  uint32_t width,
-  uint32_t height)
+  const uint32_t in_x_pixels,
+  const uint32_t in_y_pixels,
+  const uint32_t in_width_pixels,
+  const uint32_t in_height_pixels)
 {
-  window_graphics_set_viewport(x, y, width, height);
+  window_internal_platform_set_viewport(in_x_pixels, in_y_pixels, in_width_pixels, in_height_pixels);
 }
 
-/************************************************************
+/*******************************************************************************
  *
- * Function: window_set_background_color()
+ *   Function: window_set_background_color()
  *
- ************************************************************/
+ ******************************************************************************/
 void window_set_background_color(
-  struct window_t* window,
-  const fvector4 color)
+  struct window_t* inout_window,
+  const union fvector4_t in_color)
 {
-  window_graphics_set_background_color(window, color);
+  window_internal_platform_set_background_color(inout_window, in_color);
 }
 
 /*******************************************************************************
@@ -456,7 +449,7 @@ void window_set_cursor_shape(
   const struct window_t* in_window,
   const enum window_cursor_shape_t in_cursor_shape)
 {
-  window_graphics_set_cursor_shape(
+  window_internal_platform_set_cursor_shape(
     in_window,
     in_cursor_shape);
 }
@@ -469,7 +462,7 @@ void window_set_cursor_shape(
 const char* window_get_clipboard_text(
   const struct window_t* in_window)
 {
-  return window_graphics_get_clipboard_text(in_window);
+  return window_internal_platform_get_clipboard_text(in_window);
 }
 
 /*******************************************************************************
@@ -481,7 +474,7 @@ void window_set_clipboard_text(
   const struct window_t* in_window,
   const char* in_text)
 {
-  window_graphics_set_clipboard_text(
+  window_internal_platform_set_clipboard_text(
     in_window,
     in_text);
 }
@@ -492,7 +485,7 @@ void window_set_clipboard_text(
  *
  ******************************************************************************/
 static void _window_render_layer(
-  struct window_t* inout_window,
+  const struct window_t* in_window,
   struct window_layer_t* inout_layer,
   const bool in_should_resize)
 {
@@ -502,13 +495,13 @@ static void _window_render_layer(
   {
     framebuffer_resize(
       inout_layer->framebuffer,
-      inout_window->metadata.width,
-      inout_window->metadata.height);
+      in_window->metadata.width,
+      in_window->metadata.height);
 
-    inout_layer->camera->camera_reproject(
+    inout_layer->camera->function_reproject(
       inout_layer->camera,
-      (float)inout_window->metadata.width,
-      (float)inout_window->metadata.height,
+      (float)in_window->metadata.width,
+      (float)in_window->metadata.height,
       inout_layer->camera->near_plane,
       inout_layer->camera->far_plane);
   }

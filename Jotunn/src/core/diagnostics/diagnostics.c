@@ -35,29 +35,29 @@ static struct diagnostics_internal_state_t diagnostics_state =
   {
     .types =
     {
-      [EVENT_APP_TICK]    = { .is_excluded = true },
-      [EVENT_MOUSE_MOVED] = { .is_excluded = true },
+      [EVENT_TYPE_APP_TICK]    = { .is_excluded = true },
+      [EVENT_TYPE_MOUSE_MOVED] = { .is_excluded = true },
     }
   }
 };
 
 static const char* const diagnostics_event_type_names[] =
 {
-  [EVENT_WINDOW_CLOSE]      = "window close",
-  [EVENT_WINDOW_RESIZE]     = "window resize",
-  [EVENT_WINDOW_FOCUS]      = "window focus",
-  [EVENT_WINDOW_LOST_FOCUS] = "window lost focus",
-  [EVENT_WINDOW_MOVED]      = "window moved",
-  [EVENT_APP_TICK]          = "app tick",
-  [EVENT_APP_UPDATE]        = "app update",
-  [EVENT_APP_RENDER]        = "app render",
-  [EVENT_KEY_PRESSED]       = "key pressed",
-  [EVENT_KEY_RELEASED]      = "key released",
-  [EVENT_KEY_TYPED]         = "key typed",
-  [EVENT_MOUSE_BUTTON]      = "mouse button",
-  [EVENT_MOUSE_MOVED]       = "mouse moved",
-  [EVENT_MOUSE_SCROLLED]    = "mouse scrolled",
-  [EVENT_MOUSE_ENTERED]     = "mouse entered",
+  [EVENT_TYPE_WINDOW_CLOSE]      = "window close",
+  [EVENT_TYPE_WINDOW_RESIZE]     = "window resize",
+  [EVENT_TYPE_WINDOW_FOCUS]      = "window focus",
+  [EVENT_TYPE_WINDOW_LOST_FOCUS] = "window lost focus",
+  [EVENT_TYPE_WINDOW_MOVED]      = "window moved",
+  [EVENT_TYPE_APP_TICK]          = "app tick",
+  [EVENT_TYPE_APP_UPDATE]        = "app update",
+  [EVENT_TYPE_APP_RENDER]        = "app render",
+  [EVENT_TYPE_KEY_PRESSED]       = "key pressed",
+  [EVENT_TYPE_KEY_RELEASED]      = "key released",
+  [EVENT_TYPE_KEY_TYPED]         = "key typed",
+  [EVENT_TYPE_MOUSE_BUTTON]      = "mouse button",
+  [EVENT_TYPE_MOUSE_MOVED]       = "mouse moved",
+  [EVENT_TYPE_MOUSE_SCROLLED]    = "mouse scrolled",
+  [EVENT_TYPE_MOUSE_ENTERED]     = "mouse entered",
 };
 
 static_assert(
@@ -401,7 +401,7 @@ void diagnostics_internal_event_record(
   struct diagnostics_internal_event_entry_t entry =
     {
       .type = in_event->event_type,
-      .is_handled = (in_event->handled != 0U),
+      .is_handled = (in_event->is_handled != 0U),
       .frame = diagnostics_state.frame_count
     };
   snprintf(
@@ -424,7 +424,7 @@ void diagnostics_internal_event_record(
   type_stats->latest = entry;
   type_stats->has_latest = true;
 
-  if (in_event->event_type != EVENT_APP_TICK)
+  if (in_event->event_type != EVENT_TYPE_APP_TICK)
   {
     events->frame_count++;
   }
@@ -1107,7 +1107,7 @@ static void _diagnostics_describe_event(
 
   switch (in_event->event_type)
   {
-    case EVENT_WINDOW_RESIZE:
+    case EVENT_TYPE_WINDOW_RESIZE:
     {
       const struct event_window_resize_t* event =
         (const struct event_window_resize_t*)in_event;
@@ -1121,7 +1121,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_WINDOW_FOCUS:
+    case EVENT_TYPE_WINDOW_FOCUS:
     {
       const struct event_window_focus_t* event =
         (const struct event_window_focus_t*)in_event;
@@ -1130,11 +1130,11 @@ static void _diagnostics_describe_event(
         out_text,
         in_text_length,
         "%s",
-        event->focused ? "gained" : "lost");
+        event->is_focused ? "gained" : "lost");
     }
     break;
 
-    case EVENT_APP_TICK:
+    case EVENT_TYPE_APP_TICK:
     {
       const struct event_app_tick_t* event =
         (const struct event_app_tick_t*)in_event;
@@ -1147,7 +1147,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_KEY_PRESSED:
+    case EVENT_TYPE_KEY_PRESSED:
     {
       const struct event_key_pressed_t* event =
         (const struct event_key_pressed_t*)in_event;
@@ -1162,7 +1162,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_KEY_RELEASED:
+    case EVENT_TYPE_KEY_RELEASED:
     {
       const struct event_key_released_t* event =
         (const struct event_key_released_t*)in_event;
@@ -1176,7 +1176,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_KEY_TYPED:
+    case EVENT_TYPE_KEY_TYPED:
     {
       const struct event_key_typed_t* event =
         (const struct event_key_typed_t*)in_event;
@@ -1203,7 +1203,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_MOUSE_BUTTON:
+    case EVENT_TYPE_MOUSE_BUTTON:
     {
       const struct event_mouse_button_t* event =
         (const struct event_mouse_button_t*)in_event;
@@ -1218,7 +1218,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_MOUSE_MOVED:
+    case EVENT_TYPE_MOUSE_MOVED:
     {
       const struct event_mouse_moved_t* event =
         (const struct event_mouse_moved_t*)in_event;
@@ -1232,7 +1232,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_MOUSE_SCROLLED:
+    case EVENT_TYPE_MOUSE_SCROLLED:
     {
       const struct event_mouse_scrolled_t* event =
         (const struct event_mouse_scrolled_t*)in_event;
@@ -1246,7 +1246,7 @@ static void _diagnostics_describe_event(
     }
     break;
 
-    case EVENT_MOUSE_ENTERED:
+    case EVENT_TYPE_MOUSE_ENTERED:
     {
       const struct event_mouse_entered_t* event =
         (const struct event_mouse_entered_t*)in_event;
@@ -1373,16 +1373,16 @@ static const char* _diagnostics_find_event_window_tag(
 
   switch (in_event->event_type)
   {
-    case EVENT_WINDOW_CLOSE:
-    case EVENT_WINDOW_RESIZE:
-    case EVENT_WINDOW_FOCUS:
-    case EVENT_KEY_PRESSED:
-    case EVENT_KEY_RELEASED:
-    case EVENT_KEY_TYPED:
-    case EVENT_MOUSE_BUTTON:
-    case EVENT_MOUSE_MOVED:
-    case EVENT_MOUSE_SCROLLED:
-    case EVENT_MOUSE_ENTERED:
+    case EVENT_TYPE_WINDOW_CLOSE:
+    case EVENT_TYPE_WINDOW_RESIZE:
+    case EVENT_TYPE_WINDOW_FOCUS:
+    case EVENT_TYPE_KEY_PRESSED:
+    case EVENT_TYPE_KEY_RELEASED:
+    case EVENT_TYPE_KEY_TYPED:
+    case EVENT_TYPE_MOUSE_BUTTON:
+    case EVENT_TYPE_MOUSE_MOVED:
+    case EVENT_TYPE_MOUSE_SCROLLED:
+    case EVENT_TYPE_MOUSE_ENTERED:
     {
       // Each of these keeps its window's handle straight after the base
       window_handle = ((const struct event_window_close_t*)in_event)->window_handle;

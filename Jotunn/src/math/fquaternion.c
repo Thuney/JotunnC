@@ -2,8 +2,13 @@
 
 #include "fquaternion.h"
 
+/*******************************************************************************
+ *
+ *   Function: fquaternion_init()
+ *
+ ******************************************************************************/
 void fquaternion_init(
-  fquaternion* quaternion)
+  union fquaternion_t* out_quaternion)
 {
-  memset(quaternion, 0, sizeof(fquaternion));
+  memset(out_quaternion, 0, sizeof(union fquaternion_t));
 }

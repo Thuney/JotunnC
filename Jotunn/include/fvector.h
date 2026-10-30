@@ -1,6 +1,16 @@
 #pragma once
 
-typedef union fvector2_t
+// Small float vectors, passed by const pointer to the arithmetic, which
+//  returns new vectors by value
+
+/*******************************************************************************
+ *
+ *   TYPES
+ *
+ ******************************************************************************/
+
+// A 2D vector
+union fvector2_t
 {
   float vec[2];
 
@@ -12,9 +22,10 @@ typedef union fvector2_t
   /*
    *  < x, y >
    */
-} fvector2;
+};
 
-typedef union fvector3_t
+// A 3D vector
+union fvector3_t
 {
   float vec[3];
 
@@ -26,9 +37,10 @@ typedef union fvector3_t
   /*
    *  < x, y, z >
    */
-} fvector3;
+};
 
-typedef union fvector4_t
+// A 4D vector, with its components ordered w, x, y, z
+union fvector4_t
 {
   float vec[4];
 
@@ -40,96 +52,247 @@ typedef union fvector4_t
   /*
    *  < w, x, y, z >
    */
-} fvector4;
+};
+
+/*******************************************************************************
+ *
+ *   DEBUGGING
+ *
+ ******************************************************************************/
 
 #ifdef DEBUG
+
   #include <stdio.h>
 
-void fvector2_print(const fvector2* vector);
-void fvector3_print(const fvector3* vector);
-void fvector4_print(const fvector4* vector);
+// Prints a 2D vector's components to stdout
+//
+//  in:     in_vector
+void fvector2_print(const union fvector2_t* in_vector);
+
+// Prints a 3D vector's components to stdout
+//
+//  in:     in_vector
+void fvector3_print(const union fvector3_t* in_vector);
+
+// Prints a 4D vector's components to stdout
+//
+//  in:     in_vector
+void fvector4_print(const union fvector4_t* in_vector);
+
 #endif
 
-void fvector2_init(fvector2* vector);
-void fvector3_init(fvector3* vector);
-void fvector4_init(fvector4* vector);
+/*******************************************************************************
+ *
+ *   INITIALIZATION
+ *
+ ******************************************************************************/
 
+// Zeroes a 2D vector
+//
+//  out:    out_vector
+void fvector2_init(union fvector2_t* out_vector);
+
+// Zeroes a 3D vector
+//
+//  out:    out_vector
+void fvector3_init(union fvector3_t* out_vector);
+
+// Zeroes a 4D vector
+//
+//  out:    out_vector
+void fvector4_init(union fvector4_t* out_vector);
+
+// Sets a 2D vector's components
+//
+//  in:     in_x, in_y
+//  out:    out_vector
 void fvector2_set(
-  fvector2* vector,
-  const float x,
-  const float y);
+  union fvector2_t* out_vector,
+  const float in_x,
+  const float in_y);
+
+// Sets a 3D vector's components
+//
+//  in:     in_x, in_y, in_z
+//  out:    out_vector
 void fvector3_set(
-  fvector3* vector,
-  const float x,
-  const float y,
-  const float z);
+  union fvector3_t* out_vector,
+  const float in_x,
+  const float in_y,
+  const float in_z);
+
+// Sets a 4D vector's components
+//
+//  in:     in_w, in_x, in_y, in_z
+//  out:    out_vector
 void fvector4_set(
-  fvector4* vector,
-  const float w,
-  const float x,
-  const float y,
-  const float z);
+  union fvector4_t* out_vector,
+  const float in_w,
+  const float in_x,
+  const float in_y,
+  const float in_z);
 
+// Copies a 2D vector
+//
+//  in:     in_vector
+//  out:    out_vector
 void fvector2_setv(
-  fvector2* dest_vector,
-  const fvector2 src_vector);
+  union fvector2_t* out_vector,
+  const union fvector2_t in_vector);
+
+// Copies a 3D vector
+//
+//  in:     in_vector
+//  out:    out_vector
 void fvector3_setv(
-  fvector3* dest_vector,
-  const fvector3 src_vector);
+  union fvector3_t* out_vector,
+  const union fvector3_t in_vector);
+
+// Copies a 4D vector
+//
+//  in:     in_vector
+//  out:    out_vector
 void fvector4_setv(
-  fvector4* dest_vector,
-  const fvector4 src_vector);
+  union fvector4_t* out_vector,
+  const union fvector4_t in_vector);
 
-float fvector2_magnitude(const fvector2* vector);
-float fvector3_magnitude(const fvector3* vector);
-float fvector4_magnitude(const fvector4* vector);
+/*******************************************************************************
+ *
+ *   ARITHMETIC
+ *
+ ******************************************************************************/
 
-fvector2 fvector2_normalize(const fvector2* vector);
-fvector3 fvector3_normalize(const fvector3* vector);
-fvector4 fvector4_normalize(const fvector4* vector);
+// Measures a 2D vector's length
+//
+//  in:     in_vector
+//  ret:    The vector's Euclidean length
+float fvector2_magnitude(const union fvector2_t* in_vector);
 
-// <V1> + <V2>
-fvector2 fvector2_add(
-  const fvector2* vector1,
-  const fvector2* vector2);
-fvector3 fvector3_add(
-  const fvector3* vector1,
-  const fvector3* vector2);
-fvector4 fvector4_add(
-  const fvector4* vector1,
-  const fvector4* vector2);
+// Measures a 3D vector's length
+//
+//  in:     in_vector
+//  ret:    The vector's Euclidean length
+float fvector3_magnitude(const union fvector3_t* in_vector);
 
-// <V1> - <V2>
-fvector2 fvector2_subtract(
-  const fvector2* vector1,
-  const fvector2* vector2);
-fvector3 fvector3_subtract(
-  const fvector3* vector1,
-  const fvector3* vector2);
-fvector4 fvector4_subtract(
-  const fvector4* vector1,
-  const fvector4* vector2);
+// Measures a 4D vector's length
+//
+//  in:     in_vector
+//  ret:    The vector's Euclidean length
+float fvector4_magnitude(const union fvector4_t* in_vector);
 
-// <V>*s
-fvector2 fvector2_scale(
-  const fvector2* vector,
-  float scalar);
-fvector3 fvector3_scale(
-  const fvector3* vector,
-  float scalar);
-fvector4 fvector4_scale(
-  const fvector4* vector,
-  float scalar);
+// Scales a 2D vector to unit length. A zero vector gives non-finite
+//  components
+//
+//  in:     in_vector
+//  ret:    The unit vector
+union fvector2_t fvector2_normalize(const union fvector2_t* in_vector);
 
-// <V1> dot product <V2>
+// Scales a 3D vector to unit length. A zero vector gives non-finite
+//  components
+//
+//  in:     in_vector
+//  ret:    The unit vector
+union fvector3_t fvector3_normalize(const union fvector3_t* in_vector);
+
+// Scales a 4D vector to unit length. A zero vector gives non-finite
+//  components
+//
+//  in:     in_vector
+//  ret:    The unit vector
+union fvector4_t fvector4_normalize(const union fvector4_t* in_vector);
+
+// Adds two 2D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 + in_vector2
+union fvector2_t fvector2_add(
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2);
+
+// Adds two 3D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 + in_vector2
+union fvector3_t fvector3_add(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2);
+
+// Adds two 4D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 + in_vector2
+union fvector4_t fvector4_add(
+  const union fvector4_t* in_vector1,
+  const union fvector4_t* in_vector2);
+
+// Subtracts one 2D vector from another
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 - in_vector2
+union fvector2_t fvector2_subtract(
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2);
+
+// Subtracts one 3D vector from another
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 - in_vector2
+union fvector3_t fvector3_subtract(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2);
+
+// Subtracts one 4D vector from another
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 - in_vector2
+union fvector4_t fvector4_subtract(
+  const union fvector4_t* in_vector1,
+  const union fvector4_t* in_vector2);
+
+// Multiplies each component of a 2D vector by a scalar
+//
+//  in:     in_vector, in_scalar
+//  ret:    The scaled vector
+union fvector2_t fvector2_scale(
+  const union fvector2_t* in_vector,
+  const float in_scalar);
+
+// Multiplies each component of a 3D vector by a scalar
+//
+//  in:     in_vector, in_scalar
+//  ret:    The scaled vector
+union fvector3_t fvector3_scale(
+  const union fvector3_t* in_vector,
+  const float in_scalar);
+
+// Multiplies each component of a 4D vector by a scalar
+//
+//  in:     in_vector, in_scalar
+//  ret:    The scaled vector
+union fvector4_t fvector4_scale(
+  const union fvector4_t* in_vector,
+  const float in_scalar);
+
+// Takes the dot product of two 2D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 . in_vector2
 float fvector2_dot(
-  const fvector2* vector1,
-  const fvector2* vector2);
-float fvector3_dot(
-  const fvector3* vector1,
-  const fvector3* vector2);
+  const union fvector2_t* in_vector1,
+  const union fvector2_t* in_vector2);
 
-// <V1> cross product <V2>
-fvector3 fvector3_cross(
-  const fvector3* vector1,
-  const fvector3* vector2);
+// Takes the dot product of two 3D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 . in_vector2
+float fvector3_dot(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2);
+
+// Takes the cross product of two 3D vectors
+//
+//  in:     in_vector1, in_vector2
+//  ret:    in_vector1 x in_vector2
+union fvector3_t fvector3_cross(
+  const union fvector3_t* in_vector1,
+  const union fvector3_t* in_vector2);

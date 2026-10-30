@@ -1,36 +1,50 @@
 #pragma once
 
+// The events windows and the application raise. Each event's struct begins
+//  with a struct event_base_t, whose event_type says which struct it is, so
+//  handlers take a struct event_base_t* and cast it once they've checked the
+//  type. Events from a window carry its window_handle, the same as the
+//  window's context_data.window_handle, to tell which window they came from
+
 #include <stdbool.h>
 #include <stdint.h>
 
-/************************************************************
+/*******************************************************************************
  *
- * Enum Definitions
+ *   EVENT TYPES
  *
- ************************************************************/
+ ******************************************************************************/
+
+// What an event is, which says which struct it's in
 enum event_type_t
 {
-  EVENT_WINDOW_CLOSE = 0x00,
-  EVENT_WINDOW_RESIZE,
-  EVENT_WINDOW_FOCUS,
-  EVENT_WINDOW_LOST_FOCUS,
-  EVENT_WINDOW_MOVED,
+  EVENT_TYPE_WINDOW_CLOSE = 0x00,
+  EVENT_TYPE_WINDOW_RESIZE,
+  EVENT_TYPE_WINDOW_FOCUS,
+  EVENT_TYPE_WINDOW_LOST_FOCUS,
+  EVENT_TYPE_WINDOW_MOVED,
 
-  EVENT_APP_TICK,
-  EVENT_APP_UPDATE,
-  EVENT_APP_RENDER,
+  EVENT_TYPE_APP_TICK,
+  EVENT_TYPE_APP_UPDATE,
+  EVENT_TYPE_APP_RENDER,
 
-  EVENT_KEY_PRESSED,
-  EVENT_KEY_RELEASED,
-  EVENT_KEY_TYPED,
+  EVENT_TYPE_KEY_PRESSED,
+  EVENT_TYPE_KEY_RELEASED,
+  EVENT_TYPE_KEY_TYPED,
 
-  EVENT_MOUSE_BUTTON,
-  EVENT_MOUSE_MOVED,
-  EVENT_MOUSE_SCROLLED,
-  EVENT_MOUSE_ENTERED,
+  EVENT_TYPE_MOUSE_BUTTON,
+  EVENT_TYPE_MOUSE_MOVED,
+  EVENT_TYPE_MOUSE_SCROLLED,
+  EVENT_TYPE_MOUSE_ENTERED,
 
   EVENT_TYPE_COUNT
 };
+
+/*******************************************************************************
+ *
+ *   KEYS
+ *
+ ******************************************************************************/
 
 // Physical keys, independent of the windowing backend. Laid out in groups
 //  that stay contiguous (digits, letters, function keys and keypad digits) so
@@ -169,26 +183,34 @@ enum event_key_modifier_t
   EVENT_KEY_MODIFIER_SUPER   = 0x08
 };
 
-/************************************************************
+/*******************************************************************************
  *
- * Struct Definitions
+ *   BASE
  *
- ************************************************************/
+ ******************************************************************************/
 
+// The start of every event
 struct event_base_t
 {
   enum event_type_t event_type;
-  unsigned int handled;
+  // Set by the handler that takes the event, which stops it going further
+  unsigned int is_handled;
 };
 
-// Window events
+/*******************************************************************************
+ *
+ *   WINDOW EVENTS
+ *
+ ******************************************************************************/
 
+// A window was asked to close
 struct event_window_close_t
 {
   struct event_base_t base;
   void* window_handle;
 };
 
+// A window's size changed
 struct event_window_resize_t
 {
   struct event_base_t base;
@@ -196,11 +218,12 @@ struct event_window_resize_t
   int width, height;
 };
 
+// A window gained or lost focus
 struct event_window_focus_t
 {
   struct event_base_t base;
   void* window_handle;
-  int focused;
+  int is_focused;
 };
 
 // struct event_window_lost_focus_t
@@ -216,11 +239,17 @@ struct event_window_focus_t
 //    float x, y;
 // };
 
-// App events
+/*******************************************************************************
+ *
+ *   APPLICATION EVENTS
+ *
+ ******************************************************************************/
 
+// Sent once a frame, before the application's windows run
 struct event_app_tick_t
 {
   struct event_base_t base;
+  // Time since the last tick
   float delta_time_seconds;
 };
 
@@ -234,8 +263,13 @@ struct event_app_tick_t
 //    struct event_base_t base;
 // };
 
-// Key events
+/*******************************************************************************
+ *
+ *   KEY EVENTS
+ *
+ ******************************************************************************/
 
+// A key was pressed, or is repeating while held
 struct event_key_pressed_t
 {
   struct event_base_t base;
@@ -247,6 +281,7 @@ struct event_key_pressed_t
   bool is_repeat;
 };
 
+// A key was released
 struct event_key_released_t
 {
   struct event_base_t base;
@@ -264,8 +299,13 @@ struct event_key_typed_t
   uint32_t codepoint;
 };
 
-// Mouse events
+/*******************************************************************************
+ *
+ *   MOUSE EVENTS
+ *
+ ******************************************************************************/
 
+// A mouse button was pressed or released
 struct event_mouse_button_t
 {
   struct event_base_t base;
@@ -278,13 +318,16 @@ struct event_mouse_button_t
   int mods;
 };
 
+// The cursor moved over a window
 struct event_mouse_moved_t
 {
   struct event_base_t base;
   void* window_handle;
+  // Measured from the window's bottom-left corner
   float x, y;
 };
 
+// A mouse wheel or touchpad scrolled
 struct event_mouse_scrolled_t
 {
   struct event_base_t base;

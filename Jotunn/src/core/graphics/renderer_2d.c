@@ -12,16 +12,65 @@
 #include <stdlib.h>
 #include <string.h>
 
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
+
+// Draws everything in the batch, a draw call per kind of primitive in it, in
+//  the order triangles, quads, textured quads, circles, lines. The batch is
+//  left as it was
+//
+//  in:     in_renderer
+static void renderer_2d_flush(
+  struct renderer_2d_t* in_renderer);
+
+// Empties the batch
+//
+//  in/out: inout_renderer
+static void renderer_2d_start_batch(
+  struct renderer_2d_t* inout_renderer);
+
+// Draws everything in the batch, then empties it
+//
+//  in/out: inout_renderer
+static void renderer_2d_next_batch(
+  struct renderer_2d_t* inout_renderer);
+
+// Loads the shaders and creates the batches, the mesh buffers and the white
+//  texture. Shaders that fail to load are logged in DEBUG builds
+//
+//  out:    out_data
+static void renderer_2d_data_init(
+  struct renderer_2d_data_t* out_data);
+
+// Releases everything renderer_2d_data_init() made
+//
+//  in/out: inout_data
+static void renderer_2d_data_cleanup(
+  struct renderer_2d_data_t* inout_data);
+
+// Finds the size of one index of a type
+//
+//  in:     in_index_type
+//  ret:    The index's size in bytes; that of a 32-bit index for a type that
+//            isn't an index type
 static uint32_t _renderer_2d_get_index_size_bytes(
   const enum render_api_element_data_type_t in_index_type);
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_flush()
+ *
+ ******************************************************************************/
 static void renderer_2d_flush(
-  struct renderer_2d_t *renderer)
+  struct renderer_2d_t *in_renderer)
 {
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &in_renderer->render_data;
 
-  struct camera_ortho_t *camera_ortho =
-    (struct camera_ortho_t *)renderer->base.camera;
+  struct camera_orthographic_t *camera_ortho =
+    (struct camera_orthographic_t *)in_renderer->base.camera;
 
   // #ifdef DEBUG
   //    fprintf(stdout, "Flushing renderer - \n");
@@ -42,7 +91,7 @@ static void renderer_2d_flush(
     vertex_buffer_bind(&(data->triangle_data.vbo));
     element_buffer_bind(&(data->triangle_data.ebo));
 
-    vertex_buffer_buffer_sub_data(
+    vertex_buffer_set_sub_data(
       &(data->triangle_data.vbo),
       (float *)data->triangle_data.vertex_data_base,
       triangle_data_size);
@@ -50,18 +99,18 @@ static void renderer_2d_flush(
     shader_program_use(&(data->triangle_shader));
 
     shader_program_set_uniform_fmat4x4(
-      &(data->triangle_shader), "model", &renderer->render_data.model_matrix);
+      &(data->triangle_shader), "model", &in_renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &(data->triangle_shader), "view", &renderer->base.camera->view_matrix);
+      &(data->triangle_shader), "view", &in_renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
       &(data->triangle_shader),
       "projection",
-      &(renderer->base.camera->projection_matrix));
+      &(in_renderer->base.camera->projection_matrix));
 
     render_api_draw_elements(
-      DRAW_TYPE_TRIANGLES,
+      RENDER_API_DRAW_MODE_TRIANGLES,
       data->triangle_data.triangle_index_count,
-      ELEMENT_UNSIGNED_INT,
+      RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT,
       0);
   }
 
@@ -75,7 +124,7 @@ static void renderer_2d_flush(
     vertex_buffer_bind(&data->quad_data.vbo);
     element_buffer_bind(&data->quad_data.ebo);
 
-    vertex_buffer_buffer_sub_data(
+    vertex_buffer_set_sub_data(
       &data->quad_data.vbo,
       (float *)data->quad_data.vertex_data_base,
       quad_data_size);
@@ -83,18 +132,18 @@ static void renderer_2d_flush(
     shader_program_use(&data->quad_shader);
 
     shader_program_set_uniform_fmat4x4(
-      &data->quad_shader, "model", &renderer->render_data.model_matrix);
+      &data->quad_shader, "model", &in_renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->quad_shader, "view", &renderer->base.camera->view_matrix);
+      &data->quad_shader, "view", &in_renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
       &data->quad_shader,
       "projection",
-      &renderer->base.camera->projection_matrix);
+      &in_renderer->base.camera->projection_matrix);
 
     render_api_draw_elements(
-      DRAW_TYPE_TRIANGLES,
+      RENDER_API_DRAW_MODE_TRIANGLES,
       data->quad_data.quad_index_count,
-      ELEMENT_UNSIGNED_INT,
+      RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT,
       0);
   }
 
@@ -108,7 +157,7 @@ static void renderer_2d_flush(
     vertex_buffer_bind(&data->textured_quad_data.vbo);
     element_buffer_bind(&data->textured_quad_data.ebo);
 
-    vertex_buffer_buffer_sub_data(
+    vertex_buffer_set_sub_data(
       &data->textured_quad_data.vbo,
       (float *)data->textured_quad_data.vertex_data_base,
       textured_quad_data_size);
@@ -129,13 +178,13 @@ static void renderer_2d_flush(
     shader_program_set_uniform_fmat4x4(
       &data->textured_quad_shader,
       "model",
-      &renderer->render_data.model_matrix);
+      &in_renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->textured_quad_shader, "view", &renderer->base.camera->view_matrix);
+      &data->textured_quad_shader, "view", &in_renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
       &data->textured_quad_shader,
       "projection",
-      &renderer->base.camera->projection_matrix);
+      &in_renderer->base.camera->projection_matrix);
 
     char texture_uniform_name_buf[16];
 
@@ -147,9 +196,9 @@ static void renderer_2d_flush(
     }
 
     render_api_draw_elements(
-      DRAW_TYPE_TRIANGLES,
+      RENDER_API_DRAW_MODE_TRIANGLES,
       data->textured_quad_data.textured_quad_index_count,
-      ELEMENT_UNSIGNED_INT,
+      RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT,
       0);
   }
 
@@ -163,7 +212,7 @@ static void renderer_2d_flush(
     vertex_buffer_bind(&data->circle_data.vbo);
     element_buffer_bind(&data->circle_data.ebo);
 
-    vertex_buffer_buffer_sub_data(
+    vertex_buffer_set_sub_data(
       &data->circle_data.vbo,
       (float *)data->circle_data.vertex_data_base,
       circle_data_size);
@@ -171,18 +220,18 @@ static void renderer_2d_flush(
     shader_program_use(&data->circle_shader);
 
     shader_program_set_uniform_fmat4x4(
-      &data->circle_shader, "model", &renderer->render_data.model_matrix);
+      &data->circle_shader, "model", &in_renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->circle_shader, "view", &renderer->base.camera->view_matrix);
+      &data->circle_shader, "view", &in_renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
       &data->circle_shader,
       "projection",
-      &renderer->base.camera->projection_matrix);
+      &in_renderer->base.camera->projection_matrix);
 
     render_api_draw_elements(
-      DRAW_TYPE_TRIANGLES,
+      RENDER_API_DRAW_MODE_TRIANGLES,
       data->circle_data.circle_index_count,
-      ELEMENT_UNSIGNED_INT,
+      RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT,
       0);
   }
 
@@ -195,7 +244,7 @@ static void renderer_2d_flush(
     vertex_array_bind(&data->line_data.vao);
     vertex_buffer_bind(&data->line_data.vbo);
 
-    vertex_buffer_buffer_sub_data(
+    vertex_buffer_set_sub_data(
       &data->line_data.vbo,
       (float *)data->line_data.vertex_data_base,
       line_data_size);
@@ -203,27 +252,32 @@ static void renderer_2d_flush(
     shader_program_use(&data->line_shader);
 
     shader_program_set_uniform_fmat4x4(
-      &data->line_shader, "model", &renderer->render_data.model_matrix);
+      &data->line_shader, "model", &in_renderer->render_data.model_matrix);
     shader_program_set_uniform_fmat4x4(
-      &data->line_shader, "view", &renderer->base.camera->view_matrix);
+      &data->line_shader, "view", &in_renderer->base.camera->view_matrix);
     shader_program_set_uniform_fmat4x4(
       &data->line_shader,
       "projection",
-      &renderer->base.camera->projection_matrix);
+      &in_renderer->base.camera->projection_matrix);
 
-    render_api_set_line_width(data->line_width);
+    render_api_set_line_width(data->line_width_pixels);
     render_api_draw_lines(data->line_data.line_vertex_count);
   }
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_start_batch()
+ *
+ ******************************************************************************/
 static void renderer_2d_start_batch(
-  struct renderer_2d_t *renderer)
+  struct renderer_2d_t *inout_renderer)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D starting batch\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   data->triangle_data.triangle_index_count = 0;
   data->triangle_data.vertex_data_ptr = data->triangle_data.vertex_data_base;
@@ -244,27 +298,37 @@ static void renderer_2d_start_batch(
   data->textures_index = 0;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_next_batch()
+ *
+ ******************************************************************************/
 static void renderer_2d_next_batch(
-  struct renderer_2d_t *renderer)
+  struct renderer_2d_t *inout_renderer)
 {
-  renderer_2d_flush(renderer);
-  renderer_2d_start_batch(renderer);
+  renderer_2d_flush(inout_renderer);
+  renderer_2d_start_batch(inout_renderer);
 }
 
-// Our upper limit on quads to draw per batch. Translates into a limitation on max vertices / indices, technically, to include things like triangles, circles, and lines
+// Our upper limit on quads to draw per batch. Translates into a limitation on
+//  max vertices / indices, technically, to include things like triangles,
+//  circles, and lines
 static const unsigned int max_quads = 1000;
 static const unsigned int max_vertices = max_quads * 4;
 static const unsigned int max_indices = max_quads * 6;
 
-//
-
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_data_init()
+ *
+ ******************************************************************************/
 static void renderer_2d_data_init(
-  struct renderer_2d_data_t *data)
+  struct renderer_2d_data_t *out_data)
 {
   unsigned int error = 0;
 
   error = shader_program_init_filepath(
-    &data->triangle_shader,
+    &out_data->triangle_shader,
     PATH_FROM_JOTUNN_ROOT("/res/shaders/triangle_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/triangle_2d_shader.frag"));
 #ifdef DEBUG
@@ -274,7 +338,7 @@ static void renderer_2d_data_init(
       "Error during triangle shader init");
 #endif
   error = shader_program_init_filepath(
-    &data->quad_shader,
+    &out_data->quad_shader,
     PATH_FROM_JOTUNN_ROOT("/res/shaders/quad_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/quad_2d_shader.frag"));
 #ifdef DEBUG
@@ -284,7 +348,7 @@ static void renderer_2d_data_init(
       "Error during quad shader init");
 #endif
   error = shader_program_init_filepath(
-    &data->textured_quad_shader,
+    &out_data->textured_quad_shader,
     PATH_FROM_JOTUNN_ROOT("/res/shaders/textured_quad_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/textured_quad_2d_shader.frag"));
 #ifdef DEBUG
@@ -294,7 +358,7 @@ static void renderer_2d_data_init(
       "Error during quad shader init");
 #endif
   error = shader_program_init_filepath(
-    &data->circle_shader,
+    &out_data->circle_shader,
     PATH_FROM_JOTUNN_ROOT("/res/shaders/circle_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/circle_2d_shader.frag"));
 #ifdef DEBUG
@@ -304,7 +368,7 @@ static void renderer_2d_data_init(
       "Error during circle shader init");
 #endif
   error = shader_program_init_filepath(
-    &data->line_shader,
+    &out_data->line_shader,
     PATH_FROM_JOTUNN_ROOT("/res/shaders/line_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/line_2d_shader.frag"));
 #ifdef DEBUG
@@ -314,7 +378,7 @@ static void renderer_2d_data_init(
       "Error during line shader init");
 #endif
   error = shader_program_init_filepath(
-    &(data->mesh_shader),
+    &(out_data->mesh_shader),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/mesh_2d_shader.vert"),
     PATH_FROM_JOTUNN_ROOT("/res/shaders/mesh_2d_shader.frag"));
 #ifdef DEBUG
@@ -326,80 +390,90 @@ static void renderer_2d_data_init(
   }
 #endif
 
-  fmatrix_4x4_init(&data->model_matrix);
+  fmatrix_4x4_init(&out_data->model_matrix);
 
   renderable_2d_triangle_data_init(
-    &data->triangle_data, max_vertices, &data->triangle_shader);
+    &out_data->triangle_data, max_vertices, &out_data->triangle_shader);
   renderable_2d_quad_data_init(
-    &data->quad_data, max_vertices, &data->quad_shader);
+    &out_data->quad_data, max_vertices, &out_data->quad_shader);
   renderable_2d_textured_quad_data_init(
-    &data->textured_quad_data, max_vertices, &data->textured_quad_shader);
+    &out_data->textured_quad_data, max_vertices, &out_data->textured_quad_shader);
   renderable_2d_circle_data_init(
-    &data->circle_data, max_vertices, &data->circle_shader);
+    &out_data->circle_data, max_vertices, &out_data->circle_shader);
   renderable_2d_line_data_init(
-    &data->line_data, max_vertices, &data->line_shader);
+    &out_data->line_data, max_vertices, &out_data->line_shader);
   renderable_2d_mesh_data_init(
-    &(data->mesh_data),
-    &(data->mesh_shader));
+    &(out_data->mesh_data),
+    &(out_data->mesh_shader));
 
   static unsigned char white_texture_pixels[4] = {0xFF, 0xFF, 0xFF, 0xFF};
   texture_2d_init(
-    &(data->white_texture),
+    &(out_data->white_texture),
     1,
     1,
     TEXTURE_2D_INTERNAL_FORMAT_RGBA,
     TEXTURE_2D_DATA_FORMAT_RGBA,
     false);
   texture_2d_set_data(
-    &(data->white_texture),
+    &(out_data->white_texture),
     white_texture_pixels,
     sizeof(white_texture_pixels));
   resource_set_name(
-    &(data->white_texture.resource),
+    &(out_data->white_texture.resource),
     "renderer_2d white");
 
-  data->line_width = 5.0f;
+  out_data->line_width_pixels = 5.0f;
 
-  data->textures_index = 0;
+  out_data->textures_index = 0;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_data_cleanup()
+ *
+ ******************************************************************************/
 static void renderer_2d_data_cleanup(
-  struct renderer_2d_data_t *data)
+  struct renderer_2d_data_t *inout_data)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D data cleanup\n");
   // #endif
 
-  renderable_2d_triangle_data_cleanup(&data->triangle_data);
-  renderable_2d_quad_data_cleanup(&data->quad_data);
-  renderable_2d_textured_quad_data_cleanup(&data->textured_quad_data);
-  renderable_2d_circle_data_cleanup(&data->circle_data);
-  renderable_2d_line_data_cleanup(&data->line_data);
-  renderable_2d_mesh_data_cleanup(&(data->mesh_data));
-  texture_2d_cleanup(&(data->white_texture));
+  renderable_2d_triangle_data_cleanup(&inout_data->triangle_data);
+  renderable_2d_quad_data_cleanup(&inout_data->quad_data);
+  renderable_2d_textured_quad_data_cleanup(&inout_data->textured_quad_data);
+  renderable_2d_circle_data_cleanup(&inout_data->circle_data);
+  renderable_2d_line_data_cleanup(&inout_data->line_data);
+  renderable_2d_mesh_data_cleanup(&(inout_data->mesh_data));
+  texture_2d_cleanup(&(inout_data->white_texture));
 
-  shader_program_destroy(&data->triangle_shader);
-  shader_program_destroy(&data->quad_shader);
-  shader_program_destroy(&data->textured_quad_shader);
-  shader_program_destroy(&data->circle_shader);
-  shader_program_destroy(&data->line_shader);
-  shader_program_destroy(&(data->mesh_shader));
+  shader_program_destroy(&inout_data->triangle_shader);
+  shader_program_destroy(&inout_data->quad_shader);
+  shader_program_destroy(&inout_data->textured_quad_shader);
+  shader_program_destroy(&inout_data->circle_shader);
+  shader_program_destroy(&inout_data->line_shader);
+  shader_program_destroy(&(inout_data->mesh_shader));
 
-  data->line_width = -1.0f;
+  inout_data->line_width_pixels = -1.0f;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_init()
+ *
+ ******************************************************************************/
 void renderer_2d_init(
-  struct renderer_2d_t *renderer,
-  struct camera_base_t *camera,
-  struct window_t *parent_window,
-  const char *tag)
+  struct renderer_2d_t *out_renderer,
+  struct camera_base_t *in_camera,
+  struct window_t *in_parent_window,
+  const char *in_tag)
 {
-  const uint16_t render_flags = (COLOR_FLAG | DEPTH_FLAG | BLEND_FLAG);
+  const uint16_t render_flags = (RENDER_API_RENDER_FLAGS_COLOR | RENDER_API_RENDER_FLAGS_DEPTH | RENDER_API_RENDER_FLAGS_BLEND);
 
-  renderer_base_init(&renderer->base, render_flags, camera, parent_window, tag);
+  renderer_base_init(&out_renderer->base, render_flags, in_camera, in_parent_window, in_tag);
 
-  renderer->base.renderer_begin_scene = &renderer_2d_begin_scene;
-  renderer->base.renderer_end_scene = &renderer_2d_end_scene;
+  out_renderer->base.renderer_begin_scene = &renderer_2d_begin_scene;
+  out_renderer->base.renderer_end_scene = &renderer_2d_end_scene;
 
 #ifdef DEBUG
   log_write(
@@ -408,12 +482,17 @@ void renderer_2d_init(
 #endif
 
   // Batch stuff
-  renderer_2d_data_init(&renderer->render_data);
-  renderer_2d_set_line_width(renderer, renderer->render_data.line_width);
+  renderer_2d_data_init(&out_renderer->render_data);
+  renderer_2d_set_line_width(out_renderer, out_renderer->render_data.line_width_pixels);
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_cleanup()
+ *
+ ******************************************************************************/
 void renderer_2d_cleanup(
-  struct renderer_2d_t *renderer)
+  struct renderer_2d_t *inout_renderer)
 {
   // #ifdef DEBUG
   //      fprintf(stdout, "Cleaning up renderer 2D\n");
@@ -421,15 +500,20 @@ void renderer_2d_cleanup(
 
   vertex_array_unbind();
 
-  renderer_2d_data_cleanup(&renderer->render_data);
+  renderer_2d_data_cleanup(&inout_renderer->render_data);
 
-  renderer_base_cleanup(&(renderer->base));
+  renderer_base_cleanup(&(inout_renderer->base));
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_begin_scene()
+ *
+ ******************************************************************************/
 void renderer_2d_begin_scene(
-  void *renderer)
+  void *inout_renderer)
 {
-  struct renderer_2d_t *renderer_2d = (struct renderer_2d_t *)renderer;
+  struct renderer_2d_t *renderer_2d = (struct renderer_2d_t *)inout_renderer;
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D beginning scene\n");
   // #endif
@@ -437,10 +521,15 @@ void renderer_2d_begin_scene(
   renderer_2d_start_batch(renderer_2d);
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_end_scene()
+ *
+ ******************************************************************************/
 void renderer_2d_end_scene(
-  void *renderer)
+  void *in_renderer)
 {
-  struct renderer_2d_t *renderer_2d = (struct renderer_2d_t *)renderer;
+  struct renderer_2d_t *renderer_2d = (struct renderer_2d_t *)in_renderer;
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D ending scene\n");
   // #endif
@@ -452,30 +541,33 @@ void renderer_2d_end_scene(
   framebuffer_unbind();
 }
 
-//
-
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_triangle()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_triangle(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  const fvector4 color)
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing triangle\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   const unsigned int triangle_vertex_count = 3;
 
   if (data->triangle_data.triangle_index_count >= max_indices)
-    renderer_2d_next_batch(renderer);
+    renderer_2d_next_batch(inout_renderer);
 
   unsigned int i;
   for (i = 0; i < triangle_vertex_count; i++)
   {
     data->triangle_data.vertex_data_ptr->position =
-      fmatrix_4x4_transform_point(transform, triangle_2d_position_data[i]);
-    data->triangle_data.vertex_data_ptr->color = color;
+      fmatrix_4x4_transform_point(in_transform, triangle_2d_position_data[i]);
+    data->triangle_data.vertex_data_ptr->color = in_color;
 
     data->triangle_data.vertex_data_ptr++;
   }
@@ -483,28 +575,33 @@ void renderer_2d_draw_triangle(
   data->triangle_data.triangle_index_count += 3;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_quad()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_quad(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  const fvector4 color)
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing quad\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   const unsigned int quad_vertex_count = 4;
 
   if (data->quad_data.quad_index_count >= max_indices)
-    renderer_2d_next_batch(renderer);
+    renderer_2d_next_batch(inout_renderer);
 
   unsigned int i;
   for (i = 0; i < quad_vertex_count; i++)
   {
     data->quad_data.vertex_data_ptr->position =
-      fmatrix_4x4_transform_point(transform, quad_2d_position_data[i]);
-    data->quad_data.vertex_data_ptr->color = color;
+      fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[i]);
+    data->quad_data.vertex_data_ptr->color = in_color;
 
     data->quad_data.vertex_data_ptr++;
   }
@@ -512,64 +609,74 @@ void renderer_2d_draw_quad(
   data->quad_data.quad_index_count += 6;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_unfilled_quad()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_unfilled_quad(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  const fvector4 color)
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing unfilled quad\n");
   // #endif
 
   renderer_2d_draw_line(
-    renderer,
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[0]),
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[1]),
-    color);
+    inout_renderer,
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[0]),
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[1]),
+    in_color);
 
   renderer_2d_draw_line(
-    renderer,
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[1]),
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[2]),
-    color);
+    inout_renderer,
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[1]),
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[2]),
+    in_color);
 
   renderer_2d_draw_line(
-    renderer,
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[2]),
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[3]),
-    color);
+    inout_renderer,
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[2]),
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[3]),
+    in_color);
 
   renderer_2d_draw_line(
-    renderer,
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[3]),
-    fmatrix_4x4_transform_point(transform, quad_2d_position_data[0]),
-    color);
+    inout_renderer,
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[3]),
+    fmatrix_4x4_transform_point(in_transform, quad_2d_position_data[0]),
+    in_color);
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_textured_quad()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_textured_quad(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  struct texture_2d_t *texture)
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const struct texture_2d_t *in_texture)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing textured quad\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   const unsigned int quad_vertex_count = 4;
 
   const float tiling_factor = 1.0f;
 
   if (data->quad_data.quad_index_count >= max_indices)
-    renderer_2d_next_batch(renderer);
+    renderer_2d_next_batch(inout_renderer);
 
   float texture_index = -1.0f;
   for (unsigned int i = 0; i < data->textures_index; i++)
   {
     const unsigned int this_texture_id = (data->textures[i])->texture_id;
 
-    if ((this_texture_id) == (texture->texture_id))
+    if ((this_texture_id) == (in_texture->texture_id))
     {
       texture_index = (float)i;
       break;
@@ -579,19 +686,19 @@ void renderer_2d_draw_textured_quad(
   if (texture_index < 0)
   {
     if (data->textures_index >= _RENDERER_2D_MAX_TEXTURES)
-      renderer_2d_next_batch(renderer);
+      renderer_2d_next_batch(inout_renderer);
 
     texture_index = (float)data->textures_index;
-    data->textures[data->textures_index] = texture;
+    data->textures[data->textures_index] = in_texture;
     data->textures_index++;
   }
 
   unsigned int i;
   for (i = 0; i < quad_vertex_count; i++)
   {
-    const fvector3 new_position =
-      fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
-    const fvector2 new_texture_coordinates =
+    const union fvector3_t new_position =
+      fmatrix_4x4_transform_point(in_transform, textured_quad_2d_position_data[i]);
+    const union fvector2_t new_texture_coordinates =
       textured_quad_texture_coordinates[i];
     const float new_texture_index = texture_index;
     const float new_tiling_factor = tiling_factor;
@@ -608,31 +715,36 @@ void renderer_2d_draw_textured_quad(
   data->textured_quad_data.textured_quad_index_count += 6;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_subtextured_quad()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_subtextured_quad(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  struct texture_2d_t *texture,
-  const fvector2 subtexture_coords[4])
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const struct texture_2d_t *in_texture,
+  const union fvector2_t in_subtexture_coords[4])
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing subtextured quad\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   const unsigned int quad_vertex_count = 4;
 
   const float tiling_factor = 1.0f;
 
   if (data->quad_data.quad_index_count >= max_indices)
-    renderer_2d_next_batch(renderer);
+    renderer_2d_next_batch(inout_renderer);
 
   float texture_index = -1.0f;
   for (unsigned int i = 0; i < data->textures_index; i++)
   {
     const unsigned int this_texture_id = (data->textures[i])->texture_id;
 
-    if ((this_texture_id) == (texture->texture_id))
+    if ((this_texture_id) == (in_texture->texture_id))
     {
       texture_index = (float)i;
       break;
@@ -642,19 +754,19 @@ void renderer_2d_draw_subtextured_quad(
   if (texture_index < 0)
   {
     if (data->textures_index >= _RENDERER_2D_MAX_TEXTURES)
-      renderer_2d_next_batch(renderer);
+      renderer_2d_next_batch(inout_renderer);
 
     texture_index = (float)data->textures_index;
-    data->textures[data->textures_index] = texture;
+    data->textures[data->textures_index] = in_texture;
     data->textures_index++;
   }
 
   unsigned int i;
   for (i = 0; i < quad_vertex_count; i++)
   {
-    const fvector3 new_position =
-      fmatrix_4x4_transform_point(transform, textured_quad_2d_position_data[i]);
-    const fvector2 new_texture_coordinates = subtexture_coords[i];
+    const union fvector3_t new_position =
+      fmatrix_4x4_transform_point(in_transform, textured_quad_2d_position_data[i]);
+    const union fvector2_t new_texture_coordinates = in_subtexture_coords[i];
     const float new_texture_index = texture_index;
     const float new_tiling_factor = tiling_factor;
 
@@ -670,26 +782,31 @@ void renderer_2d_draw_subtextured_quad(
   data->textured_quad_data.textured_quad_index_count += 6;
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_circle()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_circle(
-  struct renderer_2d_t *renderer,
-  const fmatrix_4x4 *transform,
-  const fvector4 color)
+  struct renderer_2d_t *inout_renderer,
+  const union fmatrix_4x4_t *in_transform,
+  const union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing circle\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
   if (data->circle_data.circle_index_count >= max_indices)
-    renderer_2d_next_batch(renderer);
+    renderer_2d_next_batch(inout_renderer);
 
   unsigned int i;
   for (i = 0; i < _NUM_CIRCLE_2D_VERTICES; i++)
   {
     data->circle_data.vertex_data_ptr->position =
-      fmatrix_4x4_transform_point(transform, circle_2d_position_data[i]);
-    data->circle_data.vertex_data_ptr->color = color;
+      fmatrix_4x4_transform_point(in_transform, circle_2d_position_data[i]);
+    data->circle_data.vertex_data_ptr->color = in_color;
 
     data->circle_data.vertex_data_ptr++;
   }
@@ -698,25 +815,30 @@ void renderer_2d_draw_circle(
     (3 * (_RENDERABLE_2D_CIRCLE_RESOLUTION));
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_line()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_line(
-  struct renderer_2d_t *renderer,
-  const fvector3 pos_1,
-  const fvector3 pos_2,
-  const fvector4 color)
+  struct renderer_2d_t *inout_renderer,
+  const union fvector3_t in_pos_1,
+  const union fvector3_t in_pos_2,
+  const union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing line\n");
   // #endif
 
-  struct renderer_2d_data_t *data = &renderer->render_data;
+  struct renderer_2d_data_t *data = &inout_renderer->render_data;
 
-  data->line_data.vertex_data_ptr->position = pos_1;
-  data->line_data.vertex_data_ptr->color = color;
+  data->line_data.vertex_data_ptr->position = in_pos_1;
+  data->line_data.vertex_data_ptr->color = in_color;
 
   data->line_data.vertex_data_ptr++;
 
-  data->line_data.vertex_data_ptr->position = pos_2;
-  data->line_data.vertex_data_ptr->color = color;
+  data->line_data.vertex_data_ptr->position = in_pos_2;
+  data->line_data.vertex_data_ptr->color = in_color;
 
   data->line_data.vertex_data_ptr++;
 
@@ -750,16 +872,16 @@ void renderer_2d_draw_mesh(
   vertex_buffer_bind(&(data->mesh_data.vbo));
   element_buffer_bind(&(data->mesh_data.ebo));
 
-  vertex_buffer_buffer_data(
+  vertex_buffer_set_data(
     &(data->mesh_data.vbo),
     in_mesh->vertices,
     (in_mesh->vertex_count * sizeof(struct renderable_2d_mesh_vertex_t)),
-    STREAM_DRAW);
+    VERTEX_BUFFER_DATA_USAGE_STREAM_DRAW);
   element_buffer_buffer_data(
     &(data->mesh_data.ebo),
     in_mesh->indices,
     (in_mesh->index_count * index_size_bytes),
-    STREAM_DRAW);
+    VERTEX_BUFFER_DATA_USAGE_STREAM_DRAW);
 
   shader_program_use(&(data->mesh_shader));
 
@@ -817,7 +939,7 @@ void renderer_2d_draw_mesh(
       0);
 
     render_api_draw_elements_base_vertex(
-      DRAW_TYPE_TRIANGLES,
+      RENDER_API_DRAW_MODE_TRIANGLES,
       submesh->index_count,
       in_mesh->index_type,
       ((uintptr_t)submesh->index_offset * index_size_bytes),
@@ -829,53 +951,58 @@ void renderer_2d_draw_mesh(
   vertex_array_unbind();
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_draw_string()
+ *
+ ******************************************************************************/
 void renderer_2d_draw_string(
-  struct renderer_2d_t *renderer,
-  const struct typeface_t *typeface,
-  const fvector3 start_position,
-  const char *draw_string)
+  struct renderer_2d_t *inout_renderer,
+  const struct font_typeface_t *in_typeface,
+  const union fvector3_t in_start_position,
+  const char *in_draw_string)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing string\n");
   // #endif
 
-  unsigned int num_chars = strlen(draw_string);
-  fvector2 text_dimensions =
-    typeface_calculate_string_dimensions(typeface, draw_string, num_chars);
+  unsigned int num_chars = strlen(in_draw_string);
+  union fvector2_t text_dimensions =
+    font_typeface_calculate_string_dimensions(in_typeface, in_draw_string, num_chars);
 
   int error;
 
-  fmatrix_4x4 scale_matrix, translation_matrix, transform;
+  union fmatrix_4x4_t scale_matrix, translation_matrix, transform;
   fmatrix_4x4_init(&scale_matrix);
   fmatrix_4x4_init(&translation_matrix);
 
-  fvector3 string_current_render_position = {start_position.comp.x,
-                                             start_position.comp.y -
+  union fvector3_t string_current_render_position = {in_start_position.comp.x,
+                                             in_start_position.comp.y -
                                                text_dimensions.comp.y,
                                              0.0f};
 
-  fvector3 texture_dimensions_scale_factors, character_x_translation,
+  union fvector3_t texture_dimensions_scale_factors, character_x_translation,
     character_local_translation;
 
-  const struct glyph_t *character_glyph;
+  const struct font_glyph_t *character_glyph;
 
   unsigned int i;
   for (i = 0; i < num_chars; i++)
   {
-    char c = draw_string[i];
+    char c = in_draw_string[i];
 
-    character_glyph = typeface_get_glyph_from_char(typeface, c);
+    character_glyph = typeface_get_glyph_from_char(in_typeface, c);
 
     fvector3_set(
       &texture_dimensions_scale_factors,
-      (float)(character_glyph->width),
-      (float)(character_glyph->height),
+      (float)(character_glyph->width_pixels),
+      (float)(character_glyph->height_pixels),
       1.0f);
 
     fvector3_set(
       &character_local_translation,
-      (float)character_glyph->offset_x,
-      -1.0f * (float)character_glyph->offset_y,
+      (float)character_glyph->offset_x_pixels,
+      -1.0f * (float)character_glyph->offset_y_pixels,
       0.0f);
 
     translation_matrix = fmatrix_4x4_transform_translate(
@@ -888,24 +1015,24 @@ void renderer_2d_draw_string(
 
     transform = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
 
-    const fvector2 *p0, *p1;
+    const union fvector2_t *p0, *p1;
     p0 = &(character_glyph->glyph_texture.subtexture_coordinates[0]);
     p1 = &(character_glyph->glyph_texture.subtexture_coordinates[1]);
 
-    const fvector2 subtexture_coords[4] = {{p0->comp.x, p1->comp.y},
+    const union fvector2_t subtexture_coords[4] = {{p0->comp.x, p1->comp.y},
                                            {p1->comp.x, p1->comp.y},
                                            {p1->comp.x, p0->comp.y},
                                            {p0->comp.x, p0->comp.y}};
 
     renderer_2d_draw_subtextured_quad(
-      renderer,
+      inout_renderer,
       &transform,
       character_glyph->glyph_texture.parent_texture,
       subtexture_coords);
 
     fvector3_set(
       &character_x_translation,
-      (float)(character_glyph->advance_x),
+      (float)(character_glyph->advance_x_pixels),
       0.0f,
       0.0f);
     string_current_render_position =
@@ -916,11 +1043,16 @@ void renderer_2d_draw_string(
   }
 }
 
+/*******************************************************************************
+ *
+ *   Function: renderer_2d_set_line_width()
+ *
+ ******************************************************************************/
 void renderer_2d_set_line_width(
-  struct renderer_2d_t *renderer,
-  const float line_width)
+  const struct renderer_2d_t *in_renderer,
+  const float in_line_width_pixels)
 {
-  render_api_set_line_width(line_width);
+  render_api_set_line_width(in_line_width_pixels);
 }
 
 /*******************************************************************************
@@ -935,17 +1067,17 @@ static uint32_t _renderer_2d_get_index_size_bytes(
 
   switch (in_index_type)
   {
-    case ELEMENT_UNSIGNED_BYTE:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_BYTE:
     {
       index_size_bytes = sizeof(uint8_t);
     }
     break;
-    case ELEMENT_UNSIGNED_SHORT:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_SHORT:
     {
       index_size_bytes = sizeof(uint16_t);
     }
     break;
-    case ELEMENT_UNSIGNED_INT:
+    case RENDER_API_ELEMENT_DATA_TYPE_UNSIGNED_INT:
     default:
     {
       index_size_bytes = sizeof(uint32_t);

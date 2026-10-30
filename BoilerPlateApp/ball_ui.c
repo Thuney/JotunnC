@@ -2,37 +2,52 @@
 
 #include "cimgui.h"
 
-static void ball_custom_ui_layer_render(struct ui_layer_t* ui_layer);
+/*******************************************************************************
+ *
+ *   STATIC PROTOTYPES
+ *
+ ******************************************************************************/
 
-/*************************************
+// Draws the UI each frame: a test window and the ImGui demo window
+//
+//  in/out: inout_ui_layer
+static void ball_ui_layer_render(
+  struct ui_layer_t* inout_ui_layer);
+
+/*******************************************************************************
  *
- * Function: ball_ui_layer_init()
+ *   Function: ball_ui_layer_init()
  *
- *************************************/
+ ******************************************************************************/
 void ball_ui_layer_init(
-  struct window_t *parent_window,
-  struct ball_ui_layer_t *ball_layer,
-  uint16_t width,
-  uint16_t height)
+  struct window_t *inout_parent_window,
+  struct ball_ui_layer_t *out_ball_layer,
+  const uint16_t in_width,
+  const uint16_t in_height)
 {
-  ui_layer_init(parent_window, &(ball_layer->ui_layer), width, height);
+  ui_layer_init(inout_parent_window, &(out_ball_layer->ui_layer), in_width, in_height);
 
   ui_layer_set_custom_render(
-    &(ball_layer->ui_layer),
-    &ball_custom_ui_layer_render);
+    &(out_ball_layer->ui_layer),
+    &ball_ui_layer_render);
 }
 
-/*************************************
+/*******************************************************************************
  *
- * Function: ball_ui_layer_cleanup()
+ *   Function: ball_ui_layer_cleanup()
  *
- *************************************/
-void ball_ui_layer_cleanup(struct ball_ui_layer_t *ball_layer)
+ ******************************************************************************/
+void ball_ui_layer_cleanup(struct ball_ui_layer_t *inout_ball_layer)
 {
-  ui_layer_cleanup(&(ball_layer->ui_layer));
+  ui_layer_cleanup(&(inout_ball_layer->ui_layer));
 }
 
-static void ball_custom_ui_layer_render(struct ui_layer_t* ui_layer)
+/*******************************************************************************
+ *
+ *   Function: ball_ui_layer_render()
+ *
+ ******************************************************************************/
+static void ball_ui_layer_render(struct ui_layer_t* inout_ui_layer)
 {
   igBegin("Test", NULL, 0);
   igText("Test");
