@@ -467,6 +467,11 @@ void renderer_2d_draw_line(
 
   struct renderer_2d_data_t* data = &(inout_renderer->render_data);
 
+  // The line buffer holds max_vertices lines, of two vertices each
+  if (data->line_data.line_vertex_count >= (2 * max_vertices)) {
+    renderer_2d_next_batch(inout_renderer);
+  }
+
   data->line_data.vertex_data_ptr->position = in_pos_1;
   data->line_data.vertex_data_ptr->color = in_color;
 
