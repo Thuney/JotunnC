@@ -82,6 +82,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderable_3d_primitive.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/resource.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/camera.c
+  ${JotunnC_SOURCE_DIR}/src/core/graphics/camera_orbit.c
 
   ${JotunnC_SOURCE_DIR}/src/core/graphics/datatypes/font.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/datatypes/framebuffer.c
