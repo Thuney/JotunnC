@@ -29,7 +29,7 @@
  *
  ******************************************************************************/
 
-// Fills in a new window's metadata, copying in_tag
+// Fills in a new window's metadata, keeping in_tag
 //
 //  in:     in_width, in_height, in_tag, in_app_parent,
 //            in_function_event_notify
@@ -336,9 +336,6 @@ uint8_t window_run(
 void window_cleanup(
   struct window_t* inout_window)
 {
-  allocator_free(inout_window->metadata.tag);
-  inout_window->metadata.tag = 0;
-
   diagnostics_internal_overlay_cleanup(inout_window);
 
   // Releasing the window renderer's graphics resources needs the window's
@@ -464,11 +461,7 @@ static void window_set_metadata(
     struct application_t* inout_application,
     struct event_base_t* inout_event))
 {
-  // Store our window tag
-  out_metadata->tag =
-    allocator_duplicate_string(
-      in_tag,
-      ALLOCATOR_TAG_WINDOW);
+  out_metadata->tag = in_tag;
 
   // Assign window properties
   out_metadata->width  = in_width;

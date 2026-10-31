@@ -20,8 +20,9 @@ struct window_t;
 struct renderer_base_t
 {
   struct window_t* parent_window;
-  //
-  char* tag;
+  // Names the renderer in diagnostics. Not owned, so it must outlive the
+  //  renderer
+  const char* tag;
   //
   struct camera_base_t* camera;
   //
@@ -40,10 +41,9 @@ struct renderer_base_t
  ******************************************************************************/
 
 // Sets up the shared part of a renderer, initializing its render state with
-//  in_render_flags in the current graphics context. The tag is copied, and
-//  freed by renderer_base_cleanup(); the camera and window aren't owned and
-//  must outlive the renderer. The scene callbacks are left for the caller to
-//  set
+//  in_render_flags in the current graphics context. The tag, camera and
+//  window aren't owned, and must outlive the renderer. The scene callbacks
+//  are left for the caller to set
 //
 //  in:     in_render_flags, in_camera, in_parent_window, in_tag
 //  out:    out_renderer
@@ -54,7 +54,7 @@ void renderer_base_init(
   struct window_t* in_parent_window,
   const char* in_tag);
 
-// Frees the renderer's tag
+// Clears the renderer's tag; the base holds nothing else to release
 //
 //  in/out: inout_renderer
 void renderer_base_cleanup(

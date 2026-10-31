@@ -721,7 +721,7 @@ static void renderable_2d_primitive_data_init(
   }
 
   unsigned int attribute_index, temp_shader_index;
-  char* attribute_name;
+  const char* attribute_name;
 
   for (attribute_index = 0; attribute_index < in_num_attributes; attribute_index++) {
     attribute_name = inout_attributes[attribute_index].attribute_name;

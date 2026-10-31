@@ -21,8 +21,8 @@
 // An application and the windows it runs
 struct application_t
 {
-  //
-  char* name;
+  // Not owned, so it must outlive the application
+  const char* name;
   //
   struct window_t* current_window;
   struct window_t** windows;
@@ -47,8 +47,8 @@ struct application_t
  ******************************************************************************/
 
 // Sets up an application with room for in_max_windows windows, and
-//  initializes the font library. The application keeps its own copy of
-//  in_app_name
+//  initializes the font library. The application keeps in_app_name, which
+//  must outlive it
 //
 //  in:     in_app_name, in_max_windows
 //  out:    out_app

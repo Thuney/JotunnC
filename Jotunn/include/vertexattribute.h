@@ -26,7 +26,9 @@ enum vertex_attribute_data_type_t
 
 struct vertex_attribute_t
 {
-  char* attribute_name;
+  // The name the shader gives the attribute. Not owned, so it must outlive
+  //  the attribute
+  const char* attribute_name;
   unsigned int index;
   int size;
   enum vertex_attribute_data_type_t data_type;
@@ -41,8 +43,7 @@ struct vertex_attribute_t
  *
  ******************************************************************************/
 
-// Describes a vertex attribute, keeping a copy of its name (NULL when it
-//  can't be allocated) until vertex_attribute_cleanup(). in_index is the
+// Describes a vertex attribute, keeping in_attribute_name. in_index is the
 //  attribute's location in the shader, in_size its number of components,
 //  in_stride the bytes from one vertex to the next (0 when tightly packed),
 //  and in_ptr_offset_to_attrib the byte offset of its first component in the
@@ -61,15 +62,6 @@ void vertex_attribute_init(
   unsigned int in_should_normalize,
   unsigned int in_stride,
   void* in_ptr_offset_to_attrib);
-
-// Frees the names of in_num vertex attributes, one in each element of the
-//  array inout_vertex_attribute points to, leaving them NULL
-//
-//  in:     in_num
-//  in/out: inout_vertex_attribute
-void vertex_attribute_cleanup(
-  struct vertex_attribute_t* inout_vertex_attribute,
-  unsigned int in_num);
 
 /*******************************************************************************
  *

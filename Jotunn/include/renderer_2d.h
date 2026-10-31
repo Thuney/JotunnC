@@ -120,8 +120,8 @@ struct renderer_2d_t
 
 // Loads the renderer's shaders from Jotunn's res/shaders and creates its
 //  batches, logging any shader that fails to load in DEBUG builds. The
-//  renderer keeps in_camera and in_parent_window, which must outlive it,
-//  and a copy of in_tag, which names it in diagnostics
+//  renderer keeps in_camera, in_parent_window and in_tag, which names it in
+//  diagnostics; all three must outlive it
 //
 //  in:     in_camera, in_parent_window, in_tag
 //  out:    out_renderer

@@ -45,7 +45,8 @@ struct renderer_window_layer_t
  ******************************************************************************/
 
 // Sets up the renderer in the current graphics context, loading its shader
-//  and creating its buffers. The tag is copied; the window isn't owned
+//  and creating its buffers. Neither the tag nor the window is owned, so
+//  both must outlive the renderer
 //
 //  in:     in_parent_window, in_tag
 //  out:    out_renderer

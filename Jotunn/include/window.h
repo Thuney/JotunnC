@@ -54,8 +54,9 @@ enum window_cursor_shape_t
 //  window is open
 struct window_data_t
 {
-  // Names the window, and titles it
-  char* tag;
+  // Names the window, and titles it. Not owned, so it must outlive the
+  //  window
+  const char* tag;
   //
   uint32_t width;
   uint32_t height;
@@ -109,9 +110,9 @@ struct window_t
 
 // Opens a window of the given size, titled and tagged in_tag, whose events go
 //  to in_app_parent, with room for in_max_window_layers layers. On success
-//  the window's graphics context is left current. The window keeps its own
-//  copy of in_tag, and must stay where it is until window_cleanup(), since
-//  its backend finds it by address
+//  the window's graphics context is left current. The window keeps in_tag,
+//  which must outlive it, and must stay where it is until window_cleanup(),
+//  since its backend finds it by address
 //
 //  in:     in_max_window_layers, in_width, in_height, in_tag, in_app_parent
 //  out:    out_window

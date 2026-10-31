@@ -1,7 +1,5 @@
 #include "renderer.h"
 
-#include "allocator.h"
-
 #include "../diagnostics/diagnostics_internal.h"
 
 #include <memory.h>
@@ -21,10 +19,7 @@ void renderer_base_init(
 {
   out_renderer->parent_window = in_parent_window;
 
-  out_renderer->tag =
-    allocator_duplicate_string(
-      in_tag,
-      ALLOCATOR_TAG_RENDERER);
+  out_renderer->tag = in_tag;
 
   render_api_init(
     &(out_renderer->render_api),
@@ -41,8 +36,7 @@ void renderer_base_init(
 void renderer_base_cleanup(
   struct renderer_base_t* inout_renderer)
 {
-  allocator_free(inout_renderer->tag);
-  inout_renderer->tag = 0;
+  inout_renderer->tag = NULL;
 }
 
 /*******************************************************************************

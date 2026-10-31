@@ -264,7 +264,7 @@ static void renderer_window_layer_data_init(
     PATH_FROM_JOTUNN_ROOT("/res/shaders/framebuffer_shader.frag"));
 
   unsigned int attribute_index, temp_shader_index;
-  char* attribute_name;
+  const char* attribute_name;
 
   for (attribute_index = 0; attribute_index < RENDERER_WINDOW_LAYER_VERTEX_ATTRIBUTE_COUNT;
        attribute_index++)

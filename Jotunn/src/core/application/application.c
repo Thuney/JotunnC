@@ -56,10 +56,7 @@ uint8_t application_init(
     0,
     sizeof(struct application_t));
 
-  out_app->name =
-    allocator_duplicate_string(
-      in_app_name,
-      ALLOCATOR_TAG_APPLICATION);
+  out_app->name = in_app_name;
 
   out_app->max_windows = in_max_windows;
   out_app->num_windows = 0;
@@ -210,8 +207,7 @@ void application_cleanup(
     application_stop(inout_app);
   }
 
-  allocator_free(inout_app->name);
-  inout_app->name = 0;
+  inout_app->name = NULL;
 
   if (inout_app->num_windows) {
     // Pointer to first window, to be iterated over

@@ -6,8 +6,6 @@
 #include "vertexattribute.h"
 #include "vertex_attribute_internal.h"
 
-#include "allocator.h"
-
 /*******************************************************************************
  *
  *   Function: vertex_attribute_init()
@@ -23,10 +21,7 @@ void vertex_attribute_init(
   unsigned int in_stride,
   void* in_ptr_offset_to_attrib)
 {
-  out_vertex_attribute->attribute_name =
-    allocator_duplicate_string(
-      in_attribute_name,
-      ALLOCATOR_TAG_RENDERER);
+  out_vertex_attribute->attribute_name = in_attribute_name;
 
   vertex_attribute_internal_platform_init(
     out_vertex_attribute,
@@ -36,21 +31,6 @@ void vertex_attribute_init(
     in_should_normalize,
     in_stride,
     in_ptr_offset_to_attrib);
-}
-
-/*******************************************************************************
- *
- *   Function: vertex_attribute_cleanup()
- *
- ******************************************************************************/
-void vertex_attribute_cleanup(
-  struct vertex_attribute_t* inout_vertex_attribute,
-  unsigned int in_num)
-{
-  for (unsigned int i = 0; i < in_num; i++) {
-    allocator_free(inout_vertex_attribute[i].attribute_name);
-    inout_vertex_attribute[i].attribute_name = 0;
-  }
 }
 
 #ifdef DEBUG
