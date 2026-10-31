@@ -79,6 +79,17 @@ static_assert(
   (sizeof(allocator_tag_names) / sizeof(allocator_tag_names[0])) == ALLOCATOR_TAG_COUNT,
   "Every allocator tag needs a name");
 
+static const char* const allocator_policy_names[] =
+{
+  [ALLOCATOR_POLICY_HEAP]      = "heap",
+  [ALLOCATOR_POLICY_POOL]      = "pool",
+  [ALLOCATOR_POLICY_FORBIDDEN] = "forbidden",
+};
+
+static_assert(
+  (sizeof(allocator_policy_names) / sizeof(allocator_policy_names[0])) == ALLOCATOR_POLICY_COUNT,
+  "Every allocator policy needs a name");
+
 // What every tag's policy is until it's set otherwise
 #ifdef JOTUNN_NO_HEAP
   #define ALLOCATOR_INITIAL_POLICY ALLOCATOR_POLICY_FORBIDDEN
@@ -552,6 +563,20 @@ const char* allocator_get_tag_name(
 {
   return _allocator_is_tag_valid(in_tag) ?
     allocator_tag_names[in_tag] :
+    "unknown";
+}
+
+/*******************************************************************************
+ *
+ *   Function: allocator_get_policy_name()
+ *
+ ******************************************************************************/
+const char* allocator_get_policy_name(
+  enum allocator_policy_t in_policy)
+{
+  // An enum may be signed, so a negative policy wraps past the end here too
+  return ((unsigned int)in_policy < (unsigned int)ALLOCATOR_POLICY_COUNT) ?
+    allocator_policy_names[in_policy] :
     "unknown";
 }
 

@@ -212,3 +212,10 @@ bool allocator_get_tag_stats(
 //  ret:    The tag's name, or "unknown" when in_tag isn't valid
 const char* allocator_get_tag_name(
   enum allocator_tag_t in_tag);
+
+// Names a policy for display
+//
+//  in:     in_policy
+//  ret:    The policy's name, or "unknown" when in_policy isn't valid
+const char* allocator_get_policy_name(
+  enum allocator_policy_t in_policy);
