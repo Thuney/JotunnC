@@ -81,6 +81,23 @@ struct renderer_2d_mesh_t
 
 /*******************************************************************************
  *
+ *   TEXT
+ *
+ ******************************************************************************/
+
+// Where a string sits across the position it's drawn at
+enum renderer_2d_text_alignment_t
+{
+  // Its left edge at the position
+  RENDERER_2D_TEXT_ALIGNMENT_LEFT = 0x00,
+  // Its middle at the position
+  RENDERER_2D_TEXT_ALIGNMENT_CENTER,
+  // Its right edge at the position
+  RENDERER_2D_TEXT_ALIGNMENT_RIGHT
+};
+
+/*******************************************************************************
+ *
  *   RENDERER
  *
  ******************************************************************************/
@@ -297,6 +314,19 @@ void renderer_2d_draw_string(
   struct renderer_2d_t* inout_renderer,
   const struct font_typeface_t* in_typeface,
   union fvector3_t in_start_position,
+  const char* in_draw_string);
+
+// Adds a string to the batch as renderer_2d_draw_string() does, but with its
+//  left edge, middle or right edge at in_position, as in_alignment says. Its
+//  baseline sits the tallest glyph's height below in_position, as before
+//
+//  in:     in_typeface, in_position, in_alignment, in_draw_string
+//  in/out: inout_renderer
+void renderer_2d_draw_string_aligned(
+  struct renderer_2d_t* inout_renderer,
+  const struct font_typeface_t* in_typeface,
+  union fvector3_t in_position,
+  enum renderer_2d_text_alignment_t in_alignment,
   const char* in_draw_string);
 /*******************************************************************************
  *

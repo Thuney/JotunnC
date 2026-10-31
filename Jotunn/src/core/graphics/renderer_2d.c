@@ -746,6 +746,56 @@ void renderer_2d_draw_string(
 
 /*******************************************************************************
  *
+ *   Function: renderer_2d_draw_string_aligned()
+ *
+ ******************************************************************************/
+void renderer_2d_draw_string_aligned(
+  struct renderer_2d_t* inout_renderer,
+  const struct font_typeface_t* in_typeface,
+  union fvector3_t in_position,
+  enum renderer_2d_text_alignment_t in_alignment,
+  const char* in_draw_string)
+{
+  const union fvector2_t text_size_pixels =
+    font_typeface_calculate_string_dimensions(
+      in_typeface,
+      in_draw_string,
+      (int)strlen(in_draw_string));
+
+  // How far the string's left edge sits from in_position
+  float offset_x_pixels = 0.0f;
+
+  switch (in_alignment)
+  {
+    case RENDERER_2D_TEXT_ALIGNMENT_CENTER:
+    {
+      offset_x_pixels = -(text_size_pixels.comp.x / 2.0f);
+    }
+    break;
+
+    case RENDERER_2D_TEXT_ALIGNMENT_RIGHT:
+    {
+      offset_x_pixels = -text_size_pixels.comp.x;
+    }
+    break;
+
+    default:
+    {
+    }
+    break;
+  }
+
+  renderer_2d_draw_string(
+    inout_renderer,
+    in_typeface,
+    (union fvector3_t){{(in_position.comp.x + offset_x_pixels),
+                        in_position.comp.y,
+                        in_position.comp.z}},
+    in_draw_string);
+}
+
+/*******************************************************************************
+ *
  *   Function: renderer_2d_set_line_width()
  *
  ******************************************************************************/
