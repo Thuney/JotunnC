@@ -351,6 +351,18 @@ union fmatrix_4x4_t fmatrix_4x4_transform_scale(
   const union fmatrix_4x4_t* in_matrix,
   union fvector3_t in_scale_factors);
 
+// Follows a transform with a rotation about an axis through the origin,
+//  counter-clockwise when looking down the axis towards the origin. The axis
+//  needn't be of unit length
+//
+//  in:     in_matrix, in_axis, in_angle_radians
+//  ret:    A transform applying in_matrix, then the rotation; in_matrix
+//            unchanged when in_axis is the zero vector
+union fmatrix_4x4_t fmatrix_4x4_transform_rotate(
+  const union fmatrix_4x4_t* in_matrix,
+  union fvector3_t in_axis,
+  float in_angle_radians);
+
 // Transforms a point, as the row vector (x, y, z, 1). The result isn't
 //  divided by its fourth component, so this suits affine transforms rather
 //  than projections

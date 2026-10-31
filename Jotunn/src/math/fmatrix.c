@@ -1,5 +1,6 @@
 #include "fmatrix.h"
 
+#include <math.h>
 #include <memory.h>
 
 /*******************************************************************************
@@ -550,6 +551,49 @@ union fmatrix_4x4_t fmatrix_4x4_transform_scale(
   return fmatrix_4x4_multiply(
     in_matrix,
     &(scale_matrix));
+}
+
+/*******************************************************************************
+ *
+ *   Function: fmatrix_4x4_transform_rotate()
+ *
+ ******************************************************************************/
+union fmatrix_4x4_t fmatrix_4x4_transform_rotate(
+  const union fmatrix_4x4_t* in_matrix,
+  union fvector3_t in_axis,
+  float in_angle_radians)
+{
+  const float axis_magnitude = fvector3_magnitude(&(in_axis));
+
+  if (axis_magnitude == 0.0f) {
+    return *in_matrix;
+  }
+
+  const float x = (in_axis.comp.x / axis_magnitude);
+  const float y = (in_axis.comp.y / axis_magnitude);
+  const float z = (in_axis.comp.z / axis_magnitude);
+
+  const float c = cosf(in_angle_radians);
+  const float s = sinf(in_angle_radians);
+  const float t = (1.0f - c);
+
+  union fmatrix_4x4_t rotation_matrix;
+
+  // The axis-angle rotation, laid out for row vectors like the other
+  //  transforms: the transpose of its usual column vector form
+  const float rotation_matrix_data[4][4] = {
+    {((t * x * x) + c), ((t * x * y) + (s * z)), ((t * x * z) - (s * y)), 0.0f},
+    {((t * x * y) - (s * z)), ((t * y * y) + c), ((t * y * z) + (s * x)), 0.0f},
+    {((t * x * z) + (s * y)), ((t * y * z) - (s * x)), ((t * z * z) + c), 0.0f},
+    {0.0f, 0.0f, 0.0f, 1.0f}};
+
+  fmatrix_4x4_set(
+    &(rotation_matrix),
+    rotation_matrix_data);
+
+  return fmatrix_4x4_multiply(
+    in_matrix,
+    &(rotation_matrix));
 }
 
 /*******************************************************************************
