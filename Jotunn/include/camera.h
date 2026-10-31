@@ -1,9 +1,9 @@
 #pragma once
 
 // Cameras hold the view and projection matrices a renderer draws through. An
-//  orthographic or perspective camera embeds camera_base_t as its first
-//  member; an unprojected camera is a bare camera_base_t, with identity
-//  matrices
+//  orthographic or perspective camera embeds camera_base_t as base, and is
+//  got back from it with container_of(); an unprojected camera is a bare
+//  camera_base_t, with identity matrices
 
 #include "fmatrix.h"
 #include "fquaternion.h"

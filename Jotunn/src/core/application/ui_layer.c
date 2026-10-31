@@ -1,6 +1,7 @@
 #include "ui_layer.h"
 
 #include "ui/ui_layer_imgui.h"
+#include "util.h"
 
 #include <memory.h>
 
@@ -177,7 +178,11 @@ void ui_layer_set_custom_event_react(
 static void ui_layer_render(
   struct window_layer_t* inout_window_layer)
 {
-  struct ui_layer_t* ui_layer = (struct ui_layer_t*)inout_window_layer;
+  struct ui_layer_t* ui_layer =
+    container_of(
+      inout_window_layer,
+      struct ui_layer_t,
+      ui_window_layer);
 
   ui_layer_internal_imgui_frame_begin(ui_layer);
 
@@ -200,8 +205,11 @@ static void _ui_layer_event_react(
 {
   (void)inout_parent_window;
 
-  // The window layer is the UI layer's first member
-  struct ui_layer_t* ui_layer = (struct ui_layer_t*)inout_window_layer;
+  struct ui_layer_t* ui_layer =
+    container_of(
+      inout_window_layer,
+      struct ui_layer_t,
+      ui_window_layer);
 
   // The UI sees every event, whatever the custom handler then does with it
   const bool is_captured =

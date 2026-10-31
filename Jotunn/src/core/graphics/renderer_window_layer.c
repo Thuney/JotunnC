@@ -152,10 +152,13 @@ void renderer_window_layer_cleanup(
  *
  ******************************************************************************/
 void renderer_window_layer_begin_scene(
-  void* in_renderer)
+  struct renderer_base_t* in_renderer)
 {
   struct renderer_window_layer_t* renderer_window_layer =
-    (struct renderer_window_layer_t*)in_renderer;
+    container_of(
+      in_renderer,
+      struct renderer_window_layer_t,
+      base);
 
   // Called directly rather than through renderer_base_begin_scene(), so the
   //  scene is marked here
@@ -173,10 +176,9 @@ void renderer_window_layer_begin_scene(
  *
  ******************************************************************************/
 void renderer_window_layer_end_scene(
-  void* in_renderer)
+  struct renderer_base_t* in_renderer)
 {
-  struct renderer_window_layer_t* renderer_window_layer =
-    (struct renderer_window_layer_t*)in_renderer;
+  (void)in_renderer;
 
   vertex_array_unbind();
 

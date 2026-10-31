@@ -2,6 +2,7 @@
 
 #include "framebuffer.h"
 #include "texture.h"
+#include "util.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -95,10 +96,10 @@ const struct texture_2d_t* resource_get_texture(
     return NULL;
   }
 
-  return (const struct texture_2d_t*)(
-    (const char*)in_resource - offsetof(
-      struct texture_2d_t,
-      resource));
+  return container_of(
+    in_resource,
+    struct texture_2d_t,
+    resource);
 }
 
 /*******************************************************************************
@@ -115,10 +116,10 @@ const struct framebuffer_t* resource_get_framebuffer(
     return NULL;
   }
 
-  return (const struct framebuffer_t*)(
-    (const char*)in_resource - offsetof(
-      struct framebuffer_t,
-      resource));
+  return container_of(
+    in_resource,
+    struct framebuffer_t,
+    resource);
 }
 
 /*******************************************************************************

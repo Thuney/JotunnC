@@ -6,6 +6,7 @@
 #include "texture.h"
 #include "timestep.h"
 #include "ui_layer.h"
+#include "util.h"
 #include "window.h"
 
 #include "cimgui.h"
@@ -396,7 +397,11 @@ bool ui_layer_internal_imgui_event_react(
   {
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      const struct event_mouse_moved_t* event = (const struct event_mouse_moved_t*)in_event;
+      const struct event_mouse_moved_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_moved_t,
+          base);
 
       if (event->window_handle == window_handle) {
         // Jotunn's mouse coordinates grow upward from the bottom of the
@@ -413,7 +418,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      const struct event_mouse_button_t* event = (const struct event_mouse_button_t*)in_event;
+      const struct event_mouse_button_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_button_t,
+          base);
 
       if ((event->window_handle == window_handle) &&
           (event->button >= 0) &&
@@ -434,7 +443,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_SCROLLED:
     {
-      const struct event_mouse_scrolled_t* event = (const struct event_mouse_scrolled_t*)in_event;
+      const struct event_mouse_scrolled_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_scrolled_t,
+          base);
 
       if (event->window_handle == window_handle) {
         ImGuiIO_AddMouseWheelEvent(
@@ -449,7 +462,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_ENTERED:
     {
-      const struct event_mouse_entered_t* event = (const struct event_mouse_entered_t*)in_event;
+      const struct event_mouse_entered_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_entered_t,
+          base);
 
       if ((event->window_handle == window_handle) &&
           !event->is_entered)
@@ -465,7 +482,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_PRESSED:
     {
-      const struct event_key_pressed_t* event = (const struct event_key_pressed_t*)in_event;
+      const struct event_key_pressed_t* event =
+        container_of(
+          in_event,
+          struct event_key_pressed_t,
+          base);
 
       if (event->window_handle == window_handle) {
         _ui_layer_imgui_update_modifiers(
@@ -487,7 +508,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_RELEASED:
     {
-      const struct event_key_released_t* event = (const struct event_key_released_t*)in_event;
+      const struct event_key_released_t* event =
+        container_of(
+          in_event,
+          struct event_key_released_t,
+          base);
 
       if (event->window_handle == window_handle) {
         _ui_layer_imgui_update_modifiers(
@@ -509,7 +534,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_TYPED:
     {
-      const struct event_key_typed_t* event = (const struct event_key_typed_t*)in_event;
+      const struct event_key_typed_t* event =
+        container_of(
+          in_event,
+          struct event_key_typed_t,
+          base);
 
       if (event->window_handle == window_handle) {
         ImGuiIO_AddInputCharacter(
@@ -523,7 +552,11 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_WINDOW_FOCUS:
     {
-      const struct event_window_focus_t* event = (const struct event_window_focus_t*)in_event;
+      const struct event_window_focus_t* event =
+        container_of(
+          in_event,
+          struct event_window_focus_t,
+          base);
 
       if (event->window_handle == window_handle) {
         ImGuiIO_AddFocusEvent(

@@ -293,7 +293,7 @@ uint8_t window_run(
   // Render our layers to the default (window) framebuffer, bottom to top
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 
-  renderer_window_layer_begin_scene(&(inout_window->window_layer_renderer));
+  renderer_window_layer_begin_scene(&(inout_window->window_layer_renderer.base));
 
   current_layer = inout_window->layers;
   for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++) {
@@ -310,7 +310,7 @@ uint8_t window_run(
       inout_window->num_layers);
   }
 
-  renderer_window_layer_end_scene(&(inout_window->window_layer_renderer));
+  renderer_window_layer_end_scene(&(inout_window->window_layer_renderer.base));
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_COMPOSITE);
 

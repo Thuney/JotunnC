@@ -1,5 +1,7 @@
 #include "ball_window.h"
 
+#include "util.h"
+
 #include <math.h>
 #include <memory.h>
 #include <stdio.h>
@@ -87,9 +89,8 @@ uint8_t ball_window_init(
   out_ball_window->clicked_color            = (union fvector4_t){0.0f, 1.0f, 0.0f, 1.0f};
 
   struct window_t* window_ptr = &(out_ball_window->window);
-  struct camera_base_t* camera_base_ptr = (struct camera_base_t*)&(out_ball_window->camera_ortho);
-  struct renderer_base_t* renderer_base_ptr =
-    (struct renderer_base_t*)&(out_ball_window->renderer_2d);
+  struct camera_base_t* camera_base_ptr = &(out_ball_window->camera_ortho.base);
+  struct renderer_base_t* renderer_base_ptr = &(out_ball_window->renderer_2d.base);
 
   error |= window_init(
     window_ptr,
@@ -191,7 +192,11 @@ uint8_t ball_window_init(
 void ball_window_run(
   struct window_layer_t* inout_window_layer)
 {
-  struct ball_window_t* ball_window = (struct ball_window_t*)inout_window_layer->parent_window;
+  struct ball_window_t* ball_window =
+    container_of(
+      inout_window_layer->parent_window,
+      struct ball_window_t,
+      window);
 
   const union fmatrix_4x4_t ball_transform = ball_calculate_transform(&(ball_window->ball));
 
@@ -217,7 +222,11 @@ void ball_ui_window_run(
   struct window_t* inout_parent_window,
   const struct window_layer_t* in_window_layer)
 {
-  struct ball_window_t* ball_window = (struct ball_window_t*)inout_parent_window;
+  struct ball_window_t* ball_window =
+    container_of(
+      inout_parent_window,
+      struct ball_window_t,
+      window);
 
   union fmatrix_4x4_t transform_matrix;
   {
@@ -384,7 +393,11 @@ static void ball_window_on_event(
   struct window_t* inout_window,
   struct event_base_t* inout_event)
 {
-  struct ball_window_t* ball_window = (struct ball_window_t*)inout_window;
+  struct ball_window_t* ball_window =
+    container_of(
+      inout_window,
+      struct ball_window_t,
+      window);
   struct ball_t* ball = &(ball_window->ball);
 
   static union fvector2_t cur_mouse;
@@ -396,7 +409,11 @@ static void ball_window_on_event(
   {
     case EVENT_TYPE_APP_TICK:
     {
-      struct event_app_tick_t* app_tick_event = (struct event_app_tick_t*)inout_event;
+      struct event_app_tick_t* app_tick_event =
+        container_of(
+          inout_event,
+          struct event_app_tick_t,
+          base);
 
       double delta_time_seconds = app_tick_event->delta_time_seconds;
 
@@ -414,7 +431,11 @@ static void ball_window_on_event(
 
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)inout_event;
+      struct event_mouse_moved_t* event_mouse_moved =
+        container_of(
+          inout_event,
+          struct event_mouse_moved_t,
+          base);
 
       float mouse_x = event_mouse_moved->x;
       float mouse_y = event_mouse_moved->y;
@@ -434,7 +455,11 @@ static void ball_window_on_event(
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)inout_event;
+      struct event_mouse_button_t* event_mouse_button =
+        container_of(
+          inout_event,
+          struct event_mouse_button_t,
+          base);
 
       if (event_mouse_button->button == 0) {
         switch (event_mouse_button->action)

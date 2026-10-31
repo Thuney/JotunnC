@@ -57,7 +57,7 @@ void renderer_base_begin_scene(
 
   render_api_bind(&(inout_renderer->render_api));
   render_api_clear(&(inout_renderer->render_api));
-  inout_renderer->renderer_begin_scene((void*)inout_renderer);
+  inout_renderer->renderer_begin_scene(inout_renderer);
 }
 
 /*******************************************************************************
@@ -68,7 +68,7 @@ void renderer_base_begin_scene(
 void renderer_base_end_scene(
   struct renderer_base_t* inout_renderer)
 {
-  inout_renderer->renderer_end_scene((void*)inout_renderer);
+  inout_renderer->renderer_end_scene(inout_renderer);
 
   // Closed after the renderer's own end, which may still draw what it batched
   diagnostics_internal_scene_end();

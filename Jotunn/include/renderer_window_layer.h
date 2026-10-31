@@ -66,16 +66,16 @@ void renderer_window_layer_cleanup(
 //  renderer_base_begin_scene(); it is also the renderer's
 //  renderer_begin_scene callback
 //
-//  in:     in_renderer, a struct renderer_window_layer_t
+//  in:     in_renderer, the base of a struct renderer_window_layer_t
 void renderer_window_layer_begin_scene(
-  void* in_renderer);
+  struct renderer_base_t* in_renderer);
 
 // Closes the compositing scene opened by renderer_window_layer_begin_scene(),
 //  unbinding the vertex array and framebuffer
 //
-//  in:     in_renderer, a struct renderer_window_layer_t
+//  in:     in_renderer, the base of a struct renderer_window_layer_t
 void renderer_window_layer_end_scene(
-  void* in_renderer);
+  struct renderer_base_t* in_renderer);
 
 // Draws a window layer's framebuffer over the whole render target, between
 //  renderer_window_layer_begin_scene() and renderer_window_layer_end_scene().

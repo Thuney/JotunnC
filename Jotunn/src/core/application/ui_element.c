@@ -3,6 +3,7 @@
 #include "renderer_2d.h"
 #include "string.h"
 #include "ui_layer.h"
+#include "util.h"
 
 /*******************************************************************************
  *
@@ -206,7 +207,10 @@ static void ui_element_static_text_render(
   const struct ui_theme_t* in_theme)
 {
   const struct ui_element_static_text_t* static_text_element =
-    (const struct ui_element_static_text_t*)in_ui_element;
+    container_of(
+      in_ui_element,
+      struct ui_element_static_text_t,
+      base_element);
 
   union fvector2_t effective_element_size = ui_element_get_effective_size(in_ui_element);
 
@@ -295,7 +299,10 @@ static void ui_element_slider_render(
   const struct ui_theme_t* in_theme)
 {
   const struct ui_element_slider_t* slider_element =
-    (const struct ui_element_slider_t*)in_ui_element;
+    container_of(
+      in_ui_element,
+      struct ui_element_slider_t,
+      base_element);
 
   float slider_range = (slider_element->upper_bound - slider_element->lower_bound);
   float slider_percentage =

@@ -128,9 +128,13 @@ void renderer_2d_cleanup(
  *
  ******************************************************************************/
 void renderer_2d_begin_scene(
-  void* inout_renderer)
+  struct renderer_base_t* inout_renderer)
 {
-  struct renderer_2d_t* renderer_2d = (struct renderer_2d_t*)inout_renderer;
+  struct renderer_2d_t* renderer_2d =
+    container_of(
+      inout_renderer,
+      struct renderer_2d_t,
+      base);
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D beginning scene\n");
   // #endif
@@ -144,9 +148,13 @@ void renderer_2d_begin_scene(
  *
  ******************************************************************************/
 void renderer_2d_end_scene(
-  void* in_renderer)
+  struct renderer_base_t* in_renderer)
 {
-  struct renderer_2d_t* renderer_2d = (struct renderer_2d_t*)in_renderer;
+  struct renderer_2d_t* renderer_2d =
+    container_of(
+      in_renderer,
+      struct renderer_2d_t,
+      base);
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D ending scene\n");
   // #endif
@@ -716,7 +724,10 @@ static void renderer_2d_flush(
   struct renderer_2d_data_t* data = &(in_renderer->render_data);
 
   struct camera_orthographic_t* camera_ortho =
-    (struct camera_orthographic_t*)in_renderer->base.camera;
+    container_of(
+      in_renderer->base.camera,
+      struct camera_orthographic_t,
+      base);
 
   // #ifdef DEBUG
   //    fprintf(stdout, "Flushing renderer - \n");

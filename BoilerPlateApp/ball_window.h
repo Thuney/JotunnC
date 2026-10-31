@@ -34,8 +34,8 @@ struct ball_t
   bool is_grounded;
 };
 
-// The window comes first so that the window and layer callbacks can cast the
-//  struct window_t they're given back to the ball_window_t
+// The window and layer callbacks get back to the ball_window_t from the
+//  struct window_t they're given with container_of()
 struct ball_window_t
 {
   // Base window structure

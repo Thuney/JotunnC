@@ -1,7 +1,7 @@
 #pragma once
 
 // Retained UI elements drawn through a renderer_2d: static text, sliders,
-//  buttons and checkboxes, each embedding a ui_element_t as its first member.
+//  buttons and checkboxes, each embedding a ui_element_t as base_element.
 //  Unfinished and not built: struct ui_theme_t, which the render functions
 //  take their colors from, isn't defined yet, and only static text and
 //  sliders draw anything

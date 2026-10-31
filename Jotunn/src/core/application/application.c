@@ -274,9 +274,11 @@ void application_on_event(
   {
     case EVENT_TYPE_WINDOW_RESIZE:
     {
-      // A safe cast from base to derived, as the base is the first member
       struct event_window_resize_t* window_resize_event =
-        (struct event_window_resize_t*)inout_event;
+        container_of(
+          inout_event,
+          struct event_window_resize_t,
+          base);
 
       uint32_t new_width, new_height;
       new_width = window_resize_event->width;
@@ -309,8 +311,11 @@ void application_on_event(
 
     case EVENT_TYPE_WINDOW_FOCUS:
     {
-      // A safe cast from base to derived, as the base is the first member
-      struct event_window_focus_t* window_focus_event = (struct event_window_focus_t*)inout_event;
+      struct event_window_focus_t* window_focus_event =
+        container_of(
+          inout_event,
+          struct event_window_focus_t,
+          base);
 
       if (window_focus_event->is_focused) {
         if (inout_app->num_windows) {
@@ -338,8 +343,11 @@ void application_on_event(
 
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      // A safe cast from base to derived, as the base is the first member
-      struct event_mouse_moved_t* mouse_moved_event = (struct event_mouse_moved_t*)inout_event;
+      struct event_mouse_moved_t* mouse_moved_event =
+        container_of(
+          inout_event,
+          struct event_mouse_moved_t,
+          base);
 
       float x, y;
       x = mouse_moved_event->x;

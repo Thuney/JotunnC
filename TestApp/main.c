@@ -523,8 +523,8 @@ static uint8_t test_app_window_1_init(
       out_window1,
       &(window1_layer),
       &(window1_framebuffer),
-      (struct camera_base_t*)&(window1_camera_ortho),
-      (struct renderer_base_t*)&(window1_renderer_2d));
+      &(window1_camera_ortho.base),
+      &(window1_renderer_2d.base));
 
     window_add_layer(
       out_window1,
@@ -620,8 +620,8 @@ static uint8_t test_app_window_2_init(
       out_window2,
       &(window2_layer),
       &(window2_framebuffer),
-      (struct camera_base_t*)&(window2_camera_ortho),
-      (struct renderer_base_t*)&(window2_renderer_2d));
+      &(window2_camera_ortho.base),
+      &(window2_renderer_2d.base));
 
     window_add_layer(
       out_window2,

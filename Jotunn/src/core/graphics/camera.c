@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include "util.h"
+
 #include <math.h>
 
 #ifdef DEBUG
@@ -275,7 +277,11 @@ static void camera_reproject(
   {
     case CAMERA_PROJECTION_ORTHOGRAPHIC:
     {
-      struct camera_orthographic_t* camera_ortho = (struct camera_orthographic_t*)inout_camera;
+      struct camera_orthographic_t* camera_ortho =
+        container_of(
+          inout_camera,
+          struct camera_orthographic_t,
+          base);
       camera_orthographic_set_projection(
         camera_ortho,
         0.0f,
@@ -288,7 +294,11 @@ static void camera_reproject(
     break;
     case CAMERA_PROJECTION_PERSPECTIVE:
     {
-      struct camera_perspective_t* camera_perspective = (struct camera_perspective_t*)inout_camera;
+      struct camera_perspective_t* camera_perspective =
+        container_of(
+          inout_camera,
+          struct camera_perspective_t,
+          base);
       camera_perspective_set_projection(
         camera_perspective,
         camera_perspective->field_of_view_radians,
@@ -296,6 +306,7 @@ static void camera_reproject(
         in_near_plane,
         in_far_plane);
     }
+    break;
     case CAMERA_PROJECTION_UNPROJECTED:
     {
     }

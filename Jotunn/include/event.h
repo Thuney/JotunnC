@@ -1,10 +1,11 @@
 #pragma once
 
-// The events windows and the application raise. Each event's struct begins
-//  with a struct event_base_t, whose event_type says which struct it is, so
-//  handlers take a struct event_base_t* and cast it once they've checked the
-//  type. Events from a window carry its window_handle, the same as the
-//  window's context_data.window_handle, to tell which window they came from
+// The events windows and the application raise. Each event's struct embeds
+//  a struct event_base_t as base, whose event_type says which struct it is,
+//  so handlers take a struct event_base_t* and get the event from it with
+//  container_of() once they've checked the type. Events from a window carry
+//  its window_handle, the same as the window's context_data.window_handle, to
+//  tell which window they came from
 
 #include <stdbool.h>
 #include <stdint.h>

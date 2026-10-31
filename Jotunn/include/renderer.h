@@ -2,9 +2,9 @@
 
 // The part every renderer shares: the window it draws for, a tag naming it,
 //  the camera it views through and the render state it draws with. A
-//  renderer embeds renderer_base_t as its first member and fills in the scene
-//  callbacks, which renderer_base_begin_scene() and renderer_base_end_scene()
-//  call with the renderer itself
+//  renderer embeds renderer_base_t and fills in the scene callbacks, which
+//  renderer_base_begin_scene() and renderer_base_end_scene() call with that
+//  base; the callbacks get back to the renderer with container_of()
 
 struct window_t;
 
@@ -26,9 +26,11 @@ struct renderer_base_t
   struct camera_base_t* camera;
   //
   struct render_api_implementation_t render_api;
-  // Set by the renderer embedding this base, and called with that renderer
-  void (*renderer_begin_scene)(void* inout_renderer);
-  void (*renderer_end_scene)(void* inout_renderer);
+  // Set by the renderer embedding this base, and called with this base
+  void (*renderer_begin_scene)(
+    struct renderer_base_t* inout_renderer);
+  void (*renderer_end_scene)(
+    struct renderer_base_t* inout_renderer);
 };
 
 /*******************************************************************************

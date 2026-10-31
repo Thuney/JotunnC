@@ -6,6 +6,7 @@
 #include "render_api.h"
 #include "renderer.h"
 #include "resource.h"
+#include "util.h"
 #include "window.h"
 
 #include <stdio.h>
@@ -1058,7 +1059,11 @@ static void _diagnostics_describe_event(
   {
     case EVENT_TYPE_WINDOW_RESIZE:
     {
-      const struct event_window_resize_t* event = (const struct event_window_resize_t*)in_event;
+      const struct event_window_resize_t* event =
+        container_of(
+          in_event,
+          struct event_window_resize_t,
+          base);
 
       snprintf(
         out_text,
@@ -1071,7 +1076,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_WINDOW_FOCUS:
     {
-      const struct event_window_focus_t* event = (const struct event_window_focus_t*)in_event;
+      const struct event_window_focus_t* event =
+        container_of(
+          in_event,
+          struct event_window_focus_t,
+          base);
 
       snprintf(
         out_text,
@@ -1083,7 +1092,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_APP_TICK:
     {
-      const struct event_app_tick_t* event = (const struct event_app_tick_t*)in_event;
+      const struct event_app_tick_t* event =
+        container_of(
+          in_event,
+          struct event_app_tick_t,
+          base);
 
       snprintf(
         out_text,
@@ -1095,7 +1108,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_PRESSED:
     {
-      const struct event_key_pressed_t* event = (const struct event_key_pressed_t*)in_event;
+      const struct event_key_pressed_t* event =
+        container_of(
+          in_event,
+          struct event_key_pressed_t,
+          base);
 
       snprintf(
         out_text,
@@ -1109,7 +1126,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_RELEASED:
     {
-      const struct event_key_released_t* event = (const struct event_key_released_t*)in_event;
+      const struct event_key_released_t* event =
+        container_of(
+          in_event,
+          struct event_key_released_t,
+          base);
 
       snprintf(
         out_text,
@@ -1122,7 +1143,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_TYPED:
     {
-      const struct event_key_typed_t* event = (const struct event_key_typed_t*)in_event;
+      const struct event_key_typed_t* event =
+        container_of(
+          in_event,
+          struct event_key_typed_t,
+          base);
 
       // Printable ASCII is shown as itself as well
       if ((event->codepoint >= 0x20U) &&
@@ -1147,7 +1172,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      const struct event_mouse_button_t* event = (const struct event_mouse_button_t*)in_event;
+      const struct event_mouse_button_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_button_t,
+          base);
 
       snprintf(
         out_text,
@@ -1161,7 +1190,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      const struct event_mouse_moved_t* event = (const struct event_mouse_moved_t*)in_event;
+      const struct event_mouse_moved_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_moved_t,
+          base);
 
       snprintf(
         out_text,
@@ -1174,7 +1207,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_SCROLLED:
     {
-      const struct event_mouse_scrolled_t* event = (const struct event_mouse_scrolled_t*)in_event;
+      const struct event_mouse_scrolled_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_scrolled_t,
+          base);
 
       snprintf(
         out_text,
@@ -1187,7 +1224,11 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_ENTERED:
     {
-      const struct event_mouse_entered_t* event = (const struct event_mouse_entered_t*)in_event;
+      const struct event_mouse_entered_t* event =
+        container_of(
+          in_event,
+          struct event_mouse_entered_t,
+          base);
 
       snprintf(
         out_text,
@@ -1306,18 +1347,102 @@ static const char* _diagnostics_find_event_window_tag(
   switch (in_event->event_type)
   {
     case EVENT_TYPE_WINDOW_CLOSE:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_window_close_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_WINDOW_RESIZE:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_window_resize_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_WINDOW_FOCUS:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_window_focus_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_KEY_PRESSED:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_key_pressed_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_KEY_RELEASED:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_key_released_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_KEY_TYPED:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_key_typed_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_MOUSE_BUTTON:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_mouse_button_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_MOUSE_MOVED:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_mouse_moved_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_MOUSE_SCROLLED:
+    {
+      window_handle =
+        container_of(
+          in_event,
+          struct event_mouse_scrolled_t,
+          base)->window_handle;
+    }
+    break;
+
     case EVENT_TYPE_MOUSE_ENTERED:
     {
-      // Each of these keeps its window's handle straight after the base
-      window_handle = ((const struct event_window_close_t*)in_event)->window_handle;
+      window_handle =
+        container_of(
+          in_event,
+          struct event_mouse_entered_t,
+          base)->window_handle;
     }
     break;
 

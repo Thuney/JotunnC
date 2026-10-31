@@ -5,6 +5,7 @@
 #include "renderer.h"
 #include "resource.h"
 #include "ui_layer.h"
+#include "util.h"
 #include "window.h"
 #include "window_layer.h"
 
@@ -62,7 +63,11 @@ bool diagnostics_internal_overlay_event_react(
   struct event_base_t* inout_event)
 {
   if (inout_event->event_type == EVENT_TYPE_KEY_PRESSED) {
-    const struct event_key_pressed_t* key_event = (const struct event_key_pressed_t*)inout_event;
+    const struct event_key_pressed_t* key_event =
+      container_of(
+        inout_event,
+        struct event_key_pressed_t,
+        base);
 
     if ((key_event->key == _DIAGNOSTICS_OVERLAY_TOGGLE_KEY) &&
         !key_event->is_repeat &&
@@ -203,8 +208,11 @@ static void _diagnostics_overlay_create_layer(
 static void _diagnostics_overlay_render(
   struct ui_layer_t* inout_ui_layer)
 {
-  // The UI layer is the overlay's first member
-  struct diagnostics_overlay_t* overlay = (struct diagnostics_overlay_t*)inout_ui_layer;
+  struct diagnostics_overlay_t* overlay =
+    container_of(
+      inout_ui_layer,
+      struct diagnostics_overlay_t,
+      ui_layer);
 
   bool is_open = true;
 

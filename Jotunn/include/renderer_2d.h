@@ -144,19 +144,19 @@ void renderer_2d_cleanup(
  ******************************************************************************/
 
 // Starts a scene with an empty batch. The renderer's renderer_begin_scene
-//  hook, so inout_renderer is a struct renderer_2d_t
+//  hook, so inout_renderer is the base of a struct renderer_2d_t
 //
 //  in/out: inout_renderer
 void renderer_2d_begin_scene(
-  void* inout_renderer);
+  struct renderer_base_t* inout_renderer);
 
 // Draws what's left of the batch and ends the scene, unbinding the vertex
 //  array and framebuffer. The renderer's renderer_end_scene hook, so
-//  in_renderer is a struct renderer_2d_t
+//  in_renderer is the base of a struct renderer_2d_t
 //
 //  in:     in_renderer
 void renderer_2d_end_scene(
-  void* in_renderer);
+  struct renderer_base_t* in_renderer);
 
 /*******************************************************************************
  *

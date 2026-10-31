@@ -1,8 +1,9 @@
 #pragma once
 
-// Odds and ends shared across Jotunn: paths into its source tree, and
-//  reading files
+// Odds and ends shared across Jotunn: paths into its source tree, getting
+//  from an embedded struct to the struct embedding it, and reading files
 
+#include <stddef.h>
 #include <stdlib.h>
 
 /*******************************************************************************
@@ -17,6 +18,20 @@
 #define STRINGIFY(x) #x
 #define ROOT_PATHIFY(x) STRINGIFY(x)
 #define PATH_FROM_JOTUNN_ROOT(x) ROOT_PATHIFY(JOTUNN_ROOT_PATH) x
+
+/*******************************************************************************
+ *
+ *   EMBEDDED STRUCTS
+ *
+ ******************************************************************************/
+
+// container_of() turns ptr, a pointer to the member of a struct of type type,
+//  into a pointer to that struct, wherever in it the member sits. ptr is
+//  checked against the member's type. __extension__ keeps -pedantic quiet
+//  about the GNU statement expression
+#define container_of(ptr, type, member) __extension__ ({  \
+    const typeof( ((type *)0)->member ) *__mptr = (ptr);  \
+    (type *)( (char *)__mptr - offsetof(type,member) );})
 
 /*******************************************************************************
  *
