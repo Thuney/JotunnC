@@ -227,6 +227,27 @@ void renderer_3d_draw_line(
   union fvector3_t in_pos_2,
   union fvector4_t in_color);
 
+// Adds a grid on the XZ plane to the batch, as lines one unit apart reaching
+//  in_half_extent_units from the origin each way. The two lines through the
+//  origin are drawn as the X axis in red and the Z axis in blue, the rest in
+//  in_color
+//
+//  in:     in_half_extent_units, in_color
+//  in/out: inout_renderer
+void renderer_3d_draw_grid(
+  struct renderer_3d_t* inout_renderer,
+  uint32_t in_half_extent_units,
+  union fvector4_t in_color);
+
+// Adds the X, Y and Z axes to the batch, as lines in_length_units long from
+//  the origin along each, in red, green and blue
+//
+//  in:     in_length_units
+//  in/out: inout_renderer
+void renderer_3d_draw_axes(
+  struct renderer_3d_t* inout_renderer,
+  float in_length_units);
+
 /*******************************************************************************
  *
  *   SETTINGS

@@ -6,7 +6,14 @@
 #include "util.h"
 #include "window.h"
 
+#include <stdbool.h>
 #include <stdio.h>
+
+// The colors renderer_3d_draw_grid() and renderer_3d_draw_axes() draw the
+//  axes in
+static const union fvector4_t renderer_3d_x_axis_color = {{0.9f, 0.25f, 0.25f, 1.0f}};
+static const union fvector4_t renderer_3d_y_axis_color = {{0.25f, 0.9f, 0.25f, 1.0f}};
+static const union fvector4_t renderer_3d_z_axis_color = {{0.25f, 0.45f, 0.95f, 1.0f}};
 
 /*******************************************************************************
  *
@@ -387,6 +394,66 @@ void renderer_3d_draw_line(
   line_data->vertex_data_ptr++;
 
   line_data->line_vertex_count += 2;
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderer_3d_draw_grid()
+ *
+ ******************************************************************************/
+void renderer_3d_draw_grid(
+  struct renderer_3d_t* inout_renderer,
+  uint32_t in_half_extent_units,
+  union fvector4_t in_color)
+{
+  const int half_extent = (int)in_half_extent_units;
+  const float extent = (float)in_half_extent_units;
+
+  // A line across each way at every unit, colored as an axis through the
+  //  origin
+  for (int i = -half_extent; i <= half_extent; i++) {
+    const float offset = (float)i;
+    const bool is_axis = (i == 0);
+
+    renderer_3d_draw_line(
+      inout_renderer,
+      (union fvector3_t){{-extent, 0.0f, offset}},
+      (union fvector3_t){{extent, 0.0f, offset}},
+      is_axis ? renderer_3d_x_axis_color : in_color);
+    renderer_3d_draw_line(
+      inout_renderer,
+      (union fvector3_t){{offset, 0.0f, -extent}},
+      (union fvector3_t){{offset, 0.0f, extent}},
+      is_axis ? renderer_3d_z_axis_color : in_color);
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderer_3d_draw_axes()
+ *
+ ******************************************************************************/
+void renderer_3d_draw_axes(
+  struct renderer_3d_t* inout_renderer,
+  float in_length_units)
+{
+  const union fvector3_t origin = {{0.0f, 0.0f, 0.0f}};
+
+  renderer_3d_draw_line(
+    inout_renderer,
+    origin,
+    (union fvector3_t){{in_length_units, 0.0f, 0.0f}},
+    renderer_3d_x_axis_color);
+  renderer_3d_draw_line(
+    inout_renderer,
+    origin,
+    (union fvector3_t){{0.0f, in_length_units, 0.0f}},
+    renderer_3d_y_axis_color);
+  renderer_3d_draw_line(
+    inout_renderer,
+    origin,
+    (union fvector3_t){{0.0f, 0.0f, in_length_units}},
+    renderer_3d_z_axis_color);
 }
 
 /*******************************************************************************
