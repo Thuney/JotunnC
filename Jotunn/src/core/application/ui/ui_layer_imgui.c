@@ -273,11 +273,9 @@ void ui_layer_internal_imgui_init(
 void ui_layer_internal_imgui_cleanup(
   struct ui_layer_t* inout_ui_layer)
 {
-  struct ui_layer_imgui_data_t* data =
-    (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
+  struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
 
-  if (data == NULL)
-  {
+  if (data == NULL) {
     return;
   }
 
@@ -286,12 +284,10 @@ void ui_layer_internal_imgui_cleanup(
   // Textures still referenced only by ImGui itself are ours to release
   ImGuiPlatformIO* platform_io = igGetPlatformIO_ContextPtr(data->context);
 
-  for (int i = 0; i < platform_io->Textures.Size; i++)
-  {
+  for (int i = 0; i < platform_io->Textures.Size; i++) {
     ImTextureData* texture_data = platform_io->Textures.Data[i];
 
-    if (texture_data->RefCount == 1)
-    {
+    if (texture_data->RefCount == 1) {
       _ui_layer_imgui_destroy_texture(texture_data);
     }
   }
@@ -323,8 +319,7 @@ void ui_layer_internal_imgui_cleanup(
 void ui_layer_internal_imgui_frame_begin(
   struct ui_layer_t* inout_ui_layer)
 {
-  struct ui_layer_imgui_data_t* data =
-    (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
+  struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
   const struct window_t* window = inout_ui_layer->ui_window_layer.parent_window;
 
   _ui_layer_imgui_make_current(data);
@@ -361,8 +356,7 @@ void ui_layer_internal_imgui_frame_begin(
 void ui_layer_internal_imgui_frame_end(
   struct ui_layer_t* inout_ui_layer)
 {
-  struct ui_layer_imgui_data_t* data =
-    (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
+  struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
 
   _ui_layer_imgui_make_current(data);
 
@@ -387,8 +381,7 @@ bool ui_layer_internal_imgui_event_react(
   struct ui_layer_t* inout_ui_layer,
   const struct event_base_t* in_event)
 {
-  struct ui_layer_imgui_data_t* data =
-    (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
+  struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
   const struct window_t* window = inout_ui_layer->ui_window_layer.parent_window;
   const void* window_handle = window->context_data.window_handle;
 
@@ -403,11 +396,9 @@ bool ui_layer_internal_imgui_event_react(
   {
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      const struct event_mouse_moved_t* event =
-        (const struct event_mouse_moved_t*)in_event;
+      const struct event_mouse_moved_t* event = (const struct event_mouse_moved_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         // Jotunn's mouse coordinates grow upward from the bottom of the
         //  window; ImGui's grow downward from the top
         ImGuiIO_AddMousePosEvent(
@@ -422,8 +413,7 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      const struct event_mouse_button_t* event =
-        (const struct event_mouse_button_t*)in_event;
+      const struct event_mouse_button_t* event = (const struct event_mouse_button_t*)in_event;
 
       if ((event->window_handle == window_handle) &&
           (event->button >= 0) &&
@@ -444,11 +434,9 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_SCROLLED:
     {
-      const struct event_mouse_scrolled_t* event =
-        (const struct event_mouse_scrolled_t*)in_event;
+      const struct event_mouse_scrolled_t* event = (const struct event_mouse_scrolled_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         ImGuiIO_AddMouseWheelEvent(
           io,
           event->x_offset,
@@ -461,8 +449,7 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_MOUSE_ENTERED:
     {
-      const struct event_mouse_entered_t* event =
-        (const struct event_mouse_entered_t*)in_event;
+      const struct event_mouse_entered_t* event = (const struct event_mouse_entered_t*)in_event;
 
       if ((event->window_handle == window_handle) &&
           !event->is_entered)
@@ -478,18 +465,15 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_PRESSED:
     {
-      const struct event_key_pressed_t* event =
-        (const struct event_key_pressed_t*)in_event;
+      const struct event_key_pressed_t* event = (const struct event_key_pressed_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         _ui_layer_imgui_update_modifiers(
           io,
           event->modifiers);
 
         const ImGuiKey key = _ui_layer_imgui_translate_key(event->key);
-        if (key != ImGuiKey_None)
-        {
+        if (key != ImGuiKey_None) {
           ImGuiIO_AddKeyEvent(
             io,
             key,
@@ -503,18 +487,15 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_RELEASED:
     {
-      const struct event_key_released_t* event =
-        (const struct event_key_released_t*)in_event;
+      const struct event_key_released_t* event = (const struct event_key_released_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         _ui_layer_imgui_update_modifiers(
           io,
           event->modifiers);
 
         const ImGuiKey key = _ui_layer_imgui_translate_key(event->key);
-        if (key != ImGuiKey_None)
-        {
+        if (key != ImGuiKey_None) {
           ImGuiIO_AddKeyEvent(
             io,
             key,
@@ -528,11 +509,9 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_KEY_TYPED:
     {
-      const struct event_key_typed_t* event =
-        (const struct event_key_typed_t*)in_event;
+      const struct event_key_typed_t* event = (const struct event_key_typed_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         ImGuiIO_AddInputCharacter(
           io,
           event->codepoint);
@@ -544,11 +523,9 @@ bool ui_layer_internal_imgui_event_react(
 
     case EVENT_TYPE_WINDOW_FOCUS:
     {
-      const struct event_window_focus_t* event =
-        (const struct event_window_focus_t*)in_event;
+      const struct event_window_focus_t* event = (const struct event_window_focus_t*)in_event;
 
-      if (event->window_handle == window_handle)
-      {
+      if (event->window_handle == window_handle) {
         ImGuiIO_AddFocusEvent(
           io,
           (event->is_focused != 0));
@@ -589,7 +566,8 @@ static void _ui_layer_imgui_update_cursor(
 {
   const ImGuiIO* io = igGetIO_ContextPtr(inout_data->context);
 
-  if (io->ConfigFlags & ImGuiConfigFlags_NoMouseCursorChange)
+  if (io->ConfigFlags &
+      ImGuiConfigFlags_NoMouseCursorChange)
   {
     return;
   }
@@ -603,8 +581,7 @@ static void _ui_layer_imgui_update_cursor(
       WINDOW_CURSOR_SHAPE_HIDDEN :
       (WINDOW_CURSOR_SHAPE_ARROW + (imgui_cursor - ImGuiMouseCursor_Arrow));
 
-  if (cursor_shape != inout_data->cursor_shape)
-  {
+  if (cursor_shape != inout_data->cursor_shape) {
     window_set_cursor_shape(
       in_window,
       cursor_shape);
@@ -621,17 +598,14 @@ static void _ui_layer_imgui_update_cursor(
 static void _ui_layer_imgui_update_textures(
   ImDrawData* inout_draw_data)
 {
-  if (inout_draw_data->Textures == NULL)
-  {
+  if (inout_draw_data->Textures == NULL) {
     return;
   }
 
-  for (int i = 0; i < inout_draw_data->Textures->Size; i++)
-  {
+  for (int i = 0; i < inout_draw_data->Textures->Size; i++) {
     ImTextureData* texture_data = inout_draw_data->Textures->Data[i];
 
-    if (texture_data->Status != ImTextureStatus_OK)
-    {
+    if (texture_data->Status != ImTextureStatus_OK) {
       _ui_layer_imgui_update_texture(texture_data);
     }
   }
@@ -686,8 +660,7 @@ static void _ui_layer_imgui_update_texture(
       const struct texture_2d_t* texture =
         (const struct texture_2d_t*)(uintptr_t)inout_texture_data->TexID;
 
-      for (int i = 0; i < inout_texture_data->Updates.Size; i++)
-      {
+      for (int i = 0; i < inout_texture_data->Updates.Size; i++) {
         const ImTextureRect* update_rect = &(inout_texture_data->Updates.Data[i]);
 
         texture_2d_set_sub_data(
@@ -712,8 +685,7 @@ static void _ui_layer_imgui_update_texture(
     case ImTextureStatus_WantDestroy:
     {
       // A texture is only let go once a whole frame has passed without it
-      if (inout_texture_data->UnusedFrames > 0)
-      {
+      if (inout_texture_data->UnusedFrames > 0) {
         _ui_layer_imgui_destroy_texture(inout_texture_data);
       }
     }
@@ -734,11 +706,9 @@ static void _ui_layer_imgui_update_texture(
 static void _ui_layer_imgui_destroy_texture(
   ImTextureData* inout_texture_data)
 {
-  struct texture_2d_t* texture =
-    (struct texture_2d_t*)(uintptr_t)inout_texture_data->TexID;
+  struct texture_2d_t* texture = (struct texture_2d_t*)(uintptr_t)inout_texture_data->TexID;
 
-  if (texture != NULL)
-  {
+  if (texture != NULL) {
     texture_2d_cleanup(texture);
     allocator_free(texture);
   }
@@ -789,8 +759,7 @@ static void _ui_layer_imgui_draw(
 
   const ImGuiPlatformIO* platform_io = igGetPlatformIO_ContextPtr(inout_data->context);
 
-  for (int list_index = 0; list_index < in_draw_data->CmdLists.Size; list_index++)
-  {
+  for (int list_index = 0; list_index < in_draw_data->CmdLists.Size; list_index++) {
     const ImDrawList* draw_list = in_draw_data->CmdLists.Data[list_index];
 
     _ui_layer_imgui_reserve_submeshes(
@@ -807,12 +776,10 @@ static void _ui_layer_imgui_draw(
         .submeshes = inout_data->submeshes,
         .submesh_count = 0};
 
-    for (int command_index = 0; command_index < draw_list->CmdBuffer.Size; command_index++)
-    {
+    for (int command_index = 0; command_index < draw_list->CmdBuffer.Size; command_index++) {
       ImDrawCmd* command = &(draw_list->CmdBuffer.Data[command_index]);
 
-      if (command->UserCallback != NULL)
-      {
+      if (command->UserCallback != NULL) {
         // Everything before the callback is drawn first, so that whatever
         //  the callback draws lands in order
         renderer_2d_draw_mesh(
@@ -820,8 +787,7 @@ static void _ui_layer_imgui_draw(
           &(mesh));
         mesh.submesh_count = 0;
 
-        if (command->UserCallback != platform_io->DrawCallback_ResetRenderState)
-        {
+        if (command->UserCallback != platform_io->DrawCallback_ResetRenderState) {
           command->UserCallback(
             draw_list,
             command);
@@ -886,15 +852,13 @@ static void _ui_layer_imgui_reserve_submeshes(
   struct ui_layer_imgui_data_t* inout_data,
   const uint32_t in_count)
 {
-  if (in_count <= inout_data->submesh_capacity)
-  {
+  if (in_count <= inout_data->submesh_capacity) {
     return;
   }
 
   // Grow geometrically so a busy frame doesn't reallocate per draw list
   uint32_t capacity = (inout_data->submesh_capacity > 0) ? inout_data->submesh_capacity : 64;
-  while (capacity < in_count)
-  {
+  while (capacity < in_count) {
     capacity *= 2;
   }
 
@@ -947,8 +911,7 @@ static ImGuiKey _ui_layer_imgui_translate_key(
     return (ImGuiKey)(ImGuiKey_Tab + (in_key - EVENT_KEY_CODE_TAB));
   }
 
-  if (in_key == EVENT_KEY_CODE_OEM_102)
-  {
+  if (in_key == EVENT_KEY_CODE_OEM_102) {
     return ImGuiKey_Oem102;
   }
 

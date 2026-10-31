@@ -57,7 +57,10 @@ void ui_layer_init(
   const uint32_t in_width_pixels,
   const uint32_t in_height_pixels)
 {
-  memset(out_ui_layer, 0, sizeof(struct ui_layer_t));
+  memset(
+    out_ui_layer,
+    0,
+    sizeof(struct ui_layer_t));
 
   framebuffer_init(
     &(out_ui_layer->ui_framebuffer),
@@ -110,7 +113,9 @@ void ui_layer_init(
 
   ui_layer_internal_imgui_init(out_ui_layer);
 
-  window_layer_set_custom_layer_run(&(out_ui_layer->ui_window_layer), ui_layer_render);
+  window_layer_set_custom_layer_run(
+    &(out_ui_layer->ui_window_layer),
+    ui_layer_render);
   window_layer_set_event_react(
     &(out_ui_layer->ui_window_layer),
     &(_ui_layer_event_react));
@@ -147,8 +152,7 @@ void ui_layer_set_custom_render(
   struct ui_layer_t* inout_ui_layer,
   void (*in_function_custom_ui_layer_render)(struct ui_layer_t* inout_ui_layer))
 {
-  inout_ui_layer->function_custom_ui_layer_render =
-    in_function_custom_ui_layer_render;
+  inout_ui_layer->function_custom_ui_layer_render = in_function_custom_ui_layer_render;
 }
 
 /*******************************************************************************
@@ -162,8 +166,7 @@ void ui_layer_set_custom_event_react(
     struct ui_layer_t* inout_ui_layer,
     struct event_base_t* inout_event))
 {
-  inout_ui_layer->function_custom_ui_layer_event_react =
-    in_function_custom_ui_layer_event_react;
+  inout_ui_layer->function_custom_ui_layer_event_react = in_function_custom_ui_layer_event_react;
 }
 
 /*******************************************************************************
@@ -174,13 +177,11 @@ void ui_layer_set_custom_event_react(
 static void ui_layer_render(
   struct window_layer_t* inout_window_layer)
 {
-  struct ui_layer_t *ui_layer =
-    (struct ui_layer_t*)inout_window_layer;
+  struct ui_layer_t* ui_layer = (struct ui_layer_t*)inout_window_layer;
 
   ui_layer_internal_imgui_frame_begin(ui_layer);
 
-  if (ui_layer->function_custom_ui_layer_render)
-  {
+  if (ui_layer->function_custom_ui_layer_render) {
     ui_layer->function_custom_ui_layer_render(ui_layer);
   }
 
@@ -209,16 +210,14 @@ static void _ui_layer_event_react(
       inout_event);
 
   // The custom handler is part of the UI, so it sees every event too
-  if (ui_layer->function_custom_ui_layer_event_react)
-  {
+  if (ui_layer->function_custom_ui_layer_event_react) {
     ui_layer->function_custom_ui_layer_event_react(
       ui_layer,
       inout_event);
   }
 
   // Input the UI wants exclusive use of is kept from the layers beneath
-  if (is_captured)
-  {
+  if (is_captured) {
     inout_event->is_handled = 1U;
   }
 }

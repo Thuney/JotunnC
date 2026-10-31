@@ -19,10 +19,13 @@
 // The characters each typeface loads, in order; every other character is
 //  outside the loaded range
 static const char _FONT_LOADED_GLYPHS_STRING[] =
-  " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~";
+  " !\"#$%&'()*+,-./0123456789:;<=>?@"
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`"
+  "abcdefghijklmnopqrstuvwxyz{|}~";
 #define _FONT_LOADED_GLYPHS_STRING_LEN (sizeof(_FONT_LOADED_GLYPHS_STRING) - 1)
 #define _FONT_LOADED_GLYPHS_FIRST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[0])
-#define _FONT_LOADED_GLYPHS_LAST_CHARACTER (_FONT_LOADED_GLYPHS_STRING[_FONT_LOADED_GLYPHS_STRING_LEN - 1])
+#define _FONT_LOADED_GLYPHS_LAST_CHARACTER \
+  (_FONT_LOADED_GLYPHS_STRING[_FONT_LOADED_GLYPHS_STRING_LEN - 1])
 
 /*******************************************************************************
  *
@@ -88,7 +91,8 @@ void font_typeface_init(
 //  typeface is loaded and FreeType is started
 //
 //  in/out: inout_typeface
-void font_typeface_cleanup(struct font_typeface_t* inout_typeface);
+void font_typeface_cleanup(
+  struct font_typeface_t* inout_typeface);
 
 // Renders each loaded character of the typeface's face, at its current size,
 //  into a new glyph atlas texture and fills in its glyphs. Called by
@@ -97,7 +101,8 @@ void font_typeface_cleanup(struct font_typeface_t* inout_typeface);
 //  in/out: inout_typeface
 //  ret:    0 on success; otherwise the bitwise OR of the FreeType errors met
 //            loading and rendering glyphs, with the atlas made regardless
-int font_typeface_load_glyph_atlas(struct font_typeface_t* inout_typeface);
+int font_typeface_load_glyph_atlas(
+  struct font_typeface_t* inout_typeface);
 
 // Finds a character's glyph. Logs a warning in DEBUG builds for a character
 //  outside the loaded range

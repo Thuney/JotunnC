@@ -30,8 +30,7 @@ void window_layer_set_custom_layer_run(
   struct window_layer_t* inout_window_layer,
   void (*in_function_custom_window_layer_run)(struct window_layer_t* inout_window_layer))
 {
-  inout_window_layer->function_custom_window_layer_run =
-    in_function_custom_window_layer_run;
+  inout_window_layer->function_custom_window_layer_run = in_function_custom_window_layer_run;
 }
 
 /*******************************************************************************

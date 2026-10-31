@@ -15,9 +15,10 @@
 char* util_read_raw_file_contents(
   const char* in_file_path)
 {
-  FILE* file = fopen(in_file_path, "r");
-  if (file == NULL)
-  {
+  FILE* file = fopen(
+    in_file_path,
+    "r");
+  if (file == NULL) {
   #ifdef DEBUG
     log_write(
       LOG_LEVEL_ERROR,
@@ -29,13 +30,15 @@ char* util_read_raw_file_contents(
   }
 
   // Find end of file
-  fseek(file, 0L, SEEK_END);
+  fseek(
+    file,
+    0L,
+    SEEK_END);
   const long file_size_bytes = ftell(file);
   rewind(file);
 
   char* buffer = NULL;
-  if (file_size_bytes >= 0)
-  {
+  if (file_size_bytes >= 0) {
     // Zeroed, so the contents are followed by a terminator
     buffer =
       (char*)allocator_allocate_zeroed(
@@ -44,16 +47,14 @@ char* util_read_raw_file_contents(
         ALLOCATOR_TAG_FILE);
   }
 
-  if (buffer == NULL)
-  {
+  if (buffer == NULL) {
   #ifdef DEBUG
     log_write(
       LOG_LEVEL_ERROR,
       "Memory alloc fails");
   #endif
   }
-  else
-  {
+  else {
     const size_t read_size_bytes =
       fread(
         buffer,
@@ -61,8 +62,7 @@ char* util_read_raw_file_contents(
         (size_t)file_size_bytes,
         file);
 
-    if (read_size_bytes != (size_t)file_size_bytes)
-    {
+    if (read_size_bytes != (size_t)file_size_bytes) {
     #ifdef DEBUG
       log_write(
         LOG_LEVEL_ERROR,

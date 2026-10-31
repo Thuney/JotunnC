@@ -18,7 +18,9 @@ int shader_vertex_init(
   struct shader_vertex_t* out_shader,
   const char* in_vertex_shader_src)
 {
-  return vertex_shader_internal_platform_init(out_shader, in_vertex_shader_src);
+  return vertex_shader_internal_platform_init(
+    out_shader,
+    in_vertex_shader_src);
 }
 
 /*******************************************************************************
@@ -30,7 +32,9 @@ int shader_fragment_init(
   struct shader_fragment_t* out_shader,
   const char* in_fragment_shader_src)
 {
-  return fragment_shader_internal_platform_init(out_shader, in_fragment_shader_src);
+  return fragment_shader_internal_platform_init(
+    out_shader,
+    in_fragment_shader_src);
 }
 
 /*******************************************************************************
@@ -43,7 +47,9 @@ int shader_vertex_init_filepath(
   const char* in_filepath)
 {
   char* file_contents = util_read_raw_file_contents(in_filepath);
-  int is_compiled = vertex_shader_internal_platform_init(out_shader, file_contents);
+  int is_compiled = vertex_shader_internal_platform_init(
+    out_shader,
+    file_contents);
   allocator_free(file_contents);
   return !is_compiled;
 }
@@ -58,7 +64,9 @@ int shader_fragment_init_filepath(
   const char* in_filepath)
 {
   char* file_contents = util_read_raw_file_contents(in_filepath);
-  int is_compiled = fragment_shader_internal_platform_init(out_shader, file_contents);
+  int is_compiled = fragment_shader_internal_platform_init(
+    out_shader,
+    file_contents);
   allocator_free(file_contents);
   return !is_compiled;
 }
@@ -78,37 +86,50 @@ int shader_program_init_filepath(
 
   int error;
 
-  error = shader_vertex_init_filepath(&vertex_shader, in_vertex_shader_filepath);
-  if (error)
+  error = shader_vertex_init_filepath(
+    &(vertex_shader),
+    in_vertex_shader_filepath);
+  if (error) {
     log_write(
       LOG_LEVEL_ERROR,
       "Error occurred during vertex shader init - Filepath = %s",
       in_vertex_shader_filepath);
+  }
 
-  error =
-    shader_fragment_init_filepath(&fragment_shader, in_fragment_shader_filepath);
-  if (error)
+  error = shader_fragment_init_filepath(
+    &(fragment_shader),
+    in_fragment_shader_filepath);
+  if (error) {
     log_write(
       LOG_LEVEL_ERROR,
       "Error occurred during fragment shader init - Filepath = %s",
       in_fragment_shader_filepath);
+  }
 
-  error = shader_program_init(inout_shader_program, &vertex_shader, &fragment_shader);
-  if (error)
+  error = shader_program_init(
+    inout_shader_program,
+    &(vertex_shader),
+    &(fragment_shader));
+  if (error) {
     log_write(
       LOG_LEVEL_ERROR,
       "Error occurred during shader program init");
+  }
 
-  shader_program_bind_fragment_data_location(inout_shader_program, 0, "fColor");
+  shader_program_bind_fragment_data_location(
+    inout_shader_program,
+    0,
+    "fColor");
 
   error = shader_program_link(inout_shader_program);
-  if (error)
+  if (error) {
     log_write(
       LOG_LEVEL_ERROR,
       "Error occurred during shader program linkage");
+  }
 
-  shader_vertex_destroy(&vertex_shader);
-  shader_fragment_destroy(&fragment_shader);
+  shader_vertex_destroy(&(vertex_shader));
+  shader_fragment_destroy(&(fragment_shader));
 
   return error;
 }
@@ -124,7 +145,9 @@ int shader_program_init(
   const struct shader_fragment_t* in_fragment_shader)
 {
   int is_attached = shader_program_internal_platform_init(
-    inout_shader_program, in_vertex_shader, in_fragment_shader);
+    inout_shader_program,
+    in_vertex_shader,
+    in_fragment_shader);
 
   // The program exists whether or not its shaders could be attached
   resource_internal_register(
@@ -169,7 +192,9 @@ void shader_program_bind_fragment_data_location(
   const char* in_var_name)
 {
   shader_program_internal_platform_bind_fragment_data_location(
-    in_shader_program, in_buffer_index, in_var_name);
+    in_shader_program,
+    in_buffer_index,
+    in_var_name);
 }
 
 /*******************************************************************************
@@ -182,7 +207,8 @@ int shader_program_get_attribute_location(
   const char* in_attribute_name)
 {
   return shader_program_internal_platform_get_attribute_location(
-    in_shader_program, in_attribute_name);
+    in_shader_program,
+    in_attribute_name);
 }
 
 /*******************************************************************************
@@ -196,7 +222,10 @@ void shader_program_set_uniform_fmat4x4(
   const union fmatrix_4x4_t* in_matrix)
 {
   shader_program_internal_platform_set_uniform(
-    in_shader_program, in_uniform_name, in_matrix, SHADER_PROGRAM_UNIFORM_FMAT4X4);
+    in_shader_program,
+    in_uniform_name,
+    in_matrix,
+    SHADER_PROGRAM_UNIFORM_FMAT4X4);
 }
 
 /*******************************************************************************
@@ -210,7 +239,10 @@ void shader_program_set_uniform_float(
   const float in_val)
 {
   shader_program_internal_platform_set_uniform(
-    in_shader_program, in_uniform_name, &in_val, SHADER_PROGRAM_UNIFORM_FLOAT);
+    in_shader_program,
+    in_uniform_name,
+    &(in_val),
+    SHADER_PROGRAM_UNIFORM_FLOAT);
 }
 
 /*******************************************************************************
@@ -224,7 +256,10 @@ void shader_program_set_uniform_int(
   const int in_val)
 {
   shader_program_internal_platform_set_uniform(
-    in_shader_program, in_uniform_name, &in_val, SHADER_PROGRAM_UNIFORM_INT);
+    in_shader_program,
+    in_uniform_name,
+    &(in_val),
+    SHADER_PROGRAM_UNIFORM_INT);
 }
 
 /*******************************************************************************

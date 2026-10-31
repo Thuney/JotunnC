@@ -138,12 +138,14 @@ uint8_t window_add_layer(
 // Not defined: no backend implements it yet
 //
 //  in/out: inout_window
-void window_show(struct window_t* inout_window);
+void window_show(
+  struct window_t* inout_window);
 
 // Not defined: no backend implements it yet
 //
 //  in/out: inout_window
-void window_hide(struct window_t* inout_window);
+void window_hide(
+  struct window_t* inout_window);
 
 // Runs a frame of the window: handles pending events, renders each layer to
 //  its framebuffer, bottom to top, then the diagnostics overlay if it's
@@ -153,7 +155,8 @@ void window_hide(struct window_t* inout_window);
 //
 //  in/out: inout_window
 //  ret:    Nonzero when the window has been asked to close; otherwise 0
-uint8_t window_run(struct window_t* inout_window);
+uint8_t window_run(
+  struct window_t* inout_window);
 
 // Closes the window and releases what window_init() allocated, along with
 //  the window's diagnostics. Its layers, which the window doesn't own, are
@@ -161,7 +164,8 @@ uint8_t window_run(struct window_t* inout_window);
 //  other window still open
 //
 //  in/out: inout_window
-void window_cleanup(struct window_t* inout_window);
+void window_cleanup(
+  struct window_t* inout_window);
 
 /*******************************************************************************
  *
@@ -198,13 +202,15 @@ void window_handle_event(
 // Makes the window's graphics context current on the calling thread
 //
 //  in:     in_window
-void window_set_context(const struct window_t* in_window);
+void window_set_context(
+  const struct window_t* in_window);
 
 // Leaves the calling thread with no current graphics context, whichever
 //  window's it was
 //
 //  in:     in_window
-void window_release_context(const struct window_t* in_window);
+void window_release_context(
+  const struct window_t* in_window);
 
 // Sets the rectangle of the current context's render target that drawing
 //  maps to, in pixels with the origin at the bottom-left corner

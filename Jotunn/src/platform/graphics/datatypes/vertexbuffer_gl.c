@@ -120,7 +120,9 @@ void vertex_buffer_internal_platform_init(
   struct vertex_buffer_t* out_vertex_buffer,
   const int in_num)
 {
-  vertex_buffer_gl_init(out_vertex_buffer, in_num);
+  vertex_buffer_gl_init(
+    out_vertex_buffer,
+    in_num);
 }
 
 /*******************************************************************************
@@ -145,7 +147,11 @@ void vertex_buffer_internal_platform_set_data(
   const unsigned int in_data_bytes,
   const enum vertex_buffer_data_usage_t in_usage_type)
 {
-  vertex_buffer_gl_set_data(in_vertex_buffer, in_data, in_data_bytes, in_usage_type);
+  vertex_buffer_gl_set_data(
+    in_vertex_buffer,
+    in_data,
+    in_data_bytes,
+    in_usage_type);
 }
 
 /*******************************************************************************
@@ -158,7 +164,10 @@ void vertex_buffer_internal_platform_set_sub_data(
   const float* in_data,
   const unsigned int in_data_bytes)
 {
-  vertex_buffer_gl_set_sub_data(in_vertex_buffer, in_data, in_data_bytes);
+  vertex_buffer_gl_set_sub_data(
+    in_vertex_buffer,
+    in_data,
+    in_data_bytes);
 }
 
 /*******************************************************************************
@@ -170,7 +179,9 @@ void vertex_buffer_internal_platform_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
   const int in_num)
 {
-  vertex_buffer_gl_destroy(inout_vertex_buffer, in_num);
+  vertex_buffer_gl_destroy(
+    inout_vertex_buffer,
+    in_num);
 }
 
 
@@ -183,7 +194,9 @@ void element_buffer_internal_platform_init(
   struct element_buffer_t* out_element_buffer,
   const int in_num)
 {
-  element_buffer_gl_init(out_element_buffer, in_num);
+  element_buffer_gl_init(
+    out_element_buffer,
+    in_num);
 }
 
 /*******************************************************************************
@@ -209,7 +222,10 @@ void element_buffer_internal_platform_buffer_data(
   const enum vertex_buffer_data_usage_t in_usage_type)
 {
   element_buffer_gl_buffer_data(
-    in_element_buffer, in_index_data, in_data_bytes, in_usage_type);
+    in_element_buffer,
+    in_index_data,
+    in_data_bytes,
+    in_usage_type);
 }
 
 /*******************************************************************************
@@ -221,7 +237,9 @@ void element_buffer_internal_platform_destroy(
   struct element_buffer_t* inout_element_buffer,
   const int in_num)
 {
-  element_buffer_gl_destroy(inout_element_buffer, in_num);
+  element_buffer_gl_destroy(
+    inout_element_buffer,
+    in_num);
 }
 
 /*******************************************************************************
@@ -239,17 +257,17 @@ static void vertex_buffer_gl_check_error(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, in_error_string);
+  va_start(
+    args,
+    in_error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
+  if (_gl_error == GL_NO_ERROR) {
     log_write_va(
       LOG_LEVEL_DEBUG,
       in_success_string,
       args);
   }
-  else
-  {
+  else {
     log_write_va(
       LOG_LEVEL_ERROR,
       in_error_string,
@@ -320,7 +338,9 @@ static void vertex_buffer_gl_init(
   struct vertex_buffer_t* out_vertex_buffer,
   const int in_num)
 {
-  glGenBuffers(in_num, &(out_vertex_buffer->vertex_buffer));
+  glGenBuffers(
+    in_num,
+    &(out_vertex_buffer->vertex_buffer));
 
   // vertex_buffer_gl_check_error(
   //   "Vertex Buffer initialized with ID %d\n",
@@ -336,7 +356,9 @@ static void vertex_buffer_gl_init(
 static void vertex_buffer_gl_bind(
   const struct vertex_buffer_t* in_vertex_buffer)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, in_vertex_buffer->vertex_buffer);
+  glBindBuffer(
+    GL_ARRAY_BUFFER,
+    in_vertex_buffer->vertex_buffer);
 
   // vertex_buffer_gl_check_error(
   //   "Bound Vertex Buffer ID %d\n",
@@ -356,11 +378,15 @@ static void vertex_buffer_gl_set_data(
   const enum vertex_buffer_data_usage_t in_usage_type)
 {
   glBufferData(
-    GL_ARRAY_BUFFER, in_data_bytes, in_data, vertex_buffer_gl_get_data_usage(in_usage_type));
+    GL_ARRAY_BUFFER,
+    in_data_bytes,
+    in_data,
+    vertex_buffer_gl_get_data_usage(in_usage_type));
 
   // vertex_buffer_gl_check_error(
   //   "Buffered %d bytes of data in Vertex Buffer ID %d\n",
-  //   "Error occurred trying to buffer %d bytes of data in Vertex Buffer: [ID %d]\n",
+  //  "Error occurred trying to buffer %d bytes of data in Vertex Buffer: [ID
+  //  %d]\n",
   //   data_bytes,
   //   vertex_buffer->vertex_buffer);
 }
@@ -375,11 +401,16 @@ static void vertex_buffer_gl_set_sub_data(
   const float* in_data,
   const unsigned int in_data_bytes)
 {
-  glBufferSubData(GL_ARRAY_BUFFER, 0, in_data_bytes, in_data);
+  glBufferSubData(
+    GL_ARRAY_BUFFER,
+    0,
+    in_data_bytes,
+    in_data);
 
   // vertex_buffer_gl_check_error(
   //   "Buffered %d bytes of sub-data in Vertex Buffer ID %d\n",
-  //   "Error occurred trying to buffer %d bytes of sub-data in Vertex Buffer: [ID %d]\n",
+  //  "Error occurred trying to buffer %d bytes of sub-data in Vertex Buffer:
+  //  [ID %d]\n",
   //   data_bytes,
   //   vertex_buffer->vertex_buffer);
 }
@@ -393,7 +424,9 @@ static void vertex_buffer_gl_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
   const int in_num)
 {
-  glDeleteBuffers(in_num, &(inout_vertex_buffer->vertex_buffer));
+  glDeleteBuffers(
+    in_num,
+    &(inout_vertex_buffer->vertex_buffer));
 }
 
 /*******************************************************************************
@@ -405,7 +438,9 @@ static void element_buffer_gl_init(
   struct element_buffer_t* out_element_buffer,
   const int in_num)
 {
-  glGenBuffers(in_num, &(out_element_buffer->element_buffer));
+  glGenBuffers(
+    in_num,
+    &(out_element_buffer->element_buffer));
 
   // vertex_buffer_gl_check_error(
   //   "Element Buffer initialized with ID %d\n",
@@ -421,7 +456,9 @@ static void element_buffer_gl_init(
 static void element_buffer_gl_bind(
   const struct element_buffer_t* in_element_buffer)
 {
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, in_element_buffer->element_buffer);
+  glBindBuffer(
+    GL_ELEMENT_ARRAY_BUFFER,
+    in_element_buffer->element_buffer);
 
   // vertex_buffer_gl_check_error(
   //   "Bound Element Buffer ID %d\n",
@@ -448,7 +485,8 @@ static void element_buffer_gl_buffer_data(
 
   // vertex_buffer_gl_check_error(
   //   "Buffered %d bytes of data in Element Buffer ID %d\n",
-  //   "Error occurred trying to buffer %d bytes of data in Element Buffer: [ID %d]\n",
+  //  "Error occurred trying to buffer %d bytes of data in Element Buffer: [ID
+  //  %d]\n",
   //   data_bytes,
   //   element_buffer->element_buffer);
 }
@@ -462,5 +500,7 @@ static void element_buffer_gl_destroy(
   struct element_buffer_t* inout_element_buffer,
   const int in_num)
 {
-  glDeleteBuffers(in_num, &inout_element_buffer->element_buffer);
+  glDeleteBuffers(
+    in_num,
+    &(inout_element_buffer->element_buffer));
 }

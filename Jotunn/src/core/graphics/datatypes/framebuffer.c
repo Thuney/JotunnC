@@ -159,7 +159,10 @@ void framebuffer_color_buffer_init(
   const unsigned int in_width_pixels,
   const unsigned int in_height_pixels)
 {
-  color_buffer_internal_platform_init(inout_color_buffer, in_width_pixels, in_height_pixels);
+  color_buffer_internal_platform_init(
+    inout_color_buffer,
+    in_width_pixels,
+    in_height_pixels);
 }
 
 /*******************************************************************************
@@ -172,12 +175,17 @@ void framebuffer_render_buffer_init(
   const unsigned int in_width_pixels,
   const unsigned int in_height_pixels)
 {
-  render_buffer_internal_platform_init(inout_render_buffer, in_width_pixels, in_height_pixels);
+  render_buffer_internal_platform_init(
+    inout_render_buffer,
+    in_width_pixels,
+    in_height_pixels);
 
   resource_internal_register(
     &(inout_render_buffer->resource),
     RESOURCE_KIND_RENDER_BUFFER,
-    ((size_t)in_width_pixels * in_height_pixels * _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
+    ((size_t)in_width_pixels *
+     in_height_pixels *
+     _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
 }
 
 /*******************************************************************************
@@ -212,7 +220,10 @@ void framebuffer_color_buffer_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  color_buffer_internal_platform_resize(inout_color_buffer, in_new_width_pixels, in_new_height_pixels);
+  color_buffer_internal_platform_resize(
+    inout_color_buffer,
+    in_new_width_pixels,
+    in_new_height_pixels);
 }
 
 /*******************************************************************************
@@ -225,11 +236,16 @@ void framebuffer_render_buffer_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  render_buffer_internal_platform_resize(inout_render_buffer, in_new_width_pixels, in_new_height_pixels);
+  render_buffer_internal_platform_resize(
+    inout_render_buffer,
+    in_new_width_pixels,
+    in_new_height_pixels);
 
   resource_internal_set_size(
     &(inout_render_buffer->resource),
-    ((size_t)in_new_width_pixels * in_new_height_pixels * _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
+    ((size_t)in_new_width_pixels *
+     in_new_height_pixels *
+     _FRAMEBUFFER_RENDER_BUFFER_BYTES_PER_PIXEL));
 }
 
 /*******************************************************************************
@@ -241,7 +257,9 @@ void framebuffer_color_buffer_cleanup(
   struct framebuffer_color_buffer_t* inout_color_buffer)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up color buffer\n");
+  fprintf(
+    stdout,
+    "Cleaning up color buffer\n");
 #endif
 
   texture_2d_cleanup(&(inout_color_buffer->texture));
@@ -256,7 +274,9 @@ void framebuffer_render_buffer_cleanup(
   struct framebuffer_render_buffer_t* inout_render_buffer)
 {
 #ifdef DEBUG
-  fprintf(stdout, "Cleaning up render buffer\n");
+  fprintf(
+    stdout,
+    "Cleaning up render buffer\n");
 #endif
 
   // The render buffer itself is deleted along with its framebuffer

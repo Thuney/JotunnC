@@ -41,11 +41,12 @@ struct camera_base_t
   //  planes: an orthographic camera maps the window with its origin at the
   //  bottom-left, and a perspective camera takes its aspect ratio; an
   //  unprojected camera is left as it is. Set by the init functions
-  void (*function_reproject)(struct camera_base_t* inout_camera,
-                           const float in_window_width,
-                           const float in_window_height,
-                           const float in_near_plane,
-                           const float in_far_plane);
+  void (*function_reproject)(
+    struct camera_base_t* inout_camera,
+    const float in_window_width,
+    const float in_window_height,
+    const float in_near_plane,
+    const float in_far_plane);
 };
 
 struct camera_orthographic_t

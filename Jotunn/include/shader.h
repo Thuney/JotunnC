@@ -143,7 +143,8 @@ int shader_program_init_filepath(
 //  in/out: inout_shader_program
 //  ret:    0 when the program linked; 1 when it didn't. Only DEBUG builds
 //            check, so other builds always return 0
-int shader_program_link(struct shader_program_t* inout_shader_program);
+int shader_program_link(
+  struct shader_program_t* inout_shader_program);
 
 /*******************************************************************************
  *
@@ -154,7 +155,8 @@ int shader_program_link(struct shader_program_t* inout_shader_program);
 // Makes a linked program the one used for drawing
 //
 //  in:     in_shader_program
-void shader_program_use(const struct shader_program_t* in_shader_program);
+void shader_program_use(
+  const struct shader_program_t* in_shader_program);
 
 // Binds a fragment shader output variable to a draw buffer. Takes effect when
 //  the program is next linked
@@ -215,15 +217,18 @@ void shader_program_set_uniform_int(
 //  program is destroyed
 //
 //  in/out: inout_shader
-void shader_vertex_destroy(struct shader_vertex_t* inout_shader);
+void shader_vertex_destroy(
+  struct shader_vertex_t* inout_shader);
 
 // Deletes a fragment shader. One attached to a program lives on until the
 //  program is destroyed
 //
 //  in/out: inout_shader
-void shader_fragment_destroy(struct shader_fragment_t* inout_shader);
+void shader_fragment_destroy(
+  struct shader_fragment_t* inout_shader);
 
 // Deletes a shader program and removes it from the resource registry
 //
 //  in/out: inout_shader_program
-void shader_program_destroy(struct shader_program_t* inout_shader_program);
+void shader_program_destroy(
+  struct shader_program_t* inout_shader_program);

@@ -53,7 +53,8 @@ void vertex_buffer_init(
 // Makes a vertex buffer the one vertex data is set in and read from
 //
 //  in:     in_vertex_buffer
-void vertex_buffer_bind(const struct vertex_buffer_t* in_vertex_buffer);
+void vertex_buffer_bind(
+  const struct vertex_buffer_t* in_vertex_buffer);
 
 // Replaces the data of the bound vertex buffer, which must be
 //  inout_vertex_buffer, with a copy of in_data_bytes from in_data. A NULL
@@ -114,7 +115,8 @@ int element_buffer_init(
 //  binding is recorded in the bound vertex array
 //
 //  in:     in_element_buffer
-void element_buffer_bind(const struct element_buffer_t* in_element_buffer);
+void element_buffer_bind(
+  const struct element_buffer_t* in_element_buffer);
 
 // Replaces the indices of the bound element buffer, which must be
 //  inout_element_buffer, with a copy of in_data_bytes from in_index_data. A

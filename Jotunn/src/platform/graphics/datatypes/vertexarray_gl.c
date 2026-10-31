@@ -75,7 +75,9 @@ void vertex_array_internal_platform_init(
   struct vertex_array_t* out_vertex_array,
   const int in_num)
 {
-  vertex_array_gl_init(out_vertex_array, in_num);
+  vertex_array_gl_init(
+    out_vertex_array,
+    in_num);
 }
 
 /*******************************************************************************
@@ -108,7 +110,9 @@ void vertex_array_internal_platform_set_attribute(
   const struct vertex_array_t* in_vertex_array,
   const struct vertex_attribute_t* in_vertex_attribute)
 {
-  vertex_array_gl_set_attribute(in_vertex_array, in_vertex_attribute);
+  vertex_array_gl_set_attribute(
+    in_vertex_array,
+    in_vertex_attribute);
 }
 
 /*******************************************************************************
@@ -120,7 +124,9 @@ void vertex_array_internal_platform_destroy(
   struct vertex_array_t* inout_vertex_array,
   const int in_num)
 {
-  vertex_array_gl_destroy(inout_vertex_array, in_num);
+  vertex_array_gl_destroy(
+    inout_vertex_array,
+    in_num);
 }
 
 /*******************************************************************************
@@ -138,17 +144,17 @@ static void vertex_array_gl_check_error(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, in_error_string);
+  va_start(
+    args,
+    in_error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
+  if (_gl_error == GL_NO_ERROR) {
     log_write_va(
       LOG_LEVEL_DEBUG,
       in_success_string,
       args);
   }
-  else
-  {
+  else {
     log_write_va(
       LOG_LEVEL_ERROR,
       in_error_string,
@@ -172,7 +178,9 @@ static void vertex_array_gl_init(
   struct vertex_array_t* out_vertex_array,
   const int in_num)
 {
-  glGenVertexArrays(in_num, &(out_vertex_array->vertex_array));
+  glGenVertexArrays(
+    in_num,
+    &(out_vertex_array->vertex_array));
 
   // vertex_array_gl_check_error(
   //   "Vertex Array initialized with ID %d\n",
@@ -280,7 +288,8 @@ static void vertex_array_gl_set_attribute(
 
   // vertex_array_gl_check_error(
   //   "Set attribute '%s' in Vertex Array ID %d\n",
-  //   "Error occurred in setting of vertex attribute '%s' in Vertex Array ID %d\n",
+  //  "Error occurred in setting of vertex attribute '%s' in Vertex Array ID
+  //  %d\n",
   //   vertex_attribute->attribute_name,
   //   vertex_array->vertex_array);
 
@@ -288,7 +297,8 @@ static void vertex_array_gl_set_attribute(
 
   // vertex_array_gl_check_error(
   //   "Enabled Vertex Attribute '%s' in Vertex Array ID %d\n",
-  //   "Error occurred in enabling of vertex attribute '%s' in Vertex Array ID %d\n",
+  //  "Error occurred in enabling of vertex attribute '%s' in Vertex Array ID
+  //  %d\n",
   //   vertex_attribute->attribute_name,
   //   vertex_array->vertex_array);
 }
@@ -302,5 +312,7 @@ static void vertex_array_gl_destroy(
   struct vertex_array_t* inout_vertex_array,
   const int in_num)
 {
-  glDeleteVertexArrays(in_num, &inout_vertex_array->vertex_array);
+  glDeleteVertexArrays(
+    in_num,
+    &(inout_vertex_array->vertex_array));
 }

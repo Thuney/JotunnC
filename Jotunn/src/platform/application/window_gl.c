@@ -288,7 +288,11 @@ void window_internal_platform_set_viewport(
   const uint32_t in_width_pixels,
   const uint32_t in_height_pixels)
 {
-  glViewport(in_x_pixels, in_y_pixels, in_width_pixels, in_height_pixels);
+  glViewport(
+    in_x_pixels,
+    in_y_pixels,
+    in_width_pixels,
+    in_height_pixels);
 }
 
 /*******************************************************************************
@@ -316,15 +320,13 @@ void window_internal_platform_set_cursor_shape(
 {
   GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
 
-  if (in_cursor_shape == WINDOW_CURSOR_SHAPE_HIDDEN)
-  {
+  if (in_cursor_shape == WINDOW_CURSOR_SHAPE_HIDDEN) {
     glfwSetInputMode(
       gl_window_ptr,
       GLFW_CURSOR,
       GLFW_CURSOR_HIDDEN);
   }
-  else
-  {
+  else {
     // A NULL cursor falls back to the default arrow
     glfwSetCursor(
       gl_window_ptr,
@@ -378,24 +380,27 @@ static void window_gl_size_callback(
   const int in_height)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Window Resize - W: %d H: %d\n", in_width, in_height);
+  fprintf(
+    stdout,
+    "Event - Window Resize - W: %d H: %d\n",
+    in_width,
+    in_height);
   #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
   metadata->width = in_width;
   metadata->height = in_height;
   metadata->is_resized = 1;
 
   struct event_window_resize_t resize_event = (struct event_window_resize_t){
-    .base =
-      (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_RESIZE, .is_handled = 0},
+    .base = (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_RESIZE, .is_handled = 0},
     .window_handle = (void*)in_window,
     .width = in_width,
     .height = in_height};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(resize_event.base));
+    metadata->parent_application,
+    &(resize_event.base));
 }
 
 /*******************************************************************************
@@ -409,11 +414,14 @@ static void window_gl_framebuffer_size_callback(
   const int in_height_pixels)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Framebuffer Resize - W: %d H: %d\n", in_width_pixels, in_height_pixels);
+  fprintf(
+    stdout,
+    "Event - Framebuffer Resize - W: %d H: %d\n",
+    in_width_pixels,
+    in_height_pixels);
   #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
   metadata->width = in_width_pixels;
   metadata->height = in_height_pixels;
 
@@ -433,19 +441,18 @@ static void window_gl_close_callback(
   //    fprintf(stdout, "Event - Window Close\n");
   // #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   metadata->should_close = 1;
 
   struct event_window_close_t window_close_event =
     (struct event_window_close_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_CLOSE, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_CLOSE, .is_handled = 0},
       .window_handle = (void*)in_window};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(window_close_event.base));
+    metadata->parent_application,
+    &(window_close_event.base));
 }
 
 /*******************************************************************************
@@ -470,18 +477,15 @@ static void window_gl_key_callback(
   //   mods);
   // #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   const enum event_key_code_t key_code = _window_gl_translate_key(in_key);
   const uint8_t modifiers = _window_gl_translate_modifiers(in_mods);
 
-  if (in_action == GLFW_RELEASE)
-  {
+  if (in_action == GLFW_RELEASE) {
     struct event_key_released_t key_released_event =
       (struct event_key_released_t){
-        .base =
-          (struct event_base_t){.event_type = EVENT_TYPE_KEY_RELEASED, .is_handled = 0},
+        .base = (struct event_base_t){.event_type = EVENT_TYPE_KEY_RELEASED, .is_handled = 0},
         .window_handle = (void*)in_window,
         .key = key_code,
         .modifiers = modifiers};
@@ -490,12 +494,10 @@ static void window_gl_key_callback(
       metadata->parent_application,
       &(key_released_event.base));
   }
-  else
-  {
+  else {
     struct event_key_pressed_t key_pressed_event =
       (struct event_key_pressed_t){
-        .base =
-          (struct event_base_t){.event_type = EVENT_TYPE_KEY_PRESSED, .is_handled = 0},
+        .base = (struct event_base_t){.event_type = EVENT_TYPE_KEY_PRESSED, .is_handled = 0},
         .window_handle = (void*)in_window,
         .key = key_code,
         .modifiers = modifiers,
@@ -520,13 +522,11 @@ static void window_gl_char_callback(
   // fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
   // #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   struct event_key_typed_t key_typed_event =
     (struct event_key_typed_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_KEY_TYPED, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_KEY_TYPED, .is_handled = 0},
       .window_handle = (void*)in_window,
       .codepoint = in_codepoint};
 
@@ -555,20 +555,19 @@ static void window_gl_mouse_button_callback(
   //   mods);
   // #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   struct event_mouse_button_t mouse_button_event =
     (struct event_mouse_button_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_BUTTON, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_BUTTON, .is_handled = 0},
       .window_handle = (void*)in_window,
       .button = in_button,
       .action = in_action,
       .mods = _window_gl_translate_modifiers(in_mods)};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_button_event.base));
+    metadata->parent_application,
+    &(mouse_button_event.base));
 }
 
 /*******************************************************************************
@@ -582,22 +581,25 @@ static void window_gl_scroll_callback(
   const double in_y_offset)
 {
   #ifdef DEBUG
-  fprintf(stdout, "Event - Scroll Wheel - X: %lf Y: %lf\n", in_x_offset, in_y_offset);
+  fprintf(
+    stdout,
+    "Event - Scroll Wheel - X: %lf Y: %lf\n",
+    in_x_offset,
+    in_y_offset);
   #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   struct event_mouse_scrolled_t mouse_scrolled_event =
     (struct event_mouse_scrolled_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_SCROLLED, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_SCROLLED, .is_handled = 0},
       .window_handle = (void*)in_window,
       .x_offset = (float)in_x_offset,
       .y_offset = (float)in_y_offset};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_scrolled_event.base));
+    metadata->parent_application,
+    &(mouse_scrolled_event.base));
 }
 
 /*******************************************************************************
@@ -611,21 +613,21 @@ static void window_gl_cursor_position_callback(
   const double in_y_pos)
 {
   // #ifdef DEBUG
-  //    fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos, y_pos);
+  //  fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos,
+  //  y_pos);
   // #endif
 
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   struct event_mouse_moved_t mouse_moved_event = (struct event_mouse_moved_t){
-    .base =
-      (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_MOVED, .is_handled = 0},
+    .base = (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_MOVED, .is_handled = 0},
     .window_handle = (void*)in_window,
     .x = (float)in_x_pos,
     .y = (float)(metadata->height - in_y_pos)};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(mouse_moved_event.base));
+    metadata->parent_application,
+    &(mouse_moved_event.base));
 }
 
 /*******************************************************************************
@@ -637,8 +639,7 @@ static void window_gl_focus_callback(
   GLFWwindow* in_window,
   const int in_is_focused)
 {
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   // #ifdef DEBUG
   // if (focused)
@@ -649,13 +650,13 @@ static void window_gl_focus_callback(
 
   struct event_window_focus_t window_focus_event =
     (struct event_window_focus_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_FOCUS, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_WINDOW_FOCUS, .is_handled = 0},
       .window_handle = (void*)in_window,
       .is_focused = in_is_focused};
 
   metadata->function_event_notify(
-    metadata->parent_application, &(window_focus_event.base));
+    metadata->parent_application,
+    &(window_focus_event.base));
 }
 
 /*******************************************************************************
@@ -692,21 +693,32 @@ static void window_gl_set_callbacks(
 {
   // Window action callback assignment
   glfwSetWindowSizeCallback(
-    inout_glfw_window_ptr, (GLFWwindowsizefun)&window_gl_size_callback);
+    inout_glfw_window_ptr,
+    (GLFWwindowsizefun)&(window_gl_size_callback));
   glfwSetFramebufferSizeCallback(
-    inout_glfw_window_ptr, (GLFWframebuffersizefun)&window_gl_framebuffer_size_callback);
+    inout_glfw_window_ptr,
+    (GLFWframebuffersizefun)&(window_gl_framebuffer_size_callback));
   glfwSetWindowCloseCallback(
-    inout_glfw_window_ptr, (GLFWwindowclosefun)&window_gl_close_callback);
-  glfwSetKeyCallback(inout_glfw_window_ptr, (GLFWkeyfun)&window_gl_key_callback);
-  glfwSetCharCallback(inout_glfw_window_ptr, (GLFWcharfun)&window_gl_char_callback);
+    inout_glfw_window_ptr,
+    (GLFWwindowclosefun)&(window_gl_close_callback));
+  glfwSetKeyCallback(
+    inout_glfw_window_ptr,
+    (GLFWkeyfun)&(window_gl_key_callback));
+  glfwSetCharCallback(
+    inout_glfw_window_ptr,
+    (GLFWcharfun)&(window_gl_char_callback));
   glfwSetMouseButtonCallback(
-    inout_glfw_window_ptr, (GLFWmousebuttonfun)&window_gl_mouse_button_callback);
+    inout_glfw_window_ptr,
+    (GLFWmousebuttonfun)&(window_gl_mouse_button_callback));
   glfwSetScrollCallback(
-    inout_glfw_window_ptr, (GLFWscrollfun)&window_gl_scroll_callback);
+    inout_glfw_window_ptr,
+    (GLFWscrollfun)&(window_gl_scroll_callback));
   glfwSetCursorPosCallback(
-    inout_glfw_window_ptr, (GLFWcursorposfun)&window_gl_cursor_position_callback);
+    inout_glfw_window_ptr,
+    (GLFWcursorposfun)&(window_gl_cursor_position_callback));
   glfwSetWindowFocusCallback(
-    inout_glfw_window_ptr, (GLFWwindowfocusfun)&window_gl_focus_callback);
+    inout_glfw_window_ptr,
+    (GLFWwindowfocusfun)&(window_gl_focus_callback));
   glfwSetCursorEnterCallback(
     inout_glfw_window_ptr,
     (GLFWcursorenterfun)&(_window_gl_cursor_enter_callback));
@@ -727,26 +739,33 @@ static uint8_t window_gl_init(
 #endif
 
   // Handle GLFW initialization
-  if (!is_glfw_initialized)
-  {
+  if (!is_glfw_initialized) {
     is_glfw_initialized = glfwInit();
   }
 
-  if (is_glfw_initialized)
-  {
+  if (is_glfw_initialized) {
     glfwSetErrorCallback((GLFWerrorfun)window_gl_error_callback);
 
     // Set some GLFW settings such as GL context version, modern core profile
     //  for the context, etc.
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
+    glfwWindowHint(
+      GLFW_CONTEXT_VERSION_MAJOR,
+      3);
+    glfwWindowHint(
+      GLFW_CONTEXT_VERSION_MINOR,
+      2);
+    glfwWindowHint(
+      GLFW_OPENGL_PROFILE,
+      GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(
+      GLFW_OPENGL_FORWARD_COMPAT,
+      GL_TRUE);
+    glfwWindowHint(
+      GLFW_RESIZABLE,
+      GL_TRUE);
   }
 #ifdef DEBUG
-  else
-  {
+  else {
     log_write(
       LOG_LEVEL_ERROR,
       "GLFW initialization failed");
@@ -769,7 +788,9 @@ static uint8_t window_gl_init(
   inout_window->context_data.window_handle = (void*)gl_window_ptr;
 
   // Set a pointer in GLFW to our window data
-  glfwSetWindowUserPointer(gl_window_ptr, (void*)&(inout_window->metadata));
+  glfwSetWindowUserPointer(
+    gl_window_ptr,
+    (void*)&(inout_window->metadata));
 
   window_gl_set_callbacks(gl_window_ptr);
 
@@ -778,10 +799,13 @@ static uint8_t window_gl_init(
   // printOpenGLInfo(gl_window_ptr);
 
   // Set the GL viewport to the size of the window
-  glViewport(0, 0, inout_window->metadata.width, inout_window->metadata.height);
+  glViewport(
+    0,
+    0,
+    inout_window->metadata.width,
+    inout_window->metadata.height);
 
-  if (!is_glew_initialized)
-  {
+  if (!is_glew_initialized) {
     glewExperimental = GL_TRUE;
     is_glew_initialized = (glewInit() == GLEW_OK);
   }
@@ -831,8 +855,7 @@ static void window_gl_set_context(
 //   fprintf(stdout, "Setting context to window '%s'\n", window->metadata.tag);
 // #endif
 
-  GLFWwindow* gl_window_handle =
-    (GLFWwindow*)(in_window->context_data.window_handle);
+  GLFWwindow* gl_window_handle = (GLFWwindow*)(in_window->context_data.window_handle);
 
   glfwMakeContextCurrent(gl_window_handle);
 }
@@ -846,7 +869,8 @@ static void window_gl_release_context(
   const struct window_t* in_window)
 {
 // #ifdef DEBUG
-//   fprintf(stdout, "Releasing context from window '%s'\n", window->metadata.tag);
+//  fprintf(stdout, "Releasing context from window '%s'\n",
+//  window->metadata.tag);
 // #endif
   glfwMakeContextCurrent(NULL);
 }
@@ -890,8 +914,7 @@ static void window_gl_cleanup(
     "Cleaning up OpenGL Window");
 #endif
 
-  if (is_glfw_initialized)
-  {
+  if (is_glfw_initialized) {
     GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
 
     glfwDestroyWindow(gl_window_ptr);
@@ -910,8 +933,7 @@ static void window_gl_cleanup(
     is_glfw_initialized = 0;
   }
 
-  if (is_glew_initialized)
-  {
+  if (is_glew_initialized) {
     is_glew_initialized = 0;
   }
 }
@@ -925,13 +947,11 @@ static void _window_gl_cursor_enter_callback(
   GLFWwindow* in_window,
   const int in_is_entered)
 {
-  struct window_data_t* metadata =
-    (struct window_data_t*)glfwGetWindowUserPointer(in_window);
+  struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
   struct event_mouse_entered_t mouse_entered_event =
     (struct event_mouse_entered_t){
-      .base =
-        (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_ENTERED, .is_handled = 0},
+      .base = (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_ENTERED, .is_handled = 0},
       .window_handle = (void*)in_window,
       .is_entered = (in_is_entered == GLFW_TRUE)};
 
@@ -1039,19 +1059,23 @@ static uint8_t _window_gl_translate_modifiers(
 {
   uint8_t modifiers = EVENT_KEY_MODIFIER_NONE;
 
-  if (in_glfw_modifiers & GLFW_MOD_SHIFT)
+  if (in_glfw_modifiers &
+      GLFW_MOD_SHIFT)
   {
     modifiers |= EVENT_KEY_MODIFIER_SHIFT;
   }
-  if (in_glfw_modifiers & GLFW_MOD_CONTROL)
+  if (in_glfw_modifiers &
+      GLFW_MOD_CONTROL)
   {
     modifiers |= EVENT_KEY_MODIFIER_CONTROL;
   }
-  if (in_glfw_modifiers & GLFW_MOD_ALT)
+  if (in_glfw_modifiers &
+      GLFW_MOD_ALT)
   {
     modifiers |= EVENT_KEY_MODIFIER_ALT;
   }
-  if (in_glfw_modifiers & GLFW_MOD_SUPER)
+  if (in_glfw_modifiers &
+      GLFW_MOD_SUPER)
   {
     modifiers |= EVENT_KEY_MODIFIER_SUPER;
   }
@@ -1073,8 +1097,7 @@ static GLFWcursor* _window_gl_get_cursor(
     return NULL;
   }
 
-  if (!is_gl_cursor_created[in_cursor_shape])
-  {
+  if (!is_gl_cursor_created[in_cursor_shape]) {
     int glfw_shape;
 
     switch (in_cursor_shape)

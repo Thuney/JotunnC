@@ -14,7 +14,10 @@ void fvector2_print(
   const union fvector2_t* in_vector)
 {
   fprintf(
-    stdout, "fvector2 - X = %f, Y = %f\n", in_vector->comp.x, in_vector->comp.y);
+    stdout,
+    "fvector2 - X = %f, Y = %f\n",
+    in_vector->comp.x,
+    in_vector->comp.y);
 }
 
 /*******************************************************************************
@@ -60,7 +63,10 @@ void fvector4_print(
 void fvector2_init(
   union fvector2_t* out_vector)
 {
-  memset(out_vector, 0, sizeof(union fvector2_t));
+  memset(
+    out_vector,
+    0,
+    sizeof(union fvector2_t));
 }
 
 /*******************************************************************************
@@ -71,7 +77,10 @@ void fvector2_init(
 void fvector3_init(
   union fvector3_t* out_vector)
 {
-  memset(out_vector, 0, sizeof(union fvector3_t));
+  memset(
+    out_vector,
+    0,
+    sizeof(union fvector3_t));
 }
 
 /*******************************************************************************
@@ -82,7 +91,10 @@ void fvector3_init(
 void fvector4_init(
   union fvector4_t* out_vector)
 {
-  memset(out_vector, 0, sizeof(union fvector4_t));
+  memset(
+    out_vector,
+    0,
+    sizeof(union fvector4_t));
 }
 
 /*******************************************************************************
@@ -142,7 +154,10 @@ void fvector2_setv(
   union fvector2_t* out_vector,
   const union fvector2_t in_vector)
 {
-  fvector2_set(out_vector, in_vector.comp.x, in_vector.comp.y);
+  fvector2_set(
+    out_vector,
+    in_vector.comp.x,
+    in_vector.comp.y);
 }
 
 /*******************************************************************************
@@ -155,7 +170,10 @@ void fvector3_setv(
   const union fvector3_t in_vector)
 {
   fvector3_set(
-    out_vector, in_vector.comp.x, in_vector.comp.y, in_vector.comp.z);
+    out_vector,
+    in_vector.comp.x,
+    in_vector.comp.y,
+    in_vector.comp.z);
 }
 
 /*******************************************************************************
@@ -227,7 +245,9 @@ float fvector4_magnitude(
 union fvector2_t fvector2_normalize(
   const union fvector2_t* in_vector)
 {
-  return fvector2_scale(in_vector, 1.0f / fvector2_magnitude(in_vector));
+  return fvector2_scale(
+    in_vector,
+    1.0f / fvector2_magnitude(in_vector));
 }
 
 /*******************************************************************************
@@ -238,7 +258,9 @@ union fvector2_t fvector2_normalize(
 union fvector3_t fvector3_normalize(
   const union fvector3_t* in_vector)
 {
-  return fvector3_scale(in_vector, 1.0f / fvector3_magnitude(in_vector));
+  return fvector3_scale(
+    in_vector,
+    1.0f / fvector3_magnitude(in_vector));
 }
 
 /*******************************************************************************
@@ -249,7 +271,9 @@ union fvector3_t fvector3_normalize(
 union fvector4_t fvector4_normalize(
   const union fvector4_t* in_vector)
 {
-  return fvector4_scale(in_vector, 1.0f / fvector4_magnitude(in_vector));
+  return fvector4_scale(
+    in_vector,
+    1.0f / fvector4_magnitude(in_vector));
 }
 
 /*******************************************************************************

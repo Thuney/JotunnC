@@ -96,7 +96,9 @@ const struct texture_2d_t* resource_get_texture(
   }
 
   return (const struct texture_2d_t*)(
-    (const char*)in_resource - offsetof(struct texture_2d_t, resource));
+    (const char*)in_resource - offsetof(
+      struct texture_2d_t,
+      resource));
 }
 
 /*******************************************************************************
@@ -114,7 +116,9 @@ const struct framebuffer_t* resource_get_framebuffer(
   }
 
   return (const struct framebuffer_t*)(
-    (const char*)in_resource - offsetof(struct framebuffer_t, resource));
+    (const char*)in_resource - offsetof(
+      struct framebuffer_t,
+      resource));
 }
 
 /*******************************************************************************
@@ -141,8 +145,7 @@ bool resource_get_kind_stats(
     0,
     sizeof(struct resource_kind_stats_t));
 
-  if (!_resource_is_kind_valid(in_kind))
-  {
+  if (!_resource_is_kind_valid(in_kind)) {
     return false;
   }
 
@@ -200,28 +203,23 @@ void resource_internal_register(
   const enum resource_kind_t in_kind,
   const size_t in_size_bytes)
 {
-  if (!_resource_is_kind_valid(in_kind))
-  {
+  if (!_resource_is_kind_valid(in_kind)) {
     return;
   }
 
-  if (_resource_is_registered(inout_resource))
-  {
+  if (_resource_is_registered(inout_resource)) {
     _resource_count_release(
       inout_resource->kind,
       inout_resource->size_bytes);
   }
-  else
-  {
+  else {
     inout_resource->previous = resource_last;
     inout_resource->next = NULL;
 
-    if (resource_last != NULL)
-    {
+    if (resource_last != NULL) {
       resource_last->next = inout_resource;
     }
-    else
-    {
+    else {
       resource_first = inout_resource;
     }
 
@@ -246,26 +244,21 @@ void resource_internal_register(
 void resource_internal_unregister(
   struct resource_t* inout_resource)
 {
-  if (!_resource_is_registered(inout_resource))
-  {
+  if (!_resource_is_registered(inout_resource)) {
     return;
   }
 
-  if (inout_resource->previous != NULL)
-  {
+  if (inout_resource->previous != NULL) {
     inout_resource->previous->next = inout_resource->next;
   }
-  else
-  {
+  else {
     resource_first = inout_resource->next;
   }
 
-  if (inout_resource->next != NULL)
-  {
+  if (inout_resource->next != NULL) {
     inout_resource->next->previous = inout_resource->previous;
   }
-  else
-  {
+  else {
     resource_last = inout_resource->previous;
   }
 
@@ -287,8 +280,7 @@ void resource_internal_set_size(
   struct resource_t* inout_resource,
   const size_t in_size_bytes)
 {
-  if (!_resource_is_registered(inout_resource))
-  {
+  if (!_resource_is_registered(inout_resource)) {
     return;
   }
 
@@ -326,8 +318,7 @@ static bool _resource_is_registered(
        resource != NULL;
        resource = resource->next)
   {
-    if (resource == in_resource)
-    {
+    if (resource == in_resource) {
       return true;
     }
   }
@@ -349,8 +340,7 @@ static void _resource_count_live(
   stats->live_bytes += in_size_bytes;
   stats->live_count++;
 
-  if (stats->live_bytes > stats->peak_live_bytes)
-  {
+  if (stats->live_bytes > stats->peak_live_bytes) {
     stats->peak_live_bytes = stats->live_bytes;
   }
 }

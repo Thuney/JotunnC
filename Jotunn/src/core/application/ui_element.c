@@ -89,68 +89,12 @@ void ui_element_init(
   out_ui_element->padding_x = 0;
   out_ui_element->padding_y = 0;
 
-  if (in_function_ui_element_render)
+  if (in_function_ui_element_render) {
     out_ui_element->function_ui_element_render = in_function_ui_element_render;
+  }
 
-  if (in_function_ui_element_event_react)
+  if (in_function_ui_element_event_react) {
     out_ui_element->function_ui_element_event_react = in_function_ui_element_event_react;
-}
-
-/*******************************************************************************
- *
- *   Function: ui_element_static_text_render()
- *
- ******************************************************************************/
-static void ui_element_static_text_render(
-  struct renderer_2d_t* inout_renderer_2d,
-  const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
-  const struct ui_theme_t* in_theme)
-{
-  const struct ui_element_static_text_t* static_text_element =
-    (const struct ui_element_static_text_t*)in_ui_element;
-
-  union fvector2_t effective_element_size = ui_element_get_effective_size(in_ui_element);
-
-  switch (in_ui_element->element_centering)
-  {
-    case UI_ELEMENT_CENTERING_LEFT:
-    {
-      renderer_2d_draw_string(
-        inout_renderer_2d,
-        static_text_element->typeface,
-        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x,
-                   in_origin_position.comp.y - in_ui_element->padding_y,
-                   0.1f},
-        static_text_element->static_text);
-    }
-    break;
-    case UI_ELEMENT_CENTERING_RIGHT:
-    {
-      renderer_2d_draw_string(
-        inout_renderer_2d,
-        static_text_element->typeface,
-        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
-                     in_allocated_space.comp.x - effective_element_size.comp.x,
-                   in_origin_position.comp.y - in_ui_element->padding_y,
-                   0.1f},
-        static_text_element->static_text);
-    }
-    break;
-    case UI_ELEMENT_CENTERING_CENTER:
-    {
-      renderer_2d_draw_string(
-        inout_renderer_2d,
-        static_text_element->typeface,
-        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
-                     0.5f *
-                       (in_allocated_space.comp.x - effective_element_size.comp.x),
-                   in_origin_position.comp.y - in_ui_element->padding_y,
-                   0.1f},
-        static_text_element->static_text);
-    }
-    break;
   }
 }
 
@@ -166,7 +110,10 @@ void ui_element_static_text_init(
 {
   int text_length = strlen(in_static_text);
   union fvector2_t text_dimensions =
-    font_typeface_calculate_string_dimensions(in_typeface, in_static_text, text_length);
+    font_typeface_calculate_string_dimensions(
+      in_typeface,
+      in_static_text,
+      text_length);
 
   ui_element_init(
     &(out_text_element->base_element),
@@ -181,107 +128,6 @@ void ui_element_static_text_init(
 
   out_text_element->base_element.padding_x = 3;
   out_text_element->base_element.padding_y = 8;
-}
-
-/*******************************************************************************
- *
- *   Function: ui_element_get_transform()
- *
- ******************************************************************************/
-static union fmatrix_4x4_t ui_element_get_transform(
-  const union fvector3_t in_scale_factors,
-  const union fvector3_t in_translation_vector)
-{
-  union fmatrix_4x4_t transform_matrix;
-  {
-    union fmatrix_4x4_t scale_matrix, translation_matrix;
-
-    fmatrix_4x4_init(&scale_matrix);
-    fmatrix_4x4_init(&translation_matrix);
-    fmatrix_4x4_init(&transform_matrix);
-
-    scale_matrix = fmatrix_4x4_transform_scale(&scale_matrix, in_scale_factors);
-    translation_matrix =
-      fmatrix_4x4_transform_translate(&translation_matrix, in_translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&scale_matrix, &translation_matrix);
-  }
-  return transform_matrix;
-}
-
-/*******************************************************************************
- *
- *   Function: ui_element_slider_render()
- *
- ******************************************************************************/
-static void ui_element_slider_render(
-  struct renderer_2d_t* inout_renderer_2d,
-  const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
-  const struct ui_theme_t* in_theme)
-{
-  const struct ui_element_slider_t* slider_element =
-    (const struct ui_element_slider_t*)in_ui_element;
-
-  float slider_range =
-    (slider_element->upper_bound - slider_element->lower_bound);
-  float slider_percentage =
-    ((slider_element->slider_position - slider_element->lower_bound) /
-     slider_range);
-
-  uint16_t slider_margin = 10U;
-
-  const union fvector3_t box_scale_factors =
-    (union fvector3_t){in_ui_element->width, in_ui_element->height, 1.0f};
-
-  const union fvector3_t box_translation_vector = (union fvector3_t){
-    in_origin_position.comp.x + in_ui_element->padding_x,
-    in_origin_position.comp.y - (in_ui_element->height + in_ui_element->padding_y),
-    0.1f};
-
-  union fmatrix_4x4_t box_transform =
-    ui_element_get_transform(box_scale_factors, box_translation_vector);
-
-  renderer_2d_draw_quad(inout_renderer_2d, &box_transform, in_theme->background_color);
-
-  const union fvector3_t line_point1 = (union fvector3_t){
-    in_origin_position.comp.x + in_ui_element->padding_x + slider_margin,
-    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
-    0.2f};
-
-  const union fvector3_t line_point2 = (union fvector3_t){
-    in_origin_position.comp.x + in_ui_element->width + in_ui_element->padding_x -
-      slider_margin,
-    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
-    0.2f};
-
-  renderer_2d_draw_line(
-    inout_renderer_2d, line_point1, line_point2, in_theme->foreground_color);
-
-  uint16_t slider_x =
-    (in_ui_element->width - 2 * (in_ui_element->padding_x + slider_margin)) *
-    slider_percentage;
-
-  const union fvector3_t slider_point1 = (union fvector3_t){
-    in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
-    in_origin_position.comp.y -
-      ((in_ui_element->height / 2) + in_ui_element->padding_y) + slider_margin,
-    0.3f};
-
-  const union fvector3_t slider_point2 =
-    (union fvector3_t)
-      {
-        in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
-        in_origin_position.comp.y -
-          ((in_ui_element->height / 2) + in_ui_element->padding_y) - slider_margin,
-        0.3f
-      };
-
-  renderer_2d_draw_line(
-    inout_renderer_2d,
-    slider_point1,
-    slider_point2,
-    in_theme->accent_color);
 }
 
 /*******************************************************************************
@@ -345,4 +191,176 @@ void ui_element_checkbox_init(
     100,
     (void*)0,
     (void*)0);
+}
+
+/*******************************************************************************
+ *
+ *   Function: ui_element_static_text_render()
+ *
+ ******************************************************************************/
+static void ui_element_static_text_render(
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme)
+{
+  const struct ui_element_static_text_t* static_text_element =
+    (const struct ui_element_static_text_t*)in_ui_element;
+
+  union fvector2_t effective_element_size = ui_element_get_effective_size(in_ui_element);
+
+  switch (in_ui_element->element_centering)
+  {
+    case UI_ELEMENT_CENTERING_LEFT:
+    {
+      renderer_2d_draw_string(
+        inout_renderer_2d,
+        static_text_element->typeface,
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x,
+                   in_origin_position.comp.y - in_ui_element->padding_y,
+                   0.1f},
+        static_text_element->static_text);
+    }
+    break;
+    case UI_ELEMENT_CENTERING_RIGHT:
+    {
+      renderer_2d_draw_string(
+        inout_renderer_2d,
+        static_text_element->typeface,
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
+                     in_allocated_space.comp.x - effective_element_size.comp.x,
+                   in_origin_position.comp.y - in_ui_element->padding_y,
+                   0.1f},
+        static_text_element->static_text);
+    }
+    break;
+    case UI_ELEMENT_CENTERING_CENTER:
+    {
+      renderer_2d_draw_string(
+        inout_renderer_2d,
+        static_text_element->typeface,
+        (union fvector3_t){in_origin_position.comp.x + in_ui_element->padding_x +
+                     0.5f *
+                       (in_allocated_space.comp.x - effective_element_size.comp.x),
+                   in_origin_position.comp.y - in_ui_element->padding_y,
+                   0.1f},
+        static_text_element->static_text);
+    }
+    break;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: ui_element_get_transform()
+ *
+ ******************************************************************************/
+static union fmatrix_4x4_t ui_element_get_transform(
+  const union fvector3_t in_scale_factors,
+  const union fvector3_t in_translation_vector)
+{
+  union fmatrix_4x4_t transform_matrix;
+  {
+    union fmatrix_4x4_t scale_matrix, translation_matrix;
+
+    fmatrix_4x4_init(&(scale_matrix));
+    fmatrix_4x4_init(&(translation_matrix));
+    fmatrix_4x4_init(&(transform_matrix));
+
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      in_scale_factors);
+    translation_matrix =
+      fmatrix_4x4_transform_translate(
+        &(translation_matrix),
+        in_translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
+  }
+  return transform_matrix;
+}
+
+/*******************************************************************************
+ *
+ *   Function: ui_element_slider_render()
+ *
+ ******************************************************************************/
+static void ui_element_slider_render(
+  struct renderer_2d_t* inout_renderer_2d,
+  const struct ui_element_t* in_ui_element,
+  const union fvector2_t in_origin_position,
+  const union fvector2_t in_allocated_space,
+  const struct ui_theme_t* in_theme)
+{
+  const struct ui_element_slider_t* slider_element =
+    (const struct ui_element_slider_t*)in_ui_element;
+
+  float slider_range = (slider_element->upper_bound - slider_element->lower_bound);
+  float slider_percentage =
+    ((slider_element->slider_position - slider_element->lower_bound) /
+     slider_range);
+
+  uint16_t slider_margin = 10U;
+
+  const union fvector3_t box_scale_factors =
+    (union fvector3_t){in_ui_element->width, in_ui_element->height, 1.0f};
+
+  const union fvector3_t box_translation_vector = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x,
+    in_origin_position.comp.y - (in_ui_element->height + in_ui_element->padding_y),
+    0.1f};
+
+  union fmatrix_4x4_t box_transform =
+    ui_element_get_transform(
+      box_scale_factors,
+      box_translation_vector);
+
+  renderer_2d_draw_quad(
+    inout_renderer_2d,
+    &(box_transform),
+    in_theme->background_color);
+
+  const union fvector3_t line_point1 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x + slider_margin,
+    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
+    0.2f};
+
+  const union fvector3_t line_point2 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->width + in_ui_element->padding_x -
+      slider_margin,
+    in_origin_position.comp.y - ((in_ui_element->height / 2) + in_ui_element->padding_y),
+    0.2f};
+
+  renderer_2d_draw_line(
+    inout_renderer_2d,
+    line_point1,
+    line_point2,
+    in_theme->foreground_color);
+
+  uint16_t slider_x =
+    (in_ui_element->width - 2 * (in_ui_element->padding_x + slider_margin)) *
+    slider_percentage;
+
+  const union fvector3_t slider_point1 = (union fvector3_t){
+    in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
+    in_origin_position.comp.y -
+      ((in_ui_element->height / 2) + in_ui_element->padding_y) + slider_margin,
+    0.3f};
+
+  const union fvector3_t slider_point2 =
+    (union fvector3_t)
+      {
+        in_origin_position.comp.x + in_ui_element->padding_x + slider_x,
+        in_origin_position.comp.y -
+          ((in_ui_element->height / 2) + in_ui_element->padding_y) - slider_margin,
+        0.3f
+      };
+
+  renderer_2d_draw_line(
+    inout_renderer_2d,
+    slider_point1,
+    slider_point2,
+    in_theme->accent_color);
 }

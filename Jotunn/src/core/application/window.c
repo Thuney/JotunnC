@@ -56,39 +56,6 @@ static void _window_render_layer(
 
 /*******************************************************************************
  *
- *   Function: window_set_metadata()
- *
- ******************************************************************************/
-static void window_set_metadata(
-  struct window_data_t* out_metadata,
-  const uint32_t in_width,
-  const uint32_t in_height,
-  const char* in_tag,
-  struct application_t* in_app_parent,
-  void (*in_function_event_notify)(
-    struct application_t* inout_application,
-    struct event_base_t* inout_event))
-{
-  // Store our window tag
-  out_metadata->tag =
-    allocator_duplicate_string(
-      in_tag,
-      ALLOCATOR_TAG_WINDOW);
-
-  // Assign window properties
-  out_metadata->width  = in_width;
-  out_metadata->height = in_height;
-
-  out_metadata->should_close = 0;
-  out_metadata->is_visible = 1;
-
-  out_metadata->parent_application    = in_app_parent;
-  out_metadata->function_event_notify = in_function_event_notify;
-}
-
-
-/*******************************************************************************
- *
  *   Function: window_init()
  *
  ******************************************************************************/
@@ -100,7 +67,10 @@ uint8_t window_init(
   const char* in_tag,
   struct application_t* in_app_parent)
 {
-  memset((void*)out_window, 0, sizeof(struct window_t));
+  memset(
+    (void*)out_window,
+    0,
+    sizeof(struct window_t));
 
   window_set_metadata(
     &(out_window->metadata),
@@ -108,18 +78,19 @@ uint8_t window_init(
     in_height,
     in_tag,
     in_app_parent,
-    &application_on_event);
+    &(application_on_event));
 
   const uint8_t error = window_internal_platform_init(out_window);
 
 #ifdef DEBUG
-  if (error) log_write(
-    LOG_LEVEL_ERROR,
-    "Error during window_internal_platform_init");
+  if (error) {
+    log_write(
+      LOG_LEVEL_ERROR,
+      "Error during window_internal_platform_init");
+  }
 #endif
 
-  if (!error)
-  {
+  if (!error) {
     out_window->function_event_react = 0;
 
     window_set_context(out_window);
@@ -157,15 +128,13 @@ uint8_t window_add_layer(
 
   uint8_t error = 0U;
 
-  if (inout_window->num_layers < inout_window->max_layers)
-  {
+  if (inout_window->num_layers < inout_window->max_layers) {
     struct window_layer_t** layer_ptr;
     layer_ptr = (inout_window->layers + inout_window->num_layers);
     *layer_ptr = in_new_window_layer;
     inout_window->num_layers++;
   }
-  else
-  {
+  else {
     error |= 1U;
 
     #ifdef DEBUG
@@ -207,33 +176,28 @@ void window_handle_event(
       inout_window,
       inout_event);
 
-  if (is_taken_by_overlay)
-  {
+  if (is_taken_by_overlay) {
     return;
   }
 
   // Layers see events top to bottom, so that one drawn over another (such as
   //  a UI) can claim an event before anything underneath it reacts
-  for (uint8_t i = inout_window->num_layers; i > 0; i--)
-  {
+  for (uint8_t i = inout_window->num_layers; i > 0; i--) {
     struct window_layer_t* current_layer = inout_window->layers[i - 1];
 
-    if (current_layer->function_event_react)
-    {
+    if (current_layer->function_event_react) {
       current_layer->function_event_react(
         inout_window,
         current_layer,
         inout_event);
 
-      if (inout_event->is_handled)
-      {
+      if (inout_event->is_handled) {
         return;
       }
     }
   }
 
-  if (inout_window->function_event_react)
-  {
+  if (inout_window->function_event_react) {
     inout_window->function_event_react(
       inout_window,
       inout_event);
@@ -258,9 +222,12 @@ uint8_t window_run(
   window_internal_platform_poll_events(inout_window);
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_EVENTS);
 
-  if (inout_window->metadata.is_resized)
-  {
-    window_set_viewport(0, 0, inout_window->metadata.width, inout_window->metadata.height);
+  if (inout_window->metadata.is_resized) {
+    window_set_viewport(
+      0,
+      0,
+      inout_window->metadata.width,
+      inout_window->metadata.height);
   }
 
   struct window_layer_t** current_layer;
@@ -272,8 +239,7 @@ uint8_t window_run(
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
   current_layer = inout_window->layers;
-  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++)
-  {
+  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++) {
     const uint16_t layer_zone =
       diagnostics_internal_get_layer_zone(
         inout_window,
@@ -295,8 +261,7 @@ uint8_t window_run(
 
   diagnostics_zone_end(DIAGNOSTICS_INTERNAL_ZONE_LAYERS);
 
-  if (inout_window->metadata.is_resized)
-  {
+  if (inout_window->metadata.is_resized) {
     inout_window->metadata.is_resized = 0;
   }
 
@@ -306,8 +271,7 @@ uint8_t window_run(
   diagnostics_zone_begin(DIAGNOSTICS_INTERNAL_ZONE_OVERLAY);
 
   struct window_layer_t* overlay_layer = diagnostics_internal_overlay_prepare(inout_window);
-  if (overlay_layer != NULL)
-  {
+  if (overlay_layer != NULL) {
     const struct texture_2d_t* overlay_texture =
       &(overlay_layer->framebuffer->color_buffer.texture);
     const bool is_overlay_resized =
@@ -332,14 +296,14 @@ uint8_t window_run(
   renderer_window_layer_begin_scene(&(inout_window->window_layer_renderer));
 
   current_layer = inout_window->layers;
-  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++)
-  {
+  for (uint8_t i = 0; i < inout_window->num_layers; i++, current_layer++) {
     renderer_window_layer_draw(
-      &(inout_window->window_layer_renderer), *current_layer, i);
+      &(inout_window->window_layer_renderer),
+      *current_layer,
+      i);
   }
 
-  if (overlay_layer != NULL)
-  {
+  if (overlay_layer != NULL) {
     renderer_window_layer_draw(
       &(inout_window->window_layer_renderer),
       overlay_layer,
@@ -425,7 +389,11 @@ void window_set_viewport(
   const uint32_t in_width_pixels,
   const uint32_t in_height_pixels)
 {
-  window_internal_platform_set_viewport(in_x_pixels, in_y_pixels, in_width_pixels, in_height_pixels);
+  window_internal_platform_set_viewport(
+    in_x_pixels,
+    in_y_pixels,
+    in_width_pixels,
+    in_height_pixels);
 }
 
 /*******************************************************************************
@@ -437,7 +405,9 @@ void window_set_background_color(
   struct window_t* inout_window,
   const union fvector4_t in_color)
 {
-  window_internal_platform_set_background_color(inout_window, in_color);
+  window_internal_platform_set_background_color(
+    inout_window,
+    in_color);
 }
 
 /*******************************************************************************
@@ -481,6 +451,38 @@ void window_set_clipboard_text(
 
 /*******************************************************************************
  *
+ *   Function: window_set_metadata()
+ *
+ ******************************************************************************/
+static void window_set_metadata(
+  struct window_data_t* out_metadata,
+  const uint32_t in_width,
+  const uint32_t in_height,
+  const char* in_tag,
+  struct application_t* in_app_parent,
+  void (*in_function_event_notify)(
+    struct application_t* inout_application,
+    struct event_base_t* inout_event))
+{
+  // Store our window tag
+  out_metadata->tag =
+    allocator_duplicate_string(
+      in_tag,
+      ALLOCATOR_TAG_WINDOW);
+
+  // Assign window properties
+  out_metadata->width  = in_width;
+  out_metadata->height = in_height;
+
+  out_metadata->should_close = 0;
+  out_metadata->is_visible = 1;
+
+  out_metadata->parent_application    = in_app_parent;
+  out_metadata->function_event_notify = in_function_event_notify;
+}
+
+/*******************************************************************************
+ *
  *   Function: _window_render_layer()
  *
  ******************************************************************************/
@@ -491,8 +493,7 @@ static void _window_render_layer(
 {
   framebuffer_bind(inout_layer->framebuffer);
 
-  if (in_should_resize)
-  {
+  if (in_should_resize) {
     framebuffer_resize(
       inout_layer->framebuffer,
       in_window->metadata.width,
@@ -508,8 +509,7 @@ static void _window_render_layer(
 
   renderer_base_begin_scene(inout_layer->renderer);
 
-  if (inout_layer->function_custom_window_layer_run)
-  {
+  if (inout_layer->function_custom_window_layer_run) {
     inout_layer->function_custom_window_layer_run(inout_layer);
   }
 

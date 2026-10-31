@@ -28,4 +28,5 @@ union fquaternion_t
 // Zeroes a quaternion
 //
 //  out:    out_quaternion
-void fquaternion_init(union fquaternion_t* out_quaternion);
+void fquaternion_init(
+  union fquaternion_t* out_quaternion);

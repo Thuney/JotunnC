@@ -159,23 +159,20 @@ void* allocator_reallocate(
   const size_t in_size_bytes,
   const enum allocator_tag_t in_tag)
 {
-  if (inout_memory == NULL)
-  {
+  if (inout_memory == NULL) {
     return allocator_allocate(
       in_size_bytes,
       in_tag);
   }
 
-  if (in_size_bytes == 0)
-  {
+  if (in_size_bytes == 0) {
     allocator_free(inout_memory);
 
     return NULL;
   }
 
 #ifdef DEBUG
-  if (in_size_bytes > (SIZE_MAX - sizeof(struct allocator_header_t)))
-  {
+  if (in_size_bytes > (SIZE_MAX - sizeof(struct allocator_header_t))) {
     return NULL;
   }
 
@@ -190,8 +187,7 @@ void* allocator_reallocate(
       header,
       (sizeof(struct allocator_header_t) + in_size_bytes));
 
-  if (resized_header == NULL)
-  {
+  if (resized_header == NULL) {
     return NULL;
   }
 
@@ -228,8 +224,7 @@ void* allocator_reallocate(
 void allocator_free(
   void* inout_memory)
 {
-  if (inout_memory == NULL)
-  {
+  if (inout_memory == NULL) {
     return;
   }
 
@@ -262,8 +257,7 @@ char* allocator_duplicate_string(
       size_bytes,
       in_tag);
 
-  if (copy != NULL)
-  {
+  if (copy != NULL) {
     memcpy(
       copy,
       in_string,
@@ -288,8 +282,7 @@ bool allocator_get_tag_stats(
     sizeof(struct allocator_tag_stats_t));
 
 #ifdef DEBUG
-  if (_allocator_is_tag_valid(in_tag))
-  {
+  if (_allocator_is_tag_valid(in_tag)) {
     *out_stats = allocator_tag_stats[in_tag];
 
     return true;
@@ -338,28 +331,24 @@ static void* _allocator_allocate_counted(
   const enum allocator_tag_t in_tag,
   const bool in_is_zeroed)
 {
-  if (in_size_bytes > (SIZE_MAX - sizeof(struct allocator_header_t)))
-  {
+  if (in_size_bytes > (SIZE_MAX - sizeof(struct allocator_header_t))) {
     return NULL;
   }
 
   const size_t block_size_bytes = (sizeof(struct allocator_header_t) + in_size_bytes);
 
   struct allocator_header_t* header;
-  if (in_is_zeroed)
-  {
+  if (in_is_zeroed) {
     header =
       (struct allocator_header_t*)calloc(
         1,
         block_size_bytes);
   }
-  else
-  {
+  else {
     header = (struct allocator_header_t*)malloc(block_size_bytes);
   }
 
-  if (header == NULL)
-  {
+  if (header == NULL) {
     return NULL;
   }
 
@@ -393,8 +382,7 @@ static void _allocator_count_allocation(
   stats->live_count++;
   stats->total_count++;
 
-  if (stats->live_bytes > stats->peak_live_bytes)
-  {
+  if (stats->live_bytes > stats->peak_live_bytes) {
     stats->peak_live_bytes = stats->live_bytes;
   }
 }

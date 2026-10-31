@@ -56,7 +56,8 @@ void ui_layer_init(
 //  context current to do so and releasing it after
 //
 //  in/out: inout_ui_layer
-void ui_layer_cleanup(struct ui_layer_t* inout_ui_layer);
+void ui_layer_cleanup(
+  struct ui_layer_t* inout_ui_layer);
 
 /*******************************************************************************
  *

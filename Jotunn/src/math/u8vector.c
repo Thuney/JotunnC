@@ -24,8 +24,7 @@ union u8vector4_t u8vector4_from_fvector4(
 {
   union u8vector4_t vector;
 
-  for (unsigned int i = 0; i < 4; i++)
-  {
+  for (unsigned int i = 0; i < 4; i++) {
     vector.vec[i] = _u8vector_component_from_float(in_vector.vec[i]);
   }
 
@@ -42,8 +41,7 @@ union fvector4_t u8vector4_to_fvector4(
 {
   union fvector4_t vector;
 
-  for (unsigned int i = 0; i < 4; i++)
-  {
+  for (unsigned int i = 0; i < 4; i++) {
     vector.vec[i] = ((float)in_vector.vec[i] / 255.0f);
   }
 

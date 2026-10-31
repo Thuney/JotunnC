@@ -47,8 +47,7 @@ void vertex_attribute_cleanup(
   struct vertex_attribute_t* inout_vertex_attribute,
   const unsigned int in_num)
 {
-  for (unsigned int i = 0; i < in_num; i++)
-  {
+  for (unsigned int i = 0; i < in_num; i++) {
     allocator_free(inout_vertex_attribute[i].attribute_name);
     inout_vertex_attribute[i].attribute_name = 0;
   }

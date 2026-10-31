@@ -69,25 +69,6 @@ static const union fmatrix_4x4_t ball_click_calculate_transform(
 
 /*******************************************************************************
  *
- *   Function: ball_init()
- *
- ******************************************************************************/
-static void ball_init(
-  struct ball_t* out_ball)
-{
-  out_ball->color = (union fvector4_t){1.0f, 0.0f, 0.0f, 1.0f};
-
-  out_ball->radius_pixels       = 20.0f;
-  out_ball->position_pixels     = (union fvector2_t){200.0f, 200.0f};
-  out_ball->velocity_pixels_per_second     = (union fvector2_t){0.0f, 10.0f};
-  out_ball->acceleration_pixels_per_second_squared = (union fvector2_t){0.0f, -800.0f};
-
-  out_ball->is_held = false;
-  out_ball->is_grounded = false;
-}
-
-/*******************************************************************************
- *
  *   Function: ball_window_init()
  *
  ******************************************************************************/
@@ -106,8 +87,7 @@ uint8_t ball_window_init(
   out_ball_window->clicked_color            = (union fvector4_t){0.0f, 1.0f, 0.0f, 1.0f};
 
   struct window_t* window_ptr = &(out_ball_window->window);
-  struct camera_base_t* camera_base_ptr =
-    (struct camera_base_t*)&(out_ball_window->camera_ortho);
+  struct camera_base_t* camera_base_ptr = (struct camera_base_t*)&(out_ball_window->camera_ortho);
   struct renderer_base_t* renderer_base_ptr =
     (struct renderer_base_t*)&(out_ball_window->renderer_2d);
 
@@ -119,8 +99,7 @@ uint8_t ball_window_init(
     "JotunnWindow_BallWindow",
     inout_app_parent);
 
-  if (!error)
-  {
+  if (!error) {
     window_set_context(window_ptr);
 
     // Camera stuff
@@ -184,10 +163,15 @@ uint8_t ball_window_init(
 
     window_bind_custom_events(
       window_ptr,
-      &ball_window_on_event);
+      &(ball_window_on_event));
 
     union fvector4_t window_background_color;
-    fvector4_set(&(window_background_color), 1.0f, 1.0f, 1.0f, 0.0f);
+    fvector4_set(
+      &(window_background_color),
+      1.0f,
+      1.0f,
+      1.0f,
+      0.0f);
 
     window_set_background_color(
       window_ptr,
@@ -201,6 +185,103 @@ uint8_t ball_window_init(
 
 /*******************************************************************************
  *
+ *   Function: ball_window_run()
+ *
+ ******************************************************************************/
+void ball_window_run(
+  struct window_layer_t* inout_window_layer)
+{
+  struct ball_window_t* ball_window = (struct ball_window_t*)inout_window_layer->parent_window;
+
+  const union fmatrix_4x4_t ball_transform = ball_calculate_transform(&(ball_window->ball));
+
+  const union fmatrix_4x4_t click_transform = ball_click_calculate_transform(ball_window);
+
+  renderer_2d_draw_circle(
+    &(ball_window->renderer_2d),
+    &(ball_transform),
+    ball_window->ball.color);
+
+  renderer_2d_draw_circle(
+    &(ball_window->renderer_2d),
+    &(click_transform),
+    ball_window->clicked_color);
+}
+
+/*******************************************************************************
+ *
+ *   Function: ball_ui_window_run()
+ *
+ ******************************************************************************/
+void ball_ui_window_run(
+  struct window_t* inout_parent_window,
+  const struct window_layer_t* in_window_layer)
+{
+  struct ball_window_t* ball_window = (struct ball_window_t*)inout_parent_window;
+
+  union fmatrix_4x4_t transform_matrix;
+  {
+    union fmatrix_4x4_t scale_matrix, translation_matrix;
+
+    const union fvector3_t scale_factors = (union fvector3_t){{20.0f, 20.0f, 20.0f}};
+    const union fvector3_t translation_vector = (union fvector3_t){{200.0f, 200.0f, 0.0f}};
+
+    fmatrix_4x4_init(&(scale_matrix));
+    fmatrix_4x4_init(&(translation_matrix));
+    fmatrix_4x4_init(&(transform_matrix));
+
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
+    translation_matrix = fmatrix_4x4_transform_translate(
+      &(translation_matrix),
+      translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
+  }
+
+  renderer_2d_draw_quad(
+    &(ball_window->renderer_2d),
+    &(transform_matrix),
+    ball_window->clicked_color);
+}
+
+/*******************************************************************************
+ *
+ *   Function: ball_window_cleanup()
+ *
+ ******************************************************************************/
+void ball_window_cleanup(
+  struct ball_window_t* inout_ball_window)
+{
+  framebuffer_cleanup(&(inout_ball_window->framebuffer));
+  renderer_2d_cleanup(&(inout_ball_window->renderer_2d));
+
+  ball_ui_layer_cleanup(&(inout_ball_window->ball_ui_layer));
+}
+
+/*******************************************************************************
+ *
+ *   Function: ball_init()
+ *
+ ******************************************************************************/
+static void ball_init(
+  struct ball_t* out_ball)
+{
+  out_ball->color = (union fvector4_t){1.0f, 0.0f, 0.0f, 1.0f};
+
+  out_ball->radius_pixels       = 20.0f;
+  out_ball->position_pixels     = (union fvector2_t){200.0f, 200.0f};
+  out_ball->velocity_pixels_per_second     = (union fvector2_t){0.0f, 10.0f};
+  out_ball->acceleration_pixels_per_second_squared = (union fvector2_t){0.0f, -800.0f};
+
+  out_ball->is_held = false;
+  out_ball->is_grounded = false;
+}
+
+/*******************************************************************************
+ *
  *   Function: ball_update()
  *
  ******************************************************************************/
@@ -210,30 +291,27 @@ static void ball_update(
   const uint32_t in_window_width,
   const uint32_t in_window_height)
 {
-  union fvector2_t *pos   = &(inout_ball->position_pixels);
-  union fvector2_t *vel   = &(inout_ball->velocity_pixels_per_second);
-  union fvector2_t *accel = &(inout_ball->acceleration_pixels_per_second_squared);
+  union fvector2_t* pos   = &(inout_ball->position_pixels);
+  union fvector2_t* vel   = &(inout_ball->velocity_pixels_per_second);
+  union fvector2_t* accel = &(inout_ball->acceleration_pixels_per_second_squared);
 
 
-  if (fabs(vel->comp.x) <= 0.1)
-  {
+  if (fabs(vel->comp.x) <= 0.1) {
     vel->comp.x = 0.0f;
   }
 
-  if (fabs(vel->comp.y) <= 0.1 && !inout_ball->is_grounded)
+  if (fabs(vel->comp.y) <= 0.1 &&
+      !inout_ball->is_grounded)
   {
     vel->comp.y = 0.0f;
     inout_ball->is_grounded = true;
   }
-  else
-  {
+  else {
     inout_ball->is_grounded = false;
   }
 
-  vel->comp.x +=
-    (accel->comp.x * in_delta_time_seconds);
-  vel->comp.y +=
-    (!inout_ball->is_grounded) * (accel->comp.y * in_delta_time_seconds);
+  vel->comp.x += (accel->comp.x * in_delta_time_seconds);
+  vel->comp.y += (!inout_ball->is_grounded) * (accel->comp.y * in_delta_time_seconds);
 
   float new_x = pos->comp.x +
     (vel->comp.x * in_delta_time_seconds) +
@@ -270,8 +348,7 @@ static void ball_update(
   }
 
   pos->comp.x = new_x;
-  pos->comp.y =
-    ((new_y - inout_ball->radius_pixels) <= 0) ? (inout_ball->radius_pixels) : (new_y);
+  pos->comp.y = ((new_y - inout_ball->radius_pixels) <= 0) ? (inout_ball->radius_pixels) : (new_y);
 }
 
 /*******************************************************************************
@@ -323,8 +400,7 @@ static void ball_window_on_event(
 
       double delta_time_seconds = app_tick_event->delta_time_seconds;
 
-      if (!ball->is_held)
-      {
+      if (!ball->is_held) {
         ball_update(
           ball,
           delta_time_seconds,
@@ -338,8 +414,7 @@ static void ball_window_on_event(
 
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      struct event_mouse_moved_t* event_mouse_moved =
-        (struct event_mouse_moved_t*)inout_event;
+      struct event_mouse_moved_t* event_mouse_moved = (struct event_mouse_moved_t*)inout_event;
 
       float mouse_x = event_mouse_moved->x;
       float mouse_y = event_mouse_moved->y;
@@ -350,23 +425,18 @@ static void ball_window_on_event(
       cur_mouse.comp.x = mouse_x;
       cur_mouse.comp.y = mouse_y;
 
-      if (ball->is_held)
-      {
-        ball->position_pixels.comp.x =
-          (cur_mouse.comp.x - intersection_diff.comp.x);
-        ball->position_pixels.comp.y =
-          (cur_mouse.comp.y - intersection_diff.comp.y);
+      if (ball->is_held) {
+        ball->position_pixels.comp.x = (cur_mouse.comp.x - intersection_diff.comp.x);
+        ball->position_pixels.comp.y = (cur_mouse.comp.y - intersection_diff.comp.y);
       }
     }
     break;
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      struct event_mouse_button_t* event_mouse_button =
-        (struct event_mouse_button_t*)inout_event;
+      struct event_mouse_button_t* event_mouse_button = (struct event_mouse_button_t*)inout_event;
 
-      if (event_mouse_button->button == 0)
-      {
+      if (event_mouse_button->button == 0) {
         switch (event_mouse_button->action)
         {
           // Pressed
@@ -376,10 +446,15 @@ static void ball_window_on_event(
             ball_window->last_click_position_pixels.comp.y = cur_mouse.comp.y;
 
             // #ifdef DEBUG
-            //     fprintf(stdout, "Updating last clicked position at: x = %f, y = %f\n", ball_window->last_clicked.comp.x, ball_window->last_clicked.comp.y);
+            //  fprintf(stdout, "Updating last clicked position at: x = %f, y =
+            //  %f\n", ball_window->last_clicked.comp.x,
+            //  ball_window->last_clicked.comp.y);
             // #endif
 
-            if (ball_is_under_mouse(cur_mouse, ball, &intersection_diff))
+            if (ball_is_under_mouse(
+                  cur_mouse,
+                  ball,
+                  &(intersection_diff)))
             {
               ball->is_held = true;
 
@@ -391,8 +466,7 @@ static void ball_window_on_event(
           // Released
           case 0:
           {
-            if (ball->is_held)
-            {
+            if (ball->is_held) {
               ball->is_held = false;
 
               ball->velocity_pixels_per_second.comp.x = (delta_mouse.comp.x * 300.0f);
@@ -433,10 +507,15 @@ static const union fmatrix_4x4_t ball_calculate_transform(
     fmatrix_4x4_init(&(translation_matrix));
     fmatrix_4x4_init(&(transform_matrix));
 
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
-    translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
+    translation_matrix = fmatrix_4x4_transform_translate(
+      &(translation_matrix),
+      translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
   }
   return transform_matrix;
 }
@@ -466,85 +545,15 @@ static const union fmatrix_4x4_t ball_click_calculate_transform(
     fmatrix_4x4_init(&(translation_matrix));
     fmatrix_4x4_init(&(transform_matrix));
 
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
-    translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
+    scale_matrix = fmatrix_4x4_transform_scale(
+      &(scale_matrix),
+      scale_factors);
+    translation_matrix = fmatrix_4x4_transform_translate(
+      &(translation_matrix),
+      translation_vector);
+    transform_matrix = fmatrix_4x4_multiply(
+      &(scale_matrix),
+      &(translation_matrix));
   }
   return transform_matrix;
-}
-
-/*******************************************************************************
- *
- *   Function: ball_window_run()
- *
- ******************************************************************************/
-void ball_window_run(
-  struct window_layer_t* inout_window_layer)
-{
-  struct ball_window_t* ball_window =
-    (struct ball_window_t*)inout_window_layer->parent_window;
-
-  const union fmatrix_4x4_t ball_transform =
-    ball_calculate_transform(&(ball_window->ball));
-
-  const union fmatrix_4x4_t click_transform = ball_click_calculate_transform(ball_window);
-
-  renderer_2d_draw_circle(
-    &(ball_window->renderer_2d),
-    &(ball_transform),
-    ball_window->ball.color);
-
-  renderer_2d_draw_circle(
-    &(ball_window->renderer_2d),
-    &(click_transform),
-    ball_window->clicked_color);
-}
-
-/*******************************************************************************
- *
- *   Function: ball_ui_window_run()
- *
- ******************************************************************************/
-void ball_ui_window_run(
-  struct window_t* inout_parent_window,
-  const struct window_layer_t* in_window_layer)
-{
-  struct ball_window_t* ball_window = (struct ball_window_t*)inout_parent_window;
-
-  union fmatrix_4x4_t transform_matrix;
-  {
-    union fmatrix_4x4_t scale_matrix, translation_matrix;
-
-    const union fvector3_t scale_factors = (union fvector3_t){{20.0f, 20.0f, 20.0f}};
-    const union fvector3_t translation_vector = (union fvector3_t){{200.0f, 200.0f, 0.0f}};
-
-    fmatrix_4x4_init(&(scale_matrix));
-    fmatrix_4x4_init(&(translation_matrix));
-    fmatrix_4x4_init(&(transform_matrix));
-
-    scale_matrix = fmatrix_4x4_transform_scale(&(scale_matrix), scale_factors);
-    translation_matrix =
-      fmatrix_4x4_transform_translate(&(translation_matrix), translation_vector);
-    transform_matrix = fmatrix_4x4_multiply(&(scale_matrix), &(translation_matrix));
-  }
-
-  renderer_2d_draw_quad(
-    &(ball_window->renderer_2d),
-    &(transform_matrix),
-    ball_window->clicked_color);
-}
-
-/*******************************************************************************
- *
- *   Function: ball_window_cleanup()
- *
- ******************************************************************************/
-void ball_window_cleanup(
-  struct ball_window_t* inout_ball_window)
-{
-  framebuffer_cleanup(&(inout_ball_window->framebuffer));
-  renderer_2d_cleanup(&(inout_ball_window->renderer_2d));
-
-  ball_ui_layer_cleanup(&(inout_ball_window->ball_ui_layer));
 }

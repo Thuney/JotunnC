@@ -34,18 +34,21 @@ struct timestep_t
 // Starts the clock now, with no time elapsed
 //
 //  out:    out_timestep
-void timestep_init(struct timestep_t* out_timestep);
+void timestep_init(
+  struct timestep_t* out_timestep);
 
 // Restarts the clock now, as timestep_init() does
 //
 //  out:    out_timestep
-void timestep_reset(struct timestep_t* out_timestep);
+void timestep_reset(
+  struct timestep_t* out_timestep);
 
 // Takes a step, measuring the time since the clock started and since the
 //  last step (or the start, for the first step)
 //
 //  in/out: inout_timestep
-void timestep_step(struct timestep_t* inout_timestep);
+void timestep_step(
+  struct timestep_t* inout_timestep);
 
 // Does nothing; there's nothing to release
 void timestep_cleanup(void);

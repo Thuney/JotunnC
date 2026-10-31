@@ -85,7 +85,9 @@ void texture_2d_init(
     break;
   }
 
-  texture_2d_internal_platform_init(inout_texture, in_should_wrap);
+  texture_2d_internal_platform_init(
+    inout_texture,
+    in_should_wrap);
 
   inout_texture->is_loaded = 1;
 
@@ -103,8 +105,7 @@ void texture_2d_init(
 void texture_2d_cleanup(
   struct texture_2d_t* inout_texture)
 {
-  if (inout_texture->is_loaded)
-  {
+  if (inout_texture->is_loaded) {
     texture_2d_internal_platform_cleanup(inout_texture);
   }
 
@@ -130,7 +131,10 @@ void texture_2d_resize(
 {
   inout_texture->width  = in_new_width_pixels;
   inout_texture->height = in_new_height_pixels;
-  texture_2d_internal_platform_resize(inout_texture, in_new_width_pixels, in_new_height_pixels);
+  texture_2d_internal_platform_resize(
+    inout_texture,
+    in_new_width_pixels,
+    in_new_height_pixels);
 
   resource_internal_set_size(
     &(inout_texture->resource),
@@ -147,8 +151,7 @@ void texture_2d_set_data(
   const unsigned char* in_data,
   const unsigned int in_data_size_bytes)
 {
-  if (in_data_size_bytes != (in_texture->width * in_texture->height * in_texture->channels))
-  {
+  if (in_data_size_bytes != (in_texture->width * in_texture->height * in_texture->channels)) {
   #ifdef DEBUG
     log_write(
       LOG_LEVEL_ERROR,
@@ -159,7 +162,10 @@ void texture_2d_set_data(
     return;
   }
 
-  texture_2d_internal_platform_set_data(in_texture, in_data, in_data_size_bytes);
+  texture_2d_internal_platform_set_data(
+    in_texture,
+    in_data,
+    in_data_size_bytes);
 }
 
 /*******************************************************************************
@@ -246,8 +252,7 @@ void texture_2d_create_from_file_path(
       inout_texture->internal_format);
   #endif
 
-  if (data)
-  {
+  if (data) {
     texture_2d_init(
       inout_texture,
       inout_texture->width,
@@ -275,7 +280,9 @@ void texture_2d_bind(
   const struct texture_2d_t* in_texture,
   const unsigned int in_texture_slot)
 {
-  texture_2d_internal_platform_bind(in_texture, in_texture_slot);
+  texture_2d_internal_platform_bind(
+    in_texture,
+    in_texture_slot);
 }
 
 /*******************************************************************************

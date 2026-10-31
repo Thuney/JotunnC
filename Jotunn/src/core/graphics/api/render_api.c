@@ -92,7 +92,10 @@ void render_api_draw_elements(
   const void* in_indices)
 {
   render_api_internal_platform_draw_elements(
-    in_draw_mode, in_element_count, in_element_data_type, in_indices);
+    in_draw_mode,
+    in_element_count,
+    in_element_data_type,
+    in_indices);
 
   diagnostics_internal_count_draw(in_element_count);
 }

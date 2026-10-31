@@ -124,8 +124,7 @@ void render_api_internal_platform_create_timestamps(
   uint32_t* out_names,
   const uint32_t in_count)
 {
-  for (uint32_t i = 0; i < in_count; i++)
-  {
+  for (uint32_t i = 0; i < in_count; i++) {
     out_names[i] = 0;
   }
 }

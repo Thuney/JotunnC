@@ -248,8 +248,7 @@ void diagnostics_internal_panel_draw(
         igEndTabItem();
       }
 
-      for (uint8_t i = 0; i < state->tab_count; i++)
-      {
+      for (uint8_t i = 0; i < state->tab_count; i++) {
         const struct diagnostics_internal_tab_t* tab = &(state->tabs[i]);
 
         if (igBeginTabItem(
@@ -337,13 +336,11 @@ static void _diagnostics_panel_draw_overview(
   const float work_maximum =
     _diagnostics_panel_get_history_maximum(&(in_state->frame_work_milliseconds));
 
-  if (interval_maximum > y_maximum)
-  {
+  if (interval_maximum > y_maximum) {
     y_maximum = interval_maximum;
   }
 
-  if (work_maximum > y_maximum)
-  {
+  if (work_maximum > y_maximum) {
     y_maximum = work_maximum;
   }
 
@@ -390,16 +387,13 @@ static void _diagnostics_panel_draw_timing(
 
   const struct diagnostics_internal_gpu_t* gpu = &(in_state->gpu);
 
-  if (!gpu->is_support_checked)
-  {
+  if (!gpu->is_support_checked) {
     igTextDisabled("GPU timing starts with the first frame");
   }
-  else if (!gpu->is_supported)
-  {
+  else if (!gpu->is_supported) {
     igTextDisabled("The graphics driver doesn't support GPU timestamps");
   }
-  else
-  {
+  else {
     igTextDisabled(
       "Measured by the GPU, arriving a few frames late; %llu frames left untimed",
       (unsigned long long)gpu->skipped_frame_count);
@@ -425,10 +419,8 @@ static void _diagnostics_panel_draw_zones(
         in_is_gpu ? "gpu_zone_summary" : "cpu_zone_summary",
         in_is_gpu ? "GPU zone (ms)" : "CPU zone (ms)"))
   {
-    for (uint16_t i = 0; i < in_state->zone_count; i++)
-    {
-      if (in_state->zones[i].is_gpu == in_is_gpu)
-      {
+    for (uint16_t i = 0; i < in_state->zone_count; i++) {
+      if (in_state->zones[i].is_gpu == in_is_gpu) {
         _diagnostics_panel_draw_summary_row(
           in_state->zones[i].name,
           &(in_state->zones[i].milliseconds),
@@ -439,18 +431,15 @@ static void _diagnostics_panel_draw_zones(
     igEndTable();
   }
 
-  for (uint16_t i = 0; i < in_state->zone_count; i++)
-  {
-    if (in_state->zones[i].is_gpu != in_is_gpu)
-    {
+  for (uint16_t i = 0; i < in_state->zone_count; i++) {
+    if (in_state->zones[i].is_gpu != in_is_gpu) {
       continue;
     }
 
     const float zone_maximum =
       _diagnostics_panel_get_history_maximum(&(in_state->zones[i].milliseconds));
 
-    if (zone_maximum > y_maximum)
-    {
+    if (zone_maximum > y_maximum) {
       y_maximum = zone_maximum;
     }
   }
@@ -460,10 +449,8 @@ static void _diagnostics_panel_draw_zones(
         "ms",
         y_maximum))
   {
-    for (uint16_t i = 0; i < in_state->zone_count; i++)
-    {
-      if (in_state->zones[i].is_gpu == in_is_gpu)
-      {
+    for (uint16_t i = 0; i < in_state->zone_count; i++) {
+      if (in_state->zones[i].is_gpu == in_is_gpu) {
         _diagnostics_panel_plot_history(
           in_state->zones[i].name,
           &(in_state->zones[i].milliseconds));
@@ -495,12 +482,10 @@ static void _diagnostics_panel_draw_rendering(
 
     // Only the renderers at work in the last frame, as one gone may leave
     //  its slot behind
-    for (uint8_t i = 0; i < rendering->renderer_count; i++)
-    {
+    for (uint8_t i = 0; i < rendering->renderer_count; i++) {
       const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
 
-      if ((renderer->last_frame + 1) >= in_state->frame_count)
-      {
+      if ((renderer->last_frame + 1) >= in_state->frame_count) {
         _diagnostics_panel_draw_summary_row(
           renderer->name,
           &(renderer->draw_calls_per_frame),
@@ -535,12 +520,10 @@ static void _diagnostics_panel_draw_rendering(
       0);
     igTableHeadersRow();
 
-    for (uint8_t i = 0; i < rendering->renderer_count; i++)
-    {
+    for (uint8_t i = 0; i < rendering->renderer_count; i++) {
       const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
 
-      if ((renderer->last_frame + 1) < in_state->frame_count)
-      {
+      if ((renderer->last_frame + 1) < in_state->frame_count) {
         continue;
       }
 
@@ -575,12 +558,10 @@ static void _diagnostics_panel_draw_rendering(
       "every renderer",
       &(rendering->draw_calls_per_frame));
 
-    for (uint8_t i = 0; i < rendering->renderer_count; i++)
-    {
+    for (uint8_t i = 0; i < rendering->renderer_count; i++) {
       const struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
 
-      if ((renderer->last_frame + 1) >= in_state->frame_count)
-      {
+      if ((renderer->last_frame + 1) >= in_state->frame_count) {
         _diagnostics_panel_plot_history(
           renderer->name,
           &(renderer->draw_calls_per_frame));
@@ -599,8 +580,7 @@ static void _diagnostics_panel_draw_rendering(
 static void _diagnostics_panel_draw_memory(
   const struct diagnostics_internal_state_t* in_state)
 {
-  if (!in_state->is_heap_counted)
-  {
+  if (!in_state->is_heap_counted) {
     igTextDisabled("Heap allocations aren't counted in this build");
     return;
   }
@@ -644,8 +624,7 @@ static void _diagnostics_panel_draw_memory(
       0);
     igTableHeadersRow();
 
-    for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++)
-    {
+    for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++) {
       struct allocator_tag_stats_t stats;
       allocator_get_tag_stats(
         (enum allocator_tag_t)tag,
@@ -763,8 +742,7 @@ static void _diagnostics_panel_draw_resources(
       0);
     igTableHeadersRow();
 
-    for (int kind = 0; kind < RESOURCE_KIND_COUNT; kind++)
-    {
+    for (int kind = 0; kind < RESOURCE_KIND_COUNT; kind++) {
       struct resource_kind_stats_t stats;
       resource_get_kind_stats(
         (enum resource_kind_t)kind,
@@ -873,8 +851,7 @@ static void _diagnostics_panel_draw_resources(
           &(framebuffer->color_buffer.texture) :
           resource_get_texture(resource);
 
-      if (preview_texture != NULL)
-      {
+      if (preview_texture != NULL) {
         _diagnostics_panel_draw_preview_tooltip(
           preview_texture,
           in_target_texture);
@@ -947,12 +924,10 @@ static void _diagnostics_panel_draw_events(
     igTableHeadersRow();
 
     // Only the types seen so far, to keep the table short
-    for (int type = 0; type < EVENT_TYPE_COUNT; type++)
-    {
+    for (int type = 0; type < EVENT_TYPE_COUNT; type++) {
       const struct diagnostics_internal_event_type_stats_t* type_stats = &(events->types[type]);
 
-      if (type_stats->count == 0)
-      {
+      if (type_stats->count == 0) {
         continue;
       }
 
@@ -986,8 +961,7 @@ static void _diagnostics_panel_draw_events(
       }
 
       igTableNextColumn();
-      if (type_stats->has_latest)
-      {
+      if (type_stats->has_latest) {
         igText(
           "frame %llu  %s  %s",
           (unsigned long long)type_stats->latest.frame,
@@ -1013,8 +987,7 @@ static void _diagnostics_panel_draw_events(
     0.0f,
     -1.0f);
 
-  if (igSmallButton("Clear"))
-  {
+  if (igSmallButton("Clear")) {
     diagnostics_internal_events_clear();
   }
 
@@ -1061,8 +1034,7 @@ static void _diagnostics_panel_draw_events(
         events->next_index :
         0;
 
-    for (uint32_t i = 0; i < events->count; i++)
-    {
+    for (uint32_t i = 0; i < events->count; i++) {
       const struct diagnostics_internal_event_entry_t* entry =
         &(events->entries[(first_index + i) % DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH]);
 
@@ -1132,8 +1104,7 @@ static void _diagnostics_panel_draw_log(
 
   const struct diagnostics_internal_log_t* log = &(in_state->log);
 
-  for (int level = 0; level < LOG_LEVEL_COUNT; level++)
-  {
+  for (int level = 0; level < LOG_LEVEL_COUNT; level++) {
     char label[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
     snprintf(
       label,
@@ -1150,8 +1121,7 @@ static void _diagnostics_panel_draw_log(
       -1.0f);
   }
 
-  if (igSmallButton("Clear"))
-  {
+  if (igSmallButton("Clear")) {
     diagnostics_internal_log_clear();
   }
 
@@ -1183,18 +1153,18 @@ static void _diagnostics_panel_draw_log(
         log->next_index :
         0;
 
-    for (uint32_t i = 0; i < log->count; i++)
-    {
+    for (uint32_t i = 0; i < log->count; i++) {
       const struct diagnostics_internal_log_entry_t* entry =
         &(log->entries[(first_index + i) % DIAGNOSTICS_INTERNAL_LOG_LENGTH]);
 
-      const bool is_level_valid =
-        ((unsigned int)entry->level < (unsigned int)LOG_LEVEL_COUNT);
+      const bool is_level_valid = ((unsigned int)entry->level < (unsigned int)LOG_LEVEL_COUNT);
 
       if (!is_level_valid ||
           !is_log_level_shown[entry->level] ||
           ((log_filter_text[0] != '\0') &&
-           (strstr(entry->text, log_filter_text) == NULL)))
+           (strstr(
+             entry->text,
+             log_filter_text) == NULL)))
       {
         continue;
       }
@@ -1366,10 +1336,8 @@ static float _diagnostics_panel_get_history_maximum(
 {
   float maximum = 0.0f;
 
-  for (uint32_t i = 0; i < in_history->count; i++)
-  {
-    if (in_history->values[i] > maximum)
-    {
+  for (uint32_t i = 0; i < in_history->count; i++) {
+    if (in_history->values[i] > maximum) {
       maximum = in_history->values[i];
     }
   }
@@ -1386,8 +1354,7 @@ static void _diagnostics_panel_plot_history(
   const char* in_label,
   const struct diagnostics_internal_history_t* in_history)
 {
-  if (in_history->count == 0)
-  {
+  if (in_history->count == 0) {
     return;
   }
 
@@ -1421,8 +1388,7 @@ static ImPlotSpec_c _diagnostics_panel_get_default_spec(void)
 
   // ImPlot's defaults are set by its C++ constructor, so one is constructed
   //  once to copy them from
-  if (!is_default_spec_read)
-  {
+  if (!is_default_spec_read) {
     ImPlotSpec_c* constructed_spec = ImPlotSpec_ImPlotSpec();
     default_spec = *constructed_spec;
     ImPlotSpec_destroy(constructed_spec);
@@ -1442,13 +1408,11 @@ static void _diagnostics_panel_draw_preview_tooltip(
   const struct texture_2d_t* in_texture,
   const struct texture_2d_t* in_target_texture)
 {
-  if (!igBeginItemTooltip())
-  {
+  if (!igBeginItemTooltip()) {
     return;
   }
 
-  if (in_texture == in_target_texture)
-  {
+  if (in_texture == in_target_texture) {
     igTextDisabled("The diagnostics panel is drawn into this");
   }
   else if (!in_texture->is_loaded ||
@@ -1457,8 +1421,7 @@ static void _diagnostics_panel_draw_preview_tooltip(
   {
     igTextDisabled("Nothing to preview");
   }
-  else
-  {
+  else {
     // Fitted within the preview size, keeping the texture's proportions
     const float scale =
       (in_texture->width >= in_texture->height) ?
@@ -1505,24 +1468,21 @@ static void _diagnostics_panel_format_bytes(
 {
   const double size_bytes = (double)in_size_bytes;
 
-  if (size_bytes >= (1024.0 * 1024.0))
-  {
+  if (size_bytes >= (1024.0 * 1024.0)) {
     snprintf(
       out_text,
       in_text_length,
       "%.2f MB",
       (size_bytes / (1024.0 * 1024.0)));
   }
-  else if (size_bytes >= 1024.0)
-  {
+  else if (size_bytes >= 1024.0) {
     snprintf(
       out_text,
       in_text_length,
       "%.1f KB",
       (size_bytes / 1024.0));
   }
-  else
-  {
+  else {
     snprintf(
       out_text,
       in_text_length,

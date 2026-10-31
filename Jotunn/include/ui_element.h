@@ -116,7 +116,8 @@ struct ui_element_checkbox_t
 //
 //  in:     in_ui_element
 //  ret:    The element's width and height, padding included
-union fvector2_t ui_element_get_effective_size(const struct ui_element_t* in_ui_element);
+union fvector2_t ui_element_get_effective_size(
+  const struct ui_element_t* in_ui_element);
 
 // Sets up the part common to every element: its type and size, centered to
 //  the left without padding. A NULL function leaves its field as it was, so
@@ -167,7 +168,8 @@ void ui_element_slider_init(
 //  yet, so draws nothing and is never pressed
 //
 //  out:    out_button_element
-void ui_element_button_init(struct ui_element_button_t* out_button_element);
+void ui_element_button_init(
+  struct ui_element_button_t* out_button_element);
 
 // Sets up a 100 by 100 checkbox. It has neither a render nor an event
 //  function yet, and in_is_checked is not yet applied: is_checked is left as

@@ -67,17 +67,20 @@ union fvector4_t
 // Prints a 2D vector's components to stdout
 //
 //  in:     in_vector
-void fvector2_print(const union fvector2_t* in_vector);
+void fvector2_print(
+  const union fvector2_t* in_vector);
 
 // Prints a 3D vector's components to stdout
 //
 //  in:     in_vector
-void fvector3_print(const union fvector3_t* in_vector);
+void fvector3_print(
+  const union fvector3_t* in_vector);
 
 // Prints a 4D vector's components to stdout
 //
 //  in:     in_vector
-void fvector4_print(const union fvector4_t* in_vector);
+void fvector4_print(
+  const union fvector4_t* in_vector);
 
 #endif
 
@@ -90,17 +93,20 @@ void fvector4_print(const union fvector4_t* in_vector);
 // Zeroes a 2D vector
 //
 //  out:    out_vector
-void fvector2_init(union fvector2_t* out_vector);
+void fvector2_init(
+  union fvector2_t* out_vector);
 
 // Zeroes a 3D vector
 //
 //  out:    out_vector
-void fvector3_init(union fvector3_t* out_vector);
+void fvector3_init(
+  union fvector3_t* out_vector);
 
 // Zeroes a 4D vector
 //
 //  out:    out_vector
-void fvector4_init(union fvector4_t* out_vector);
+void fvector4_init(
+  union fvector4_t* out_vector);
 
 // Sets a 2D vector's components
 //
@@ -166,40 +172,46 @@ void fvector4_setv(
 //
 //  in:     in_vector
 //  ret:    The vector's Euclidean length
-float fvector2_magnitude(const union fvector2_t* in_vector);
+float fvector2_magnitude(
+  const union fvector2_t* in_vector);
 
 // Measures a 3D vector's length
 //
 //  in:     in_vector
 //  ret:    The vector's Euclidean length
-float fvector3_magnitude(const union fvector3_t* in_vector);
+float fvector3_magnitude(
+  const union fvector3_t* in_vector);
 
 // Measures a 4D vector's length
 //
 //  in:     in_vector
 //  ret:    The vector's Euclidean length
-float fvector4_magnitude(const union fvector4_t* in_vector);
+float fvector4_magnitude(
+  const union fvector4_t* in_vector);
 
 // Scales a 2D vector to unit length. A zero vector gives non-finite
 //  components
 //
 //  in:     in_vector
 //  ret:    The unit vector
-union fvector2_t fvector2_normalize(const union fvector2_t* in_vector);
+union fvector2_t fvector2_normalize(
+  const union fvector2_t* in_vector);
 
 // Scales a 3D vector to unit length. A zero vector gives non-finite
 //  components
 //
 //  in:     in_vector
 //  ret:    The unit vector
-union fvector3_t fvector3_normalize(const union fvector3_t* in_vector);
+union fvector3_t fvector3_normalize(
+  const union fvector3_t* in_vector);
 
 // Scales a 4D vector to unit length. A zero vector gives non-finite
 //  components
 //
 //  in:     in_vector
 //  ret:    The unit vector
-union fvector4_t fvector4_normalize(const union fvector4_t* in_vector);
+union fvector4_t fvector4_normalize(
+  const union fvector4_t* in_vector);
 
 // Adds two 2D vectors
 //

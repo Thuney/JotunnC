@@ -91,7 +91,9 @@ void texture_2d_internal_platform_init(
   struct texture_2d_t* inout_texture,
   const bool in_should_wrap)
 {
-  texture_2d_gl_init(inout_texture, in_should_wrap);
+  texture_2d_gl_init(
+    inout_texture,
+    in_should_wrap);
 }
 
 /*******************************************************************************
@@ -104,7 +106,10 @@ void texture_2d_internal_platform_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  texture_2d_gl_resize(in_texture, in_new_width_pixels, in_new_height_pixels);
+  texture_2d_gl_resize(
+    in_texture,
+    in_new_width_pixels,
+    in_new_height_pixels);
 }
 
 /*******************************************************************************
@@ -128,7 +133,10 @@ void texture_2d_internal_platform_set_data(
   const void* in_data,
   const unsigned int in_data_size_bytes)
 {
-  texture_2d_gl_set_data(in_texture, in_data, in_data_size_bytes);
+  texture_2d_gl_set_data(
+    in_texture,
+    in_data,
+    in_data_size_bytes);
 }
 
 /*******************************************************************************
@@ -175,7 +183,9 @@ void texture_2d_internal_platform_bind(
   const struct texture_2d_t* in_texture,
   const unsigned int in_texture_slot)
 {
-  texture_2d_gl_bind(in_texture, in_texture_slot);
+  texture_2d_gl_bind(
+    in_texture,
+    in_texture_slot);
 }
 
 /*******************************************************************************
@@ -193,17 +203,17 @@ static void texture_gl_check_error(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, in_error_string);
+  va_start(
+    args,
+    in_error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
+  if (_gl_error == GL_NO_ERROR) {
     log_write_va(
       LOG_LEVEL_DEBUG,
       in_success_string,
       args);
   }
-  else
-  {
+  else {
     log_write_va(
       LOG_LEVEL_ERROR,
       in_error_string,
@@ -336,39 +346,54 @@ static void texture_2d_gl_init(
   //   "No error before texture init\n",
   //   "Error occurred prior to texture init\n");
 
-  glGenTextures(1, &(inout_texture->texture_id));
+  glGenTextures(
+    1,
+    &(inout_texture->texture_id));
 
   // texture_gl_check_error(
   //   "Texture initialized with ID %d\n",
   //   "Error occurred during texture generation: [ID %d]\n",
   //   inout_texture->texture_id);
 
-  glBindTexture(GL_TEXTURE_2D, inout_texture->texture_id);
-  texture_2d_gl_bind(inout_texture, 0);
+  glBindTexture(
+    GL_TEXTURE_2D,
+    inout_texture->texture_id);
+  texture_2d_gl_bind(
+    inout_texture,
+    0);
 
   /*
    * Set the modes for texture filtering
    * 'Minimizing' filter for down-scaling textures
    * 'Magnifying' filter for up-scaling textures
    */
-  glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTextureParameteri(
+    inout_texture->texture_id,
+    GL_TEXTURE_MIN_FILTER,
+    GL_LINEAR);
+  glTextureParameteri(
+    inout_texture->texture_id,
+    GL_TEXTURE_MAG_FILTER,
+    GL_LINEAR);
 
-  if (in_should_wrap)
-  {
+  if (in_should_wrap) {
     /*
      * Specify how the texture will wrap when texture coordinates are out of the normal range
      * In this case, the texture will 'repeat' for S and T texture coordinates
      */
-    glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTextureParameteri(inout_texture->texture_id, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTextureParameteri(
+      inout_texture->texture_id,
+      GL_TEXTURE_WRAP_S,
+      GL_REPEAT);
+    glTextureParameteri(
+      inout_texture->texture_id,
+      GL_TEXTURE_WRAP_T,
+      GL_REPEAT);
   }
 
-  const GLenum gl_internal_format =
-    texture_gl_get_internal_format(inout_texture->internal_format);
+  const GLenum gl_internal_format = texture_gl_get_internal_format(inout_texture->internal_format);
 
-  const GLenum gl_data_format =
-    texture_gl_get_data_format(inout_texture->data_format);
+  const GLenum gl_data_format = texture_gl_get_data_format(inout_texture->data_format);
 
   glTexImage2D(
     GL_TEXTURE_2D,
@@ -395,7 +420,9 @@ static void texture_2d_gl_init(
 static void texture_2d_gl_cleanup(
   const struct texture_2d_t* in_texture)
 {
-  glDeleteTextures(1, &in_texture->texture_id);
+  glDeleteTextures(
+    1,
+    &(in_texture->texture_id));
 }
 
 /*******************************************************************************
@@ -407,7 +434,9 @@ static void texture_2d_gl_bind(
   const struct texture_2d_t* in_texture,
   const unsigned int in_texture_slot)
 {
-  glBindTextureUnit(in_texture_slot, in_texture->texture_id);
+  glBindTextureUnit(
+    in_texture_slot,
+    in_texture->texture_id);
 
   // texture_gl_check_error(
   //   "Texture ID %d bound to Texture Slot %d\n",
@@ -449,11 +478,9 @@ static void texture_2d_gl_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  const GLenum gl_internal_format =
-    texture_gl_get_internal_format(in_texture->internal_format);
+  const GLenum gl_internal_format = texture_gl_get_internal_format(in_texture->internal_format);
 
-  const GLenum gl_data_format =
-    texture_gl_get_data_format(in_texture->data_format);
+  const GLenum gl_data_format = texture_gl_get_data_format(in_texture->data_format);
 
   glTexImage2D(
     GL_TEXTURE_2D,

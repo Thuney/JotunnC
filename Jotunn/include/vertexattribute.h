@@ -81,5 +81,6 @@ void vertex_attribute_cleanup(
 // Prints a vertex attribute's description to stdout; DEBUG builds only
 //
 //  in:     in_vertex_attribute
-void vertex_attribute_print(const struct vertex_attribute_t* in_vertex_attribute);
+void vertex_attribute_print(
+  const struct vertex_attribute_t* in_vertex_attribute);
 #endif

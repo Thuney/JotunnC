@@ -28,9 +28,15 @@ void timestep_init(
   out_timestep->current_time_seconds = 0.0f;
   out_timestep->delta_time_seconds = 0.0f;
 
-  clock_gettime(CLOCK_MONOTONIC, &out_timestep->start_time);
-  clock_gettime(CLOCK_MONOTONIC, &out_timestep->last_time);
-  clock_gettime(CLOCK_MONOTONIC, &out_timestep->current_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &(out_timestep->start_time));
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &(out_timestep->last_time));
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &(out_timestep->current_time));
 }
 
 /*******************************************************************************
@@ -46,19 +52,6 @@ void timestep_reset(
 
 /*******************************************************************************
  *
- *   Function: timestep_subtract_timespecs()
- *
- ******************************************************************************/
-static double timestep_subtract_timespecs(
-  const struct timespec* in_time1,
-  const struct timespec* in_time0)
-{
-  return (in_time1->tv_sec - in_time0->tv_sec) +
-    (in_time1->tv_nsec - in_time0->tv_nsec) / 1000000000.0;
-}
-
-/*******************************************************************************
- *
  *   Function: timestep_step()
  *
  ******************************************************************************/
@@ -66,12 +59,18 @@ void timestep_step(
   struct timestep_t* inout_timestep)
 {
   inout_timestep->last_time = inout_timestep->current_time;
-  clock_gettime(CLOCK_MONOTONIC, &inout_timestep->current_time);
+  clock_gettime(
+    CLOCK_MONOTONIC,
+    &(inout_timestep->current_time));
 
   inout_timestep->current_time_seconds =
-    timestep_subtract_timespecs(&inout_timestep->current_time, &inout_timestep->start_time);
+    timestep_subtract_timespecs(
+      &(inout_timestep->current_time),
+      &(inout_timestep->start_time));
   inout_timestep->delta_time_seconds =
-    timestep_subtract_timespecs(&inout_timestep->current_time, &inout_timestep->last_time);
+    timestep_subtract_timespecs(
+      &(inout_timestep->current_time),
+      &(inout_timestep->last_time));
 }
 
 /*******************************************************************************
@@ -81,4 +80,17 @@ void timestep_step(
  ******************************************************************************/
 void timestep_cleanup(void)
 {
+}
+
+/*******************************************************************************
+ *
+ *   Function: timestep_subtract_timespecs()
+ *
+ ******************************************************************************/
+static double timestep_subtract_timespecs(
+  const struct timespec* in_time1,
+  const struct timespec* in_time0)
+{
+  return (in_time1->tv_sec - in_time0->tv_sec) +
+    (in_time1->tv_nsec - in_time0->tv_nsec) / 1000000000.0;
 }

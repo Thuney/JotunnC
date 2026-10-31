@@ -26,7 +26,9 @@ void renderer_base_init(
       in_tag,
       ALLOCATOR_TAG_RENDERER);
 
-  render_api_init(&(out_renderer->render_api), in_render_flags);
+  render_api_init(
+    &(out_renderer->render_api),
+    in_render_flags);
 
   out_renderer->camera = in_camera;
 }

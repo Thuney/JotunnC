@@ -61,17 +61,14 @@ bool diagnostics_internal_overlay_event_react(
   struct window_t* inout_window,
   struct event_base_t* inout_event)
 {
-  if (inout_event->event_type == EVENT_TYPE_KEY_PRESSED)
-  {
-    const struct event_key_pressed_t* key_event =
-      (const struct event_key_pressed_t*)inout_event;
+  if (inout_event->event_type == EVENT_TYPE_KEY_PRESSED) {
+    const struct event_key_pressed_t* key_event = (const struct event_key_pressed_t*)inout_event;
 
     if ((key_event->key == _DIAGNOSTICS_OVERLAY_TOGGLE_KEY) &&
         !key_event->is_repeat &&
         (key_event->window_handle == inout_window->context_data.window_handle))
     {
-      if (inout_window->diagnostics_overlay == NULL)
-      {
+      if (inout_window->diagnostics_overlay == NULL) {
         inout_window->diagnostics_overlay =
           (struct diagnostics_overlay_t*)allocator_allocate_zeroed(
             1,
@@ -79,8 +76,7 @@ bool diagnostics_internal_overlay_event_react(
             ALLOCATOR_TAG_DIAGNOSTICS);
       }
 
-      if (inout_window->diagnostics_overlay == NULL)
-      {
+      if (inout_window->diagnostics_overlay == NULL) {
         return false;
       }
 
@@ -129,8 +125,7 @@ struct window_layer_t* diagnostics_internal_overlay_prepare(
     return NULL;
   }
 
-  if (!overlay->is_layer_created)
-  {
+  if (!overlay->is_layer_created) {
     _diagnostics_overlay_create_layer(
       inout_window,
       overlay);
@@ -149,13 +144,11 @@ void diagnostics_internal_overlay_cleanup(
 {
   struct diagnostics_overlay_t* overlay = inout_window->diagnostics_overlay;
 
-  if (overlay == NULL)
-  {
+  if (overlay == NULL) {
     return;
   }
 
-  if (overlay->is_layer_created)
-  {
+  if (overlay->is_layer_created) {
     ui_layer_cleanup(&(overlay->ui_layer));
   }
 
@@ -219,8 +212,7 @@ static void _diagnostics_overlay_render(
     &(is_open),
     &(overlay->ui_layer.ui_framebuffer.color_buffer.texture));
 
-  if (!is_open)
-  {
+  if (!is_open) {
     overlay->is_visible = false;
   }
 }

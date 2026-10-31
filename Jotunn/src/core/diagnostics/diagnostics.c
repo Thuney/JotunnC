@@ -178,8 +178,7 @@ uint16_t diagnostics_zone_register(
 void diagnostics_zone_begin(
   const uint16_t in_zone_id)
 {
-  if (in_zone_id >= diagnostics_state.zone_count)
-  {
+  if (in_zone_id >= diagnostics_state.zone_count) {
     return;
   }
 
@@ -197,15 +196,13 @@ void diagnostics_zone_begin(
 void diagnostics_zone_end(
   const uint16_t in_zone_id)
 {
-  if (in_zone_id >= diagnostics_state.zone_count)
-  {
+  if (in_zone_id >= diagnostics_state.zone_count) {
     return;
   }
 
   struct diagnostics_internal_zone_t* zone = &(diagnostics_state.zones[in_zone_id]);
 
-  if (zone->is_open)
-  {
+  if (zone->is_open) {
     zone->frame_seconds += (diagnostics_internal_get_time_seconds() - zone->begin_seconds);
     zone->is_open = false;
   }
@@ -227,8 +224,7 @@ bool diagnostics_tab_add(
     return false;
   }
 
-  struct diagnostics_internal_tab_t* tab =
-    &(diagnostics_state.tabs[diagnostics_state.tab_count]);
+  struct diagnostics_internal_tab_t* tab = &(diagnostics_state.tabs[diagnostics_state.tab_count]);
   diagnostics_state.tab_count++;
 
   snprintf(
@@ -252,13 +248,11 @@ void diagnostics_internal_frame_begin(
 {
   const double now_seconds = diagnostics_internal_get_time_seconds();
 
-  if (diagnostics_state.frame_count == 0)
-  {
+  if (diagnostics_state.frame_count == 0) {
     diagnostics_state.start_seconds = now_seconds;
 
     // Allocations made before the first frame aren't counted against it
-    for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++)
-    {
+    for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++) {
       struct allocator_tag_stats_t stats;
       allocator_get_tag_stats(
         (enum allocator_tag_t)tag,
@@ -267,8 +261,7 @@ void diagnostics_internal_frame_begin(
       diagnostics_state.tag_total_counts[tag] = stats.total_count;
     }
   }
-  else
-  {
+  else {
     _diagnostics_history_push(
       &(diagnostics_state.frame_interval_milliseconds),
       (float)((now_seconds - diagnostics_state.frame_begin_seconds) * 1000.0));
@@ -296,14 +289,12 @@ void diagnostics_internal_frame_end(void)
     &(diagnostics_state.frame_work_milliseconds),
     (float)((now_seconds - diagnostics_state.frame_begin_seconds) * 1000.0));
 
-  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++)
-  {
+  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++) {
     struct diagnostics_internal_zone_t* zone = &(diagnostics_state.zones[i]);
 
     // A zone still open is cut at the frame's end and carries on into the
     //  next
-    if (zone->is_open)
-    {
+    if (zone->is_open) {
       zone->frame_seconds += (now_seconds - zone->begin_seconds);
       zone->begin_seconds = now_seconds;
     }
@@ -358,13 +349,11 @@ void diagnostics_internal_log_record(
     in_text);
 
   log->next_index = (log->next_index + 1) % DIAGNOSTICS_INTERNAL_LOG_LENGTH;
-  if (log->count < DIAGNOSTICS_INTERNAL_LOG_LENGTH)
-  {
+  if (log->count < DIAGNOSTICS_INTERNAL_LOG_LENGTH) {
     log->count++;
   }
 
-  if ((unsigned int)in_level < (unsigned int)LOG_LEVEL_COUNT)
-  {
+  if ((unsigned int)in_level < (unsigned int)LOG_LEVEL_COUNT) {
     log->level_counts[in_level]++;
   }
 }
@@ -389,8 +378,7 @@ void diagnostics_internal_event_record(
   const struct application_t* in_app,
   const struct event_base_t* in_event)
 {
-  if ((unsigned int)in_event->event_type >= (unsigned int)EVENT_TYPE_COUNT)
-  {
+  if ((unsigned int)in_event->event_type >= (unsigned int)EVENT_TYPE_COUNT) {
     return;
   }
 
@@ -417,15 +405,13 @@ void diagnostics_internal_event_record(
     sizeof(entry.details));
 
   type_stats->count++;
-  if (entry.is_handled)
-  {
+  if (entry.is_handled) {
     type_stats->handled_count++;
   }
   type_stats->latest = entry;
   type_stats->has_latest = true;
 
-  if (in_event->event_type != EVENT_TYPE_APP_TICK)
-  {
+  if (in_event->event_type != EVENT_TYPE_APP_TICK) {
     events->frame_count++;
   }
 
@@ -437,8 +423,7 @@ void diagnostics_internal_event_record(
 
   events->entries[events->next_index] = entry;
   events->next_index = (events->next_index + 1) % DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH;
-  if (events->count < DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH)
-  {
+  if (events->count < DIAGNOSTICS_INTERNAL_EVENT_LOG_LENGTH) {
     events->count++;
   }
 }
@@ -465,8 +450,7 @@ void diagnostics_internal_events_set_excluded(
   const enum event_type_t in_type,
   const bool in_is_excluded)
 {
-  if ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT)
-  {
+  if ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT) {
     diagnostics_state.events.types[in_type].is_excluded = in_is_excluded;
   }
 }
@@ -505,8 +489,7 @@ void diagnostics_internal_scene_begin(
   const uint8_t renderer_index = _diagnostics_find_renderer(in_renderer);
 
   // A scene too deep to track is charged to the deepest one tracked
-  if (rendering->scene_depth < DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH)
-  {
+  if (rendering->scene_depth < DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH) {
     rendering->scene_renderer_indices[rendering->scene_depth] = renderer_index;
   }
 
@@ -520,8 +503,7 @@ void diagnostics_internal_scene_begin(
  ******************************************************************************/
 void diagnostics_internal_scene_end(void)
 {
-  if (diagnostics_state.rendering.scene_depth > 0)
-  {
+  if (diagnostics_state.rendering.scene_depth > 0) {
     diagnostics_state.rendering.scene_depth--;
   }
 }
@@ -537,16 +519,13 @@ void diagnostics_internal_count_draw(
   struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
 
   uint8_t renderer_index;
-  if (rendering->scene_depth == 0)
-  {
+  if (rendering->scene_depth == 0) {
     renderer_index = _diagnostics_find_renderer(NULL);
   }
-  else if (rendering->scene_depth > DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH)
-  {
+  else if (rendering->scene_depth > DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH) {
     renderer_index = rendering->scene_renderer_indices[DIAGNOSTICS_INTERNAL_MAX_SCENE_DEPTH - 1];
   }
-  else
-  {
+  else {
     renderer_index = rendering->scene_renderer_indices[rendering->scene_depth - 1];
   }
 
@@ -590,14 +569,12 @@ void diagnostics_internal_gpu_frame_begin(
 {
   struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
 
-  if (!gpu->is_support_checked)
-  {
+  if (!gpu->is_support_checked) {
     gpu->is_supported = render_api_has_timestamps();
     gpu->is_support_checked = true;
   }
 
-  if (!gpu->is_supported)
-  {
+  if (!gpu->is_supported) {
     return;
   }
 
@@ -606,15 +583,12 @@ void diagnostics_internal_gpu_frame_begin(
       in_window,
       true);
 
-  if (gpu_window == NULL)
-  {
+  if (gpu_window == NULL) {
     return;
   }
 
-  if (!gpu_window->is_created)
-  {
-    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
-    {
+  if (!gpu_window->is_created) {
+    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++) {
       render_api_create_timestamps(
         gpu_window->frames[i].timestamp_names,
         DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS);
@@ -625,13 +599,11 @@ void diagnostics_internal_gpu_frame_begin(
 
   _diagnostics_collect_gpu_frames(gpu_window);
 
-  struct diagnostics_internal_gpu_frame_t* frame =
-    &(gpu_window->frames[gpu_window->current_frame]);
+  struct diagnostics_internal_gpu_frame_t* frame = &(gpu_window->frames[gpu_window->current_frame]);
 
   // Its timestamps are still in use, so this frame goes untimed rather than
   //  waiting for the GPU
-  if (frame->is_pending)
-  {
+  if (frame->is_pending) {
     gpu_window->is_frame_open = false;
     gpu->skipped_frame_count++;
     return;
@@ -666,11 +638,9 @@ void diagnostics_internal_gpu_mark(
     return;
   }
 
-  struct diagnostics_internal_gpu_frame_t* frame =
-    &(gpu_window->frames[gpu_window->current_frame]);
+  struct diagnostics_internal_gpu_frame_t* frame = &(gpu_window->frames[gpu_window->current_frame]);
 
-  if (frame->mark_count >= DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS)
-  {
+  if (frame->mark_count >= DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS) {
     return;
   }
 
@@ -726,8 +696,7 @@ void diagnostics_internal_gpu_frame_end(
     return;
   }
 
-  struct diagnostics_internal_gpu_frame_t* frame =
-    &(gpu_window->frames[gpu_window->current_frame]);
+  struct diagnostics_internal_gpu_frame_t* frame = &(gpu_window->frames[gpu_window->current_frame]);
 
   frame->frame_zone_id =
     _diagnostics_get_window_zone(
@@ -736,7 +705,8 @@ void diagnostics_internal_gpu_frame_end(
       true);
   frame->is_pending = true;
 
-  gpu_window->current_frame = (gpu_window->current_frame + 1) % DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY;
+  gpu_window->current_frame =
+    (gpu_window->current_frame + 1) % DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY;
   gpu_window->is_frame_open = false;
 }
 
@@ -754,15 +724,12 @@ void diagnostics_internal_gpu_cleanup(
       in_window,
       false);
 
-  if (gpu_window == NULL)
-  {
+  if (gpu_window == NULL) {
     return;
   }
 
-  if (gpu_window->is_created)
-  {
-    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
-    {
+  if (gpu_window->is_created) {
+    for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++) {
       render_api_delete_timestamps(
         gpu_window->frames[i].timestamp_names,
         DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS);
@@ -817,8 +784,7 @@ void diagnostics_internal_history_summarize(
     0,
     sizeof(struct diagnostics_internal_summary_t));
 
-  if (in_history->count == 0)
-  {
+  if (in_history->count == 0) {
     return;
   }
 
@@ -841,8 +807,7 @@ void diagnostics_internal_history_summarize(
     &(_diagnostics_compare_floats));
 
   double sum = 0.0;
-  for (uint32_t i = 0; i < in_history->count; i++)
-  {
+  for (uint32_t i = 0; i < in_history->count; i++) {
     sum += sorted_values[i];
   }
 
@@ -862,20 +827,18 @@ static uint16_t _diagnostics_register_zone(
   const char* in_name,
   const bool in_is_gpu)
 {
-  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++)
-  {
+  for (uint16_t i = 0; i < diagnostics_state.zone_count; i++) {
     if ((diagnostics_state.zones[i].is_gpu == in_is_gpu) &&
         (strncmp(
-           diagnostics_state.zones[i].name,
-           in_name,
-           (DIAGNOSTICS_INTERNAL_NAME_LENGTH - 1)) == 0))
+          diagnostics_state.zones[i].name,
+          in_name,
+          (DIAGNOSTICS_INTERNAL_NAME_LENGTH - 1)) == 0))
     {
       return i;
     }
   }
 
-  if (diagnostics_state.zone_count >= DIAGNOSTICS_INTERNAL_MAX_ZONES)
-  {
+  if (diagnostics_state.zone_count >= DIAGNOSTICS_INTERNAL_MAX_ZONES) {
     return DIAGNOSTICS_ZONE_INVALID;
   }
 
@@ -928,10 +891,8 @@ static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
 {
   struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
 
-  for (uint8_t i = 0; i < gpu->window_count; i++)
-  {
-    if (gpu->windows[i].window == in_window)
-    {
+  for (uint8_t i = 0; i < gpu->window_count; i++) {
+    if (gpu->windows[i].window == in_window) {
       return &(gpu->windows[i]);
     }
   }
@@ -962,17 +923,14 @@ static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
 static void _diagnostics_collect_gpu_frames(
   struct diagnostics_internal_gpu_window_t* inout_gpu_window)
 {
-  for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++)
-  {
+  for (uint8_t i = 0; i < DIAGNOSTICS_INTERNAL_GPU_FRAME_DELAY; i++) {
     struct diagnostics_internal_gpu_frame_t* frame = &(inout_gpu_window->frames[i]);
 
-    if (!frame->is_pending)
-    {
+    if (!frame->is_pending) {
       continue;
     }
 
-    if (frame->mark_count == 0)
-    {
+    if (frame->mark_count == 0) {
       frame->is_pending = false;
       continue;
     }
@@ -982,30 +940,25 @@ static void _diagnostics_collect_gpu_frames(
     uint64_t times_nanoseconds[DIAGNOSTICS_INTERNAL_GPU_MAX_MARKS];
     bool is_ready = true;
 
-    for (uint8_t mark = 0; is_ready && (mark < frame->mark_count); mark++)
-    {
+    for (uint8_t mark = 0; is_ready && (mark < frame->mark_count); mark++) {
       is_ready =
         render_api_read_timestamp(
           frame->timestamp_names[mark],
           &(times_nanoseconds[mark]));
     }
 
-    if (!is_ready)
-    {
+    if (!is_ready) {
       continue;
     }
 
-    for (uint8_t mark = 1; mark < frame->mark_count; mark++)
-    {
-      if (frame->zone_ids[mark] < diagnostics_state.zone_count)
-      {
+    for (uint8_t mark = 1; mark < frame->mark_count; mark++) {
+      if (frame->zone_ids[mark] < diagnostics_state.zone_count) {
         diagnostics_state.zones[frame->zone_ids[mark]].frame_seconds +=
           ((double)(times_nanoseconds[mark] - times_nanoseconds[mark - 1]) / 1000000000.0);
       }
     }
 
-    if (frame->frame_zone_id < diagnostics_state.zone_count)
-    {
+    if (frame->frame_zone_id < diagnostics_state.zone_count) {
       diagnostics_state.zones[frame->frame_zone_id].frame_seconds +=
         ((double)(times_nanoseconds[frame->mark_count - 1] - times_nanoseconds[0]) /
          1000000000.0);
@@ -1025,11 +978,9 @@ static void _diagnostics_history_push(
   const float in_value)
 {
   inout_history->values[inout_history->next_index] = in_value;
-  inout_history->next_index =
-    (inout_history->next_index + 1) % DIAGNOSTICS_INTERNAL_HISTORY_LENGTH;
+  inout_history->next_index = (inout_history->next_index + 1) % DIAGNOSTICS_INTERNAL_HISTORY_LENGTH;
 
-  if (inout_history->count < DIAGNOSTICS_INTERNAL_HISTORY_LENGTH)
-  {
+  if (inout_history->count < DIAGNOSTICS_INTERNAL_HISTORY_LENGTH) {
     inout_history->count++;
   }
 }
@@ -1044,8 +995,7 @@ static void _diagnostics_record_heap(void)
   size_t live_bytes = 0;
   uint64_t frame_allocations = 0;
 
-  for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++)
-  {
+  for (int tag = 0; tag < ALLOCATOR_TAG_COUNT; tag++) {
     struct allocator_tag_stats_t stats;
     diagnostics_state.is_heap_counted =
       allocator_get_tag_stats(
@@ -1078,8 +1028,7 @@ static void _diagnostics_record_resources(void)
 {
   size_t live_bytes = 0;
 
-  for (int kind = 0; kind < RESOURCE_KIND_COUNT; kind++)
-  {
+  for (int kind = 0; kind < RESOURCE_KIND_COUNT; kind++) {
     struct resource_kind_stats_t stats;
     resource_get_kind_stats(
       (enum resource_kind_t)kind,
@@ -1109,8 +1058,7 @@ static void _diagnostics_describe_event(
   {
     case EVENT_TYPE_WINDOW_RESIZE:
     {
-      const struct event_window_resize_t* event =
-        (const struct event_window_resize_t*)in_event;
+      const struct event_window_resize_t* event = (const struct event_window_resize_t*)in_event;
 
       snprintf(
         out_text,
@@ -1123,8 +1071,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_WINDOW_FOCUS:
     {
-      const struct event_window_focus_t* event =
-        (const struct event_window_focus_t*)in_event;
+      const struct event_window_focus_t* event = (const struct event_window_focus_t*)in_event;
 
       snprintf(
         out_text,
@@ -1136,8 +1083,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_APP_TICK:
     {
-      const struct event_app_tick_t* event =
-        (const struct event_app_tick_t*)in_event;
+      const struct event_app_tick_t* event = (const struct event_app_tick_t*)in_event;
 
       snprintf(
         out_text,
@@ -1149,8 +1095,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_PRESSED:
     {
-      const struct event_key_pressed_t* event =
-        (const struct event_key_pressed_t*)in_event;
+      const struct event_key_pressed_t* event = (const struct event_key_pressed_t*)in_event;
 
       snprintf(
         out_text,
@@ -1164,8 +1109,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_RELEASED:
     {
-      const struct event_key_released_t* event =
-        (const struct event_key_released_t*)in_event;
+      const struct event_key_released_t* event = (const struct event_key_released_t*)in_event;
 
       snprintf(
         out_text,
@@ -1178,8 +1122,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_KEY_TYPED:
     {
-      const struct event_key_typed_t* event =
-        (const struct event_key_typed_t*)in_event;
+      const struct event_key_typed_t* event = (const struct event_key_typed_t*)in_event;
 
       // Printable ASCII is shown as itself as well
       if ((event->codepoint >= 0x20U) &&
@@ -1192,8 +1135,7 @@ static void _diagnostics_describe_event(
           (char)event->codepoint,
           (unsigned int)event->codepoint);
       }
-      else
-      {
+      else {
         snprintf(
           out_text,
           in_text_length,
@@ -1205,8 +1147,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_BUTTON:
     {
-      const struct event_mouse_button_t* event =
-        (const struct event_mouse_button_t*)in_event;
+      const struct event_mouse_button_t* event = (const struct event_mouse_button_t*)in_event;
 
       snprintf(
         out_text,
@@ -1220,8 +1161,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_MOVED:
     {
-      const struct event_mouse_moved_t* event =
-        (const struct event_mouse_moved_t*)in_event;
+      const struct event_mouse_moved_t* event = (const struct event_mouse_moved_t*)in_event;
 
       snprintf(
         out_text,
@@ -1234,8 +1174,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_SCROLLED:
     {
-      const struct event_mouse_scrolled_t* event =
-        (const struct event_mouse_scrolled_t*)in_event;
+      const struct event_mouse_scrolled_t* event = (const struct event_mouse_scrolled_t*)in_event;
 
       snprintf(
         out_text,
@@ -1248,8 +1187,7 @@ static void _diagnostics_describe_event(
 
     case EVENT_TYPE_MOUSE_ENTERED:
     {
-      const struct event_mouse_entered_t* event =
-        (const struct event_mouse_entered_t*)in_event;
+      const struct event_mouse_entered_t* event = (const struct event_mouse_entered_t*)in_event;
 
       snprintf(
         out_text,
@@ -1283,14 +1221,11 @@ static uint8_t _diagnostics_find_renderer(
     renderer_index++;
   }
 
-  if (renderer_index == rendering->renderer_count)
-  {
-    if (rendering->renderer_count < DIAGNOSTICS_INTERNAL_MAX_RENDERERS)
-    {
+  if (renderer_index == rendering->renderer_count) {
+    if (rendering->renderer_count < DIAGNOSTICS_INTERNAL_MAX_RENDERERS) {
       rendering->renderer_count++;
     }
-    else
-    {
+    else {
       renderer_index = (DIAGNOSTICS_INTERNAL_MAX_RENDERERS - 1);
     }
 
@@ -1301,15 +1236,13 @@ static uint8_t _diagnostics_find_renderer(
 
   // Named afresh each time, as a renderer gone may leave its address to
   //  another
-  if (in_renderer == NULL)
-  {
+  if (in_renderer == NULL) {
     snprintf(
       renderer->name,
       sizeof(renderer->name),
       "outside any scene");
   }
-  else
-  {
+  else {
     const char* window_tag =
       ((in_renderer->parent_window != NULL) &&
        (in_renderer->parent_window->metadata.tag != NULL)) ?
@@ -1338,8 +1271,7 @@ static void _diagnostics_record_rendering(void)
 {
   struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
 
-  for (uint8_t i = 0; i < rendering->renderer_count; i++)
-  {
+  for (uint8_t i = 0; i < rendering->renderer_count; i++) {
     struct diagnostics_internal_renderer_t* renderer = &(rendering->renderers[i]);
 
     renderer->draw_calls = renderer->frame_draw_calls;
@@ -1395,13 +1327,11 @@ static const char* _diagnostics_find_event_window_tag(
     break;
   }
 
-  if (window_handle == NULL)
-  {
+  if (window_handle == NULL) {
     return "";
   }
 
-  for (uint8_t i = 0; i < in_app->num_windows; i++)
-  {
+  for (uint8_t i = 0; i < in_app->num_windows; i++) {
     const struct window_t* window = in_app->windows[i];
 
     if ((window->context_data.window_handle == window_handle) &&

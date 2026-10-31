@@ -14,8 +14,7 @@ void vertex_buffer_init(
 {
   // Each buffer has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     vertex_buffer_internal_platform_init(
       &(inout_vertex_buffer[i]),
       1);
@@ -50,7 +49,10 @@ void vertex_buffer_set_data(
   const enum vertex_buffer_data_usage_t in_usage_type)
 {
   vertex_buffer_internal_platform_set_data(
-    inout_vertex_buffer, in_data, in_data_bytes, in_usage_type);
+    inout_vertex_buffer,
+    in_data,
+    in_data_bytes,
+    in_usage_type);
 
   // The buffer's storage is replaced with data_bytes of it
   resource_internal_set_size(
@@ -68,7 +70,10 @@ void vertex_buffer_set_sub_data(
   const float* in_data,
   const unsigned int in_data_bytes)
 {
-  vertex_buffer_internal_platform_set_sub_data(in_vertex_buffer, in_data, in_data_bytes);
+  vertex_buffer_internal_platform_set_sub_data(
+    in_vertex_buffer,
+    in_data,
+    in_data_bytes);
 }
 
 /*******************************************************************************
@@ -80,8 +85,7 @@ void vertex_buffer_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
   const int in_num)
 {
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     vertex_buffer_internal_platform_destroy(
       &(inout_vertex_buffer[i]),
       1);
@@ -102,8 +106,7 @@ int element_buffer_init(
 {
   // Each buffer has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     element_buffer_internal_platform_init(
       &(inout_element_buffer[i]),
       1);
@@ -141,7 +144,10 @@ void element_buffer_buffer_data(
   const enum vertex_buffer_data_usage_t in_usage_type)
 {
   element_buffer_internal_platform_buffer_data(
-    inout_element_buffer, in_index_data, in_data_bytes, in_usage_type);
+    inout_element_buffer,
+    in_index_data,
+    in_data_bytes,
+    in_usage_type);
 
   // The buffer's storage is replaced with data_bytes of it
   resource_internal_set_size(
@@ -158,8 +164,7 @@ void element_buffer_destroy(
   struct element_buffer_t* inout_element_buffer,
   const int in_num)
 {
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     element_buffer_internal_platform_destroy(
       &(inout_element_buffer[i]),
       1);

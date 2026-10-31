@@ -38,7 +38,8 @@ void vertex_array_init(
 // Makes a vertex array the one drawn from and configured
 //
 //  in:     in_vertex_array
-void vertex_array_bind(const struct vertex_array_t* in_vertex_array);
+void vertex_array_bind(
+  const struct vertex_array_t* in_vertex_array);
 
 // Leaves no vertex array bound
 void vertex_array_unbind(void);

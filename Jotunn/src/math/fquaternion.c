@@ -10,5 +10,8 @@
 void fquaternion_init(
   union fquaternion_t* out_quaternion)
 {
-  memset(out_quaternion, 0, sizeof(union fquaternion_t));
+  memset(
+    out_quaternion,
+    0,
+    sizeof(union fquaternion_t));
 }

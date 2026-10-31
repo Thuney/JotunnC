@@ -165,7 +165,9 @@ void framebuffer_internal_platform_attach_color_buffer(
   const struct framebuffer_t* in_frame_buffer,
   const struct framebuffer_color_buffer_t* in_color_buffer)
 {
-  framebuffer_gl_attach_color_buffer(in_frame_buffer, in_color_buffer);
+  framebuffer_gl_attach_color_buffer(
+    in_frame_buffer,
+    in_color_buffer);
 }
 
 /*******************************************************************************
@@ -177,7 +179,9 @@ void framebuffer_internal_platform_attach_render_buffer(
   const struct framebuffer_t* in_frame_buffer,
   const struct framebuffer_render_buffer_t* in_render_buffer)
 {
-  framebuffer_gl_attach_render_buffer(in_frame_buffer, in_render_buffer);
+  framebuffer_gl_attach_render_buffer(
+    in_frame_buffer,
+    in_render_buffer);
 }
 
 /*******************************************************************************
@@ -190,7 +194,10 @@ void color_buffer_internal_platform_init(
   const unsigned int in_width_pixels,
   const unsigned int in_height_pixels)
 {
-  color_buffer_gl_init(inout_color_buffer, in_width_pixels, in_height_pixels);
+  color_buffer_gl_init(
+    inout_color_buffer,
+    in_width_pixels,
+    in_height_pixels);
 }
 
 /*******************************************************************************
@@ -203,7 +210,10 @@ void render_buffer_internal_platform_init(
   const unsigned int in_width_pixels,
   const unsigned int in_height_pixels)
 {
-  render_buffer_gl_init(out_render_buffer, in_width_pixels, in_height_pixels);
+  render_buffer_gl_init(
+    out_render_buffer,
+    in_width_pixels,
+    in_height_pixels);
 }
 
 /*******************************************************************************
@@ -238,7 +248,10 @@ void color_buffer_internal_platform_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  color_buffer_gl_resize(inout_color_buffer, in_new_width_pixels, in_new_height_pixels);
+  color_buffer_gl_resize(
+    inout_color_buffer,
+    in_new_width_pixels,
+    in_new_height_pixels);
 }
 
 /*******************************************************************************
@@ -251,7 +264,10 @@ void render_buffer_internal_platform_resize(
   const unsigned int in_new_width_pixels,
   const unsigned int in_new_height_pixels)
 {
-  render_buffer_gl_resize(in_render_buffer, in_new_width_pixels, in_new_height_pixels);
+  render_buffer_gl_resize(
+    in_render_buffer,
+    in_new_width_pixels,
+    in_new_height_pixels);
 }
 
 /*******************************************************************************
@@ -269,17 +285,17 @@ static void framebuffer_gl_check_error(
 
 #ifdef DEBUG
   va_list args;
-  va_start(args, in_error_string);
+  va_start(
+    args,
+    in_error_string);
 
-  if (_gl_error == GL_NO_ERROR)
-  {
+  if (_gl_error == GL_NO_ERROR) {
     log_write_va(
       LOG_LEVEL_DEBUG,
       in_success_string,
       args);
   }
-  else
-  {
+  else {
     log_write_va(
       LOG_LEVEL_ERROR,
       in_error_string,
@@ -302,7 +318,9 @@ static void framebuffer_gl_check_error(
 static void framebuffer_gl_init(
   struct framebuffer_t* out_frame_buffer)
 {
-  glGenFramebuffers(1, &(out_frame_buffer->frame_buffer));
+  glGenFramebuffers(
+    1,
+    &(out_frame_buffer->frame_buffer));
 
   // framebuffer_gl_check_error(
   //   "Frame buffer initialized with ID %d\n",
@@ -318,8 +336,12 @@ static void framebuffer_gl_init(
 static void framebuffer_gl_cleanup(
   const struct framebuffer_t* in_frame_buffer)
 {
-  glDeleteRenderbuffers(1, &(in_frame_buffer->depth_stencil_buffer.rbo));
-  glDeleteFramebuffers(1, &(in_frame_buffer->frame_buffer));
+  glDeleteRenderbuffers(
+    1,
+    &(in_frame_buffer->depth_stencil_buffer.rbo));
+  glDeleteFramebuffers(
+    1,
+    &(in_frame_buffer->frame_buffer));
 }
 
 /*******************************************************************************
@@ -334,7 +356,9 @@ static void framebuffer_gl_bind(
   //   "No error before frame buffer bind\n",
   //   "Error occurred prior to frame buffer bind\n");
 
-  glBindFramebuffer(GL_FRAMEBUFFER, in_frame_buffer->frame_buffer);
+  glBindFramebuffer(
+    GL_FRAMEBUFFER,
+    in_frame_buffer->frame_buffer);
 
   // framebuffer_gl_check_error(
   //   "Successfully bound frame buffer %d\n",
@@ -351,7 +375,9 @@ static void framebuffer_gl_unbind()
 {
   // Binds back to what should be the default framebuffer (the framebuffer of
   //  the first window spawned)
-  glBindFramebuffer(GL_FRAMEBUFFER, 0);
+  glBindFramebuffer(
+    GL_FRAMEBUFFER,
+    0);
 }
 
 /*******************************************************************************
@@ -372,7 +398,8 @@ static void framebuffer_gl_attach_color_buffer(
 
   // framebuffer_gl_check_error(
   //   "Attached color buffer ID %d to frame buffer ID %d\n",
-  //   "Error occurred during attachment of color buffer ID %d to frame buffer ID %d\n",
+  //  "Error occurred during attachment of color buffer ID %d to frame buffer ID
+  //  %d\n",
   //   in_color_buffer->texture.texture_id,
   //   in_frame_buffer->frame_buffer);
 }
@@ -394,7 +421,8 @@ static void framebuffer_gl_attach_render_buffer(
 
   // framebuffer_gl_check_error(
   //   "Attached render buffer ID %d to frame buffer ID %d\n",
-  //   "Error occurred during attachment of render buffer ID %d to frame buffer ID %d\n",
+  //  "Error occurred during attachment of render buffer ID %d to frame buffer
+  //  ID %d\n",
   //   in_render_buffer->rbo,
   //   in_frame_buffer->frame_buffer);
 }
@@ -428,7 +456,9 @@ static void render_buffer_gl_init(
   const unsigned int in_width_pixels,
   const unsigned int in_height_pixels)
 {
-  glGenRenderbuffers(1, &(out_render_buffer->rbo));
+  glGenRenderbuffers(
+    1,
+    &(out_render_buffer->rbo));
 
   render_buffer_gl_bind(out_render_buffer);
 
@@ -461,7 +491,9 @@ static void color_buffer_gl_bind(
 static void render_buffer_gl_bind(
   const struct framebuffer_render_buffer_t* in_render_buffer)
 {
-  glBindRenderbuffer(GL_RENDERBUFFER, in_render_buffer->rbo);
+  glBindRenderbuffer(
+    GL_RENDERBUFFER,
+    in_render_buffer->rbo);
 }
 
 /*******************************************************************************

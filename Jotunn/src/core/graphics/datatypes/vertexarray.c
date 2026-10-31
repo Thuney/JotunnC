@@ -14,8 +14,7 @@ void vertex_array_init(
 {
   // Each array has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     vertex_array_internal_platform_init(
       &(inout_vertex_array[i]),
       1);
@@ -58,7 +57,9 @@ void vertex_array_set_attribute(
   const struct vertex_array_t* in_vertex_array,
   const struct vertex_attribute_t* in_vertex_attribute)
 {
-  vertex_array_internal_platform_set_attribute(in_vertex_array, in_vertex_attribute);
+  vertex_array_internal_platform_set_attribute(
+    in_vertex_array,
+    in_vertex_attribute);
 }
 
 /*******************************************************************************
@@ -70,8 +71,7 @@ void vertex_array_destroy(
   struct vertex_array_t* inout_vertex_array,
   const int in_num)
 {
-  for (int i = 0; i < in_num; i++)
-  {
+  for (int i = 0; i < in_num; i++) {
     vertex_array_internal_platform_destroy(
       &(inout_vertex_array[i]),
       1);
