@@ -278,6 +278,17 @@ void application_cleanup(
 
 /*******************************************************************************
  *
+ *   Function: application_get_elapsed_seconds()
+ *
+ ******************************************************************************/
+double application_get_elapsed_seconds(
+  const struct application_t* in_app)
+{
+  return in_app->timer.current_time_seconds;
+}
+
+/*******************************************************************************
+ *
  *   Function: application_bind_custom_events()
  *
  ******************************************************************************/

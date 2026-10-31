@@ -115,6 +115,22 @@ void application_cleanup(
 
 /*******************************************************************************
  *
+ *   TIME
+ *
+ ******************************************************************************/
+
+// Reads the time since the application was started, as of the latest pass of
+//  application_run(), so it holds still for the length of a frame. Window
+//  layers and window event handlers reach the application through their
+//  window's metadata.parent_application
+//
+//  in:     in_app
+//  ret:    The time since application_start(), in seconds
+double application_get_elapsed_seconds(
+  const struct application_t* in_app);
+
+/*******************************************************************************
+ *
  *   EVENTS
  *
  ******************************************************************************/
