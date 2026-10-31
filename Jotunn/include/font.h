@@ -9,6 +9,20 @@
 #include <string.h>
 
 #include "texture.h"
+#include "util.h"
+
+/*******************************************************************************
+ *
+ *   DEFAULT TYPEFACE
+ *
+ ******************************************************************************/
+
+// A typeface shipped with Jotunn, as an absolute path for
+//  font_typeface_init(), so that an application can draw text without
+//  bringing a font of its own: Roboto Medium, from the copy of Dear ImGui
+//  Jotunn builds with
+#define FONT_DEFAULT_TYPEFACE_PATH \
+  PATH_FROM_JOTUNN_ROOT("/vendor/cimgui/imgui/misc/fonts/Roboto-Medium.ttf")
 
 /*******************************************************************************
  *
