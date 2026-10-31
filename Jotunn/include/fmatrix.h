@@ -363,6 +363,35 @@ union fmatrix_4x4_t fmatrix_4x4_transform_rotate(
   union fvector3_t in_axis,
   float in_angle_radians);
 
+// Builds the transform that places a primitive drawn about the origin: a
+//  scaling along each axis, then a rotation about an axis through the origin
+//  as fmatrix_4x4_transform_rotate() makes, then a translation
+//
+//  in:     in_scale_factors, in_rotation_axis, in_rotation_radians,
+//            in_translation
+//  ret:    The transform
+union fmatrix_4x4_t fmatrix_4x4_transform_compose(
+  union fvector3_t in_scale_factors,
+  union fvector3_t in_rotation_axis,
+  float in_rotation_radians,
+  union fvector3_t in_translation);
+
+// Builds the transform that places a primitive in the XY plane: a
+//  translation taking in_pivot to the origin, a scaling, a counter-clockwise
+//  rotation about Z, then a translation to in_position. in_pivot is the
+//  point of the primitive, before any transform, that it's scaled and turned
+//  about and that ends up at in_position: (0.5, 0.5) for the middle of
+//  renderer_2d's unit square, or (0, 0) for its corner or the center of its
+//  unit circle. Z is left as it is
+//
+//  in:     in_pivot, in_scale_factors, in_rotation_radians, in_position
+//  ret:    The transform
+union fmatrix_4x4_t fmatrix_4x4_transform_compose_2d(
+  union fvector2_t in_pivot,
+  union fvector2_t in_scale_factors,
+  float in_rotation_radians,
+  union fvector2_t in_position);
+
 // Transforms a point, as the row vector (x, y, z, 1). The result isn't
 //  divided by its fourth component, so this suits affine transforms rather
 //  than projections

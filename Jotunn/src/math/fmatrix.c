@@ -598,6 +598,72 @@ union fmatrix_4x4_t fmatrix_4x4_transform_rotate(
 
 /*******************************************************************************
  *
+ *   Function: fmatrix_4x4_transform_compose()
+ *
+ ******************************************************************************/
+union fmatrix_4x4_t fmatrix_4x4_transform_compose(
+  union fvector3_t in_scale_factors,
+  union fvector3_t in_rotation_axis,
+  float in_rotation_radians,
+  union fvector3_t in_translation)
+{
+  union fmatrix_4x4_t transform;
+  fmatrix_4x4_init(&(transform));
+
+  // Each step applies after those before it
+  transform =
+    fmatrix_4x4_transform_scale(
+      &(transform),
+      in_scale_factors);
+  transform =
+    fmatrix_4x4_transform_rotate(
+      &(transform),
+      in_rotation_axis,
+      in_rotation_radians);
+  transform =
+    fmatrix_4x4_transform_translate(
+      &(transform),
+      in_translation);
+
+  return transform;
+}
+
+/*******************************************************************************
+ *
+ *   Function: fmatrix_4x4_transform_compose_2d()
+ *
+ ******************************************************************************/
+union fmatrix_4x4_t fmatrix_4x4_transform_compose_2d(
+  union fvector2_t in_pivot,
+  union fvector2_t in_scale_factors,
+  float in_rotation_radians,
+  union fvector2_t in_position)
+{
+  const union fvector3_t z_axis = {{0.0f, 0.0f, 1.0f}};
+
+  union fmatrix_4x4_t transform;
+  fmatrix_4x4_init(&(transform));
+
+  transform =
+    fmatrix_4x4_transform_translate(
+      &(transform),
+      (union fvector3_t){{-in_pivot.comp.x, -in_pivot.comp.y, 0.0f}});
+
+  const union fmatrix_4x4_t placement =
+    fmatrix_4x4_transform_compose(
+      (union fvector3_t){{in_scale_factors.comp.x, in_scale_factors.comp.y, 1.0f}},
+      z_axis,
+      in_rotation_radians,
+      (union fvector3_t){{in_position.comp.x, in_position.comp.y, 0.0f}});
+
+  // The pivot is moved to the origin first, then placed
+  return fmatrix_4x4_multiply(
+    &(transform),
+    &(placement));
+}
+
+/*******************************************************************************
+ *
  *   Function: fmatrix_4x4_transform_point()
  *
  ******************************************************************************/
