@@ -17,3 +17,4 @@ set(
 add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/ImGuiApp)
 add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/Renderer2DApp)
 add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/Renderer3DApp)
+add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/MultiWindowApp)
