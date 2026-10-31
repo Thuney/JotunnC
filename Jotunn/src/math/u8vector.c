@@ -1,5 +1,7 @@
 #include "u8vector.h"
 
+#include "fmath.h"
+
 /*******************************************************************************
  *
  *   STATIC PROTOTYPES
@@ -57,9 +59,10 @@ static uint8_t _u8vector_component_from_float(
   float in_component)
 {
   const float clamped_component =
-    (in_component < 0.0f) ?
-      0.0f :
-      ((in_component > 1.0f) ? 1.0f : in_component);
+    fmath_clamp(
+      in_component,
+      0.0f,
+      1.0f);
 
   return (uint8_t)((clamped_component * 255.0f) + 0.5f);
 }

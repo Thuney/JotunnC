@@ -8,6 +8,8 @@
 
 #include "renderable_2d_primitive.h"
 
+#include "fmath.h"
+
 const union fvector3_t triangle_2d_position_data[3] =
   {
     [0] = {{0.0f, 0.0f, 0.0f}},
@@ -40,8 +42,6 @@ const union fvector2_t textured_quad_texture_coordinates[4] =
   };
 
 union fvector3_t circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
-
-#define PI 3.14159f
 
 // How many indices are built at a time when filling an element buffer
 #define RENDERABLE_2D_INDEX_UPLOAD_CHUNK_COUNT 256
@@ -648,7 +648,7 @@ static void renderable_2d_generate_circle_position_data(void)
 
   // Generate vertices on circle
   for (v = 1; v < _NUM_CIRCLE_2D_VERTICES; v++) {
-    angle_radians = (PI / 180.0f) * angle_degrees;
+    angle_radians = fmath_degrees_to_radians(angle_degrees);
 
     x = (cosf(angle_radians) + offset.comp.x);
     y = (sinf(angle_radians) + offset.comp.y);

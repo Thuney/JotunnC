@@ -4,7 +4,7 @@
 
 #include "renderable_3d_primitive.h"
 
-#define PI 3.14159265f
+#include "fmath.h"
 
 // The components of the normals of the pyramid's sides, which rise 1 for
 //  every 0.5 they run in: 1/sqrt(5) up and 2/sqrt(5) out
@@ -635,10 +635,10 @@ static void renderable_3d_generate_sphere_data(void)
   // Rings of vertices from the north pole (+Y) down to the south pole (-Y),
   //  each with a repeat of its first vertex to close the texture's seam
   for (stack = 0; stack <= stacks; stack++) {
-    const float polar_angle_radians = (PI * ((float)stack / (float)stacks));
+    const float polar_angle_radians = (FMATH_PI * ((float)stack / (float)stacks));
 
     for (slice = 0; slice <= slices; slice++) {
-      const float azimuth_radians = (2.0f * PI * ((float)slice / (float)slices));
+      const float azimuth_radians = (2.0f * FMATH_PI * ((float)slice / (float)slices));
 
       const unsigned int v = ((stack * (slices + 1)) + slice);
 
