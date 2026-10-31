@@ -157,6 +157,24 @@ void element_buffer_buffer_data(
 
 /*******************************************************************************
  *
+ *   Function: element_buffer_set_sub_data()
+ *
+ ******************************************************************************/
+void element_buffer_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes)
+{
+  element_buffer_internal_platform_set_sub_data(
+    in_element_buffer,
+    in_offset_bytes,
+    in_index_data,
+    in_data_bytes);
+}
+
+/*******************************************************************************
+ *
  *   Function: element_buffer_destroy()
  *
  ******************************************************************************/

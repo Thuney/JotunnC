@@ -45,6 +45,9 @@ union fvector3_t circle_2d_position_data[_NUM_CIRCLE_2D_VERTICES];
 
 #define PI 3.14159f
 
+// How many indices are built at a time when filling an element buffer
+#define RENDERABLE_2D_INDEX_UPLOAD_CHUNK_COUNT 256
+
 /*******************************************************************************
  *
  *   STATIC PROTOTYPES
@@ -71,6 +74,44 @@ static void renderable_2d_primitive_data_init(
   struct vertex_attribute_t* inout_attributes,
   unsigned int in_num_attributes,
   struct shader_program_t* in_shader_program);
+
+// Fills the bound element buffer, which must be inout_ebo, with
+//  in_index_count indices, taking the one at each position from
+//  in_function_get_index. They're built and uploaded a chunk at a time, so
+//  however many there are, only a chunk's worth is held in memory
+//
+//  in:     in_index_count, in_function_get_index
+//  in/out: inout_ebo
+static void renderable_2d_upload_indices(
+  struct element_buffer_t* inout_ebo,
+  unsigned int in_index_count,
+  unsigned int (*in_function_get_index)(
+    unsigned int in_position));
+
+// Finds the index at a position in a batch's triangle indices, which draw
+//  each triangle's three vertices in turn
+//
+//  in:     in_position
+//  ret:    The index of the vertex drawn at in_position
+static unsigned int renderable_2d_get_triangle_index(
+  unsigned int in_position);
+
+// Finds the index at a position in a batch's quad indices, which draw each
+//  quad's four vertices as two triangles
+//
+//  in:     in_position
+//  ret:    The index of the vertex drawn at in_position
+static unsigned int renderable_2d_get_quad_index(
+  unsigned int in_position);
+
+// Finds the index at a position in a batch's circle indices, which draw each
+//  circle as a fan of _RENDERABLE_2D_CIRCLE_RESOLUTION triangles around its
+//  center vertex
+//
+//  in:     in_position
+//  ret:    The index of the vertex drawn at in_position
+static unsigned int renderable_2d_get_circle_index(
+  unsigned int in_position);
 
 // Triangle 2D vertex attributes
 static struct vertex_attribute_t triangle_vertex_attributes[2] =
@@ -290,22 +331,10 @@ void renderable_2d_triangle_data_init(
       ALLOCATOR_TAG_RENDERER);
   out_triangle_data->vertex_data_ptr = out_triangle_data->vertex_data_base;
 
-  unsigned int triangle_indices[max_indices];
-
-  unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 3) {
-    triangle_indices[i + 0] = offset + 0;
-    triangle_indices[i + 1] = offset + 1;
-    triangle_indices[i + 2] = offset + 2;
-
-    offset += 3;
-  }
-
-  element_buffer_buffer_data(
+  renderable_2d_upload_indices(
     &(out_triangle_data->ebo),
-    triangle_indices,
-    max_indices * sizeof(unsigned int),
-    VERTEX_BUFFER_DATA_USAGE_STATIC_DRAW);
+    max_indices,
+    &(renderable_2d_get_triangle_index));
   vertex_buffer_set_data(
     &(out_triangle_data->vbo),
     (float*)out_triangle_data->vertex_data_base,
@@ -343,26 +372,10 @@ void renderable_2d_quad_data_init(
       ALLOCATOR_TAG_RENDERER);
   out_quad_data->vertex_data_ptr = out_quad_data->vertex_data_base;
 
-  unsigned int quad_indices[max_indices];
-
-  unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 6) {
-    quad_indices[i + 0] = offset + 0;
-    quad_indices[i + 1] = offset + 1;
-    quad_indices[i + 2] = offset + 2;
-
-    quad_indices[i + 3] = offset + 0;
-    quad_indices[i + 4] = offset + 3;
-    quad_indices[i + 5] = offset + 2;
-
-    offset += 4;
-  }
-
-  element_buffer_buffer_data(
+  renderable_2d_upload_indices(
     &(out_quad_data->ebo),
-    quad_indices,
-    max_indices * sizeof(unsigned int),
-    VERTEX_BUFFER_DATA_USAGE_STATIC_DRAW);
+    max_indices,
+    &(renderable_2d_get_quad_index));
   vertex_buffer_set_data(
     &(out_quad_data->vbo),
     (float*)out_quad_data->vertex_data_base,
@@ -401,26 +414,11 @@ void renderable_2d_textured_quad_data_init(
       ALLOCATOR_TAG_RENDERER);
   out_textured_quad_data->vertex_data_ptr = out_textured_quad_data->vertex_data_base;
 
-  unsigned int textured_quad_indices[max_indices];
-
-  unsigned int offset = 0;
-  for (unsigned int i = 0; i < max_indices; i += 6) {
-    textured_quad_indices[i + 0] = offset + 0;
-    textured_quad_indices[i + 1] = offset + 1;
-    textured_quad_indices[i + 2] = offset + 2;
-
-    textured_quad_indices[i + 3] = offset + 0;
-    textured_quad_indices[i + 4] = offset + 3;
-    textured_quad_indices[i + 5] = offset + 2;
-
-    offset += 4;
-  }
-
-  element_buffer_buffer_data(
+  // Textured quads share the quads' indices
+  renderable_2d_upload_indices(
     &(out_textured_quad_data->ebo),
-    textured_quad_indices,
-    max_indices * sizeof(unsigned int),
-    VERTEX_BUFFER_DATA_USAGE_STATIC_DRAW);
+    max_indices,
+    &(renderable_2d_get_quad_index));
   vertex_buffer_set_data(
     &(out_textured_quad_data->vbo),
     (float*)out_textured_quad_data->vertex_data_base,
@@ -463,34 +461,10 @@ void renderable_2d_circle_data_init(
       ALLOCATOR_TAG_RENDERER);
   out_circle_data->vertex_data_ptr = out_circle_data->vertex_data_base;
 
-  unsigned int circle_indices[max_indices];
-
-  unsigned int circle;
-
-  unsigned int vertex_offset = 0;
-
-  for (circle = 0; circle < in_max_count; circle++) {
-    unsigned int triangle;
-    for (triangle = 1; triangle < _RENDERABLE_2D_CIRCLE_RESOLUTION; triangle++) {
-      circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 0] = vertex_offset;
-      circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 1] =
-        vertex_offset + triangle;
-      circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 2] =
-        vertex_offset + triangle + 1;
-    }
-    circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 0] = vertex_offset;
-    circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 1] =
-      vertex_offset + triangle;
-    circle_indices[indices_per_circle * circle + (3 * (triangle - 1)) + 2] = vertex_offset + 1;
-
-    vertex_offset += _NUM_CIRCLE_2D_VERTICES;
-  }
-
-  element_buffer_buffer_data(
+  renderable_2d_upload_indices(
     &(out_circle_data->ebo),
-    circle_indices,
-    max_indices * sizeof(unsigned int),
-    VERTEX_BUFFER_DATA_USAGE_STATIC_DRAW);
+    max_indices,
+    &(renderable_2d_get_circle_index));
   vertex_buffer_set_data(
     &(out_circle_data->vbo),
     (float*)out_circle_data->vertex_data_base,
@@ -770,4 +744,106 @@ static void renderable_2d_primitive_data_init(
       out_vao,
       &(inout_attributes[attribute_index]));
   }
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_upload_indices()
+ *
+ ******************************************************************************/
+static void renderable_2d_upload_indices(
+  struct element_buffer_t* inout_ebo,
+  unsigned int in_index_count,
+  unsigned int (*in_function_get_index)(
+    unsigned int in_position))
+{
+  // Sized for every index, then filled in a chunk at a time
+  element_buffer_buffer_data(
+    inout_ebo,
+    NULL,
+    (in_index_count * sizeof(unsigned int)),
+    VERTEX_BUFFER_DATA_USAGE_STATIC_DRAW);
+
+  unsigned int chunk[RENDERABLE_2D_INDEX_UPLOAD_CHUNK_COUNT];
+
+  unsigned int start = 0;
+  while (start < in_index_count) {
+    const unsigned int remaining_count = (in_index_count - start);
+    const unsigned int chunk_count =
+      (remaining_count < RENDERABLE_2D_INDEX_UPLOAD_CHUNK_COUNT) ?
+        remaining_count :
+        RENDERABLE_2D_INDEX_UPLOAD_CHUNK_COUNT;
+
+    for (unsigned int i = 0; i < chunk_count; i++) {
+      chunk[i] = in_function_get_index(start + i);
+    }
+
+    element_buffer_set_sub_data(
+      inout_ebo,
+      (start * sizeof(unsigned int)),
+      chunk,
+      (chunk_count * sizeof(unsigned int)));
+
+    start += chunk_count;
+  }
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_get_triangle_index()
+ *
+ ******************************************************************************/
+static unsigned int renderable_2d_get_triangle_index(
+  unsigned int in_position)
+{
+  // Each triangle has vertices of its own, drawn in order
+  return in_position;
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_get_quad_index()
+ *
+ ******************************************************************************/
+static unsigned int renderable_2d_get_quad_index(
+  unsigned int in_position)
+{
+  // Corners 0, 1, 2 then 0, 3, 2 of each quad's four vertices
+  static const unsigned int quad_pattern[6] = {0, 1, 2, 0, 3, 2};
+
+  const unsigned int quad = (in_position / 6);
+  const unsigned int index = ((quad * 4) + quad_pattern[in_position % 6]);
+
+  return index;
+}
+
+/*******************************************************************************
+ *
+ *   Function: renderable_2d_get_circle_index()
+ *
+ ******************************************************************************/
+static unsigned int renderable_2d_get_circle_index(
+  unsigned int in_position)
+{
+  const unsigned int indices_per_circle = (3 * _RENDERABLE_2D_CIRCLE_RESOLUTION);
+
+  const unsigned int circle = (in_position / indices_per_circle);
+  const unsigned int triangle = ((in_position % indices_per_circle) / 3);
+  const unsigned int corner = (in_position % 3);
+
+  // Vertex 0 is the circle's center, and 1 on are the points around it
+  const unsigned int center_index = (circle * _NUM_CIRCLE_2D_VERTICES);
+
+  if (corner == 0) {
+    return center_index;
+  }
+
+  // The last triangle closes the fan, ending on the first point
+  const unsigned int point =
+    (corner == 1) ?
+      triangle :
+      ((triangle + 1) % _RENDERABLE_2D_CIRCLE_RESOLUTION);
+  const unsigned int index = (center_index + 1 + point);
+
+  return index;
 }

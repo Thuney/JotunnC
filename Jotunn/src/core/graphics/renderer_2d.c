@@ -59,12 +59,9 @@ static void renderer_2d_data_cleanup(
 static uint32_t _renderer_2d_get_index_size_bytes(
   enum render_api_element_data_type_t in_index_type);
 
-// Our upper limit on quads to draw per batch. Translates into a limitation on
-//  max vertices / indices, technically, to include things like triangles,
-//  circles, and lines
-static const unsigned int max_quads = 1000;
-static const unsigned int max_vertices = max_quads * 4;
-static const unsigned int max_indices = max_quads * 6;
+// The most of each kind of primitive (triangles, quads, textured quads,
+//  circles and lines) a batch holds; drawing one more draws the batch first
+static const unsigned int max_primitives_per_batch = 1000;
 
 /*******************************************************************************
  *
@@ -184,7 +181,7 @@ void renderer_2d_draw_triangle(
 
   const unsigned int triangle_vertex_count = 3;
 
-  if (data->triangle_data.triangle_index_count >= max_indices) {
+  if (data->triangle_data.triangle_index_count >= (3 * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -220,7 +217,7 @@ void renderer_2d_draw_quad(
 
   const unsigned int quad_vertex_count = 4;
 
-  if (data->quad_data.quad_index_count >= max_indices) {
+  if (data->quad_data.quad_index_count >= (6 * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -313,7 +310,7 @@ void renderer_2d_draw_textured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->quad_data.quad_index_count >= max_indices) {
+  if (data->textured_quad_data.textured_quad_index_count >= (6 * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -379,7 +376,7 @@ void renderer_2d_draw_subtextured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->quad_data.quad_index_count >= max_indices) {
+  if (data->textured_quad_data.textured_quad_index_count >= (6 * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -440,7 +437,10 @@ void renderer_2d_draw_circle(
 
   struct renderer_2d_data_t* data = &(inout_renderer->render_data);
 
-  if (data->circle_data.circle_index_count >= max_indices) {
+  // A fan of triangles around the circle's center
+  const unsigned int indices_per_circle = (3 * _RENDERABLE_2D_CIRCLE_RESOLUTION);
+
+  if (data->circle_data.circle_index_count >= (indices_per_circle * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -455,7 +455,7 @@ void renderer_2d_draw_circle(
     data->circle_data.vertex_data_ptr++;
   }
 
-  data->circle_data.circle_index_count += (3 * (_RENDERABLE_2D_CIRCLE_RESOLUTION));
+  data->circle_data.circle_index_count += indices_per_circle;
 }
 
 /*******************************************************************************
@@ -475,8 +475,8 @@ void renderer_2d_draw_line(
 
   struct renderer_2d_data_t* data = &(inout_renderer->render_data);
 
-  // The line buffer holds max_vertices lines, of two vertices each
-  if (data->line_data.line_vertex_count >= (2 * max_vertices)) {
+  // Each line is two vertices
+  if (data->line_data.line_vertex_count >= (2 * max_primitives_per_batch)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -1071,23 +1071,23 @@ static void renderer_2d_data_init(
 
   renderable_2d_triangle_data_init(
     &(out_data->triangle_data),
-    max_vertices,
+    max_primitives_per_batch,
     &(out_data->triangle_shader));
   renderable_2d_quad_data_init(
     &(out_data->quad_data),
-    max_vertices,
+    max_primitives_per_batch,
     &(out_data->quad_shader));
   renderable_2d_textured_quad_data_init(
     &(out_data->textured_quad_data),
-    max_vertices,
+    max_primitives_per_batch,
     &(out_data->textured_quad_shader));
   renderable_2d_circle_data_init(
     &(out_data->circle_data),
-    max_vertices,
+    max_primitives_per_batch,
     &(out_data->circle_shader));
   renderable_2d_line_data_init(
     &(out_data->line_data),
-    max_vertices,
+    max_primitives_per_batch,
     &(out_data->line_shader));
   renderable_2d_mesh_data_init(
     &(out_data->mesh_data),

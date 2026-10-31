@@ -130,6 +130,18 @@ void element_buffer_buffer_data(
   unsigned int in_data_bytes,
   enum vertex_buffer_data_usage_t in_usage_type);
 
+// Overwrites in_data_bytes of the bound element buffer's indices, which must
+//  be in_element_buffer's, from in_offset_bytes on, with those in
+//  in_index_data. The buffer must already hold at least
+//  in_offset_bytes + in_data_bytes
+//
+//  in:     in_element_buffer, in_offset_bytes, in_index_data, in_data_bytes
+void element_buffer_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes);
+
 // Deletes in_num element buffers, one in each element of the array
 //  inout_element_buffer points to, and removes each from the resource
 //  registry

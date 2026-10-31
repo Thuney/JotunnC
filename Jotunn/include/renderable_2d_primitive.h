@@ -209,7 +209,7 @@ struct renderable_2d_mesh_data_t
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  triangles, binds the triangle vertex layout to in_shader_program's
 //  attributes, and allocates storage for a batch's vertices. Indices are
-//  built on the stack and uploaded once
+//  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
 //  out:    out_triangle_data
@@ -221,7 +221,7 @@ void renderable_2d_triangle_data_init(
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  quads, binds the quad vertex layout to in_shader_program's
 //  attributes, and allocates storage for a batch's vertices. Indices are
-//  built on the stack and uploaded once
+//  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
 //  out:    out_quad_data
@@ -233,7 +233,7 @@ void renderable_2d_quad_data_init(
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  textured quads, binds the textured quad vertex layout to in_shader_program's
 //  attributes, and allocates storage for a batch's vertices. Indices are
-//  built on the stack and uploaded once
+//  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
 //  out:    out_textured_quad_data
@@ -245,7 +245,7 @@ void renderable_2d_textured_quad_data_init(
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  circles, binds the circle vertex layout to in_shader_program's
 //  attributes, and allocates storage for a batch's vertices. Indices are
-//  built on the stack and uploaded once. Also fills in
+//  uploaded once, a chunk at a time. Also fills in
 //  circle_2d_position_data
 //
 //  in:     in_max_count, in_shader_program

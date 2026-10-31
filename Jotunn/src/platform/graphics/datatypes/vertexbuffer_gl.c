@@ -103,6 +103,17 @@ static void element_buffer_gl_buffer_data(
   unsigned int in_data_bytes,
   enum vertex_buffer_data_usage_t in_usage_type);
 
+// Overwrites in_data_bytes of the data of the buffer bound to
+//  GL_ELEMENT_ARRAY_BUFFER, from in_offset_bytes on, with those in
+//  in_index_data. in_element_buffer is only there to match the other hooks
+//
+//  in:     in_element_buffer, in_offset_bytes, in_index_data, in_data_bytes
+static void element_buffer_gl_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes);
+
 // Deletes in_num buffer names from inout_element_buffer->element_buffer on
 //
 //  in:     in_num
@@ -226,6 +237,24 @@ void element_buffer_internal_platform_buffer_data(
     in_index_data,
     in_data_bytes,
     in_usage_type);
+}
+
+/*******************************************************************************
+ *
+ *   Function: element_buffer_internal_platform_set_sub_data()
+ *
+ ******************************************************************************/
+void element_buffer_internal_platform_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes)
+{
+  element_buffer_gl_set_sub_data(
+    in_element_buffer,
+    in_offset_bytes,
+    in_index_data,
+    in_data_bytes);
 }
 
 /*******************************************************************************
@@ -489,6 +518,26 @@ static void element_buffer_gl_buffer_data(
   //  %d]\n",
   //   data_bytes,
   //   element_buffer->element_buffer);
+}
+
+/*******************************************************************************
+ *
+ *   Function: element_buffer_gl_set_sub_data()
+ *
+ ******************************************************************************/
+static void element_buffer_gl_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes)
+{
+  (void)in_element_buffer;
+
+  glBufferSubData(
+    GL_ELEMENT_ARRAY_BUFFER,
+    in_offset_bytes,
+    in_data_bytes,
+    in_index_data);
 }
 
 /*******************************************************************************

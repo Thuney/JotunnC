@@ -91,6 +91,17 @@ void element_buffer_internal_platform_buffer_data(
   unsigned int in_data_bytes,
   enum vertex_buffer_data_usage_t in_usage_type);
 
+// Overwrites in_data_bytes of the bound element buffer's indices, which must
+//  be in_element_buffer's, from in_offset_bytes on, with those in
+//  in_index_data
+//
+//  in:     in_element_buffer, in_offset_bytes, in_index_data, in_data_bytes
+void element_buffer_internal_platform_set_sub_data(
+  const struct element_buffer_t* in_element_buffer,
+  unsigned int in_offset_bytes,
+  const void* in_index_data,
+  unsigned int in_data_bytes);
+
 // Deletes the element buffer in inout_element_buffer. The backend reads
 //  in_num names from inout_element_buffer->element_buffer on, so anything but
 //  1 overruns it
