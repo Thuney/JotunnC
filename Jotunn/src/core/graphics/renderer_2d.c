@@ -1,4 +1,5 @@
 #include "renderer_2d.h"
+#include "allocator.h"
 #include "log.h"
 
 #include "framebuffer.h"
@@ -38,12 +39,15 @@ static void renderer_2d_start_batch(
 static void renderer_2d_next_batch(
   struct renderer_2d_t* inout_renderer);
 
-// Loads the shaders and creates the batches, the mesh buffers and the white
-//  texture. Shaders that fail to load are logged in DEBUG builds
+// Loads the shaders and creates the batches, keeping their vertices in
+//  inout_storage, along with the mesh buffers and the white texture. Shaders
+//  that fail to load are logged in DEBUG builds
 //
+//  in/out: inout_storage
 //  out:    out_data
 static void renderer_2d_data_init(
-  struct renderer_2d_data_t* out_data);
+  struct renderer_2d_data_t* out_data,
+  struct renderer_2d_storage_t* inout_storage);
 
 // Releases everything renderer_2d_data_init() made
 //
@@ -59,21 +63,41 @@ static void renderer_2d_data_cleanup(
 static uint32_t _renderer_2d_get_index_size_bytes(
   enum render_api_element_data_type_t in_index_type);
 
-// The most of each kind of primitive (triangles, quads, textured quads,
-//  circles and lines) a batch holds; drawing one more draws the batch first
-static const unsigned int max_primitives_per_batch = 1000;
-
 /*******************************************************************************
  *
  *   Function: renderer_2d_init()
  *
  ******************************************************************************/
-void renderer_2d_init(
+uint8_t renderer_2d_init(
   struct renderer_2d_t* out_renderer,
+  struct renderer_2d_storage_t* inout_storage,
   struct camera_base_t* in_camera,
   struct window_t* in_parent_window,
   const char* in_tag)
 {
+  // Allocated before anything else is made, so that failing leaves nothing
+  //  to clean up
+  struct renderer_2d_storage_t* storage = inout_storage;
+  const bool is_storage_owned = (inout_storage == NULL);
+
+  if (is_storage_owned) {
+    storage =
+      (struct renderer_2d_storage_t*)allocator_allocate(
+        sizeof(struct renderer_2d_storage_t),
+        ALLOCATOR_TAG_RENDERER);
+
+    if (storage == NULL) {
+    #ifdef DEBUG
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Couldn't allocate %zu bytes of renderer_2d storage",
+        sizeof(struct renderer_2d_storage_t));
+    #endif
+
+      return 1;
+    }
+  }
+
   const uint16_t render_flags =
     (RENDER_API_RENDER_FLAGS_COLOR | RENDER_API_RENDER_FLAGS_DEPTH | RENDER_API_RENDER_FLAGS_BLEND);
 
@@ -94,10 +118,16 @@ void renderer_2d_init(
 #endif
 
   // Batch stuff
-  renderer_2d_data_init(&(out_renderer->render_data));
+  renderer_2d_data_init(
+    &(out_renderer->render_data),
+    storage);
+  out_renderer->render_data.is_storage_owned = is_storage_owned;
+
   renderer_2d_set_line_width(
     out_renderer,
     out_renderer->render_data.line_width_pixels);
+
+  return 0;
 }
 
 /*******************************************************************************
@@ -115,6 +145,13 @@ void renderer_2d_cleanup(
   vertex_array_unbind();
 
   renderer_2d_data_cleanup(&(inout_renderer->render_data));
+
+  if (inout_renderer->render_data.is_storage_owned) {
+    allocator_free(inout_renderer->render_data.storage);
+  }
+
+  inout_renderer->render_data.storage = NULL;
+  inout_renderer->render_data.is_storage_owned = false;
 
   renderer_base_cleanup(&(inout_renderer->base));
 }
@@ -181,7 +218,7 @@ void renderer_2d_draw_triangle(
 
   const unsigned int triangle_vertex_count = 3;
 
-  if (data->triangle_data.triangle_index_count >= (3 * max_primitives_per_batch)) {
+  if (data->triangle_data.triangle_index_count >= (3 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -217,7 +254,7 @@ void renderer_2d_draw_quad(
 
   const unsigned int quad_vertex_count = 4;
 
-  if (data->quad_data.quad_index_count >= (6 * max_primitives_per_batch)) {
+  if (data->quad_data.quad_index_count >= (6 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -310,7 +347,9 @@ void renderer_2d_draw_textured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->textured_quad_data.textured_quad_index_count >= (6 * max_primitives_per_batch)) {
+  const unsigned int max_index_count = (6 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH);
+
+  if (data->textured_quad_data.textured_quad_index_count >= max_index_count) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -376,7 +415,9 @@ void renderer_2d_draw_subtextured_quad(
 
   const float tiling_factor = 1.0f;
 
-  if (data->textured_quad_data.textured_quad_index_count >= (6 * max_primitives_per_batch)) {
+  const unsigned int max_index_count = (6 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH);
+
+  if (data->textured_quad_data.textured_quad_index_count >= max_index_count) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -440,7 +481,9 @@ void renderer_2d_draw_circle(
   // A fan of triangles around the circle's center
   const unsigned int indices_per_circle = (3 * _RENDERABLE_2D_CIRCLE_RESOLUTION);
 
-  if (data->circle_data.circle_index_count >= (indices_per_circle * max_primitives_per_batch)) {
+  const unsigned int max_index_count = (indices_per_circle * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH);
+
+  if (data->circle_data.circle_index_count >= max_index_count) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -476,7 +519,7 @@ void renderer_2d_draw_line(
   struct renderer_2d_data_t* data = &(inout_renderer->render_data);
 
   // Each line is two vertices
-  if (data->line_data.line_vertex_count >= (2 * max_primitives_per_batch)) {
+  if (data->line_data.line_vertex_count >= (2 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH)) {
     renderer_2d_next_batch(inout_renderer);
   }
 
@@ -996,7 +1039,8 @@ static void renderer_2d_next_batch(
  *
  ******************************************************************************/
 static void renderer_2d_data_init(
-  struct renderer_2d_data_t* out_data)
+  struct renderer_2d_data_t* out_data,
+  struct renderer_2d_storage_t* inout_storage)
 {
   unsigned int error = 0;
 
@@ -1069,25 +1113,32 @@ static void renderer_2d_data_init(
 
   fmatrix_4x4_init(&(out_data->model_matrix));
 
+  out_data->storage = inout_storage;
+
   renderable_2d_triangle_data_init(
     &(out_data->triangle_data),
-    max_primitives_per_batch,
+    RENDERER_2D_MAX_PRIMITIVES_PER_BATCH,
+    inout_storage->triangle_vertices,
     &(out_data->triangle_shader));
   renderable_2d_quad_data_init(
     &(out_data->quad_data),
-    max_primitives_per_batch,
+    RENDERER_2D_MAX_PRIMITIVES_PER_BATCH,
+    inout_storage->quad_vertices,
     &(out_data->quad_shader));
   renderable_2d_textured_quad_data_init(
     &(out_data->textured_quad_data),
-    max_primitives_per_batch,
+    RENDERER_2D_MAX_PRIMITIVES_PER_BATCH,
+    inout_storage->textured_quad_vertices,
     &(out_data->textured_quad_shader));
   renderable_2d_circle_data_init(
     &(out_data->circle_data),
-    max_primitives_per_batch,
+    RENDERER_2D_MAX_PRIMITIVES_PER_BATCH,
+    inout_storage->circle_vertices,
     &(out_data->circle_shader));
   renderable_2d_line_data_init(
     &(out_data->line_data),
-    max_primitives_per_batch,
+    RENDERER_2D_MAX_PRIMITIVES_PER_BATCH,
+    inout_storage->line_vertices,
     &(out_data->line_shader));
   renderable_2d_mesh_data_init(
     &(out_data->mesh_data),

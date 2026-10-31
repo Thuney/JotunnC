@@ -42,13 +42,19 @@ struct ui_layer_t
 // Sets up a UI layer for a window, drawing into a framebuffer of the given
 //  size. The window doesn't run the layer until ui_window_layer is added to
 //  it. The window's graphics context must be current; the layer's new ImGui,
-//  ImPlot and imnodes contexts are left current
+//  ImPlot and imnodes contexts are left current. The layer's renderer keeps
+//  its batches' vertices in inout_renderer_storage, which must outlive the
+//  layer; when it's NULL, the storage is allocated instead
 //
 //  in:     in_parent_window, in_width_pixels, in_height_pixels
+//  in/out: inout_renderer_storage
 //  out:    out_ui_layer
-void ui_layer_init(
+//  ret:    0 on success; 1 when inout_renderer_storage is NULL and the
+//            storage can't be allocated, leaving nothing to clean up
+uint8_t ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
+  struct renderer_2d_storage_t* inout_renderer_storage,
   uint32_t in_width_pixels,
   uint32_t in_height_pixels);
 

@@ -52,9 +52,10 @@ static void _ui_layer_event_react(
  *   Function: ui_layer_init()
  *
  ******************************************************************************/
-void ui_layer_init(
+uint8_t ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
+  struct renderer_2d_storage_t* inout_renderer_storage,
   uint32_t in_width_pixels,
   uint32_t in_height_pixels)
 {
@@ -101,11 +102,19 @@ void ui_layer_init(
     ortho_near_plane,
     ortho_far_plane);
 
-  renderer_2d_init(
-    &(out_ui_layer->ui_renderer_2d),
-    &(out_ui_layer->ui_camera_ortho.base),
-    in_parent_window,
-    "ui_layer_renderer_2d");
+  const uint8_t error =
+    renderer_2d_init(
+      &(out_ui_layer->ui_renderer_2d),
+      inout_renderer_storage,
+      &(out_ui_layer->ui_camera_ortho.base),
+      in_parent_window,
+      "ui_layer_renderer_2d");
+
+  if (error) {
+    framebuffer_cleanup(&(out_ui_layer->ui_framebuffer));
+
+    return error;
+  }
 
   // The UI is drawn strictly in submission order, so depth testing is off
   render_api_set_render_flags(
@@ -120,6 +129,8 @@ void ui_layer_init(
   window_layer_set_event_react(
     &(out_ui_layer->ui_window_layer),
     &(_ui_layer_event_react));
+
+  return 0;
 }
 
 /*******************************************************************************

@@ -30,6 +30,11 @@ static struct renderer_2d_t window1_renderer_2d;
 static struct camera_orthographic_t window2_camera_ortho;
 static struct renderer_2d_t window2_renderer_2d;
 
+// Where each renderer keeps its batches' vertices, rather than having the
+//  engine allocate it
+static struct renderer_2d_storage_t window1_renderer_storage;
+static struct renderer_2d_storage_t window2_renderer_storage;
+
 static struct texture_2d_t aaron_shakespeare_texture;
 static struct texture_2d_t lenna_texture;
 
@@ -523,6 +528,7 @@ static uint8_t test_app_window_1_init(
 
     renderer_2d_init(
       &(window1_renderer_2d),
+      &(window1_renderer_storage),
       &(window1_camera_ortho.base),
       out_window1,
       "window1_renderer_2d");
@@ -620,6 +626,7 @@ static uint8_t test_app_window_2_init(
 
     renderer_2d_init(
       &(window2_renderer_2d),
+      &(window2_renderer_storage),
       &(window2_camera_ortho.base),
       out_window2,
       "window2_renderer_2d");

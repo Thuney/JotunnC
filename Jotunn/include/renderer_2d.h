@@ -23,6 +23,15 @@ struct window_t;
 // The most textures a batch of textured quads can sample from
 #define _RENDERER_2D_MAX_TEXTURES 16
 
+// The most of each kind of primitive (triangles, quads, textured quads,
+//  circles and lines) a batch holds; drawing one more draws the batch first.
+//  It sizes renderer_2d_storage_t, so Jotunn and the application must agree
+//  on it: set it through the JOTUNN_RENDERER_2D_MAX_PRIMITIVES_PER_BATCH
+//  CMake cache variable, which defines it for both
+#ifndef RENDERER_2D_MAX_PRIMITIVES_PER_BATCH
+  #define RENDERER_2D_MAX_PRIMITIVES_PER_BATCH 1000
+#endif
+
 /*******************************************************************************
  *
  *   MESHES
@@ -76,6 +85,23 @@ struct renderer_2d_mesh_t
  *
  ******************************************************************************/
 
+// Where a renderer keeps the vertices of a batch until it's drawn, with room
+//  for RENDERER_2D_MAX_PRIMITIVES_PER_BATCH of each kind of primitive. At the
+//  default of 1000 it's about 840 KB
+struct renderer_2d_storage_t
+{
+  struct renderable_2d_triangle_vertex_t
+    triangle_vertices[3 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH];
+  struct renderable_2d_quad_vertex_t
+    quad_vertices[4 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH];
+  struct renderable_2d_textured_quad_vertex_t
+    textured_quad_vertices[4 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH];
+  struct renderable_2d_circle_vertex_t
+    circle_vertices[_NUM_CIRCLE_2D_VERTICES * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH];
+  struct renderable_2d_line_vertex_t
+    line_vertices[2 * RENDERER_2D_MAX_PRIMITIVES_PER_BATCH];
+};
+
 // The renderer's shaders and batches
 struct renderer_2d_data_t
 {
@@ -102,6 +128,11 @@ struct renderer_2d_data_t
   struct texture_2d_t white_texture;
   // Applied each time the batch's lines are drawn
   float line_width_pixels;
+  // Where the batches' vertices are kept
+  struct renderer_2d_storage_t* storage;
+  // Set when renderer_2d_init() allocated storage, which
+  //  renderer_2d_cleanup() then frees; clear when the caller provided it
+  bool is_storage_owned;
 };
 
 // A 2D renderer, usable wherever a renderer_base_t is through base
@@ -121,17 +152,24 @@ struct renderer_2d_t
 // Loads the renderer's shaders from Jotunn's res/shaders and creates its
 //  batches, logging any shader that fails to load in DEBUG builds. The
 //  renderer keeps in_camera, in_parent_window and in_tag, which names it in
-//  diagnostics; all three must outlive it
+//  diagnostics; all three must outlive it. The batches' vertices are kept in
+//  inout_storage, which must outlive the renderer; when it's NULL, the
+//  storage is allocated instead
 //
 //  in:     in_camera, in_parent_window, in_tag
+//  in/out: inout_storage
 //  out:    out_renderer
-void renderer_2d_init(
+//  ret:    0 on success; 1 when inout_storage is NULL and the storage can't
+//            be allocated, leaving nothing to clean up
+uint8_t renderer_2d_init(
   struct renderer_2d_t* out_renderer,
+  struct renderer_2d_storage_t* inout_storage,
   struct camera_base_t* in_camera,
   struct window_t* in_parent_window,
   const char* in_tag);
 
-// Releases everything renderer_2d_init() made
+// Releases everything renderer_2d_init() made, including the storage for the
+//  batches' vertices if it was allocated rather than provided
 //
 //  in/out: inout_renderer
 void renderer_2d_cleanup(

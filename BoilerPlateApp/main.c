@@ -31,7 +31,7 @@ int main(
     NULL,
     max_windows);
 
-  ball_window_init(
+  error |= ball_window_init(
     app_ptr,
     &(ball_window));
 

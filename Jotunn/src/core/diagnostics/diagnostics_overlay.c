@@ -29,6 +29,9 @@ struct diagnostics_overlay_t
 {
   // First, so the layer's render callback can find its overlay
   struct ui_layer_t ui_layer;
+  // The layer's renderer's batch storage, kept here so that it's counted
+  //  against diagnostics with the rest of the overlay
+  struct renderer_2d_storage_t renderer_storage;
   bool is_layer_created;
   bool is_visible;
 };
@@ -170,9 +173,12 @@ static void _diagnostics_overlay_create_layer(
   struct window_t* inout_window,
   struct diagnostics_overlay_t* inout_overlay)
 {
+  // ui_layer_init() only fails to allocate its renderer's storage, which is
+  //  provided here
   ui_layer_init(
     inout_window,
     &(inout_overlay->ui_layer),
+    &(inout_overlay->renderer_storage),
     inout_window->metadata.width,
     inout_window->metadata.height);
   ui_layer_set_custom_render(

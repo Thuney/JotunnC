@@ -132,8 +132,10 @@ uint8_t ball_window_init(
       ortho_near_plane,
       ortho_far_plane);
 
-    renderer_2d_init(
+    // NULL, so the engine allocates the renderer's batch storage
+    error |= renderer_2d_init(
       &(out_ball_window->renderer_2d),
+      NULL,
       camera_base_ptr,
       window_ptr,
       "ball_app_renderer_2d");
@@ -154,7 +156,7 @@ uint8_t ball_window_init(
       &(out_ball_window->window),
       &(out_ball_window->window_layer));
 
-    ball_ui_layer_init(
+    error |= ball_ui_layer_init(
       &(out_ball_window->window),
       &(out_ball_window->ball_ui_layer),
       width,

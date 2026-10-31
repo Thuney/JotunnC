@@ -157,6 +157,20 @@ if (JOTUNN_ENABLE_DIAGNOSTICS)
     JOTUNN_DIAGNOSTICS)
 endif()
 
+# How many of each kind of primitive a renderer_2d batch holds. It sizes the
+#  public struct renderer_2d_storage_t, so it's a public definition, which
+#  keeps Jotunn and the applications built against it agreeing on it
+set(
+  JOTUNN_RENDERER_2D_MAX_PRIMITIVES_PER_BATCH
+  1000
+  CACHE STRING
+  "How many of each kind of primitive a renderer_2d batch holds")
+
+target_compile_definitions(
+  JotunnC
+  PUBLIC
+  RENDERER_2D_MAX_PRIMITIVES_PER_BATCH=${JOTUNN_RENDERER_2D_MAX_PRIMITIVES_PER_BATCH})
+
 target_compile_definitions(
   JotunnC
   #

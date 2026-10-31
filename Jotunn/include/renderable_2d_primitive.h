@@ -208,94 +208,109 @@ struct renderable_2d_mesh_data_t
 
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  triangles, binds the triangle vertex layout to in_shader_program's
-//  attributes, and allocates storage for a batch's vertices. Indices are
+//  attributes, and keeps a batch's vertices in inout_vertex_storage, which
+//  must hold 3 for each triangle and outlive the batch. Indices are
 //  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
+//  in/out: inout_vertex_storage
 //  out:    out_triangle_data
 void renderable_2d_triangle_data_init(
   struct renderable_2d_triangle_data_t* out_triangle_data,
   unsigned int in_max_count,
+  struct renderable_2d_triangle_vertex_t* inout_vertex_storage,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  quads, binds the quad vertex layout to in_shader_program's
-//  attributes, and allocates storage for a batch's vertices. Indices are
+//  attributes, and keeps a batch's vertices in inout_vertex_storage, which
+//  must hold 4 for each quad and outlive the batch. Indices are
 //  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
+//  in/out: inout_vertex_storage
 //  out:    out_quad_data
 void renderable_2d_quad_data_init(
   struct renderable_2d_quad_data_t* out_quad_data,
   unsigned int in_max_count,
+  struct renderable_2d_quad_vertex_t* inout_vertex_storage,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  textured quads, binds the textured quad vertex layout to in_shader_program's
-//  attributes, and allocates storage for a batch's vertices. Indices are
+//  attributes, and keeps a batch's vertices in inout_vertex_storage, which
+//  must hold 4 for each textured quad and outlive the batch. Indices are
 //  uploaded once, a chunk at a time
 //
 //  in:     in_max_count, in_shader_program
+//  in/out: inout_vertex_storage
 //  out:    out_textured_quad_data
 void renderable_2d_textured_quad_data_init(
   struct renderable_2d_textured_quad_data_t* out_textured_quad_data,
   unsigned int in_max_count,
+  struct renderable_2d_textured_quad_vertex_t* inout_vertex_storage,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
 //  circles, binds the circle vertex layout to in_shader_program's
-//  attributes, and allocates storage for a batch's vertices. Indices are
-//  uploaded once, a chunk at a time. Also fills in
+//  attributes, and keeps a batch's vertices in inout_vertex_storage, which
+//  must hold _NUM_CIRCLE_2D_VERTICES for each circle and outlive the batch.
+//  Indices are uploaded once, a chunk at a time. Also fills in
 //  circle_2d_position_data
 //
 //  in:     in_max_count, in_shader_program
+//  in/out: inout_vertex_storage
 //  out:    out_circle_data
 void renderable_2d_circle_data_init(
   struct renderable_2d_circle_data_t* out_circle_data,
   unsigned int in_max_count,
+  struct renderable_2d_circle_vertex_t* inout_vertex_storage,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffer for batches of up to in_max_count
 //  lines, binds the line vertex layout to in_shader_program's attributes,
-//  and allocates storage for a batch's vertices. Lines are drawn without
+//  and keeps a batch's vertices in inout_vertex_storage, which must hold 2
+//  for each line and outlive the batch. Lines are drawn without
 //  indices
 //
 //  in:     in_max_count, in_shader_program
+//  in/out: inout_vertex_storage
 //  out:    out_line_data
 void renderable_2d_line_data_init(
   struct renderable_2d_line_data_t* out_line_data,
   unsigned int in_max_count,
+  struct renderable_2d_line_vertex_t* inout_vertex_storage,
   struct shader_program_t* in_shader_program);
 
-// Destroys the GPU objects and frees the vertex storage made by
+// Destroys the GPU objects made by
 //  renderable_2d_triangle_data_init()
 //
 //  in/out: inout_triangle_data
 void renderable_2d_triangle_data_cleanup(
   struct renderable_2d_triangle_data_t* inout_triangle_data);
 
-// Destroys the GPU objects and frees the vertex storage made by
+// Destroys the GPU objects made by
 //  renderable_2d_quad_data_init()
 //
 //  in/out: inout_quad_data
 void renderable_2d_quad_data_cleanup(
   struct renderable_2d_quad_data_t* inout_quad_data);
 
-// Destroys the GPU objects and frees the vertex storage made by
+// Destroys the GPU objects made by
 //  renderable_2d_textured_quad_data_init()
 //
 //  in/out: inout_textured_quad_data
 void renderable_2d_textured_quad_data_cleanup(
   struct renderable_2d_textured_quad_data_t* inout_textured_quad_data);
 
-// Destroys the GPU objects and frees the vertex storage made by
+// Destroys the GPU objects made by
 //  renderable_2d_circle_data_init()
 //
 //  in/out: inout_circle_data
 void renderable_2d_circle_data_cleanup(
   struct renderable_2d_circle_data_t* inout_circle_data);
 
-// Destroys the GPU objects and frees the vertex storage made by
+// Destroys the GPU objects made by
 //  renderable_2d_line_data_init()
 //
 //  in/out: inout_line_data
