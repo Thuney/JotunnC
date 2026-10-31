@@ -1,7 +1,8 @@
 #pragma once
 
 // Odds and ends shared across Jotunn: paths into its source tree, getting
-//  from an embedded struct to the struct embedding it, and reading files
+//  from an embedded struct to the struct embedding it, reading files, and
+//  writing sizes for display
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -46,3 +47,22 @@
 //            allocator_free(); NULL when the file can't be read
 char* util_read_raw_file_contents(
   const char* in_file_path);
+
+/*******************************************************************************
+ *
+ *   SIZES
+ *
+ ******************************************************************************/
+
+// Room for any size util_format_bytes() writes, its terminator included
+#define UTIL_BYTES_TEXT_LENGTH 32
+
+// Writes a size in bytes for display, in the largest of B, KB and MB that
+//  keeps it at least 1, a KB being 1024 bytes
+//
+//  in:     in_size_bytes, in_text_length
+//  out:    out_text
+void util_format_bytes(
+  size_t in_size_bytes,
+  char* out_text,
+  size_t in_text_length);

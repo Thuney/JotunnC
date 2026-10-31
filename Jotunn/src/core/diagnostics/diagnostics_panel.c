@@ -5,6 +5,7 @@
 #include "resource.h"
 #include "texture.h"
 #include "ui_imgui.h"
+#include "util.h"
 
 #include "cimgui.h"
 #include "cimplot.h"
@@ -18,7 +19,7 @@
 #define _DIAGNOSTICS_PANEL_RESOURCE_LIST_HEIGHT_PIXELS 240.0f
 #define _DIAGNOSTICS_PANEL_EVENT_LIST_HEIGHT_PIXELS 220.0f
 #define _DIAGNOSTICS_PANEL_NUMBER_COLUMN_WIDTH_PIXELS 72.0f
-#define _DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH 32
+#define _DIAGNOSTICS_PANEL_LABEL_TEXT_LENGTH 32
 #define _DIAGNOSTICS_PANEL_FILTER_TEXT_LENGTH 128
 
 /*******************************************************************************
@@ -141,15 +142,6 @@ static void _diagnostics_panel_plot_history(
 static void _diagnostics_panel_draw_preview_tooltip(
   const struct texture_2d_t* in_texture,
   const struct texture_2d_t* in_target_texture);
-
-// Writes a size in bytes in the largest unit that keeps it at least 1
-//
-//  in:     in_size_bytes, in_text_length
-//  out:    out_text
-static void _diagnostics_panel_format_bytes(
-  size_t in_size_bytes,
-  char* out_text,
-  size_t in_text_length);
 
 /*******************************************************************************
  *
@@ -626,13 +618,13 @@ static void _diagnostics_panel_draw_memory(
         (enum allocator_tag_t)tag,
         &(stats));
 
-      char live_text[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
-      char peak_text[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
-      _diagnostics_panel_format_bytes(
+      char live_text[UTIL_BYTES_TEXT_LENGTH];
+      char peak_text[UTIL_BYTES_TEXT_LENGTH];
+      util_format_bytes(
         stats.live_bytes,
         live_text,
         sizeof(live_text));
-      _diagnostics_panel_format_bytes(
+      util_format_bytes(
         stats.peak_live_bytes,
         peak_text,
         sizeof(peak_text));
@@ -744,13 +736,13 @@ static void _diagnostics_panel_draw_resources(
         (enum resource_kind_t)kind,
         &(stats));
 
-      char live_text[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
-      char peak_text[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
-      _diagnostics_panel_format_bytes(
+      char live_text[UTIL_BYTES_TEXT_LENGTH];
+      char peak_text[UTIL_BYTES_TEXT_LENGTH];
+      util_format_bytes(
         stats.live_bytes,
         live_text,
         sizeof(live_text));
-      _diagnostics_panel_format_bytes(
+      util_format_bytes(
         stats.peak_live_bytes,
         peak_text,
         sizeof(peak_text));
@@ -822,8 +814,8 @@ static void _diagnostics_panel_draw_resources(
          resource != NULL;
          resource = resource->next)
     {
-      char size_text[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
-      _diagnostics_panel_format_bytes(
+      char size_text[UTIL_BYTES_TEXT_LENGTH];
+      util_format_bytes(
         resource->size_bytes,
         size_text,
         sizeof(size_text));
@@ -1101,7 +1093,7 @@ static void _diagnostics_panel_draw_log(
   const struct diagnostics_internal_log_t* log = &(in_state->log);
 
   for (int level = 0; level < LOG_LEVEL_COUNT; level++) {
-    char label[_DIAGNOSTICS_PANEL_BYTES_TEXT_LENGTH];
+    char label[_DIAGNOSTICS_PANEL_LABEL_TEXT_LENGTH];
     snprintf(
       label,
       sizeof(label),
@@ -1427,39 +1419,4 @@ static void _diagnostics_panel_draw_preview_tooltip(
   }
 
   igEndTooltip();
-}
-
-/*******************************************************************************
- *
- *   Function: _diagnostics_panel_format_bytes()
- *
- ******************************************************************************/
-static void _diagnostics_panel_format_bytes(
-  size_t in_size_bytes,
-  char* out_text,
-  size_t in_text_length)
-{
-  const double size_bytes = (double)in_size_bytes;
-
-  if (size_bytes >= (1024.0 * 1024.0)) {
-    snprintf(
-      out_text,
-      in_text_length,
-      "%.2f MB",
-      (size_bytes / (1024.0 * 1024.0)));
-  }
-  else if (size_bytes >= 1024.0) {
-    snprintf(
-      out_text,
-      in_text_length,
-      "%.1f KB",
-      (size_bytes / 1024.0));
-  }
-  else {
-    snprintf(
-      out_text,
-      in_text_length,
-      "%zu B",
-      in_size_bytes);
-  }
 }

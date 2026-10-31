@@ -78,3 +78,38 @@ char* util_read_raw_file_contents(
 
   return buffer;
 }
+
+/*******************************************************************************
+ *
+ *   Function: util_format_bytes()
+ *
+ ******************************************************************************/
+void util_format_bytes(
+  size_t in_size_bytes,
+  char* out_text,
+  size_t in_text_length)
+{
+  const double size_bytes = (double)in_size_bytes;
+
+  if (size_bytes >= (1024.0 * 1024.0)) {
+    snprintf(
+      out_text,
+      in_text_length,
+      "%.2f MB",
+      (size_bytes / (1024.0 * 1024.0)));
+  }
+  else if (size_bytes >= 1024.0) {
+    snprintf(
+      out_text,
+      in_text_length,
+      "%.1f KB",
+      (size_bytes / 1024.0));
+  }
+  else {
+    snprintf(
+      out_text,
+      in_text_length,
+      "%zu B",
+      in_size_bytes);
+  }
+}
