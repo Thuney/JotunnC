@@ -1,0 +1,112 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Configure",
+      "detail": "Configure CMake in .build, exporting .build/compile_commands.json",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "-S",
+        "${workspaceFolder}",
+        "-B",
+        "${workspaceFolder}/.build",
+        "-G",
+        "Unix Makefiles",
+        "-DCMAKE_BUILD_TYPE=Debug",
+        "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "Build",
+      "detail": "Configure, then build Jotunn and every application",
+      "type": "shell",
+      "command": "cmake",
+      "args": [
+        "--build",
+        "${workspaceFolder}/.build",
+        "--parallel"
+      ],
+      "dependsOn": "Configure",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": {
+        "base": "$gcc",
+        "fileLocation": "absolute"
+      }
+    },
+    {
+      "label": "Run ImGuiApp",
+      "detail": "Build, then run the ImGui window layer example",
+      "type": "process",
+      "command": "${workspaceFolder}/ExampleApplications/.build/ImGuiApp/ImGuiApp",
+      "options": {
+        "cwd": "${workspaceFolder}/ExampleApplications/.build/ImGuiApp"
+      },
+      "dependsOn": "Build",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Renderer2DApp",
+      "detail": "Build, then run the 2D renderer example",
+      "type": "process",
+      "command": "${workspaceFolder}/ExampleApplications/.build/Renderer2DApp/Renderer2DApp",
+      "options": {
+        "cwd": "${workspaceFolder}/ExampleApplications/.build/Renderer2DApp"
+      },
+      "dependsOn": "Build",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run Renderer3DApp",
+      "detail": "Build, then run the 3D renderer example",
+      "type": "process",
+      "command": "${workspaceFolder}/ExampleApplications/.build/Renderer3DApp/Renderer3DApp",
+      "options": {
+        "cwd": "${workspaceFolder}/ExampleApplications/.build/Renderer3DApp"
+      },
+      "dependsOn": "Build",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run MultiWindowApp",
+      "detail": "Build, then run the multi-window, multi-layer example",
+      "type": "process",
+      "command": "${workspaceFolder}/ExampleApplications/.build/MultiWindowApp/MultiWindowApp",
+      "options": {
+        "cwd": "${workspaceFolder}/ExampleApplications/.build/MultiWindowApp"
+      },
+      "dependsOn": "Build",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Run AllocationStorageApp",
+      "detail": "Build, then run the configurable allocation storage example",
+      "type": "process",
+      "command": "${workspaceFolder}/ExampleApplications/.build/AllocationStorageApp/AllocationStorageApp",
+      "options": {
+        "cwd": "${workspaceFolder}/ExampleApplications/.build/AllocationStorageApp"
+      },
+      "dependsOn": "Build",
+      "presentation": {
+        "panel": "dedicated"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
