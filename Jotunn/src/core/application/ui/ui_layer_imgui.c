@@ -255,7 +255,7 @@ void ui_layer_internal_imgui_init(
 
   platform_io->Platform_GetClipboardTextFn = &(_ui_layer_imgui_get_clipboard_text);
   platform_io->Platform_SetClipboardTextFn = &(_ui_layer_imgui_set_clipboard_text);
-  platform_io->Platform_ClipboardUserData = inout_ui_layer->ui_window_layer.parent_window;
+  platform_io->Platform_ClipboardUserData = inout_ui_layer->layer_2d.window_layer.parent_window;
   platform_io->DrawCallback_ResetRenderState = &(_ui_layer_imgui_reset_render_state);
 
   igStyleColorsDark(NULL);
@@ -321,7 +321,7 @@ void ui_layer_internal_imgui_frame_begin(
   struct ui_layer_t* inout_ui_layer)
 {
   struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
-  const struct window_t* window = inout_ui_layer->ui_window_layer.parent_window;
+  const struct window_t* window = inout_ui_layer->layer_2d.window_layer.parent_window;
 
   _ui_layer_imgui_make_current(data);
 
@@ -383,7 +383,7 @@ bool ui_layer_internal_imgui_event_react(
   const struct event_base_t* in_event)
 {
   struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
-  const struct window_t* window = inout_ui_layer->ui_window_layer.parent_window;
+  const struct window_t* window = inout_ui_layer->layer_2d.window_layer.parent_window;
 
   _ui_layer_imgui_make_current(data);
 
@@ -800,7 +800,7 @@ static void _ui_layer_imgui_draw(
 
   // ImGui's coordinates start at the top-left of the display and grow
   //  downward, so the camera is flipped to match for the duration of the frame
-  struct camera_orthographic_t* camera = &(inout_ui_layer->ui_camera_ortho);
+  struct camera_orthographic_t* camera = &(inout_ui_layer->layer_2d.camera_ortho);
 
   camera_orthographic_set_projection(
     camera,
@@ -837,7 +837,7 @@ static void _ui_layer_imgui_draw(
         // Everything before the callback is drawn first, so that whatever
         //  the callback draws lands in order
         renderer_2d_draw_mesh(
-          &(inout_ui_layer->ui_renderer_2d),
+          &(inout_ui_layer->layer_2d.renderer_2d),
           &(mesh));
         mesh.submesh_count = 0;
 
@@ -892,7 +892,7 @@ static void _ui_layer_imgui_draw(
     }
 
     renderer_2d_draw_mesh(
-      &(inout_ui_layer->ui_renderer_2d),
+      &(inout_ui_layer->layer_2d.renderer_2d),
       &(mesh));
   }
 }

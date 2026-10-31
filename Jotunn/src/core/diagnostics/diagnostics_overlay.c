@@ -109,7 +109,7 @@ bool diagnostics_internal_overlay_event_react(
 
   // The UI layer marks the input its UI captures as handled
   const bool was_handled = (inout_event->is_handled != 0U);
-  struct window_layer_t* layer = &(overlay->ui_layer.ui_window_layer);
+  struct window_layer_t* layer = &(overlay->ui_layer.layer_2d.window_layer);
 
   layer->function_event_react(
     inout_window,
@@ -141,7 +141,7 @@ struct window_layer_t* diagnostics_internal_overlay_prepare(
       overlay);
   }
 
-  return &(overlay->ui_layer.ui_window_layer);
+  return &(overlay->ui_layer.layer_2d.window_layer);
 }
 
 /*******************************************************************************
@@ -180,9 +180,7 @@ static void _diagnostics_overlay_create_layer(
   ui_layer_init(
     inout_window,
     &(inout_overlay->ui_layer),
-    &(inout_overlay->renderer_storage),
-    inout_window->metadata.width,
-    inout_window->metadata.height);
+    &(inout_overlay->renderer_storage));
   ui_layer_set_custom_render(
     &(inout_overlay->ui_layer),
     &(_diagnostics_overlay_render));
@@ -192,12 +190,12 @@ static void _diagnostics_overlay_create_layer(
   igGetIO_Nil()->IniFilename = NULL;
 
   resource_set_name(
-    &(inout_overlay->ui_layer.ui_framebuffer.resource),
+    &(inout_overlay->ui_layer.layer_2d.framebuffer.resource),
     "diagnostics overlay");
 
   // Every UI layer's renderer shares one tag, so the overlay's is retagged to
   //  tell its draws apart from the application's UI
-  inout_overlay->ui_layer.ui_renderer_2d.base.tag = "diagnostics overlay";
+  inout_overlay->ui_layer.layer_2d.renderer_2d.base.tag = "diagnostics overlay";
 
   inout_overlay->is_layer_created = true;
 }
@@ -220,7 +218,7 @@ static void _diagnostics_overlay_render(
 
   diagnostics_internal_panel_draw(
     &(is_open),
-    &(overlay->ui_layer.ui_framebuffer.color_buffer.texture));
+    &(overlay->ui_layer.layer_2d.framebuffer.color_buffer.texture));
 
   if (!is_open) {
     overlay->is_visible = false;

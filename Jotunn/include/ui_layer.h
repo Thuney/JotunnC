@@ -10,6 +10,7 @@
 #include "renderer_2d.h"
 #include "ui_element.h"
 #include "window_layer.h"
+#include "window_layer_2d.h"
 
 /*******************************************************************************
  *
@@ -19,11 +20,9 @@
 
 struct ui_layer_t
 {
-  struct window_layer_t ui_window_layer;
-  struct framebuffer_t ui_framebuffer;
-
-  struct camera_orthographic_t ui_camera_ortho;
-  struct renderer_2d_t ui_renderer_2d;
+  // The window layer the UI is drawn in, with its framebuffer, camera and
+  //  renderer_2d. Its window_layer is what's added to the window
+  struct window_layer_2d_t layer_2d;
 
   // Managed by implementation
   void* ui_layer_data;
@@ -39,14 +38,15 @@ struct ui_layer_t
  *
  ******************************************************************************/
 
-// Sets up a UI layer for a window, drawing into a framebuffer of the given
-//  size. The window doesn't run the layer until ui_window_layer is added to
-//  it. The window's graphics context must be current; the layer's new ImGui,
-//  ImPlot and imnodes contexts are left current. The layer's renderer keeps
-//  its batches' vertices in inout_renderer_storage, which must outlive the
-//  layer; when it's NULL, the storage is allocated instead
+// Sets up a UI layer covering a window, drawing into a framebuffer of the
+//  window's size. The window doesn't run the layer until layer_2d's
+//  window_layer is added to it. The window's graphics context must be
+//  current; the layer's new ImGui, ImPlot and imnodes contexts are left
+//  current. The layer's renderer keeps its batches' vertices in
+//  inout_renderer_storage, which must outlive the layer; when it's NULL, the
+//  storage is allocated instead
 //
-//  in:     in_parent_window, in_width_pixels, in_height_pixels
+//  in:     in_parent_window
 //  in/out: inout_renderer_storage
 //  out:    out_ui_layer
 //  ret:    0 on success; 1 when inout_renderer_storage is NULL and the
@@ -54,9 +54,7 @@ struct ui_layer_t
 uint8_t ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
-  struct renderer_2d_storage_t* inout_renderer_storage,
-  uint32_t in_width_pixels,
-  uint32_t in_height_pixels);
+  struct renderer_2d_storage_t* inout_renderer_storage);
 
 // Releases everything a UI layer holds, making its parent window's graphics
 //  context current to do so and releasing it after
@@ -82,7 +80,8 @@ void ui_layer_set_custom_render(
 
 // Sets a handler for the events reaching the UI layer. The layer owns its
 //  window layer's event hook, through which it feeds input to the UI, so use
-//  this rather than window_layer_set_event_react() on ui_window_layer. Every
+//  this rather than window_layer_set_event_react() on layer_2d's
+//  window_layer. Every
 //  event reaches the handler, including those the UI wants exclusive use of;
 //  those are marked handled after it returns, keeping them from the layers
 //  beneath

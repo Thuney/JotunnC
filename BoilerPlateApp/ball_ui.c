@@ -21,17 +21,13 @@ static void ball_ui_layer_render(
  ******************************************************************************/
 uint8_t ball_ui_layer_init(
   struct window_t* inout_parent_window,
-  struct ball_ui_layer_t* out_ball_layer,
-  uint16_t in_width,
-  uint16_t in_height)
+  struct ball_ui_layer_t* out_ball_layer)
 {
   const uint8_t error =
     ui_layer_init(
       inout_parent_window,
       &(out_ball_layer->ui_layer),
-      NULL,
-      in_width,
-      in_height);
+      NULL);
 
   if (!error) {
     ui_layer_set_custom_render(

@@ -55,58 +55,34 @@ static void _ui_layer_event_react(
 uint8_t ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
-  struct renderer_2d_storage_t* inout_renderer_storage,
-  uint32_t in_width_pixels,
-  uint32_t in_height_pixels)
+  struct renderer_2d_storage_t* inout_renderer_storage)
 {
   memset(
     out_ui_layer,
     0,
     sizeof(struct ui_layer_t));
 
-  framebuffer_init(
-    &(out_ui_layer->ui_framebuffer),
-    in_width_pixels,
-    in_height_pixels);
-
-  window_layer_init(
-    in_parent_window,
-    &(out_ui_layer->ui_window_layer),
-    &(out_ui_layer->ui_framebuffer),
-    &(out_ui_layer->ui_camera_ortho.base),
-    &(out_ui_layer->ui_renderer_2d.base));
-
-  camera_orthographic_init_pixel_space(
-    &(out_ui_layer->ui_camera_ortho),
-    in_width_pixels,
-    in_height_pixels);
-
   const uint8_t error =
-    renderer_2d_init(
-      &(out_ui_layer->ui_renderer_2d),
-      inout_renderer_storage,
-      &(out_ui_layer->ui_camera_ortho.base),
+    window_layer_2d_init(
       in_parent_window,
-      "ui_layer_renderer_2d");
+      &(out_ui_layer->layer_2d),
+      inout_renderer_storage,
+      "ui_layer_renderer_2d",
+      &(ui_layer_render));
 
   if (error) {
-    framebuffer_cleanup(&(out_ui_layer->ui_framebuffer));
-
     return error;
   }
 
   // The UI is drawn strictly in submission order, so depth testing is off
   render_api_set_render_flags(
-    &(out_ui_layer->ui_renderer_2d.base.render_api),
+    &(out_ui_layer->layer_2d.renderer_2d.base.render_api),
     (RENDER_API_RENDER_FLAGS_COLOR | RENDER_API_RENDER_FLAGS_BLEND));
 
   ui_layer_internal_imgui_init(out_ui_layer);
 
-  window_layer_set_custom_layer_run(
-    &(out_ui_layer->ui_window_layer),
-    ui_layer_render);
   window_layer_set_event_react(
-    &(out_ui_layer->ui_window_layer),
+    &(out_ui_layer->layer_2d.window_layer),
     &(_ui_layer_event_react));
 
   return 0;
@@ -120,16 +96,14 @@ uint8_t ui_layer_init(
 void ui_layer_cleanup(
   struct ui_layer_t* inout_ui_layer)
 {
-  struct window_t* parent_window = inout_ui_layer->ui_window_layer.parent_window;
+  struct window_t* parent_window = inout_ui_layer->layer_2d.window_layer.parent_window;
 
   // Releasing the UI's textures needs the window's graphics context
   window_set_context(parent_window);
 
   ui_layer_internal_imgui_cleanup(inout_ui_layer);
 
-  renderer_2d_cleanup(&(inout_ui_layer->ui_renderer_2d));
-
-  framebuffer_cleanup(&(inout_ui_layer->ui_framebuffer));
+  window_layer_2d_cleanup(&(inout_ui_layer->layer_2d));
 
   window_release_context(parent_window);
 }
@@ -172,7 +146,7 @@ static void ui_layer_render(
     container_of(
       inout_window_layer,
       struct ui_layer_t,
-      ui_window_layer);
+      layer_2d.window_layer);
 
   ui_layer_internal_imgui_frame_begin(ui_layer);
 
@@ -199,7 +173,7 @@ static void _ui_layer_event_react(
     container_of(
       inout_window_layer,
       struct ui_layer_t,
-      ui_window_layer);
+      layer_2d.window_layer);
 
   // The UI sees every event, whatever the custom handler then does with it
   const bool is_captured =

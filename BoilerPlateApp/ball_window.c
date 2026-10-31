@@ -158,13 +158,11 @@ uint8_t ball_window_init(
 
     error |= ball_ui_layer_init(
       &(out_ball_window->window),
-      &(out_ball_window->ball_ui_layer),
-      width,
-      height);
+      &(out_ball_window->ball_ui_layer));
 
     window_add_layer(
       &(out_ball_window->window),
-      &(out_ball_window->ball_ui_layer.ui_layer.ui_window_layer));
+      &(out_ball_window->ball_ui_layer.ui_layer.layer_2d.window_layer));
 
     window_bind_custom_events(
       window_ptr,
