@@ -188,6 +188,14 @@ void shader_program_set_uniform_fmat4x4(
   const char* in_uniform_name,
   const union fmatrix_4x4_t* in_matrix);
 
+// Sets a 3-component vector uniform. The program must be the one in use
+//
+//  in:     in_shader_program, in_uniform_name, in_vector
+void shader_program_set_uniform_fvec3(
+  const struct shader_program_t* in_shader_program,
+  const char* in_uniform_name,
+  const union fvector3_t* in_vector);
+
 // Sets a float uniform. The program must be the one in use
 //
 //  in:     in_shader_program, in_uniform_name, in_val

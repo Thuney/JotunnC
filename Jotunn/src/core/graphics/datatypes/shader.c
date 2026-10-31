@@ -229,6 +229,23 @@ void shader_program_set_uniform_fmat4x4(
 
 /*******************************************************************************
  *
+ *   Function: shader_program_set_uniform_fvec3()
+ *
+ ******************************************************************************/
+void shader_program_set_uniform_fvec3(
+  const struct shader_program_t* in_shader_program,
+  const char* in_uniform_name,
+  const union fvector3_t* in_vector)
+{
+  shader_program_internal_platform_set_uniform(
+    in_shader_program,
+    in_uniform_name,
+    in_vector,
+    SHADER_PROGRAM_UNIFORM_FVEC3);
+}
+
+/*******************************************************************************
+ *
  *   Function: shader_program_set_uniform_float()
  *
  ******************************************************************************/
