@@ -68,24 +68,22 @@ struct shader_fragment_t
  *
  ******************************************************************************/
 
-// Creates a vertex shader and compiles it from source. Unlike
-//  shader_vertex_init_filepath(), this returns nonzero on success
+// Creates a vertex shader and compiles it from source
 //
 //  in:     in_vertex_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return nonzero
+//  ret:    0 when the shader compiled; 1 when it didn't. Only DEBUG builds
+//            check, so other builds always return 0
 int shader_vertex_init(
   struct shader_vertex_t* out_shader,
   const char* in_vertex_shader_src);
 
-// Creates a fragment shader and compiles it from source. Unlike
-//  shader_fragment_init_filepath(), this returns nonzero on success
+// Creates a fragment shader and compiles it from source
 //
 //  in:     in_fragment_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return nonzero
+//  ret:    0 when the shader compiled; 1 when it didn't. Only DEBUG builds
+//            check, so other builds always return 0
 int shader_fragment_init(
   struct shader_fragment_t* out_shader,
   const char* in_fragment_shader_src);

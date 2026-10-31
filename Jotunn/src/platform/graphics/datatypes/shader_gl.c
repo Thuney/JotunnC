@@ -20,8 +20,8 @@
 //
 //  in:     in_vertex_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return 1
+//  ret:    0 when the shader compiled; 1 when it didn't. Only DEBUG builds
+//            check, so other builds always return 0
 static int vertex_shader_gl_init(
   struct shader_vertex_t* out_shader,
   const char* in_vertex_shader_src);
@@ -31,8 +31,8 @@ static int vertex_shader_gl_init(
 //
 //  in:     in_fragment_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return 1
+//  ret:    0 when the shader compiled; 1 when it didn't. Only DEBUG builds
+//            check, so other builds always return 0
 static int fragment_shader_gl_init(
   struct shader_fragment_t* out_shader,
   const char* in_fragment_shader_src);
@@ -41,7 +41,7 @@ static int fragment_shader_gl_init(
 //
 //  in:     in_vertex_shader, in_fragment_shader
 //  out:    out_shader_program
-//  ret:    1
+//  ret:    0
 static int shader_program_gl_init(
   struct shader_program_t* out_shader_program,
   const struct shader_vertex_t* in_vertex_shader,
@@ -51,8 +51,8 @@ static int shader_program_gl_init(
 //  DEBUG builds when it fails
 //
 //  in/out: inout_shader_program
-//  ret:    Nonzero when the program linked; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return 1
+//  ret:    0 when the program linked; 1 when it didn't. Only DEBUG builds
+//            check, so other builds always return 0
 static int shader_program_gl_link(
   struct shader_program_t* inout_shader_program);
 
@@ -300,10 +300,10 @@ static int vertex_shader_gl_init(
       "%s",
       out_shader->compilation_log);
   }
-  return out_shader->compilation_status;
+  return !out_shader->compilation_status;
    #endif
 
-  return 1;
+  return 0;
 }
 
 /*******************************************************************************
@@ -343,10 +343,10 @@ static int fragment_shader_gl_init(
       "%s",
       out_shader->compilation_log);
   }
-  return out_shader->compilation_status;
+  return !out_shader->compilation_status;
    #endif
 
-  return 1;
+  return 0;
 }
 
 /*******************************************************************************
@@ -368,7 +368,7 @@ static int shader_program_gl_init(
     out_shader_program->shader_program,
     in_fragment_shader->fragment_shader);
 
-  return 1;
+  return 0;
 }
 
 /*******************************************************************************
@@ -401,10 +401,10 @@ static int shader_program_gl_link(
       "%s",
       inout_shader_program->link_log);
   }
-  return inout_shader_program->link_status;
+  return !inout_shader_program->link_status;
    #endif
 
-  return 1;
+  return 0;
 }
 
 /*******************************************************************************

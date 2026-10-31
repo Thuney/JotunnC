@@ -17,8 +17,9 @@
 //
 //  in:     in_vertex_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return nonzero
+//  ret:    0 when the shader compiled; 1 when it didn't, or there is no
+//            backend. Only DEBUG builds check, so other builds always return 0
+//            with a backend
 int vertex_shader_internal_platform_init(
   struct shader_vertex_t* out_shader,
   const char* in_vertex_shader_src);
@@ -28,8 +29,9 @@ int vertex_shader_internal_platform_init(
 //
 //  in:     in_fragment_shader_src
 //  out:    out_shader
-//  ret:    Nonzero when the shader compiled; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return nonzero
+//  ret:    0 when the shader compiled; 1 when it didn't, or there is no
+//            backend. Only DEBUG builds check, so other builds always return 0
+//            with a backend
 int fragment_shader_internal_platform_init(
   struct shader_fragment_t* out_shader,
   const char* in_fragment_shader_src);
@@ -38,7 +40,8 @@ int fragment_shader_internal_platform_init(
 //
 //  in:     in_vertex_shader, in_fragment_shader
 //  out:    out_shader_program
-//  ret:    Nonzero on success; 0 when the shaders couldn't be attached
+//  ret:    0 on success; 1 when the shaders couldn't be attached, or there
+//            is no backend
 int shader_program_internal_platform_init(
   struct shader_program_t* out_shader_program,
   const struct shader_vertex_t* in_vertex_shader,
@@ -48,8 +51,9 @@ int shader_program_internal_platform_init(
 //  DEBUG builds when it fails
 //
 //  in/out: inout_shader_program
-//  ret:    Nonzero when the program linked; 0 when it didn't. Only DEBUG
-//            builds check, so other builds always return nonzero
+//  ret:    0 when the program linked; 1 when it didn't, or there is no
+//            backend. Only DEBUG builds check, so other builds always return 0
+//            with a backend
 int shader_program_internal_platform_link(
   struct shader_program_t* inout_shader_program);
 

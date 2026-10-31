@@ -10,7 +10,7 @@ int vertex_shader_internal_platform_init(
   struct shader_vertex_t* out_shader,
   const char* in_vertex_shader_src)
 {
-  return 0;
+  return 1;
 }
 
 /*******************************************************************************
@@ -22,7 +22,7 @@ int fragment_shader_internal_platform_init(
   struct shader_fragment_t* out_shader,
   const char* in_fragment_shader_src)
 {
-  return 0;
+  return 1;
 }
 
 /*******************************************************************************
@@ -35,7 +35,7 @@ int shader_program_internal_platform_init(
   const struct shader_vertex_t* in_vertex_shader,
   const struct shader_fragment_t* in_fragment_shader)
 {
-  return 0;
+  return 1;
 }
 
 /*******************************************************************************
@@ -46,7 +46,7 @@ int shader_program_internal_platform_init(
 int shader_program_internal_platform_link(
   struct shader_program_t* inout_shader_program)
 {
-  return 0;
+  return 1;
 }
 
 /*******************************************************************************
