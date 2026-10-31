@@ -104,7 +104,7 @@ const struct resource_t* resource_get_first(void);
 //  out:    out_stats
 //  ret:    true when in_kind is valid; otherwise false, with out_stats zeroed
 bool resource_get_kind_stats(
-  const enum resource_kind_t in_kind,
+  enum resource_kind_t in_kind,
   struct resource_kind_stats_t* out_stats);
 
 // Names a kind of resource for display
@@ -112,7 +112,7 @@ bool resource_get_kind_stats(
 //  in:     in_kind
 //  ret:    The kind's name, or "unknown" when in_kind isn't valid
 const char* resource_get_kind_name(
-  const enum resource_kind_t in_kind);
+  enum resource_kind_t in_kind);
 
 // Prints every live resource to stdout, as a leak report once everything
 //  should have been cleaned up

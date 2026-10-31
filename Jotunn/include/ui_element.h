@@ -62,8 +62,8 @@ struct ui_element_t
   void (*function_ui_element_render)(
     struct renderer_2d_t* inout_renderer_2d,
     const struct ui_element_t* in_ui_element,
-    const union fvector2_t in_origin_position,
-    const union fvector2_t in_allocated_space,
+    union fvector2_t in_origin_position,
+    union fvector2_t in_allocated_space,
     const struct ui_theme_t* in_theme);
 
   void (*function_ui_element_event_react)(
@@ -129,14 +129,14 @@ union fvector2_t ui_element_get_effective_size(
 //  out:    out_ui_element
 void ui_element_init(
   struct ui_element_t* out_ui_element,
-  const enum ui_element_type_t in_element_type,
-  const uint16_t in_width,
-  const uint16_t in_height,
+  enum ui_element_type_t in_element_type,
+  uint16_t in_width,
+  uint16_t in_height,
   void (*in_function_ui_element_render)(
     struct renderer_2d_t* inout_renderer_2d,
     const struct ui_element_t* in_ui_element,
-    const union fvector2_t in_origin_position,
-    const union fvector2_t in_allocated_space,
+    union fvector2_t in_origin_position,
+    union fvector2_t in_allocated_space,
     const struct ui_theme_t* in_theme),
   void (*in_function_ui_element_event_react)(
     struct ui_element_t* inout_ui_element,
@@ -160,9 +160,9 @@ void ui_element_static_text_init(
 //  out:    out_slider_element
 void ui_element_slider_init(
   struct ui_element_slider_t* out_slider_element,
-  const float in_starting_position,
-  const float in_lower_bound,
-  const float in_upper_bound);
+  float in_starting_position,
+  float in_lower_bound,
+  float in_upper_bound);
 
 // Sets up a 100 by 100 button. It has neither a render nor an event function
 //  yet, so draws nothing and is never pressed
@@ -179,4 +179,4 @@ void ui_element_button_init(
 //  out:    out_checkbox_element
 void ui_element_checkbox_init(
   struct ui_element_checkbox_t* out_checkbox_element,
-  const bool in_is_checked);
+  bool in_is_checked);

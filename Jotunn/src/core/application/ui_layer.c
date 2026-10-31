@@ -54,8 +54,8 @@ static void _ui_layer_event_react(
 void ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels)
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels)
 {
   memset(
     out_ui_layer,

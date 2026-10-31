@@ -45,7 +45,7 @@ static struct resource_kind_stats_t resource_kind_stats[RESOURCE_KIND_COUNT];
 //  in:     in_kind
 //  ret:    true when in_kind is valid; otherwise false
 static bool _resource_is_kind_valid(
-  const enum resource_kind_t in_kind);
+  enum resource_kind_t in_kind);
 
 // Looks for a resource in the registry. Only addresses are compared, so a
 //  resource whose links are uninitialized is safely found absent
@@ -59,15 +59,15 @@ static bool _resource_is_registered(
 //
 //  in:     in_kind, in_size_bytes
 static void _resource_count_live(
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes);
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes);
 
 // Removes a live resource from its kind's counts
 //
 //  in:     in_kind, in_size_bytes
 static void _resource_count_release(
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes);
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes);
 
 /*******************************************************************************
  *
@@ -137,7 +137,7 @@ const struct resource_t* resource_get_first(void)
  *
  ******************************************************************************/
 bool resource_get_kind_stats(
-  const enum resource_kind_t in_kind,
+  enum resource_kind_t in_kind,
   struct resource_kind_stats_t* out_stats)
 {
   memset(
@@ -160,7 +160,7 @@ bool resource_get_kind_stats(
  *
  ******************************************************************************/
 const char* resource_get_kind_name(
-  const enum resource_kind_t in_kind)
+  enum resource_kind_t in_kind)
 {
   return _resource_is_kind_valid(in_kind) ?
     resource_kind_names[in_kind] :
@@ -200,8 +200,8 @@ size_t resource_log_live(void)
  ******************************************************************************/
 void resource_internal_register(
   struct resource_t* inout_resource,
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes)
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes)
 {
   if (!_resource_is_kind_valid(in_kind)) {
     return;
@@ -278,7 +278,7 @@ void resource_internal_unregister(
  ******************************************************************************/
 void resource_internal_set_size(
   struct resource_t* inout_resource,
-  const size_t in_size_bytes)
+  size_t in_size_bytes)
 {
   if (!_resource_is_registered(inout_resource)) {
     return;
@@ -300,7 +300,7 @@ void resource_internal_set_size(
  *
  ******************************************************************************/
 static bool _resource_is_kind_valid(
-  const enum resource_kind_t in_kind)
+  enum resource_kind_t in_kind)
 {
   // An enum may be signed, so a negative kind wraps past the end here too
   return ((unsigned int)in_kind < (unsigned int)RESOURCE_KIND_COUNT);
@@ -332,8 +332,8 @@ static bool _resource_is_registered(
  *
  ******************************************************************************/
 static void _resource_count_live(
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes)
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes)
 {
   struct resource_kind_stats_t* stats = &(resource_kind_stats[in_kind]);
 
@@ -351,8 +351,8 @@ static void _resource_count_live(
  *
  ******************************************************************************/
 static void _resource_count_release(
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes)
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes)
 {
   struct resource_kind_stats_t* stats = &(resource_kind_stats[in_kind]);
 

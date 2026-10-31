@@ -18,14 +18,14 @@
 //  in:     in_data_type
 //  ret:    The OpenGL type; GL_INVALID_ENUM when in_data_type isn't valid
 static GLenum render_api_opengl_get_element_data_type(
-  const enum render_api_element_data_type_t in_data_type);
+  enum render_api_element_data_type_t in_data_type);
 
 // Translates a draw mode to OpenGL's
 //
 //  in:     in_draw_mode
 //  ret:    The OpenGL mode; GL_INVALID_ENUM when in_draw_mode isn't valid
 static GLenum render_api_opengl_get_draw_mode(
-  const enum render_api_draw_mode_t in_draw_mode);
+  enum render_api_draw_mode_t in_draw_mode);
 
 // Turns on line smoothing in the current context; in_render_api is unused
 //
@@ -51,9 +51,9 @@ static void render_api_opengl_clear(
 //
 //  in:     in_draw_mode, in_element_count, in_element_data_type, in_indices
 static void render_api_opengl_draw_elements(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const unsigned int in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
+  enum render_api_draw_mode_t in_draw_mode,
+  unsigned int in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
   const void* in_indices);
 
 // Draws the first in_vertex_count vertices of the bound vertex array as a
@@ -61,27 +61,27 @@ static void render_api_opengl_draw_elements(
 //
 //  in:     in_vertex_count
 static void render_api_opengl_draw_triangle_fan(
-  const unsigned int in_vertex_count);
+  unsigned int in_vertex_count);
 
 // Draws the first in_vertex_count vertices of the bound vertex array as
 //  separate lines, one per pair
 //
 //  in:     in_vertex_count
 static void render_api_opengl_draw_lines(
-  const unsigned int in_vertex_count);
+  unsigned int in_vertex_count);
 
 // Sets the width lines are drawn with
 //
 //  in:     in_line_width_pixels
 static void render_api_opengl_set_line_width(
-  const float in_line_width_pixels);
+  float in_line_width_pixels);
 
 // Sets the blend function for a blend mode; an unknown mode blends as
 //  RENDER_API_BLEND_MODE_ALPHA
 //
 //  in:     in_blend_mode
 static void _render_api_opengl_apply_blend_mode(
-  const enum render_api_blend_mode_t in_blend_mode);
+  enum render_api_blend_mode_t in_blend_mode);
 
 // Restricts drawing to in_scissor's rectangle when it is enabled, and lifts
 //  the restriction otherwise
@@ -131,9 +131,9 @@ void render_api_internal_platform_clear(
  *
  ******************************************************************************/
 void render_api_internal_platform_draw_elements(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const unsigned int in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
+  enum render_api_draw_mode_t in_draw_mode,
+  unsigned int in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
   const void* in_indices)
 {
   render_api_opengl_draw_elements(
@@ -160,11 +160,11 @@ void render_api_internal_platform_apply_scissor(
  *
  ******************************************************************************/
 void render_api_internal_platform_draw_elements_base_vertex(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const uint32_t in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
-  const uintptr_t in_index_offset_bytes,
-  const int32_t in_base_vertex)
+  enum render_api_draw_mode_t in_draw_mode,
+  uint32_t in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
+  uintptr_t in_index_offset_bytes,
+  int32_t in_base_vertex)
 {
   glDrawElementsBaseVertex(
     render_api_opengl_get_draw_mode(in_draw_mode),
@@ -180,7 +180,7 @@ void render_api_internal_platform_draw_elements_base_vertex(
  *
  ******************************************************************************/
 void render_api_internal_platform_draw_triangle_fan(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   render_api_opengl_draw_triangle_fan(in_vertex_count);
 }
@@ -191,7 +191,7 @@ void render_api_internal_platform_draw_triangle_fan(
  *
  ******************************************************************************/
 void render_api_internal_platform_draw_lines(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   render_api_opengl_draw_lines(in_vertex_count);
 }
@@ -202,7 +202,7 @@ void render_api_internal_platform_draw_lines(
  *
  ******************************************************************************/
 void render_api_internal_platform_set_line_width(
-  const float in_line_width_pixels)
+  float in_line_width_pixels)
 {
   render_api_opengl_set_line_width(in_line_width_pixels);
 }
@@ -226,7 +226,7 @@ bool render_api_internal_platform_has_timestamps(void)
  ******************************************************************************/
 void render_api_internal_platform_create_timestamps(
   uint32_t* out_names,
-  const uint32_t in_count)
+  uint32_t in_count)
 {
   static_assert(
     sizeof(GLuint) == sizeof(uint32_t),
@@ -244,7 +244,7 @@ void render_api_internal_platform_create_timestamps(
  ******************************************************************************/
 void render_api_internal_platform_delete_timestamps(
   const uint32_t* in_names,
-  const uint32_t in_count)
+  uint32_t in_count)
 {
   glDeleteQueries(
     (GLsizei)in_count,
@@ -257,7 +257,7 @@ void render_api_internal_platform_delete_timestamps(
  *
  ******************************************************************************/
 void render_api_internal_platform_record_timestamp(
-  const uint32_t in_name)
+  uint32_t in_name)
 {
   glQueryCounter(
     in_name,
@@ -270,7 +270,7 @@ void render_api_internal_platform_record_timestamp(
  *
  ******************************************************************************/
 bool render_api_internal_platform_read_timestamp(
-  const uint32_t in_name,
+  uint32_t in_name,
   uint64_t* out_time_nanoseconds)
 {
   GLint is_available = GL_FALSE;
@@ -300,7 +300,7 @@ bool render_api_internal_platform_read_timestamp(
  *
  ******************************************************************************/
 static GLenum render_api_opengl_get_element_data_type(
-  const enum render_api_element_data_type_t in_data_type)
+  enum render_api_element_data_type_t in_data_type)
 {
   GLenum gl_data_type;
 
@@ -329,7 +329,7 @@ static GLenum render_api_opengl_get_element_data_type(
  *
  ******************************************************************************/
 static GLenum render_api_opengl_get_draw_mode(
-  const enum render_api_draw_mode_t in_draw_mode)
+  enum render_api_draw_mode_t in_draw_mode)
 {
   GLenum gl_draw_mode;
 
@@ -476,9 +476,9 @@ static void render_api_opengl_clear(
  *
  ******************************************************************************/
 static void render_api_opengl_draw_elements(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const unsigned int in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
+  enum render_api_draw_mode_t in_draw_mode,
+  unsigned int in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
   const void* in_indices)
 {
   glDrawElements(
@@ -494,7 +494,7 @@ static void render_api_opengl_draw_elements(
  *
  ******************************************************************************/
 static void render_api_opengl_draw_triangle_fan(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   glDrawArrays(
     render_api_opengl_get_draw_mode(RENDER_API_DRAW_MODE_TRIANGLE_FAN),
@@ -508,7 +508,7 @@ static void render_api_opengl_draw_triangle_fan(
  *
  ******************************************************************************/
 static void render_api_opengl_draw_lines(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   glDrawArrays(
     render_api_opengl_get_draw_mode(RENDER_API_DRAW_MODE_LINES),
@@ -522,7 +522,7 @@ static void render_api_opengl_draw_lines(
  *
  ******************************************************************************/
 static void render_api_opengl_set_line_width(
-  const float in_line_width_pixels)
+  float in_line_width_pixels)
 {
   glLineWidth(in_line_width_pixels);
 }
@@ -533,7 +533,7 @@ static void render_api_opengl_set_line_width(
  *
  ******************************************************************************/
 static void _render_api_opengl_apply_blend_mode(
-  const enum render_api_blend_mode_t in_blend_mode)
+  enum render_api_blend_mode_t in_blend_mode)
 {
   switch (in_blend_mode)
   {

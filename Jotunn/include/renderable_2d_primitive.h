@@ -215,7 +215,7 @@ struct renderable_2d_mesh_data_t
 //  out:    out_triangle_data
 void renderable_2d_triangle_data_init(
   struct renderable_2d_triangle_data_t* out_triangle_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
@@ -227,7 +227,7 @@ void renderable_2d_triangle_data_init(
 //  out:    out_quad_data
 void renderable_2d_quad_data_init(
   struct renderable_2d_quad_data_t* out_quad_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
@@ -239,7 +239,7 @@ void renderable_2d_quad_data_init(
 //  out:    out_textured_quad_data
 void renderable_2d_textured_quad_data_init(
   struct renderable_2d_textured_quad_data_t* out_textured_quad_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffers for batches of up to in_max_count
@@ -252,7 +252,7 @@ void renderable_2d_textured_quad_data_init(
 //  out:    out_circle_data
 void renderable_2d_circle_data_init(
   struct renderable_2d_circle_data_t* out_circle_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program);
 
 // Creates the vertex array and buffer for batches of up to in_max_count
@@ -264,7 +264,7 @@ void renderable_2d_circle_data_init(
 //  out:    out_line_data
 void renderable_2d_line_data_init(
   struct renderable_2d_line_data_t* out_line_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program);
 
 // Destroys the GPU objects and frees the vertex storage made by

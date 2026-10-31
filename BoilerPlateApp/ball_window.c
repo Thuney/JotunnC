@@ -25,9 +25,9 @@ static void ball_init(
 //  in/out: inout_ball
 static void ball_update(
   struct ball_t* inout_ball,
-  const float in_delta_time_seconds,
-  const uint32_t in_window_width,
-  const uint32_t in_window_height);
+  float in_delta_time_seconds,
+  uint32_t in_window_width,
+  uint32_t in_window_height);
 
 // Finds whether the mouse is over the ball
 //
@@ -36,7 +36,7 @@ static void ball_update(
 //            either way)
 //  ret:    true when the mouse is within the ball's radius of its center
 static bool ball_is_under_mouse(
-  const union fvector2_t in_mouse_pos,
+  union fvector2_t in_mouse_pos,
   const struct ball_t* in_ball,
   union fvector2_t* out_mouse_diff);
 
@@ -287,9 +287,9 @@ static void ball_init(
  ******************************************************************************/
 static void ball_update(
   struct ball_t* inout_ball,
-  const float in_delta_time_seconds,
-  const uint32_t in_window_width,
-  const uint32_t in_window_height)
+  float in_delta_time_seconds,
+  uint32_t in_window_width,
+  uint32_t in_window_height)
 {
   union fvector2_t* pos   = &(inout_ball->position_pixels);
   union fvector2_t* vel   = &(inout_ball->velocity_pixels_per_second);
@@ -357,7 +357,7 @@ static void ball_update(
  *
  ******************************************************************************/
 static bool ball_is_under_mouse(
-  const union fvector2_t in_mouse_pos,
+  union fvector2_t in_mouse_pos,
   const struct ball_t* in_ball,
   union fvector2_t* out_mouse_diff)
 {

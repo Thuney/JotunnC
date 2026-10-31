@@ -68,7 +68,7 @@ static void shader_program_gl_use(
 //  in:     in_shader_program, in_buffer_index, in_var_name
 static void shader_program_gl_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name);
 
 // Finds the location of a vertex attribute in a linked program
@@ -91,7 +91,7 @@ static void shader_program_gl_set_uniform(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
   const void* in_uniform_data,
-  const enum shader_program_uniform_t in_uniform_type);
+  enum shader_program_uniform_t in_uniform_type);
 
 // Deletes a vertex shader
 //
@@ -187,7 +187,7 @@ void shader_program_internal_platform_use(
  ******************************************************************************/
 void shader_program_internal_platform_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name)
 {
   shader_program_gl_bind_fragment_data_location(
@@ -220,7 +220,7 @@ void shader_program_internal_platform_set_uniform(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
   const void* in_uniform_data,
-  const enum shader_program_uniform_t in_uniform_type)
+  enum shader_program_uniform_t in_uniform_type)
 {
   shader_program_gl_set_uniform(
     in_shader_program,
@@ -425,7 +425,7 @@ static void shader_program_gl_use(
  ******************************************************************************/
 static void shader_program_gl_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name)
 {
   glBindFragDataLocation(
@@ -457,7 +457,7 @@ static void shader_program_gl_set_uniform(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
   const void* in_uniform_data,
-  const enum shader_program_uniform_t in_uniform_type)
+  enum shader_program_uniform_t in_uniform_type)
 {
   GLint uniform_location = glGetUniformLocation(
     in_shader_program->shader_program,

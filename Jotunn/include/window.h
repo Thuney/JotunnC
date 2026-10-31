@@ -118,9 +118,9 @@ struct window_t
 //  ret:    0 on success; 1 when the backend couldn't open the window
 uint8_t window_init(
   struct window_t* out_window,
-  const uint8_t in_max_window_layers,
-  const uint32_t in_width,
-  const uint32_t in_height,
+  uint8_t in_max_window_layers,
+  uint32_t in_width,
+  uint32_t in_height,
   const char* in_tag,
   struct application_t* in_app_parent);
 
@@ -217,10 +217,10 @@ void window_release_context(
 //
 //  in:     in_x_pixels, in_y_pixels, in_width_pixels, in_height_pixels
 void window_set_viewport(
-  const uint32_t in_x_pixels,
-  const uint32_t in_y_pixels,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels);
+  uint32_t in_x_pixels,
+  uint32_t in_y_pixels,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels);
 
 // Sets the color the window is cleared to each frame, showing where no layer
 //  covers it
@@ -229,7 +229,7 @@ void window_set_viewport(
 //  in/out: inout_window
 void window_set_background_color(
   struct window_t* inout_window,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 /*******************************************************************************
  *
@@ -243,7 +243,7 @@ void window_set_background_color(
 //  in:     in_window, in_cursor_shape
 void window_set_cursor_shape(
   const struct window_t* in_window,
-  const enum window_cursor_shape_t in_cursor_shape);
+  enum window_cursor_shape_t in_cursor_shape);
 
 // Reads the system clipboard as UTF-8 text
 //

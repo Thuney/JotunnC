@@ -86,4 +86,4 @@ void renderer_window_layer_end_scene(
 void renderer_window_layer_draw(
   struct renderer_window_layer_t* inout_renderer,
   const struct window_layer_t* in_window_layer,
-  const uint8_t in_layer_number);
+  uint8_t in_layer_number);

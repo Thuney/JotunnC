@@ -71,8 +71,8 @@ static void framebuffer_gl_attach_render_buffer(
 //  in/out: inout_color_buffer
 static void color_buffer_gl_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Generates a render buffer object, binds it, and allocates its storage as
 //  GL_DEPTH24_STENCIL8
@@ -81,8 +81,8 @@ static void color_buffer_gl_init(
 //  out:    out_render_buffer
 static void render_buffer_gl_init(
   struct framebuffer_render_buffer_t* out_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Binds a color buffer's texture to texture unit 0
 //
@@ -102,16 +102,16 @@ static void render_buffer_gl_bind(
 //  in/out: inout_color_buffer
 static void color_buffer_gl_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 // Binds a render buffer and reallocates its storage at a new size
 //
 //  in:     in_render_buffer, in_new_width_pixels, in_new_height_pixels
 static void render_buffer_gl_resize(
   const struct framebuffer_render_buffer_t* in_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 /*******************************************************************************
  *
@@ -191,8 +191,8 @@ void framebuffer_internal_platform_attach_render_buffer(
  ******************************************************************************/
 void color_buffer_internal_platform_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   color_buffer_gl_init(
     inout_color_buffer,
@@ -207,8 +207,8 @@ void color_buffer_internal_platform_init(
  ******************************************************************************/
 void render_buffer_internal_platform_init(
   struct framebuffer_render_buffer_t* out_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   render_buffer_gl_init(
     out_render_buffer,
@@ -245,8 +245,8 @@ void render_buffer_internal_platform_bind(
  ******************************************************************************/
 void color_buffer_internal_platform_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   color_buffer_gl_resize(
     inout_color_buffer,
@@ -261,8 +261,8 @@ void color_buffer_internal_platform_resize(
  ******************************************************************************/
 void render_buffer_internal_platform_resize(
   const struct framebuffer_render_buffer_t* in_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   render_buffer_gl_resize(
     in_render_buffer,
@@ -434,8 +434,8 @@ static void framebuffer_gl_attach_render_buffer(
  ******************************************************************************/
 static void color_buffer_gl_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   texture_2d_init(
     &(inout_color_buffer->texture),
@@ -453,8 +453,8 @@ static void color_buffer_gl_init(
  ******************************************************************************/
 static void render_buffer_gl_init(
   struct framebuffer_render_buffer_t* out_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   glGenRenderbuffers(
     1,
@@ -503,8 +503,8 @@ static void render_buffer_gl_bind(
  ******************************************************************************/
 static void color_buffer_gl_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   color_buffer_gl_bind(inout_color_buffer);
 
@@ -521,8 +521,8 @@ static void color_buffer_gl_resize(
  ******************************************************************************/
 static void render_buffer_gl_resize(
   const struct framebuffer_render_buffer_t* in_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   render_buffer_gl_bind(in_render_buffer);
 

@@ -36,8 +36,8 @@
 //  out:    out_metadata
 static void window_set_metadata(
   struct window_data_t* out_metadata,
-  const uint32_t in_width,
-  const uint32_t in_height,
+  uint32_t in_width,
+  uint32_t in_height,
   const char* in_tag,
   struct application_t* in_app_parent,
   void (*in_function_event_notify)(
@@ -52,7 +52,7 @@ static void window_set_metadata(
 static void _window_render_layer(
   const struct window_t* in_window,
   struct window_layer_t* inout_layer,
-  const bool in_should_resize);
+  bool in_should_resize);
 
 /*******************************************************************************
  *
@@ -61,9 +61,9 @@ static void _window_render_layer(
  ******************************************************************************/
 uint8_t window_init(
   struct window_t* out_window,
-  const uint8_t in_max_window_layers,
-  const uint32_t in_width,
-  const uint32_t in_height,
+  uint8_t in_max_window_layers,
+  uint32_t in_width,
+  uint32_t in_height,
   const char* in_tag,
   struct application_t* in_app_parent)
 {
@@ -384,10 +384,10 @@ void window_release_context(
  *
  ******************************************************************************/
 void window_set_viewport(
-  const uint32_t in_x_pixels,
-  const uint32_t in_y_pixels,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels)
+  uint32_t in_x_pixels,
+  uint32_t in_y_pixels,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels)
 {
   window_internal_platform_set_viewport(
     in_x_pixels,
@@ -403,7 +403,7 @@ void window_set_viewport(
  ******************************************************************************/
 void window_set_background_color(
   struct window_t* inout_window,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   window_internal_platform_set_background_color(
     inout_window,
@@ -417,7 +417,7 @@ void window_set_background_color(
  ******************************************************************************/
 void window_set_cursor_shape(
   const struct window_t* in_window,
-  const enum window_cursor_shape_t in_cursor_shape)
+  enum window_cursor_shape_t in_cursor_shape)
 {
   window_internal_platform_set_cursor_shape(
     in_window,
@@ -456,8 +456,8 @@ void window_set_clipboard_text(
  ******************************************************************************/
 static void window_set_metadata(
   struct window_data_t* out_metadata,
-  const uint32_t in_width,
-  const uint32_t in_height,
+  uint32_t in_width,
+  uint32_t in_height,
   const char* in_tag,
   struct application_t* in_app_parent,
   void (*in_function_event_notify)(
@@ -489,7 +489,7 @@ static void window_set_metadata(
 static void _window_render_layer(
   const struct window_t* in_window,
   struct window_layer_t* inout_layer,
-  const bool in_should_resize)
+  bool in_should_resize)
 {
   framebuffer_bind(inout_layer->framebuffer);
 

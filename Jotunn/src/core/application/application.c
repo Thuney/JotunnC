@@ -40,7 +40,7 @@ static void _application_report_leaks(void);
 uint8_t application_init(
   struct application_t* out_app,
   const char* in_app_name,
-  const uint8_t in_max_windows)
+  uint8_t in_max_windows)
 {
 #ifdef DEBUG
   log_write(

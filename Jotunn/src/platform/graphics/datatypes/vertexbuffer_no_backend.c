@@ -8,7 +8,7 @@
  ******************************************************************************/
 void vertex_buffer_internal_platform_init(
   struct vertex_buffer_t* out_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }
@@ -32,8 +32,8 @@ void vertex_buffer_internal_platform_bind(
 void vertex_buffer_internal_platform_set_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   return 0;
 }
@@ -45,7 +45,7 @@ void vertex_buffer_internal_platform_set_data(
  ******************************************************************************/
 void vertex_buffer_internal_platform_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }
@@ -57,7 +57,7 @@ void vertex_buffer_internal_platform_destroy(
  ******************************************************************************/
 void element_buffer_internal_platform_init(
   struct element_buffer_t* out_element_buffer,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }
@@ -81,8 +81,8 @@ void element_buffer_internal_platform_bind(
 void element_buffer_internal_platform_buffer_data(
   const struct element_buffer_t* in_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   return 0;
 }
@@ -94,7 +94,7 @@ void element_buffer_internal_platform_buffer_data(
  ******************************************************************************/
 void element_buffer_internal_platform_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }

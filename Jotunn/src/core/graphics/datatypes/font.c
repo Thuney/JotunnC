@@ -54,8 +54,8 @@ static void* _font_freetype_reallocate(
 //  ret:    The RGBA pixels, which the caller releases with allocator_free()
 static unsigned char* font_convert_grayscale_to_rgba(
   const unsigned char* in_bitmap_data,
-  const int in_bitmap_width,
-  const int in_bitmap_height);
+  int in_bitmap_width,
+  int in_bitmap_height);
 
 // Loads a character's glyph into the typeface's glyph slot and renders it to
 //  a grayscale bitmap there. Errors are logged in DEBUG builds
@@ -65,7 +65,7 @@ static unsigned char* font_convert_grayscale_to_rgba(
 //            loading and rendering the glyph
 static int font_typeface_render_char(
   const struct font_typeface_t* in_typeface,
-  const char in_charcode);
+  char in_charcode);
 
 // Copies the glyph just rendered into the atlas bitmap at the pen, fills in
 //  its glyph from the typeface's glyph slot, and advances the pen past it
@@ -80,11 +80,11 @@ static int font_typeface_add_bitmap_to_glyph_atlas(
   struct texture_2d_t* in_atlas_texture,
   struct font_glyph_t* out_glyph,
   unsigned char* out_atlas_bitmap,
-  const int in_atlas_width,
-  const int in_atlas_height,
+  int in_atlas_width,
+  int in_atlas_height,
   int* inout_pen_x,
   const int* in_pen_y,
-  const char in_char_code,
+  char in_char_code,
   const FT_Bitmap* in_bitmap);
 
 // Detaches the glyphs from the glyph atlas and releases the atlas texture
@@ -182,7 +182,7 @@ void font_cleanup(void)
 void font_typeface_init(
   struct font_typeface_t* out_typeface,
   const char* in_ttf_file_path,
-  const unsigned int in_size_pixels)
+  unsigned int in_size_pixels)
 {
   int error = 0;
 
@@ -348,7 +348,7 @@ int font_typeface_load_glyph_atlas(
  ******************************************************************************/
 const struct font_glyph_t* typeface_get_glyph_from_char(
   const struct font_typeface_t* in_typeface,
-  const char in_charcode)
+  char in_charcode)
 {
   const struct font_glyph_t* char_glyph = NULL;
 
@@ -382,7 +382,7 @@ const struct font_glyph_t* typeface_get_glyph_from_char(
  ******************************************************************************/
 void font_typeface_set_char_size(
   const struct font_typeface_t* in_typeface,
-  const unsigned int in_char_height_pixels)
+  unsigned int in_char_height_pixels)
 {
   int error = FT_Set_Pixel_Sizes(
     in_typeface->typeface,
@@ -398,7 +398,7 @@ void font_typeface_set_char_size(
 union fvector2_t font_typeface_calculate_string_dimensions(
   const struct font_typeface_t* in_typeface,
   const char* in_string,
-  const int in_string_length)
+  int in_string_length)
 {
   static union fvector2_t string_dimensions;
   string_dimensions = (union fvector2_t){0.0f, 0.0f};
@@ -431,8 +431,8 @@ union fvector2_t font_typeface_calculate_string_dimensions(
  ******************************************************************************/
 static unsigned char* font_convert_grayscale_to_rgba(
   const unsigned char* in_bitmap_data,
-  const int in_bitmap_width,
-  const int in_bitmap_height)
+  int in_bitmap_width,
+  int in_bitmap_height)
 {
   unsigned char* char_rgba_data =
     (unsigned char*)allocator_allocate_zeroed(
@@ -463,7 +463,7 @@ static unsigned char* font_convert_grayscale_to_rgba(
  ******************************************************************************/
 static int font_typeface_render_char(
   const struct font_typeface_t* in_typeface,
-  const char in_charcode)
+  char in_charcode)
 {
   int error = 0;
 
@@ -515,11 +515,11 @@ static int font_typeface_add_bitmap_to_glyph_atlas(
   struct texture_2d_t* in_atlas_texture,
   struct font_glyph_t* out_glyph,
   unsigned char* out_atlas_bitmap,
-  const int in_atlas_width,
-  const int in_atlas_height,
+  int in_atlas_width,
+  int in_atlas_height,
   int* inout_pen_x,
   const int* in_pen_y,
-  const char in_char_code,
+  char in_char_code,
   const FT_Bitmap* in_bitmap)
 {
   int error = 0;

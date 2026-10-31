@@ -58,7 +58,7 @@ static void _diagnostics_panel_draw_timing(
 //  in:     in_state, in_is_gpu
 static void _diagnostics_panel_draw_zones(
   const struct diagnostics_internal_state_t* in_state,
-  const bool in_is_gpu);
+  bool in_is_gpu);
 
 // Draws the Rendering tab: draw calls per frame, by renderer
 //
@@ -107,7 +107,7 @@ static bool _diagnostics_panel_begin_summary_table(
 static void _diagnostics_panel_draw_summary_row(
   const char* in_label,
   const struct diagnostics_internal_history_t* in_history,
-  const int in_decimal_places);
+  int in_decimal_places);
 
 // Starts a plot of histories against how many frames ago each value was
 //  recorded. Its y axis starts at zero, with room above in_y_maximum so that
@@ -118,7 +118,7 @@ static void _diagnostics_panel_draw_summary_row(
 static bool _diagnostics_panel_begin_history_plot(
   const char* in_id,
   const char* in_y_label,
-  const float in_y_maximum);
+  float in_y_maximum);
 
 // Finds the largest value in a history
 //
@@ -151,9 +151,9 @@ static void _diagnostics_panel_draw_preview_tooltip(
 //  in:     in_size_bytes, in_text_length
 //  out:    out_text
 static void _diagnostics_panel_format_bytes(
-  const size_t in_size_bytes,
+  size_t in_size_bytes,
   char* out_text,
-  const size_t in_text_length);
+  size_t in_text_length);
 
 /*******************************************************************************
  *
@@ -411,7 +411,7 @@ static void _diagnostics_panel_draw_timing(
  ******************************************************************************/
 static void _diagnostics_panel_draw_zones(
   const struct diagnostics_internal_state_t* in_state,
-  const bool in_is_gpu)
+  bool in_is_gpu)
 {
   float y_maximum = 0.0f;
 
@@ -1249,7 +1249,7 @@ static bool _diagnostics_panel_begin_summary_table(
 static void _diagnostics_panel_draw_summary_row(
   const char* in_label,
   const struct diagnostics_internal_history_t* in_history,
-  const int in_decimal_places)
+  int in_decimal_places)
 {
   struct diagnostics_internal_summary_t summary;
   diagnostics_internal_history_summarize(
@@ -1293,7 +1293,7 @@ static void _diagnostics_panel_draw_summary_row(
 static bool _diagnostics_panel_begin_history_plot(
   const char* in_id,
   const char* in_y_label,
-  const float in_y_maximum)
+  float in_y_maximum)
 {
   if (!ImPlot_BeginPlot(
         in_id,
@@ -1462,9 +1462,9 @@ static void _diagnostics_panel_draw_preview_tooltip(
  *
  ******************************************************************************/
 static void _diagnostics_panel_format_bytes(
-  const size_t in_size_bytes,
+  size_t in_size_bytes,
   char* out_text,
-  const size_t in_text_length)
+  size_t in_text_length)
 {
   const double size_bytes = (double)in_size_bytes;
 

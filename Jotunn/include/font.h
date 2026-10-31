@@ -85,7 +85,7 @@ void font_cleanup(void);
 void font_typeface_init(
   struct font_typeface_t* out_typeface,
   const char* in_ttf_file_path,
-  const unsigned int in_size_pixels);
+  unsigned int in_size_pixels);
 
 // Releases a loaded typeface's glyph atlas and face. Does nothing unless the
 //  typeface is loaded and FreeType is started
@@ -112,7 +112,7 @@ int font_typeface_load_glyph_atlas(
 //            outside the loaded range
 const struct font_glyph_t* typeface_get_glyph_from_char(
   const struct font_typeface_t* in_typeface,
-  const char in_charcode);
+  char in_charcode);
 
 // Sets the pixel height the typeface's face renders glyphs at. Glyphs already
 //  in the atlas are unchanged
@@ -120,7 +120,7 @@ const struct font_glyph_t* typeface_get_glyph_from_char(
 //  in:     in_typeface, in_char_height_pixels
 void font_typeface_set_char_size(
   const struct font_typeface_t* in_typeface,
-  const unsigned int in_char_height_pixels);
+  unsigned int in_char_height_pixels);
 
 // Measures a string as drawn in the typeface. Characters without a glyph,
 //  outside the loaded range or in a typeface not loaded, add nothing
@@ -131,4 +131,4 @@ void font_typeface_set_char_size(
 union fvector2_t font_typeface_calculate_string_dimensions(
   const struct font_typeface_t* in_typeface,
   const char* in_string,
-  const int in_string_length);
+  int in_string_length);

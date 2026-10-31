@@ -162,7 +162,7 @@ void shader_program_use(
 //  in:     in_shader_program, in_buffer_index, in_var_name
 void shader_program_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name);
 
 // Finds the location of a vertex attribute in a linked program
@@ -194,7 +194,7 @@ void shader_program_set_uniform_fmat4x4(
 void shader_program_set_uniform_float(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
-  const float in_val);
+  float in_val);
 
 // Sets an int uniform, such as a sampler's texture unit. The program must be
 //  the one in use
@@ -203,7 +203,7 @@ void shader_program_set_uniform_float(
 void shader_program_set_uniform_int(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
-  const int in_val);
+  int in_val);
 
 /*******************************************************************************
  *

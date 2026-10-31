@@ -67,7 +67,7 @@ void shader_program_internal_platform_use(
  ******************************************************************************/
 void shader_program_internal_platform_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name)
 {
   return 0;
@@ -94,7 +94,7 @@ void shader_program_internal_platform_set_uniform(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
   const void* in_uniform_data,
-  const enum shader_program_uniform_t in_uniform_type)
+  enum shader_program_uniform_t in_uniform_type)
 {
   return 0;
 }

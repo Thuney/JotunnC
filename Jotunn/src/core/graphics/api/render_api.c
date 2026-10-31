@@ -10,7 +10,7 @@
  ******************************************************************************/
 void render_api_init(
   struct render_api_implementation_t* out_render_api,
-  const uint16_t in_render_flags)
+  uint16_t in_render_flags)
 {
   out_render_api->active_render_flags = in_render_flags;
   out_render_api->blend_mode = RENDER_API_BLEND_MODE_ALPHA;
@@ -40,7 +40,7 @@ void render_api_bind(
  ******************************************************************************/
 void render_api_set_render_flags(
   struct render_api_implementation_t* inout_render_api,
-  const uint16_t in_render_flags)
+  uint16_t in_render_flags)
 {
   inout_render_api->active_render_flags = in_render_flags;
 }
@@ -52,7 +52,7 @@ void render_api_set_render_flags(
  ******************************************************************************/
 void render_api_set_blend_mode(
   struct render_api_implementation_t* inout_render_api,
-  const enum render_api_blend_mode_t in_blend_mode)
+  enum render_api_blend_mode_t in_blend_mode)
 {
   inout_render_api->blend_mode = in_blend_mode;
 }
@@ -64,7 +64,7 @@ void render_api_set_blend_mode(
  ******************************************************************************/
 void render_api_set_clear_color(
   struct render_api_implementation_t* inout_render_api,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   inout_render_api->clear_color = in_color;
 }
@@ -86,9 +86,9 @@ void render_api_clear(
  *
  ******************************************************************************/
 void render_api_draw_elements(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const unsigned int in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
+  enum render_api_draw_mode_t in_draw_mode,
+  unsigned int in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
   const void* in_indices)
 {
   render_api_internal_platform_draw_elements(
@@ -107,10 +107,10 @@ void render_api_draw_elements(
  ******************************************************************************/
 void render_api_set_scissor(
   struct render_api_implementation_t* inout_render_api,
-  const int32_t in_x_pixels,
-  const int32_t in_y_pixels,
-  const int32_t in_width_pixels,
-  const int32_t in_height_pixels)
+  int32_t in_x_pixels,
+  int32_t in_y_pixels,
+  int32_t in_width_pixels,
+  int32_t in_height_pixels)
 {
   inout_render_api->scissor =
     (struct render_api_scissor_t){
@@ -142,11 +142,11 @@ void render_api_disable_scissor(
  *
  ******************************************************************************/
 void render_api_draw_elements_base_vertex(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const uint32_t in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
-  const uintptr_t in_index_offset_bytes,
-  const int32_t in_base_vertex)
+  enum render_api_draw_mode_t in_draw_mode,
+  uint32_t in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
+  uintptr_t in_index_offset_bytes,
+  int32_t in_base_vertex)
 {
   render_api_internal_platform_draw_elements_base_vertex(
     in_draw_mode,
@@ -164,7 +164,7 @@ void render_api_draw_elements_base_vertex(
  *
  ******************************************************************************/
 void render_api_draw_triangle_fan(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   render_api_internal_platform_draw_triangle_fan(in_vertex_count);
 
@@ -177,7 +177,7 @@ void render_api_draw_triangle_fan(
  *
  ******************************************************************************/
 void render_api_draw_lines(
-  const unsigned int in_vertex_count)
+  unsigned int in_vertex_count)
 {
   render_api_internal_platform_draw_lines(in_vertex_count);
 
@@ -190,7 +190,7 @@ void render_api_draw_lines(
  *
  ******************************************************************************/
 void render_api_set_line_width(
-  const float in_line_width_pixels)
+  float in_line_width_pixels)
 {
   render_api_internal_platform_set_line_width(in_line_width_pixels);
 }
@@ -212,7 +212,7 @@ bool render_api_has_timestamps(void)
  ******************************************************************************/
 void render_api_create_timestamps(
   uint32_t* out_names,
-  const uint32_t in_count)
+  uint32_t in_count)
 {
   render_api_internal_platform_create_timestamps(
     out_names,
@@ -226,7 +226,7 @@ void render_api_create_timestamps(
  ******************************************************************************/
 void render_api_delete_timestamps(
   const uint32_t* in_names,
-  const uint32_t in_count)
+  uint32_t in_count)
 {
   render_api_internal_platform_delete_timestamps(
     in_names,
@@ -239,7 +239,7 @@ void render_api_delete_timestamps(
  *
  ******************************************************************************/
 void render_api_record_timestamp(
-  const uint32_t in_name)
+  uint32_t in_name)
 {
   render_api_internal_platform_record_timestamp(in_name);
 }
@@ -250,7 +250,7 @@ void render_api_record_timestamp(
  *
  ******************************************************************************/
 bool render_api_read_timestamp(
-  const uint32_t in_name,
+  uint32_t in_name,
   uint64_t* out_time_nanoseconds)
 {
   return render_api_internal_platform_read_timestamp(

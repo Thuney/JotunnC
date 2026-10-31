@@ -10,7 +10,7 @@
  ******************************************************************************/
 void vertex_array_init(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num)
+  int in_num)
 {
   // Each array has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
@@ -69,7 +69,7 @@ void vertex_array_set_attribute(
  ******************************************************************************/
 void vertex_array_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num)
+  int in_num)
 {
   for (int i = 0; i < in_num; i++) {
     vertex_array_internal_platform_destroy(

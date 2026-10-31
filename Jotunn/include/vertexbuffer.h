@@ -48,7 +48,7 @@ struct vertex_buffer_t
 //  in/out: inout_vertex_buffer
 void vertex_buffer_init(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num);
+  int in_num);
 
 // Makes a vertex buffer the one vertex data is set in and read from
 //
@@ -65,8 +65,8 @@ void vertex_buffer_bind(
 void vertex_buffer_set_data(
   struct vertex_buffer_t* inout_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type);
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type);
 
 // Overwrites the start of the bound vertex buffer's data, which must be
 //  in_vertex_buffer's, with in_data_bytes from in_data. The buffer must
@@ -76,7 +76,7 @@ void vertex_buffer_set_data(
 void vertex_buffer_set_sub_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const float* in_data,
-  const unsigned int in_data_bytes);
+  unsigned int in_data_bytes);
 
 // Deletes in_num vertex buffers, one in each element of the array
 //  inout_vertex_buffer points to, and removes each from the resource registry
@@ -85,7 +85,7 @@ void vertex_buffer_set_sub_data(
 //  in/out: inout_vertex_buffer
 void vertex_buffer_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num);
+  int in_num);
 
 /*******************************************************************************
  *
@@ -109,7 +109,7 @@ struct element_buffer_t
 //  ret:    0, as creating buffers can't fail
 int element_buffer_init(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num);
+  int in_num);
 
 // Makes an element buffer the one indices are set in and read from. The
 //  binding is recorded in the bound vertex array
@@ -127,8 +127,8 @@ void element_buffer_bind(
 void element_buffer_buffer_data(
   struct element_buffer_t* inout_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type);
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type);
 
 // Deletes in_num element buffers, one in each element of the array
 //  inout_element_buffer points to, and removes each from the resource
@@ -138,4 +138,4 @@ void element_buffer_buffer_data(
 //  in/out: inout_element_buffer
 void element_buffer_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num);
+  int in_num);

@@ -55,8 +55,8 @@ struct framebuffer_t
 //  in/out: inout_frame_buffer
 void framebuffer_init(
   struct framebuffer_t* inout_frame_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Resizes both of a framebuffer's attachments, leaving their contents
 //  undefined. The color texture is respecified through texture unit 0, so
@@ -67,8 +67,8 @@ void framebuffer_init(
 //  in/out: inout_frame_buffer
 void framebuffer_resize(
   struct framebuffer_t* inout_frame_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 // Attaches a color buffer as color attachment 0 of whichever framebuffer is
 //  bound. Bind in_frame_buffer first; the GL backend doesn't use it
@@ -116,8 +116,8 @@ void framebuffer_cleanup(
 //  in/out: inout_color_buffer
 void framebuffer_color_buffer_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Creates a render buffer holding 24 bits of depth and 8 of stencil per pixel,
 //  and registers it with the resource registry. Leaves it bound
@@ -126,8 +126,8 @@ void framebuffer_color_buffer_init(
 //  in/out: inout_render_buffer
 void framebuffer_render_buffer_init(
   struct framebuffer_render_buffer_t* inout_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Binds a color buffer's texture to texture unit 0
 //
@@ -150,8 +150,8 @@ void framebuffer_render_buffer_bind(
 //  in/out: inout_color_buffer
 void framebuffer_color_buffer_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 // Resizes a render buffer, leaving its contents undefined and it bound, and
 //  updates its size in the resource registry
@@ -160,8 +160,8 @@ void framebuffer_color_buffer_resize(
 //  in/out: inout_render_buffer
 void framebuffer_render_buffer_resize(
   struct framebuffer_render_buffer_t* inout_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 // Deletes a color buffer's texture and removes it from the resource registry
 //

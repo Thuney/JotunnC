@@ -270,7 +270,7 @@ struct diagnostics_internal_state_t
 //
 //  in:     in_target_interval_seconds
 void diagnostics_internal_frame_begin(
-  const float in_target_interval_seconds);
+  float in_target_interval_seconds);
 
 // Marks the end of a frame, recording what it measured
 void diagnostics_internal_frame_end(void);
@@ -285,7 +285,7 @@ void diagnostics_internal_count_idle_call(void);
 //  ret:    The zone's id; DIAGNOSTICS_ZONE_INVALID when every zone is taken
 uint16_t diagnostics_internal_get_layer_zone(
   const struct window_t* in_window,
-  const uint8_t in_layer_index);
+  uint8_t in_layer_index);
 
 // Reads what the diagnostics have collected
 //
@@ -363,7 +363,7 @@ void diagnostics_internal_panel_draw(
 //
 //  in:     in_level, in_text
 void diagnostics_internal_log_record(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_text);
 
 // Empties the log kept for the Log tab, keeping the counts per level
@@ -387,20 +387,20 @@ void diagnostics_internal_event_record(
 //  in:     in_type
 //  ret:    The type's name, or "unknown" when in_type isn't valid
 const char* diagnostics_internal_event_get_type_name(
-  const enum event_type_t in_type);
+  enum event_type_t in_type);
 
 // Includes a type of event in the event log, or leaves it out
 //
 //  in:     in_type, in_is_excluded
 void diagnostics_internal_events_set_excluded(
-  const enum event_type_t in_type,
-  const bool in_is_excluded);
+  enum event_type_t in_type,
+  bool in_is_excluded);
 
 // Pauses or resumes the event log; events are counted either way
 //
 //  in:     in_is_paused
 void diagnostics_internal_events_set_paused(
-  const bool in_is_paused);
+  bool in_is_paused);
 
 // Empties the event log, keeping the counts per type
 void diagnostics_internal_events_clear(void);
@@ -432,7 +432,7 @@ void diagnostics_internal_gpu_mark(
 //  in:     in_window, in_layer_index
 void diagnostics_internal_gpu_mark_layer(
   const struct window_t* in_window,
-  const uint8_t in_layer_index);
+  uint8_t in_layer_index);
 
 // Ends a window's frame on the GPU; its results are collected once the GPU
 //  reaches its end
@@ -467,7 +467,7 @@ void diagnostics_internal_scene_end(void);
 //
 //  in:     in_element_count
 void diagnostics_internal_count_draw(
-  const uint32_t in_element_count);
+  uint32_t in_element_count);
 
 #else
 

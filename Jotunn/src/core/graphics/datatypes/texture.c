@@ -42,11 +42,11 @@ static size_t _texture_2d_get_size_bytes(
  ******************************************************************************/
 void texture_2d_init(
   struct texture_2d_t* inout_texture,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels,
-  const enum texture_2d_internal_format_t in_internal_format,
-  const enum texture_2d_data_format_t in_data_format,
-  const bool in_should_wrap)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels,
+  enum texture_2d_internal_format_t in_internal_format,
+  enum texture_2d_data_format_t in_data_format,
+  bool in_should_wrap)
 {
   inout_texture->width       = in_width_pixels;
   inout_texture->height      = in_height_pixels;
@@ -126,8 +126,8 @@ void texture_2d_cleanup(
  ******************************************************************************/
 void texture_2d_resize(
   struct texture_2d_t* inout_texture,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   inout_texture->width  = in_new_width_pixels;
   inout_texture->height = in_new_height_pixels;
@@ -149,7 +149,7 @@ void texture_2d_resize(
 void texture_2d_set_data(
   const struct texture_2d_t* in_texture,
   const unsigned char* in_data,
-  const unsigned int in_data_size_bytes)
+  unsigned int in_data_size_bytes)
 {
   if (in_data_size_bytes != (in_texture->width * in_texture->height * in_texture->channels)) {
   #ifdef DEBUG
@@ -175,11 +175,11 @@ void texture_2d_set_data(
  ******************************************************************************/
 void texture_2d_set_sub_data(
   const struct texture_2d_t* in_texture,
-  const uint32_t in_x_pixels,
-  const uint32_t in_y_pixels,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels,
-  const uint32_t in_row_length_pixels,
+  uint32_t in_x_pixels,
+  uint32_t in_y_pixels,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels,
+  uint32_t in_row_length_pixels,
   const void* in_data)
 {
   texture_2d_internal_platform_set_sub_data(
@@ -200,7 +200,7 @@ void texture_2d_set_sub_data(
 void texture_2d_create_from_file_path(
   struct texture_2d_t* inout_texture,
   const char* in_file_path,
-  const unsigned int in_should_flip_vertically)
+  unsigned int in_should_flip_vertically)
 {
   stbi_set_flip_vertically_on_load(in_should_flip_vertically);
 
@@ -278,7 +278,7 @@ void texture_2d_create_from_file_path(
  ******************************************************************************/
 void texture_2d_bind(
   const struct texture_2d_t* in_texture,
-  const unsigned int in_texture_slot)
+  unsigned int in_texture_slot)
 {
   texture_2d_internal_platform_bind(
     in_texture,

@@ -104,8 +104,8 @@ void fvector4_init(
  ******************************************************************************/
 void fvector2_set(
   union fvector2_t* out_vector,
-  const float in_x,
-  const float in_y)
+  float in_x,
+  float in_y)
 {
   out_vector->comp.x = in_x;
   out_vector->comp.y = in_y;
@@ -118,9 +118,9 @@ void fvector2_set(
  ******************************************************************************/
 void fvector3_set(
   union fvector3_t* out_vector,
-  const float in_x,
-  const float in_y,
-  const float in_z)
+  float in_x,
+  float in_y,
+  float in_z)
 {
   out_vector->comp.x = in_x;
   out_vector->comp.y = in_y;
@@ -134,10 +134,10 @@ void fvector3_set(
  ******************************************************************************/
 void fvector4_set(
   union fvector4_t* out_vector,
-  const float in_w,
-  const float in_x,
-  const float in_y,
-  const float in_z)
+  float in_w,
+  float in_x,
+  float in_y,
+  float in_z)
 {
   out_vector->comp.w = in_w;
   out_vector->comp.x = in_x;
@@ -152,7 +152,7 @@ void fvector4_set(
  ******************************************************************************/
 void fvector2_setv(
   union fvector2_t* out_vector,
-  const union fvector2_t in_vector)
+  union fvector2_t in_vector)
 {
   fvector2_set(
     out_vector,
@@ -167,7 +167,7 @@ void fvector2_setv(
  ******************************************************************************/
 void fvector3_setv(
   union fvector3_t* out_vector,
-  const union fvector3_t in_vector)
+  union fvector3_t in_vector)
 {
   fvector3_set(
     out_vector,
@@ -183,7 +183,7 @@ void fvector3_setv(
  ******************************************************************************/
 void fvector4_setv(
   union fvector4_t* out_vector,
-  const union fvector4_t in_vector)
+  union fvector4_t in_vector)
 {
   fvector4_set(
     out_vector,
@@ -382,7 +382,7 @@ union fvector4_t fvector4_subtract(
  ******************************************************************************/
 union fvector2_t fvector2_scale(
   const union fvector2_t* in_vector,
-  const float in_scalar)
+  float in_scalar)
 {
   return (union fvector2_t){(in_vector->comp.x * in_scalar), (in_vector->comp.y * in_scalar)};
 }
@@ -394,7 +394,7 @@ union fvector2_t fvector2_scale(
  ******************************************************************************/
 union fvector3_t fvector3_scale(
   const union fvector3_t* in_vector,
-  const float in_scalar)
+  float in_scalar)
 {
   return (union fvector3_t){(in_vector->comp.x * in_scalar),
                     in_vector->comp.y * in_scalar,
@@ -408,7 +408,7 @@ union fvector3_t fvector3_scale(
  ******************************************************************************/
 union fvector4_t fvector4_scale(
   const union fvector4_t* in_vector,
-  const float in_scalar)
+  float in_scalar)
 {
   return (union fvector4_t){(in_vector->comp.w * in_scalar),
                     in_vector->comp.x * in_scalar,

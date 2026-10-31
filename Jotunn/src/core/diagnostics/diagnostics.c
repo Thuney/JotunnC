@@ -78,7 +78,7 @@ static_assert(
 //  ret:    The zone's id; DIAGNOSTICS_ZONE_INVALID when every zone is taken
 static uint16_t _diagnostics_register_zone(
   const char* in_name,
-  const bool in_is_gpu);
+  bool in_is_gpu);
 
 // Finds the zone timing part of a window's frame, named after the window's
 //  tag and in_part, registering it the first time
@@ -88,7 +88,7 @@ static uint16_t _diagnostics_register_zone(
 static uint16_t _diagnostics_get_window_zone(
   const struct window_t* in_window,
   const char* in_part,
-  const bool in_is_gpu);
+  bool in_is_gpu);
 
 // Finds a window's GPU timing, taking a slot for it when asked to and it has
 //  none yet
@@ -97,7 +97,7 @@ static uint16_t _diagnostics_get_window_zone(
 //  ret:    The window's GPU timing; NULL when it has none
 static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
   const struct window_t* in_window,
-  const bool in_should_create);
+  bool in_should_create);
 
 // Charges the GPU time of every pending frame the GPU has finished to its
 //  zones
@@ -112,7 +112,7 @@ static void _diagnostics_collect_gpu_frames(
 //  in/out: inout_history
 static void _diagnostics_history_push(
   struct diagnostics_internal_history_t* inout_history,
-  const float in_value);
+  float in_value);
 
 // Records the heap's counts for the frame just ended
 static void _diagnostics_record_heap(void);
@@ -127,7 +127,7 @@ static void _diagnostics_record_resources(void);
 static void _diagnostics_describe_event(
   const struct event_base_t* in_event,
   char* out_text,
-  const size_t in_text_length);
+  size_t in_text_length);
 
 // Finds a renderer's slot, taking a new one the first time it's seen; the
 //  last slot is shared by every renderer once the rest are taken
@@ -176,7 +176,7 @@ uint16_t diagnostics_zone_register(
  *
  ******************************************************************************/
 void diagnostics_zone_begin(
-  const uint16_t in_zone_id)
+  uint16_t in_zone_id)
 {
   if (in_zone_id >= diagnostics_state.zone_count) {
     return;
@@ -194,7 +194,7 @@ void diagnostics_zone_begin(
  *
  ******************************************************************************/
 void diagnostics_zone_end(
-  const uint16_t in_zone_id)
+  uint16_t in_zone_id)
 {
   if (in_zone_id >= diagnostics_state.zone_count) {
     return;
@@ -244,7 +244,7 @@ bool diagnostics_tab_add(
  *
  ******************************************************************************/
 void diagnostics_internal_frame_begin(
-  const float in_target_interval_seconds)
+  float in_target_interval_seconds)
 {
   const double now_seconds = diagnostics_internal_get_time_seconds();
 
@@ -334,7 +334,7 @@ void diagnostics_internal_count_idle_call(void)
  *
  ******************************************************************************/
 void diagnostics_internal_log_record(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_text)
 {
   struct diagnostics_internal_log_t* log = &(diagnostics_state.log);
@@ -434,7 +434,7 @@ void diagnostics_internal_event_record(
  *
  ******************************************************************************/
 const char* diagnostics_internal_event_get_type_name(
-  const enum event_type_t in_type)
+  enum event_type_t in_type)
 {
   return ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT) ?
     diagnostics_event_type_names[in_type] :
@@ -447,8 +447,8 @@ const char* diagnostics_internal_event_get_type_name(
  *
  ******************************************************************************/
 void diagnostics_internal_events_set_excluded(
-  const enum event_type_t in_type,
-  const bool in_is_excluded)
+  enum event_type_t in_type,
+  bool in_is_excluded)
 {
   if ((unsigned int)in_type < (unsigned int)EVENT_TYPE_COUNT) {
     diagnostics_state.events.types[in_type].is_excluded = in_is_excluded;
@@ -461,7 +461,7 @@ void diagnostics_internal_events_set_excluded(
  *
  ******************************************************************************/
 void diagnostics_internal_events_set_paused(
-  const bool in_is_paused)
+  bool in_is_paused)
 {
   diagnostics_state.events.is_paused = in_is_paused;
 }
@@ -514,7 +514,7 @@ void diagnostics_internal_scene_end(void)
  *
  ******************************************************************************/
 void diagnostics_internal_count_draw(
-  const uint32_t in_element_count)
+  uint32_t in_element_count)
 {
   struct diagnostics_internal_rendering_t* rendering = &(diagnostics_state.rendering);
 
@@ -544,7 +544,7 @@ void diagnostics_internal_count_draw(
  ******************************************************************************/
 uint16_t diagnostics_internal_get_layer_zone(
   const struct window_t* in_window,
-  const uint8_t in_layer_index)
+  uint8_t in_layer_index)
 {
   char part[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
   snprintf(
@@ -663,7 +663,7 @@ void diagnostics_internal_gpu_mark(
  ******************************************************************************/
 void diagnostics_internal_gpu_mark_layer(
   const struct window_t* in_window,
-  const uint8_t in_layer_index)
+  uint8_t in_layer_index)
 {
   char part[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
   snprintf(
@@ -825,7 +825,7 @@ void diagnostics_internal_history_summarize(
  ******************************************************************************/
 static uint16_t _diagnostics_register_zone(
   const char* in_name,
-  const bool in_is_gpu)
+  bool in_is_gpu)
 {
   for (uint16_t i = 0; i < diagnostics_state.zone_count; i++) {
     if ((diagnostics_state.zones[i].is_gpu == in_is_gpu) &&
@@ -863,7 +863,7 @@ static uint16_t _diagnostics_register_zone(
 static uint16_t _diagnostics_get_window_zone(
   const struct window_t* in_window,
   const char* in_part,
-  const bool in_is_gpu)
+  bool in_is_gpu)
 {
   char name[DIAGNOSTICS_INTERNAL_NAME_LENGTH];
   snprintf(
@@ -887,7 +887,7 @@ static uint16_t _diagnostics_get_window_zone(
  ******************************************************************************/
 static struct diagnostics_internal_gpu_window_t* _diagnostics_find_gpu_window(
   const struct window_t* in_window,
-  const bool in_should_create)
+  bool in_should_create)
 {
   struct diagnostics_internal_gpu_t* gpu = &(diagnostics_state.gpu);
 
@@ -975,7 +975,7 @@ static void _diagnostics_collect_gpu_frames(
  ******************************************************************************/
 static void _diagnostics_history_push(
   struct diagnostics_internal_history_t* inout_history,
-  const float in_value)
+  float in_value)
 {
   inout_history->values[inout_history->next_index] = in_value;
   inout_history->next_index = (inout_history->next_index + 1) % DIAGNOSTICS_INTERNAL_HISTORY_LENGTH;
@@ -1050,7 +1050,7 @@ static void _diagnostics_record_resources(void)
 static void _diagnostics_describe_event(
   const struct event_base_t* in_event,
   char* out_text,
-  const size_t in_text_length)
+  size_t in_text_length)
 {
   out_text[0] = '\0';
 

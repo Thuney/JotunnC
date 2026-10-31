@@ -49,8 +49,8 @@ struct ui_layer_t
 void ui_layer_init(
   struct window_t* in_parent_window,
   struct ui_layer_t* out_ui_layer,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels);
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels);
 
 // Releases everything a UI layer holds, making its parent window's graphics
 //  context current to do so and releasing it after

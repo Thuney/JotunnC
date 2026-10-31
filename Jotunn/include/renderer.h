@@ -47,7 +47,7 @@ struct renderer_base_t
 //  out:    out_renderer
 void renderer_base_init(
   struct renderer_base_t* out_renderer,
-  const uint16_t in_render_flags,
+  uint16_t in_render_flags,
   struct camera_base_t* in_camera,
   struct window_t* in_parent_window,
   const char* in_tag);

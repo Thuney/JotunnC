@@ -172,7 +172,7 @@ void renderer_2d_end_scene(
 void renderer_2d_draw_triangle(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 // Adds a quad to the batch: the unit square from the origin, moved by
 //  in_transform
@@ -182,7 +182,7 @@ void renderer_2d_draw_triangle(
 void renderer_2d_draw_quad(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 // Adds a quad's outline to the batch, as four lines: the unit square from
 //  the origin, moved by in_transform
@@ -192,7 +192,7 @@ void renderer_2d_draw_quad(
 void renderer_2d_draw_unfilled_quad(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 // Adds a quad covered by a whole texture to the batch: the unit square from
 //  the origin, moved by in_transform. The renderer keeps in_texture until the
@@ -226,7 +226,7 @@ void renderer_2d_draw_subtextured_quad(
 void renderer_2d_draw_circle(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 // Adds a line between two points to the batch
 //
@@ -234,9 +234,9 @@ void renderer_2d_draw_circle(
 //  in/out: inout_renderer
 void renderer_2d_draw_line(
   struct renderer_2d_t* inout_renderer,
-  const union fvector3_t in_pos_1,
-  const union fvector3_t in_pos_2,
-  const union fvector4_t in_color);
+  union fvector3_t in_pos_1,
+  union fvector3_t in_pos_2,
+  union fvector4_t in_color);
 
 // Draws a mesh on top of everything submitted to the renderer before it,
 //  flushing the pending batch first. Unlike the other primitives the mesh is
@@ -258,7 +258,7 @@ void renderer_2d_draw_mesh(
 void renderer_2d_draw_string(
   struct renderer_2d_t* inout_renderer,
   const struct font_typeface_t* in_typeface,
-  const union fvector3_t in_start_position,
+  union fvector3_t in_start_position,
   const char* in_draw_string);
 /*******************************************************************************
  *
@@ -273,4 +273,4 @@ void renderer_2d_draw_string(
 //  in:     in_renderer, in_line_width_pixels
 void renderer_2d_set_line_width(
   const struct renderer_2d_t* in_renderer,
-  const float in_line_width_pixels);
+  float in_line_width_pixels);

@@ -12,7 +12,7 @@
 //  in:     in_component
 //  ret:    The byte
 static uint8_t _u8vector_component_from_float(
-  const float in_component);
+  float in_component);
 
 /*******************************************************************************
  *
@@ -20,7 +20,7 @@ static uint8_t _u8vector_component_from_float(
  *
  ******************************************************************************/
 union u8vector4_t u8vector4_from_fvector4(
-  const union fvector4_t in_vector)
+  union fvector4_t in_vector)
 {
   union u8vector4_t vector;
 
@@ -37,7 +37,7 @@ union u8vector4_t u8vector4_from_fvector4(
  *
  ******************************************************************************/
 union fvector4_t u8vector4_to_fvector4(
-  const union u8vector4_t in_vector)
+  union u8vector4_t in_vector)
 {
   union fvector4_t vector;
 
@@ -54,7 +54,7 @@ union fvector4_t u8vector4_to_fvector4(
  *
  ******************************************************************************/
 static uint8_t _u8vector_component_from_float(
-  const float in_component)
+  float in_component)
 {
   const float clamped_component =
     (in_component < 0.0f) ?

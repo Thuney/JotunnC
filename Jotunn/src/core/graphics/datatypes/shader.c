@@ -187,7 +187,7 @@ void shader_program_use(
  ******************************************************************************/
 void shader_program_bind_fragment_data_location(
   const struct shader_program_t* in_shader_program,
-  const unsigned int in_buffer_index,
+  unsigned int in_buffer_index,
   const char* in_var_name)
 {
   shader_program_internal_platform_bind_fragment_data_location(
@@ -235,7 +235,7 @@ void shader_program_set_uniform_fmat4x4(
 void shader_program_set_uniform_float(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
-  const float in_val)
+  float in_val)
 {
   shader_program_internal_platform_set_uniform(
     in_shader_program,
@@ -252,7 +252,7 @@ void shader_program_set_uniform_float(
 void shader_program_set_uniform_int(
   const struct shader_program_t* in_shader_program,
   const char* in_uniform_name,
-  const int in_val)
+  int in_val)
 {
   shader_program_internal_platform_set_uniform(
     in_shader_program,

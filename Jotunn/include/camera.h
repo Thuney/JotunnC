@@ -43,10 +43,10 @@ struct camera_base_t
   //  unprojected camera is left as it is. Set by the init functions
   void (*function_reproject)(
     struct camera_base_t* inout_camera,
-    const float in_window_width,
-    const float in_window_height,
-    const float in_near_plane,
-    const float in_far_plane);
+    float in_window_width,
+    float in_window_height,
+    float in_near_plane,
+    float in_far_plane);
 };
 
 struct camera_orthographic_t
@@ -90,9 +90,9 @@ void camera_unprojected_init(
 //  out:    out_camera
 void camera_orthographic_init(
   struct camera_orthographic_t* out_camera,
-  const union fvector3_t in_position,
-  const union fvector3_t in_up,
-  const union fvector3_t in_front);
+  union fvector3_t in_position,
+  union fvector3_t in_up,
+  union fvector3_t in_front);
 
 // Sets up a perspective camera's view, at in_position looking along in_front
 //  with in_up as up. Its projection is identity until
@@ -103,9 +103,9 @@ void camera_orthographic_init(
 //  out:    out_camera
 void camera_perspective_init(
   struct camera_perspective_t* out_camera,
-  const union fvector3_t in_position,
-  const union fvector3_t in_up,
-  const union fvector3_t in_front);
+  union fvector3_t in_position,
+  union fvector3_t in_up,
+  union fvector3_t in_front);
 
 /*******************************************************************************
  *
@@ -121,12 +121,12 @@ void camera_perspective_init(
 //  in/out: inout_camera
 void camera_orthographic_set_projection(
   struct camera_orthographic_t* inout_camera,
-  const float in_left,
-  const float in_right,
-  const float in_top,
-  const float in_bottom,
-  const float in_near_plane,
-  const float in_far_plane);
+  float in_left,
+  float in_right,
+  float in_top,
+  float in_bottom,
+  float in_near_plane,
+  float in_far_plane);
 
 // Sets a perspective camera's projection from its vertical field of view,
 //  aspect ratio (width over height) and clip planes, and updates its
@@ -138,10 +138,10 @@ void camera_orthographic_set_projection(
 //  in/out: inout_camera
 void camera_perspective_set_projection(
   struct camera_perspective_t* inout_camera,
-  const float in_field_of_view_radians,
-  const float in_aspect_ratio,
-  const float in_near_plane,
-  const float in_far_plane);
+  float in_field_of_view_radians,
+  float in_aspect_ratio,
+  float in_near_plane,
+  float in_far_plane);
 
 // Recomputes a camera's view-projection matrix from its view and projection
 //  matrices, after either has changed

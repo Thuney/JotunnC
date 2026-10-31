@@ -68,7 +68,7 @@ static struct allocator_tag_stats_t allocator_tag_stats[ALLOCATOR_TAG_COUNT];
 //  in:     in_tag
 //  ret:    true when in_tag is valid; otherwise false
 static bool _allocator_is_tag_valid(
-  const enum allocator_tag_t in_tag);
+  enum allocator_tag_t in_tag);
 
 #ifdef DEBUG
 
@@ -78,23 +78,23 @@ static bool _allocator_is_tag_valid(
 //  in:     in_size_bytes, in_tag, in_is_zeroed
 //  ret:    The memory after the header; NULL when it can't be allocated
 static void* _allocator_allocate_counted(
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag,
-  const bool in_is_zeroed);
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag,
+  bool in_is_zeroed);
 
 // Adds an allocation to a tag's counts
 //
 //  in:     in_tag, in_size_bytes
 static void _allocator_count_allocation(
-  const enum allocator_tag_t in_tag,
-  const size_t in_size_bytes);
+  enum allocator_tag_t in_tag,
+  size_t in_size_bytes);
 
 // Removes an allocation from a tag's counts
 //
 //  in:     in_tag, in_size_bytes
 static void _allocator_count_release(
-  const enum allocator_tag_t in_tag,
-  const size_t in_size_bytes);
+  enum allocator_tag_t in_tag,
+  size_t in_size_bytes);
 
 #endif
 
@@ -104,8 +104,8 @@ static void _allocator_count_release(
  *
  ******************************************************************************/
 void* allocator_allocate(
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag)
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag)
 {
 #ifdef DEBUG
   return _allocator_allocate_counted(
@@ -125,9 +125,9 @@ void* allocator_allocate(
  *
  ******************************************************************************/
 void* allocator_allocate_zeroed(
-  const size_t in_count,
-  const size_t in_element_size_bytes,
-  const enum allocator_tag_t in_tag)
+  size_t in_count,
+  size_t in_element_size_bytes,
+  enum allocator_tag_t in_tag)
 {
   if ((in_element_size_bytes != 0) &&
       (in_count > (SIZE_MAX / in_element_size_bytes)))
@@ -156,8 +156,8 @@ void* allocator_allocate_zeroed(
  ******************************************************************************/
 void* allocator_reallocate(
   void* inout_memory,
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag)
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag)
 {
   if (inout_memory == NULL) {
     return allocator_allocate(
@@ -248,7 +248,7 @@ void allocator_free(
  ******************************************************************************/
 char* allocator_duplicate_string(
   const char* in_string,
-  const enum allocator_tag_t in_tag)
+  enum allocator_tag_t in_tag)
 {
   const size_t size_bytes = (strlen(in_string) + 1);
 
@@ -273,7 +273,7 @@ char* allocator_duplicate_string(
  *
  ******************************************************************************/
 bool allocator_get_tag_stats(
-  const enum allocator_tag_t in_tag,
+  enum allocator_tag_t in_tag,
   struct allocator_tag_stats_t* out_stats)
 {
   memset(
@@ -300,7 +300,7 @@ bool allocator_get_tag_stats(
  *
  ******************************************************************************/
 const char* allocator_get_tag_name(
-  const enum allocator_tag_t in_tag)
+  enum allocator_tag_t in_tag)
 {
   return _allocator_is_tag_valid(in_tag) ?
     allocator_tag_names[in_tag] :
@@ -313,7 +313,7 @@ const char* allocator_get_tag_name(
  *
  ******************************************************************************/
 static bool _allocator_is_tag_valid(
-  const enum allocator_tag_t in_tag)
+  enum allocator_tag_t in_tag)
 {
   // An enum may be signed, so a negative tag wraps past the end here too
   return ((unsigned int)in_tag < (unsigned int)ALLOCATOR_TAG_COUNT);
@@ -327,9 +327,9 @@ static bool _allocator_is_tag_valid(
  *
  ******************************************************************************/
 static void* _allocator_allocate_counted(
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag,
-  const bool in_is_zeroed)
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag,
+  bool in_is_zeroed)
 {
   if (in_size_bytes > (SIZE_MAX - sizeof(struct allocator_header_t))) {
     return NULL;
@@ -373,8 +373,8 @@ static void* _allocator_allocate_counted(
  *
  ******************************************************************************/
 static void _allocator_count_allocation(
-  const enum allocator_tag_t in_tag,
-  const size_t in_size_bytes)
+  enum allocator_tag_t in_tag,
+  size_t in_size_bytes)
 {
   struct allocator_tag_stats_t* stats = &(allocator_tag_stats[in_tag]);
 
@@ -393,8 +393,8 @@ static void _allocator_count_allocation(
  *
  ******************************************************************************/
 static void _allocator_count_release(
-  const enum allocator_tag_t in_tag,
-  const size_t in_size_bytes)
+  enum allocator_tag_t in_tag,
+  size_t in_size_bytes)
 {
   struct allocator_tag_stats_t* stats = &(allocator_tag_stats[in_tag]);
 

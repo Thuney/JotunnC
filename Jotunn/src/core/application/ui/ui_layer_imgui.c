@@ -147,7 +147,7 @@ static void _ui_layer_imgui_draw(
 //  in/out: inout_data
 static void _ui_layer_imgui_reserve_submeshes(
   struct ui_layer_imgui_data_t* inout_data,
-  const uint32_t in_count);
+  uint32_t in_count);
 
 // Tells ImGui which modifier keys are held
 //
@@ -155,14 +155,14 @@ static void _ui_layer_imgui_reserve_submeshes(
 //  in/out: inout_io
 static void _ui_layer_imgui_update_modifiers(
   ImGuiIO* inout_io,
-  const uint8_t in_modifiers);
+  uint8_t in_modifiers);
 
 // Translates a Jotunn key code to ImGui's
 //
 //  in:     in_key
 //  ret:    The ImGui key; ImGuiKey_None when ImGui has no equivalent
 static ImGuiKey _ui_layer_imgui_translate_key(
-  const enum event_key_code_t in_key);
+  enum event_key_code_t in_key);
 
 // Clipboard hook for ImGui, reading the clipboard of the window held in the
 //  context's clipboard user data
@@ -194,7 +194,7 @@ static void _ui_layer_imgui_reset_render_state(
 //  in:     in_size_bytes, in_user_data
 //  ret:    The memory; NULL when it can't be allocated
 static void* _ui_layer_imgui_allocate(
-  const size_t in_size_bytes,
+  size_t in_size_bytes,
   void* in_user_data);
 
 // Allocator hook for ImGui, releasing memory from _ui_layer_imgui_allocate();
@@ -850,7 +850,7 @@ static void _ui_layer_imgui_draw(
  ******************************************************************************/
 static void _ui_layer_imgui_reserve_submeshes(
   struct ui_layer_imgui_data_t* inout_data,
-  const uint32_t in_count)
+  uint32_t in_count)
 {
   if (in_count <= inout_data->submesh_capacity) {
     return;
@@ -877,7 +877,7 @@ static void _ui_layer_imgui_reserve_submeshes(
  ******************************************************************************/
 static void _ui_layer_imgui_update_modifiers(
   ImGuiIO* inout_io,
-  const uint8_t in_modifiers)
+  uint8_t in_modifiers)
 {
   ImGuiIO_AddKeyEvent(
     inout_io,
@@ -903,7 +903,7 @@ static void _ui_layer_imgui_update_modifiers(
  *
  ******************************************************************************/
 static ImGuiKey _ui_layer_imgui_translate_key(
-  const enum event_key_code_t in_key)
+  enum event_key_code_t in_key)
 {
   if ((in_key >= EVENT_KEY_CODE_TAB) &&
       (in_key <= EVENT_KEY_CODE_KEYPAD_EQUAL))
@@ -967,7 +967,7 @@ static void _ui_layer_imgui_reset_render_state(
  *
  ******************************************************************************/
 static void* _ui_layer_imgui_allocate(
-  const size_t in_size_bytes,
+  size_t in_size_bytes,
   void* in_user_data)
 {
   (void)in_user_data;

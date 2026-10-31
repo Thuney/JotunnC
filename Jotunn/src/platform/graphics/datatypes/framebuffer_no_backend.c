@@ -20,8 +20,8 @@ void framebuffer_internal_platform_init(
  ******************************************************************************/
 void color_buffer_internal_platform_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   return;
 }
@@ -33,8 +33,8 @@ void color_buffer_internal_platform_init(
  ******************************************************************************/
 void render_buffer_internal_platform_init(
   struct framebuffer_render_buffer_t* out_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   return;
 }
@@ -46,8 +46,8 @@ void render_buffer_internal_platform_init(
  ******************************************************************************/
 void color_buffer_internal_platform_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   return;
 }
@@ -59,8 +59,8 @@ void color_buffer_internal_platform_resize(
  ******************************************************************************/
 void render_buffer_internal_platform_resize(
   const struct framebuffer_render_buffer_t* in_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   return;
 }

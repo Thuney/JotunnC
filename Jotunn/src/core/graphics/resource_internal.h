@@ -21,8 +21,8 @@
 //  in/out: inout_resource
 void resource_internal_register(
   struct resource_t* inout_resource,
-  const enum resource_kind_t in_kind,
-  const size_t in_size_bytes);
+  enum resource_kind_t in_kind,
+  size_t in_size_bytes);
 
 // Removes a resource from the registry; one not in the registry is ignored
 //
@@ -37,4 +37,4 @@ void resource_internal_unregister(
 //  in/out: inout_resource
 void resource_internal_set_size(
   struct resource_t* inout_resource,
-  const size_t in_size_bytes);
+  size_t in_size_bytes);

@@ -74,10 +74,10 @@ void window_internal_platform_release_context(
 //
 //  in:     in_x_pixels, in_y_pixels, in_width_pixels, in_height_pixels
 void window_internal_platform_set_viewport(
-  const uint32_t in_x_pixels,
-  const uint32_t in_y_pixels,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels);
+  uint32_t in_x_pixels,
+  uint32_t in_y_pixels,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels);
 
 // Sets the color the window's default framebuffer is cleared to each frame
 //
@@ -85,7 +85,7 @@ void window_internal_platform_set_viewport(
 //  in/out: inout_window
 void window_internal_platform_set_background_color(
   struct window_t* inout_window,
-  const union fvector4_t in_color);
+  union fvector4_t in_color);
 
 /*******************************************************************************
  *
@@ -99,7 +99,7 @@ void window_internal_platform_set_background_color(
 //  in:     in_window, in_cursor_shape
 void window_internal_platform_set_cursor_shape(
   const struct window_t* in_window,
-  const enum window_cursor_shape_t in_cursor_shape);
+  enum window_cursor_shape_t in_cursor_shape);
 
 // Reads the system clipboard as UTF-8 text
 //

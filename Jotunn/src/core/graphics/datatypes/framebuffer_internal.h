@@ -64,8 +64,8 @@ void framebuffer_internal_platform_attach_render_buffer(
 //  in/out: inout_color_buffer
 void color_buffer_internal_platform_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Creates the backend's render buffer object, holding 24 bits of depth and 8
 //  of stencil per pixel, and leaves it bound
@@ -74,8 +74,8 @@ void color_buffer_internal_platform_init(
 //  out:    out_render_buffer
 void render_buffer_internal_platform_init(
   struct framebuffer_render_buffer_t* out_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels);
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels);
 
 // Binds a color buffer's texture to texture unit 0
 //
@@ -97,8 +97,8 @@ void render_buffer_internal_platform_bind(
 //  in/out: inout_color_buffer
 void color_buffer_internal_platform_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);
 
 // Reallocates a render buffer's storage at a new size, leaving its contents
 //  undefined and it bound
@@ -106,5 +106,5 @@ void color_buffer_internal_platform_resize(
 //  in:     in_render_buffer, in_new_width_pixels, in_new_height_pixels
 void render_buffer_internal_platform_resize(
   const struct framebuffer_render_buffer_t* in_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels);
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels);

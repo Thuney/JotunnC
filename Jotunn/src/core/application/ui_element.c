@@ -18,8 +18,8 @@
 static void ui_element_static_text_render(
   struct renderer_2d_t* inout_renderer_2d,
   const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
+  union fvector2_t in_origin_position,
+  union fvector2_t in_allocated_space,
   const struct ui_theme_t* in_theme);
 
 // Builds a transform from a scale and a translation
@@ -27,8 +27,8 @@ static void ui_element_static_text_render(
 //  in:     in_scale_factors, in_translation_vector
 //  ret:    The transform
 static union fmatrix_4x4_t ui_element_get_transform(
-  const union fvector3_t in_scale_factors,
-  const union fvector3_t in_translation_vector);
+  union fvector3_t in_scale_factors,
+  union fvector3_t in_translation_vector);
 
 // Draws a slider at the top left of the space allocated to it: a box in the
 //  theme's background color, a line across it in the foreground color, and a
@@ -40,8 +40,8 @@ static union fmatrix_4x4_t ui_element_get_transform(
 static void ui_element_slider_render(
   struct renderer_2d_t* inout_renderer_2d,
   const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
+  union fvector2_t in_origin_position,
+  union fvector2_t in_allocated_space,
   const struct ui_theme_t* in_theme);
 
 /*******************************************************************************
@@ -66,14 +66,14 @@ union fvector2_t ui_element_get_effective_size(
  ******************************************************************************/
 void ui_element_init(
   struct ui_element_t* out_ui_element,
-  const enum ui_element_type_t in_element_type,
-  const uint16_t in_width,
-  const uint16_t in_height,
+  enum ui_element_type_t in_element_type,
+  uint16_t in_width,
+  uint16_t in_height,
   void (*in_function_ui_element_render)(
     struct renderer_2d_t* inout_renderer_2d,
     const struct ui_element_t* in_ui_element,
-    const union fvector2_t in_origin_position,
-    const union fvector2_t in_allocated_space,
+    union fvector2_t in_origin_position,
+    union fvector2_t in_allocated_space,
     const struct ui_theme_t* in_theme),
   void (*in_function_ui_element_event_react)(
     struct ui_element_t* inout_ui_element,
@@ -137,9 +137,9 @@ void ui_element_static_text_init(
  ******************************************************************************/
 void ui_element_slider_init(
   struct ui_element_slider_t* out_slider_element,
-  const float in_starting_position,
-  const float in_lower_bound,
-  const float in_upper_bound)
+  float in_starting_position,
+  float in_lower_bound,
+  float in_upper_bound)
 {
   ui_element_init(
     &(out_slider_element->base_element),
@@ -182,7 +182,7 @@ void ui_element_button_init(
  ******************************************************************************/
 void ui_element_checkbox_init(
   struct ui_element_checkbox_t* out_checkbox_element,
-  const bool in_is_checked)
+  bool in_is_checked)
 {
   ui_element_init(
     &(out_checkbox_element->base_element),
@@ -201,8 +201,8 @@ void ui_element_checkbox_init(
 static void ui_element_static_text_render(
   struct renderer_2d_t* inout_renderer_2d,
   const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
+  union fvector2_t in_origin_position,
+  union fvector2_t in_allocated_space,
   const struct ui_theme_t* in_theme)
 {
   const struct ui_element_static_text_t* static_text_element =
@@ -257,8 +257,8 @@ static void ui_element_static_text_render(
  *
  ******************************************************************************/
 static union fmatrix_4x4_t ui_element_get_transform(
-  const union fvector3_t in_scale_factors,
-  const union fvector3_t in_translation_vector)
+  union fvector3_t in_scale_factors,
+  union fvector3_t in_translation_vector)
 {
   union fmatrix_4x4_t transform_matrix;
   {
@@ -290,8 +290,8 @@ static union fmatrix_4x4_t ui_element_get_transform(
 static void ui_element_slider_render(
   struct renderer_2d_t* inout_renderer_2d,
   const struct ui_element_t* in_ui_element,
-  const union fvector2_t in_origin_position,
-  const union fvector2_t in_allocated_space,
+  union fvector2_t in_origin_position,
+  union fvector2_t in_allocated_space,
   const struct ui_theme_t* in_theme)
 {
   const struct ui_element_slider_t* slider_element =

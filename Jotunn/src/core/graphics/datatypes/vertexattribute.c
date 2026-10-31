@@ -16,11 +16,11 @@
 void vertex_attribute_init(
   struct vertex_attribute_t* out_vertex_attribute,
   const char* in_attribute_name,
-  const unsigned int in_index,
-  const int in_size,
-  const enum vertex_attribute_data_type_t in_data_type,
-  const unsigned int in_should_normalize,
-  const unsigned int in_stride,
+  unsigned int in_index,
+  int in_size,
+  enum vertex_attribute_data_type_t in_data_type,
+  unsigned int in_should_normalize,
+  unsigned int in_stride,
   void* in_ptr_offset_to_attrib)
 {
   out_vertex_attribute->attribute_name =
@@ -45,7 +45,7 @@ void vertex_attribute_init(
  ******************************************************************************/
 void vertex_attribute_cleanup(
   struct vertex_attribute_t* inout_vertex_attribute,
-  const unsigned int in_num)
+  unsigned int in_num)
 {
   for (unsigned int i = 0; i < in_num; i++) {
     allocator_free(inout_vertex_attribute[i].attribute_name);

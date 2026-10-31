@@ -19,8 +19,8 @@
  ******************************************************************************/
 void framebuffer_init(
   struct framebuffer_t* inout_frame_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   framebuffer_internal_platform_init(
     inout_frame_buffer);
@@ -71,8 +71,8 @@ void framebuffer_init(
  ******************************************************************************/
 void framebuffer_resize(
   struct framebuffer_t* inout_frame_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   framebuffer_color_buffer_resize(
     &(inout_frame_buffer->color_buffer),
@@ -156,8 +156,8 @@ void framebuffer_cleanup(
  ******************************************************************************/
 void framebuffer_color_buffer_init(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   color_buffer_internal_platform_init(
     inout_color_buffer,
@@ -172,8 +172,8 @@ void framebuffer_color_buffer_init(
  ******************************************************************************/
 void framebuffer_render_buffer_init(
   struct framebuffer_render_buffer_t* inout_render_buffer,
-  const unsigned int in_width_pixels,
-  const unsigned int in_height_pixels)
+  unsigned int in_width_pixels,
+  unsigned int in_height_pixels)
 {
   render_buffer_internal_platform_init(
     inout_render_buffer,
@@ -217,8 +217,8 @@ void framebuffer_render_buffer_bind(
  ******************************************************************************/
 void framebuffer_color_buffer_resize(
   struct framebuffer_color_buffer_t* inout_color_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   color_buffer_internal_platform_resize(
     inout_color_buffer,
@@ -233,8 +233,8 @@ void framebuffer_color_buffer_resize(
  ******************************************************************************/
 void framebuffer_render_buffer_resize(
   struct framebuffer_render_buffer_t* inout_render_buffer,
-  const unsigned int in_new_width_pixels,
-  const unsigned int in_new_height_pixels)
+  unsigned int in_new_width_pixels,
+  unsigned int in_new_height_pixels)
 {
   render_buffer_internal_platform_resize(
     inout_render_buffer,

@@ -31,7 +31,7 @@ static void vertex_array_gl_check_error(
 //  out:    out_vertex_array
 static void vertex_array_gl_init(
   struct vertex_array_t* out_vertex_array,
-  const int in_num);
+  int in_num);
 
 // Makes a vertex array the one drawn from and configured
 //
@@ -47,7 +47,7 @@ static void vertex_array_gl_unbind(void);
 //  in:     in_data_type
 //  ret:    The GL data type; GL_INVALID_ENUM when in_data_type isn't valid
 static GLenum vertex_array_gl_get_attribute_data_type(
-  const enum vertex_attribute_data_type_t in_data_type);
+  enum vertex_attribute_data_type_t in_data_type);
 
 // Sets where and how a vertex attribute is read, and enables it, in the bound
 //  vertex array, reading from the buffer bound to GL_ARRAY_BUFFER.
@@ -64,7 +64,7 @@ static void vertex_array_gl_set_attribute(
 //  in/out: inout_vertex_array
 static void vertex_array_gl_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num);
+  int in_num);
 
 /*******************************************************************************
  *
@@ -73,7 +73,7 @@ static void vertex_array_gl_destroy(
  ******************************************************************************/
 void vertex_array_internal_platform_init(
   struct vertex_array_t* out_vertex_array,
-  const int in_num)
+  int in_num)
 {
   vertex_array_gl_init(
     out_vertex_array,
@@ -122,7 +122,7 @@ void vertex_array_internal_platform_set_attribute(
  ******************************************************************************/
 void vertex_array_internal_platform_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num)
+  int in_num)
 {
   vertex_array_gl_destroy(
     inout_vertex_array,
@@ -176,7 +176,7 @@ static void vertex_array_gl_check_error(
  ******************************************************************************/
 static void vertex_array_gl_init(
   struct vertex_array_t* out_vertex_array,
-  const int in_num)
+  int in_num)
 {
   glGenVertexArrays(
     in_num,
@@ -224,7 +224,7 @@ static void vertex_array_gl_unbind(void)
  *
  ******************************************************************************/
 static GLenum vertex_array_gl_get_attribute_data_type(
-  const enum vertex_attribute_data_type_t in_data_type)
+  enum vertex_attribute_data_type_t in_data_type)
 {
   GLenum gl_data_type;
 
@@ -310,7 +310,7 @@ static void vertex_array_gl_set_attribute(
  ******************************************************************************/
 static void vertex_array_gl_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num)
+  int in_num)
 {
   glDeleteVertexArrays(
     in_num,

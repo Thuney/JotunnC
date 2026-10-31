@@ -30,7 +30,7 @@ static_assert(
  *
  ******************************************************************************/
 void log_write(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_format,
   ...)
 {
@@ -53,7 +53,7 @@ void log_write(
  *
  ******************************************************************************/
 void log_write_va(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_format,
   va_list in_arguments)
 {
@@ -94,7 +94,7 @@ void log_write_va(
  *
  ******************************************************************************/
 const char* log_get_level_name(
-  const enum log_level_t in_level)
+  enum log_level_t in_level)
 {
   // An enum may be signed, so a negative level wraps past the end here too
   return ((unsigned int)in_level < (unsigned int)LOG_LEVEL_COUNT) ?

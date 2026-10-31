@@ -57,7 +57,7 @@ static void renderer_2d_data_cleanup(
 //  ret:    The index's size in bytes; that of a 32-bit index for a type that
 //            isn't an index type
 static uint32_t _renderer_2d_get_index_size_bytes(
-  const enum render_api_element_data_type_t in_index_type);
+  enum render_api_element_data_type_t in_index_type);
 
 // Our upper limit on quads to draw per batch. Translates into a limitation on
 //  max vertices / indices, technically, to include things like triangles,
@@ -166,7 +166,7 @@ void renderer_2d_end_scene(
 void renderer_2d_draw_triangle(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing triangle\n");
@@ -202,7 +202,7 @@ void renderer_2d_draw_triangle(
 void renderer_2d_draw_quad(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing quad\n");
@@ -238,7 +238,7 @@ void renderer_2d_draw_quad(
 void renderer_2d_draw_unfilled_quad(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing unfilled quad\n");
@@ -424,7 +424,7 @@ void renderer_2d_draw_subtextured_quad(
 void renderer_2d_draw_circle(
   struct renderer_2d_t* inout_renderer,
   const union fmatrix_4x4_t* in_transform,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing circle\n");
@@ -457,9 +457,9 @@ void renderer_2d_draw_circle(
  ******************************************************************************/
 void renderer_2d_draw_line(
   struct renderer_2d_t* inout_renderer,
-  const union fvector3_t in_pos_1,
-  const union fvector3_t in_pos_2,
-  const union fvector4_t in_color)
+  union fvector3_t in_pos_1,
+  union fvector3_t in_pos_2,
+  union fvector4_t in_color)
 {
   // #ifdef DEBUG
   //    fprintf(stdout, "Renderer 2D drawing line\n");
@@ -594,7 +594,7 @@ void renderer_2d_draw_mesh(
 void renderer_2d_draw_string(
   struct renderer_2d_t* inout_renderer,
   const struct font_typeface_t* in_typeface,
-  const union fvector3_t in_start_position,
+  union fvector3_t in_start_position,
   const char* in_draw_string)
 {
   // #ifdef DEBUG
@@ -700,7 +700,7 @@ void renderer_2d_draw_string(
  ******************************************************************************/
 void renderer_2d_set_line_width(
   const struct renderer_2d_t* in_renderer,
-  const float in_line_width_pixels)
+  float in_line_width_pixels)
 {
   render_api_set_line_width(in_line_width_pixels);
 }
@@ -1139,7 +1139,7 @@ static void renderer_2d_data_cleanup(
  *
  ******************************************************************************/
 static uint32_t _renderer_2d_get_index_size_bytes(
-  const enum render_api_element_data_type_t in_index_type)
+  enum render_api_element_data_type_t in_index_type)
 {
   uint32_t index_size_bytes;
 

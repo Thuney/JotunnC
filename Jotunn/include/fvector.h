@@ -114,8 +114,8 @@ void fvector4_init(
 //  out:    out_vector
 void fvector2_set(
   union fvector2_t* out_vector,
-  const float in_x,
-  const float in_y);
+  float in_x,
+  float in_y);
 
 // Sets a 3D vector's components
 //
@@ -123,9 +123,9 @@ void fvector2_set(
 //  out:    out_vector
 void fvector3_set(
   union fvector3_t* out_vector,
-  const float in_x,
-  const float in_y,
-  const float in_z);
+  float in_x,
+  float in_y,
+  float in_z);
 
 // Sets a 4D vector's components
 //
@@ -133,10 +133,10 @@ void fvector3_set(
 //  out:    out_vector
 void fvector4_set(
   union fvector4_t* out_vector,
-  const float in_w,
-  const float in_x,
-  const float in_y,
-  const float in_z);
+  float in_w,
+  float in_x,
+  float in_y,
+  float in_z);
 
 // Copies a 2D vector
 //
@@ -144,7 +144,7 @@ void fvector4_set(
 //  out:    out_vector
 void fvector2_setv(
   union fvector2_t* out_vector,
-  const union fvector2_t in_vector);
+  union fvector2_t in_vector);
 
 // Copies a 3D vector
 //
@@ -152,7 +152,7 @@ void fvector2_setv(
 //  out:    out_vector
 void fvector3_setv(
   union fvector3_t* out_vector,
-  const union fvector3_t in_vector);
+  union fvector3_t in_vector);
 
 // Copies a 4D vector
 //
@@ -160,7 +160,7 @@ void fvector3_setv(
 //  out:    out_vector
 void fvector4_setv(
   union fvector4_t* out_vector,
-  const union fvector4_t in_vector);
+  union fvector4_t in_vector);
 
 /*******************************************************************************
  *
@@ -267,7 +267,7 @@ union fvector4_t fvector4_subtract(
 //  ret:    The scaled vector
 union fvector2_t fvector2_scale(
   const union fvector2_t* in_vector,
-  const float in_scalar);
+  float in_scalar);
 
 // Multiplies each component of a 3D vector by a scalar
 //
@@ -275,7 +275,7 @@ union fvector2_t fvector2_scale(
 //  ret:    The scaled vector
 union fvector3_t fvector3_scale(
   const union fvector3_t* in_vector,
-  const float in_scalar);
+  float in_scalar);
 
 // Multiplies each component of a 4D vector by a scalar
 //
@@ -283,7 +283,7 @@ union fvector3_t fvector3_scale(
 //  ret:    The scaled vector
 union fvector4_t fvector4_scale(
   const union fvector4_t* in_vector,
-  const float in_scalar);
+  float in_scalar);
 
 // Takes the dot product of two 2D vectors
 //

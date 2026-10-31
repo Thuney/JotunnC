@@ -33,7 +33,7 @@ enum log_level_t
 //
 //  in:     in_level, in_format, ...
 void log_write(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_format,
   ...) __attribute__((format(printf, 2, 3)));
 
@@ -41,7 +41,7 @@ void log_write(
 //
 //  in:     in_level, in_format, in_arguments
 void log_write_va(
-  const enum log_level_t in_level,
+  enum log_level_t in_level,
   const char* in_format,
   va_list in_arguments) __attribute__((format(printf, 2, 0)));
 
@@ -50,6 +50,6 @@ void log_write_va(
 //  in:     in_level
 //  ret:    The level's name, or "unknown" when in_level isn't valid
 const char* log_get_level_name(
-  const enum log_level_t in_level);
+  enum log_level_t in_level);
 
 #define LOG_MESSAGE_MAX_LENGTH 1024

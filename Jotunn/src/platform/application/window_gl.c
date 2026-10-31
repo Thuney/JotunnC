@@ -45,8 +45,8 @@ static bool is_gl_cursor_created[WINDOW_CURSOR_SHAPE_COUNT];
 //  in:     in_window, in_width, in_height
 static void window_gl_size_callback(
   GLFWwindow* in_window,
-  const int in_width,
-  const int in_height);
+  int in_width,
+  int in_height);
 
 // GLFW's framebuffer size callback: records the framebuffer's new size as
 //  the window's size
@@ -54,8 +54,8 @@ static void window_gl_size_callback(
 //  in:     in_window, in_width_pixels, in_height_pixels
 static void window_gl_framebuffer_size_callback(
   GLFWwindow* in_window,
-  const int in_width_pixels,
-  const int in_height_pixels);
+  int in_width_pixels,
+  int in_height_pixels);
 
 // GLFW's window close callback: flags the window to close and sends a window
 //  close event
@@ -70,10 +70,10 @@ static void window_gl_close_callback(
 //  in:     in_window, in_key, in_scancode, in_action, in_mods
 static void window_gl_key_callback(
   GLFWwindow* in_window,
-  const int in_key,
-  const int in_scancode,
-  const int in_action,
-  const int in_mods);
+  int in_key,
+  int in_scancode,
+  int in_action,
+  int in_mods);
 
 // GLFW's character callback: sends a key typed event for the Unicode code
 //  point typed
@@ -81,24 +81,24 @@ static void window_gl_key_callback(
 //  in:     in_window, in_codepoint
 static void window_gl_char_callback(
   GLFWwindow* in_window,
-  const unsigned int in_codepoint);
+  unsigned int in_codepoint);
 
 // GLFW's mouse button callback: sends a mouse button event
 //
 //  in:     in_window, in_button, in_action, in_mods
 static void window_gl_mouse_button_callback(
   GLFWwindow* in_window,
-  const int in_button,
-  const int in_action,
-  const int in_mods);
+  int in_button,
+  int in_action,
+  int in_mods);
 
 // GLFW's scroll callback: sends a mouse scrolled event
 //
 //  in:     in_window, in_x_offset, in_y_offset
 static void window_gl_scroll_callback(
   GLFWwindow* in_window,
-  const double in_x_offset,
-  const double in_y_offset);
+  double in_x_offset,
+  double in_y_offset);
 
 // GLFW's cursor position callback: sends a mouse moved event, with the
 //  position measured up from the bottom of the window rather than down from
@@ -107,8 +107,8 @@ static void window_gl_scroll_callback(
 //  in:     in_window, in_x_pos, in_y_pos
 static void window_gl_cursor_position_callback(
   GLFWwindow* in_window,
-  const double in_x_pos,
-  const double in_y_pos);
+  double in_x_pos,
+  double in_y_pos);
 
 // GLFW's window focus callback: sends a window focus event, whether the
 //  window gained focus or lost it
@@ -116,13 +116,13 @@ static void window_gl_cursor_position_callback(
 //  in:     in_window, in_is_focused
 static void window_gl_focus_callback(
   GLFWwindow* in_window,
-  const int in_is_focused);
+  int in_is_focused);
 
 // GLFW's error callback: logs the error in debug builds
 //
 //  in:     in_error_code, in_description
 static void window_gl_error_callback(
-  const int in_error_code,
+  int in_error_code,
   const char* in_description);
 
 // GLFW's cursor enter callback: sends a mouse entered event as the cursor
@@ -131,21 +131,21 @@ static void window_gl_error_callback(
 //  in:     in_window, in_is_entered
 static void _window_gl_cursor_enter_callback(
   GLFWwindow* in_window,
-  const int in_is_entered);
+  int in_is_entered);
 
 // Translates a GLFW key code to Jotunn's
 //
 //  in:     in_glfw_key
 //  ret:    The key code; EVENT_KEY_CODE_UNKNOWN for a key Jotunn doesn't have
 static enum event_key_code_t _window_gl_translate_key(
-  const int in_glfw_key);
+  int in_glfw_key);
 
 // Translates GLFW's modifier key bits to Jotunn's
 //
 //  in:     in_glfw_modifiers
 //  ret:    A bit set of enum event_key_modifier_t
 static uint8_t _window_gl_translate_modifiers(
-  const int in_glfw_modifiers);
+  int in_glfw_modifiers);
 
 // Finds GLFW's standard cursor for a shape, creating it the first time
 //
@@ -153,7 +153,7 @@ static uint8_t _window_gl_translate_modifiers(
 //  ret:    The cursor; NULL for a shape out of range or one the platform
 //            lacks, either of which GLFW shows as the arrow
 static GLFWcursor* _window_gl_get_cursor(
-  const enum window_cursor_shape_t in_cursor_shape);
+  enum window_cursor_shape_t in_cursor_shape);
 
 // Points each of a GLFW window's callbacks at this file's
 //
@@ -287,10 +287,10 @@ void window_internal_platform_release_context(
  *
  ******************************************************************************/
 void window_internal_platform_set_viewport(
-  const uint32_t in_x_pixels,
-  const uint32_t in_y_pixels,
-  const uint32_t in_width_pixels,
-  const uint32_t in_height_pixels)
+  uint32_t in_x_pixels,
+  uint32_t in_y_pixels,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels)
 {
   glViewport(
     in_x_pixels,
@@ -306,7 +306,7 @@ void window_internal_platform_set_viewport(
  ******************************************************************************/
 void window_internal_platform_set_background_color(
   struct window_t* inout_window,
-  const union fvector4_t in_color)
+  union fvector4_t in_color)
 {
   render_api_set_clear_color(
     &(inout_window->window_layer_renderer.base.render_api),
@@ -320,7 +320,7 @@ void window_internal_platform_set_background_color(
  ******************************************************************************/
 void window_internal_platform_set_cursor_shape(
   const struct window_t* in_window,
-  const enum window_cursor_shape_t in_cursor_shape)
+  enum window_cursor_shape_t in_cursor_shape)
 {
   GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
 
@@ -380,8 +380,8 @@ void window_internal_platform_set_clipboard_text(
  ******************************************************************************/
 static void window_gl_size_callback(
   GLFWwindow* in_window,
-  const int in_width,
-  const int in_height)
+  int in_width,
+  int in_height)
 {
   #ifdef DEBUG
   fprintf(
@@ -414,8 +414,8 @@ static void window_gl_size_callback(
  ******************************************************************************/
 static void window_gl_framebuffer_size_callback(
   GLFWwindow* in_window,
-  const int in_width_pixels,
-  const int in_height_pixels)
+  int in_width_pixels,
+  int in_height_pixels)
 {
   #ifdef DEBUG
   fprintf(
@@ -466,10 +466,10 @@ static void window_gl_close_callback(
  ******************************************************************************/
 static void window_gl_key_callback(
   GLFWwindow* in_window,
-  const int in_key,
-  const int in_scancode,
-  const int in_action,
-  const int in_mods)
+  int in_key,
+  int in_scancode,
+  int in_action,
+  int in_mods)
 {
   // #ifdef DEBUG
   // fprintf(
@@ -520,7 +520,7 @@ static void window_gl_key_callback(
  ******************************************************************************/
 static void window_gl_char_callback(
   GLFWwindow* in_window,
-  const unsigned int in_codepoint)
+  unsigned int in_codepoint)
 {
   // #ifdef DEBUG
   // fprintf(stdout, "Event - Char Received - Char: %c\n", codepoint);
@@ -546,9 +546,9 @@ static void window_gl_char_callback(
  ******************************************************************************/
 static void window_gl_mouse_button_callback(
   GLFWwindow* in_window,
-  const int in_button,
-  const int in_action,
-  const int in_mods)
+  int in_button,
+  int in_action,
+  int in_mods)
 {
   // #ifdef DEBUG
   // fprintf(
@@ -581,8 +581,8 @@ static void window_gl_mouse_button_callback(
  ******************************************************************************/
 static void window_gl_scroll_callback(
   GLFWwindow* in_window,
-  const double in_x_offset,
-  const double in_y_offset)
+  double in_x_offset,
+  double in_y_offset)
 {
   #ifdef DEBUG
   fprintf(
@@ -613,8 +613,8 @@ static void window_gl_scroll_callback(
  ******************************************************************************/
 static void window_gl_cursor_position_callback(
   GLFWwindow* in_window,
-  const double in_x_pos,
-  const double in_y_pos)
+  double in_x_pos,
+  double in_y_pos)
 {
   // #ifdef DEBUG
   //  fprintf(stdout, "Event - Cursor Position - X: %lf Y: %lf\n", x_pos,
@@ -641,7 +641,7 @@ static void window_gl_cursor_position_callback(
  ******************************************************************************/
 static void window_gl_focus_callback(
   GLFWwindow* in_window,
-  const int in_is_focused)
+  int in_is_focused)
 {
   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
@@ -669,7 +669,7 @@ static void window_gl_focus_callback(
  *
  ******************************************************************************/
 static void window_gl_error_callback(
-  const int in_error_code,
+  int in_error_code,
   const char* in_description)
 {
   #ifdef DEBUG
@@ -964,7 +964,7 @@ static void window_gl_cleanup(
  ******************************************************************************/
 static void _window_gl_cursor_enter_callback(
   GLFWwindow* in_window,
-  const int in_is_entered)
+  int in_is_entered)
 {
   struct window_data_t* metadata = (struct window_data_t*)glfwGetWindowUserPointer(in_window);
 
@@ -985,7 +985,7 @@ static void _window_gl_cursor_enter_callback(
  *
  ******************************************************************************/
 static enum event_key_code_t _window_gl_translate_key(
-  const int in_glfw_key)
+  int in_glfw_key)
 {
   // Digits, letters, function keys and keypad digits are contiguous in both
   //  GLFW's key codes and Jotunn's
@@ -1074,7 +1074,7 @@ static enum event_key_code_t _window_gl_translate_key(
  *
  ******************************************************************************/
 static uint8_t _window_gl_translate_modifiers(
-  const int in_glfw_modifiers)
+  int in_glfw_modifiers)
 {
   uint8_t modifiers = EVENT_KEY_MODIFIER_NONE;
 
@@ -1108,7 +1108,7 @@ static uint8_t _window_gl_translate_modifiers(
  *
  ******************************************************************************/
 static GLFWcursor* _window_gl_get_cursor(
-  const enum window_cursor_shape_t in_cursor_shape)
+  enum window_cursor_shape_t in_cursor_shape)
 {
   if ((in_cursor_shape < 0) ||
       (in_cursor_shape >= WINDOW_CURSOR_SHAPE_COUNT))

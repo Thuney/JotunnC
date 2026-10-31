@@ -10,7 +10,7 @@
  ******************************************************************************/
 void vertex_buffer_init(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   // Each buffer has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
@@ -45,8 +45,8 @@ void vertex_buffer_bind(
 void vertex_buffer_set_data(
   struct vertex_buffer_t* inout_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   vertex_buffer_internal_platform_set_data(
     inout_vertex_buffer,
@@ -68,7 +68,7 @@ void vertex_buffer_set_data(
 void vertex_buffer_set_sub_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const float* in_data,
-  const unsigned int in_data_bytes)
+  unsigned int in_data_bytes)
 {
   vertex_buffer_internal_platform_set_sub_data(
     in_vertex_buffer,
@@ -83,7 +83,7 @@ void vertex_buffer_set_sub_data(
  ******************************************************************************/
 void vertex_buffer_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   for (int i = 0; i < in_num; i++) {
     vertex_buffer_internal_platform_destroy(
@@ -102,7 +102,7 @@ void vertex_buffer_destroy(
  ******************************************************************************/
 int element_buffer_init(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num)
+  int in_num)
 {
   // Each buffer has its own registry entry, so they're created one at a time
   //  rather than with their names packed together
@@ -140,8 +140,8 @@ void element_buffer_bind(
 void element_buffer_buffer_data(
   struct element_buffer_t* inout_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   element_buffer_internal_platform_buffer_data(
     inout_element_buffer,
@@ -162,7 +162,7 @@ void element_buffer_buffer_data(
  ******************************************************************************/
 void element_buffer_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num)
+  int in_num)
 {
   for (int i = 0; i < in_num; i++) {
     element_buffer_internal_platform_destroy(

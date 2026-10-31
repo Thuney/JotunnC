@@ -57,8 +57,8 @@ struct allocator_tag_stats_t
 //  in:     in_size_bytes, in_tag
 //  ret:    The memory, aligned for any type; NULL when it can't be allocated
 void* allocator_allocate(
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag);
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag);
 
 // Allocates zeroed memory for an array
 //
@@ -66,9 +66,9 @@ void* allocator_allocate(
 //  ret:    The memory, aligned for any type; NULL when it can't be allocated,
 //            including when the array's size overflows
 void* allocator_allocate_zeroed(
-  const size_t in_count,
-  const size_t in_element_size_bytes,
-  const enum allocator_tag_t in_tag);
+  size_t in_count,
+  size_t in_element_size_bytes,
+  enum allocator_tag_t in_tag);
 
 // Resizes memory from this allocator, keeping its contents up to the smaller
 //  of the two sizes. A NULL inout_memory is allocated afresh, and a size of
@@ -82,8 +82,8 @@ void* allocator_allocate_zeroed(
 //            is zero
 void* allocator_reallocate(
   void* inout_memory,
-  const size_t in_size_bytes,
-  const enum allocator_tag_t in_tag);
+  size_t in_size_bytes,
+  enum allocator_tag_t in_tag);
 
 // Releases memory from this allocator; NULL is ignored
 //
@@ -97,7 +97,7 @@ void allocator_free(
 //  ret:    The copy; NULL when it can't be allocated
 char* allocator_duplicate_string(
   const char* in_string,
-  const enum allocator_tag_t in_tag);
+  enum allocator_tag_t in_tag);
 
 /*******************************************************************************
  *
@@ -112,7 +112,7 @@ char* allocator_duplicate_string(
 //  ret:    true when allocations are counted in this build and in_tag is
 //            valid; otherwise false, with out_stats zeroed
 bool allocator_get_tag_stats(
-  const enum allocator_tag_t in_tag,
+  enum allocator_tag_t in_tag,
   struct allocator_tag_stats_t* out_stats);
 
 // Names a tag for display
@@ -120,4 +120,4 @@ bool allocator_get_tag_stats(
 //  in:     in_tag
 //  ret:    The tag's name, or "unknown" when in_tag isn't valid
 const char* allocator_get_tag_name(
-  const enum allocator_tag_t in_tag);
+  enum allocator_tag_t in_tag);

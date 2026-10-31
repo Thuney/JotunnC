@@ -40,11 +40,11 @@ union u8vector4_t
 //  in:     in_vector
 //  ret:    The byte vector
 union u8vector4_t u8vector4_from_fvector4(
-  const union fvector4_t in_vector);
+  union fvector4_t in_vector);
 
 // Converts a byte vector to a normalized float vector in [0, 1]
 //
 //  in:     in_vector
 //  ret:    The float vector
 union fvector4_t u8vector4_to_fvector4(
-  const union u8vector4_t in_vector);
+  union u8vector4_t in_vector);

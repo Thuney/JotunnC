@@ -14,7 +14,7 @@
 //  out:    out_matrix
 static void fmatrix_identity(
   float* out_matrix,
-  const int in_dimension);
+  int in_dimension);
 
 // Transposes a square matrix, stored row major, in place
 //
@@ -22,7 +22,7 @@ static void fmatrix_identity(
 //  in/out: inout_matrix
 static void fmatrix_transpose(
   float* inout_matrix,
-  const int in_dimension);
+  int in_dimension);
 
 // Copies the elements of one square matrix into another
 //
@@ -31,7 +31,7 @@ static void fmatrix_transpose(
 static void fmatrix_set(
   float* out_matrix,
   const float* in_matrix,
-  const int in_dimension);
+  int in_dimension);
 
 // Adds two square matrices, element by element
 //
@@ -41,7 +41,7 @@ static void fmatrix_add(
   float* out_matrix,
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension);
+  int in_dimension);
 
 // Multiplies every element of a square matrix by a scalar
 //
@@ -50,8 +50,8 @@ static void fmatrix_add(
 static void fmatrix_scale(
   float* out_matrix,
   const float* in_matrix,
-  const int in_dimension,
-  const float in_scalar);
+  int in_dimension,
+  float in_scalar);
 
 // Multiplies two square matrices, stored row major. out_matrix must not
 //  overlap either input
@@ -62,7 +62,7 @@ static void fmatrix_multiply(
   float* out_matrix,
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension);
+  int in_dimension);
 
 #ifdef DEBUG
 
@@ -73,7 +73,7 @@ static void fmatrix_multiply(
 static int fmatrix_are_equal(
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension);
+  int in_dimension);
 
 // Checks whether a square matrix, stored row major, is the identity, to
 //  within 0.0001 per element
@@ -82,7 +82,7 @@ static int fmatrix_are_equal(
 //  ret:    1 when in_matrix is the identity; otherwise 0
 static int fmatrix_is_identity(
   const float* in_matrix,
-  const int in_dimension);
+  int in_dimension);
 
 // Prints each element of a square matrix, stored row major, to stdout with
 //  its row and column
@@ -90,14 +90,14 @@ static int fmatrix_is_identity(
 //  in:     in_matrix, in_dimension
 static void fmatrix_print_matrix_form(
   const float* in_matrix,
-  const int in_dimension);
+  int in_dimension);
 
 // Prints each element of a matrix's buffer to stdout with its index
 //
 //  in:     in_buffer, in_length
 static void fmatrix_print_buffer_form(
   const float in_buffer[],
-  const int in_length);
+  int in_length);
 
 #endif
 
@@ -387,7 +387,7 @@ union fmatrix_4x4_t fmatrix_4x4_subtract(
  ******************************************************************************/
 union fmatrix_2x2_t fmatrix_2x2_scale(
   const union fmatrix_2x2_t* in_matrix,
-  const float in_scalar)
+  float in_scalar)
 {
   union fmatrix_2x2_t resultant;
 
@@ -407,7 +407,7 @@ union fmatrix_2x2_t fmatrix_2x2_scale(
  ******************************************************************************/
 union fmatrix_3x3_t fmatrix_3x3_scale(
   const union fmatrix_3x3_t* in_matrix,
-  const float in_scalar)
+  float in_scalar)
 {
   union fmatrix_3x3_t resultant;
 
@@ -427,7 +427,7 @@ union fmatrix_3x3_t fmatrix_3x3_scale(
  ******************************************************************************/
 union fmatrix_4x4_t fmatrix_4x4_scale(
   const union fmatrix_4x4_t* in_matrix,
-  const float in_scalar)
+  float in_scalar)
 {
   union fmatrix_4x4_t resultant;
 
@@ -507,7 +507,7 @@ union fmatrix_4x4_t fmatrix_4x4_multiply(
  ******************************************************************************/
 union fmatrix_4x4_t fmatrix_4x4_transform_translate(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_translation)
+  union fvector3_t in_translation)
 {
   union fmatrix_4x4_t translation_matrix;
 
@@ -533,7 +533,7 @@ union fmatrix_4x4_t fmatrix_4x4_transform_translate(
  ******************************************************************************/
 union fmatrix_4x4_t fmatrix_4x4_transform_scale(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_scale_factors)
+  union fvector3_t in_scale_factors)
 {
   union fmatrix_4x4_t scale_matrix;
 
@@ -559,7 +559,7 @@ union fmatrix_4x4_t fmatrix_4x4_transform_scale(
  ******************************************************************************/
 union fvector3_t fmatrix_4x4_transform_point(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_point)
+  union fvector3_t in_point)
 {
   union fvector4_t point_vec4 = {in_point.comp.x, in_point.comp.y, in_point.comp.z, 1.0f};
   union fvector4_t resultant = {0.0f, 0.0f, 0.0f, 0.0f};
@@ -713,7 +713,7 @@ void fmatrix_4x4_print(
  ******************************************************************************/
 static void fmatrix_identity(
   float* out_matrix,
-  const int in_dimension)
+  int in_dimension)
 {
   int r, c;
   float val;
@@ -733,7 +733,7 @@ static void fmatrix_identity(
  ******************************************************************************/
 static void fmatrix_transpose(
   float* inout_matrix,
-  const int in_dimension)
+  int in_dimension)
 {
   /*
  * |---|---|
@@ -813,7 +813,7 @@ static void fmatrix_transpose(
 static void fmatrix_set(
   float* out_matrix,
   const float* in_matrix,
-  const int in_dimension)
+  int in_dimension)
 {
   int r, c;
 
@@ -833,7 +833,7 @@ static void fmatrix_add(
   float* out_matrix,
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension)
+  int in_dimension)
 {
   int r, c;
   float val1, val2;
@@ -856,8 +856,8 @@ static void fmatrix_add(
 static void fmatrix_scale(
   float* out_matrix,
   const float* in_matrix,
-  const int in_dimension,
-  const float in_scalar)
+  int in_dimension,
+  float in_scalar)
 {
   int r, c;
   float val;
@@ -879,7 +879,7 @@ static void fmatrix_multiply(
   float* out_matrix,
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension)
+  int in_dimension)
 {
   int r, c, i;
   float sum;
@@ -910,7 +910,7 @@ static void fmatrix_multiply(
 static int fmatrix_are_equal(
   const float* in_matrix1,
   const float* in_matrix2,
-  const int in_dimension)
+  int in_dimension)
 {
   int are_equal = 1;
 
@@ -939,7 +939,7 @@ static int fmatrix_are_equal(
  ******************************************************************************/
 static int fmatrix_is_identity(
   const float* in_matrix,
-  const int in_dimension)
+  int in_dimension)
 {
   int is_identity = 1;
 
@@ -971,7 +971,7 @@ static int fmatrix_is_identity(
  ******************************************************************************/
 static void fmatrix_print_matrix_form(
   const float* in_matrix,
-  const int in_dimension)
+  int in_dimension)
 {
   printf("Printing matrix representation\n");
 
@@ -996,7 +996,7 @@ static void fmatrix_print_matrix_form(
  ******************************************************************************/
 static void fmatrix_print_buffer_form(
   const float in_buffer[],
-  const int in_length)
+  int in_length)
 {
   printf("Printing buffer representation\n");
 

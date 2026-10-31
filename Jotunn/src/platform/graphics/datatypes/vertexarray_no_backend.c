@@ -8,7 +8,7 @@
  ******************************************************************************/
 void vertex_array_internal_platform_init(
   struct vertex_array_t* out_vertex_array,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }
@@ -53,7 +53,7 @@ void vertex_array_internal_platform_set_attribute(
  ******************************************************************************/
 void vertex_array_internal_platform_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num)
+  int in_num)
 {
   return 0;
 }

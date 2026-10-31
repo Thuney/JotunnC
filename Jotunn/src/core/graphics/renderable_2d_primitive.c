@@ -67,9 +67,9 @@ static void renderable_2d_primitive_data_init(
   struct vertex_array_t* out_vao,
   struct vertex_buffer_t* out_vbo,
   struct element_buffer_t* out_ebo,
-  const unsigned int in_should_use_ebo,
+  unsigned int in_should_use_ebo,
   struct vertex_attribute_t* inout_attributes,
-  const unsigned int in_num_attributes,
+  unsigned int in_num_attributes,
   struct shader_program_t* in_shader_program);
 
 // Triangle 2D vertex attributes
@@ -268,7 +268,7 @@ static struct vertex_attribute_t mesh_vertex_attributes[3] =
  ******************************************************************************/
 void renderable_2d_triangle_data_init(
   struct renderable_2d_triangle_data_t* out_triangle_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program)
 {
   const unsigned int max_vertices = 3 * in_max_count;
@@ -321,7 +321,7 @@ void renderable_2d_triangle_data_init(
  ******************************************************************************/
 void renderable_2d_quad_data_init(
   struct renderable_2d_quad_data_t* out_quad_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program)
 {
   const unsigned int max_vertices = 4 * in_max_count;
@@ -379,7 +379,7 @@ void renderable_2d_quad_data_init(
  ******************************************************************************/
 void renderable_2d_textured_quad_data_init(
   struct renderable_2d_textured_quad_data_t* out_textured_quad_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program)
 {
   const unsigned int max_vertices = 4 * in_max_count;
@@ -437,7 +437,7 @@ void renderable_2d_textured_quad_data_init(
  ******************************************************************************/
 void renderable_2d_circle_data_init(
   struct renderable_2d_circle_data_t* out_circle_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program)
 {
   renderable_2d_generate_circle_position_data();
@@ -507,7 +507,7 @@ void renderable_2d_circle_data_init(
  ******************************************************************************/
 void renderable_2d_line_data_init(
   struct renderable_2d_line_data_t* out_line_data,
-  const unsigned int in_max_count,
+  unsigned int in_max_count,
   struct shader_program_t* in_shader_program)
 {
   const unsigned int max_vertices = 2 * in_max_count;
@@ -721,9 +721,9 @@ static void renderable_2d_primitive_data_init(
   struct vertex_array_t* out_vao,
   struct vertex_buffer_t* out_vbo,
   struct element_buffer_t* out_ebo,
-  const unsigned int in_should_use_ebo,
+  unsigned int in_should_use_ebo,
   struct vertex_attribute_t* inout_attributes,
-  const unsigned int in_num_attributes,
+  unsigned int in_num_attributes,
   struct shader_program_t* in_shader_program)
 {
   vertex_array_init(

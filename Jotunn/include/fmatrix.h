@@ -284,7 +284,7 @@ union fmatrix_4x4_t fmatrix_4x4_subtract(
 //  ret:    The scaled matrix
 union fmatrix_2x2_t fmatrix_2x2_scale(
   const union fmatrix_2x2_t* in_matrix,
-  const float in_scalar);
+  float in_scalar);
 
 // Multiplies every element of a 3x3 matrix by a scalar
 //
@@ -292,7 +292,7 @@ union fmatrix_2x2_t fmatrix_2x2_scale(
 //  ret:    The scaled matrix
 union fmatrix_3x3_t fmatrix_3x3_scale(
   const union fmatrix_3x3_t* in_matrix,
-  const float in_scalar);
+  float in_scalar);
 
 // Multiplies every element of a 4x4 matrix by a scalar
 //
@@ -300,7 +300,7 @@ union fmatrix_3x3_t fmatrix_3x3_scale(
 //  ret:    The scaled matrix
 union fmatrix_4x4_t fmatrix_4x4_scale(
   const union fmatrix_4x4_t* in_matrix,
-  const float in_scalar);
+  float in_scalar);
 
 // Multiplies two 2x2 matrices; as transforms, the product applies
 //  in_matrix1, then in_matrix2
@@ -341,7 +341,7 @@ union fmatrix_4x4_t fmatrix_4x4_multiply(
 //  ret:    A transform applying in_matrix, then the translation
 union fmatrix_4x4_t fmatrix_4x4_transform_translate(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_translation);
+  union fvector3_t in_translation);
 
 // Follows a transform with a scaling along each axis
 //
@@ -349,7 +349,7 @@ union fmatrix_4x4_t fmatrix_4x4_transform_translate(
 //  ret:    A transform applying in_matrix, then the scaling
 union fmatrix_4x4_t fmatrix_4x4_transform_scale(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_scale_factors);
+  union fvector3_t in_scale_factors);
 
 // Transforms a point, as the row vector (x, y, z, 1). The result isn't
 //  divided by its fourth component, so this suits affine transforms rather
@@ -359,4 +359,4 @@ union fmatrix_4x4_t fmatrix_4x4_transform_scale(
 //  ret:    The transformed point
 union fvector3_t fmatrix_4x4_transform_point(
   const union fmatrix_4x4_t* in_matrix,
-  const union fvector3_t in_point);
+  union fvector3_t in_point);

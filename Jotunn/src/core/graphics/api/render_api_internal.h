@@ -56,9 +56,9 @@ void render_api_internal_platform_apply_scissor(
 //
 //  in:     in_draw_mode, in_element_count, in_element_data_type, in_indices
 void render_api_internal_platform_draw_elements(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const unsigned int in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
+  enum render_api_draw_mode_t in_draw_mode,
+  unsigned int in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
   const void* in_indices);
 
 // Draws indexed geometry from the bound element buffer, adding
@@ -67,31 +67,31 @@ void render_api_internal_platform_draw_elements(
 //  in:     in_draw_mode, in_element_count, in_element_data_type,
 //            in_index_offset_bytes, in_base_vertex
 void render_api_internal_platform_draw_elements_base_vertex(
-  const enum render_api_draw_mode_t in_draw_mode,
-  const uint32_t in_element_count,
-  const enum render_api_element_data_type_t in_element_data_type,
-  const uintptr_t in_index_offset_bytes,
-  const int32_t in_base_vertex);
+  enum render_api_draw_mode_t in_draw_mode,
+  uint32_t in_element_count,
+  enum render_api_element_data_type_t in_element_data_type,
+  uintptr_t in_index_offset_bytes,
+  int32_t in_base_vertex);
 
 // Draws the first in_vertex_count vertices of the bound vertex array as a
 //  triangle fan
 //
 //  in:     in_vertex_count
 void render_api_internal_platform_draw_triangle_fan(
-  const unsigned int in_vertex_count);
+  unsigned int in_vertex_count);
 
 // Draws the first in_vertex_count vertices of the bound vertex array as
 //  separate lines, one per pair
 //
 //  in:     in_vertex_count
 void render_api_internal_platform_draw_lines(
-  const unsigned int in_vertex_count);
+  unsigned int in_vertex_count);
 
 // Sets the width lines are drawn with
 //
 //  in:     in_line_width_pixels
 void render_api_internal_platform_set_line_width(
-  const float in_line_width_pixels);
+  float in_line_width_pixels);
 
 /*******************************************************************************
  *
@@ -110,20 +110,20 @@ bool render_api_internal_platform_has_timestamps(void);
 //  out:    out_names
 void render_api_internal_platform_create_timestamps(
   uint32_t* out_names,
-  const uint32_t in_count);
+  uint32_t in_count);
 
 // Deletes timestamps
 //
 //  in:     in_names, in_count
 void render_api_internal_platform_delete_timestamps(
   const uint32_t* in_names,
-  const uint32_t in_count);
+  uint32_t in_count);
 
 // Has the GPU record the time when it reaches this point in its commands
 //
 //  in:     in_name
 void render_api_internal_platform_record_timestamp(
-  const uint32_t in_name);
+  uint32_t in_name);
 
 // Reads a recorded timestamp, without waiting for the GPU
 //
@@ -132,5 +132,5 @@ void render_api_internal_platform_record_timestamp(
 //  ret:    true when the GPU has reached the timestamp; otherwise false, with
 //            out_time_nanoseconds untouched
 bool render_api_internal_platform_read_timestamp(
-  const uint32_t in_name,
+  uint32_t in_name,
   uint64_t* out_time_nanoseconds);

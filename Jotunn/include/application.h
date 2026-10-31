@@ -56,7 +56,7 @@ struct application_t
 uint8_t application_init(
   struct application_t* out_app,
   const char* in_app_name,
-  const uint8_t in_max_windows);
+  uint8_t in_max_windows);
 
 // Restarts the application's clock and marks it running, so that
 //  application_run() runs frames

@@ -34,13 +34,13 @@ uint16_t diagnostics_zone_register(
 //
 //  in:     in_zone_id
 void diagnostics_zone_begin(
-  const uint16_t in_zone_id);
+  uint16_t in_zone_id);
 
 // Stops timing a zone begun with diagnostics_zone_begin()
 //
 //  in:     in_zone_id
 void diagnostics_zone_end(
-  const uint16_t in_zone_id);
+  uint16_t in_zone_id);
 
 /*******************************************************************************
  *

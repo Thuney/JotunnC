@@ -22,8 +22,8 @@ static void ball_ui_layer_render(
 void ball_ui_layer_init(
   struct window_t* inout_parent_window,
   struct ball_ui_layer_t* out_ball_layer,
-  const uint16_t in_width,
-  const uint16_t in_height)
+  uint16_t in_width,
+  uint16_t in_height)
 {
   ui_layer_init(
     inout_parent_window,

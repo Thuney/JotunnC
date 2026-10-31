@@ -31,7 +31,7 @@ static void vertex_buffer_gl_check_error(
 //  in:     in_usage_type
 //  ret:    The GL usage; GL_INVALID_ENUM when in_usage_type isn't valid
 static GLenum vertex_buffer_gl_get_data_usage(
-  const enum vertex_buffer_data_usage_t in_usage_type);
+  enum vertex_buffer_data_usage_t in_usage_type);
 
 // Creates in_num buffer names from out_vertex_buffer->vertex_buffer on
 //
@@ -39,7 +39,7 @@ static GLenum vertex_buffer_gl_get_data_usage(
 //  out:    out_vertex_buffer
 static void vertex_buffer_gl_init(
   struct vertex_buffer_t* out_vertex_buffer,
-  const int in_num);
+  int in_num);
 
 // Binds a vertex buffer to GL_ARRAY_BUFFER
 //
@@ -55,8 +55,8 @@ static void vertex_buffer_gl_bind(
 static void vertex_buffer_gl_set_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type);
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type);
 
 // Overwrites the start of the data of the buffer bound to GL_ARRAY_BUFFER
 //  with in_data_bytes from in_data. in_vertex_buffer is only named in the
@@ -66,7 +66,7 @@ static void vertex_buffer_gl_set_data(
 static void vertex_buffer_gl_set_sub_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const float* in_data,
-  const unsigned int in_data_bytes);
+  unsigned int in_data_bytes);
 
 // Deletes in_num buffer names from inout_vertex_buffer->vertex_buffer on
 //
@@ -74,7 +74,7 @@ static void vertex_buffer_gl_set_sub_data(
 //  in/out: inout_vertex_buffer
 static void vertex_buffer_gl_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num);
+  int in_num);
 
 // Creates in_num buffer names from out_element_buffer->element_buffer on
 //
@@ -82,7 +82,7 @@ static void vertex_buffer_gl_destroy(
 //  out:    out_element_buffer
 static void element_buffer_gl_init(
   struct element_buffer_t* out_element_buffer,
-  const int in_num);
+  int in_num);
 
 // Binds an element buffer to GL_ELEMENT_ARRAY_BUFFER, which the bound vertex
 //  array records
@@ -100,8 +100,8 @@ static void element_buffer_gl_bind(
 static void element_buffer_gl_buffer_data(
   const struct element_buffer_t* in_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type);
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type);
 
 // Deletes in_num buffer names from inout_element_buffer->element_buffer on
 //
@@ -109,7 +109,7 @@ static void element_buffer_gl_buffer_data(
 //  in/out: inout_element_buffer
 static void element_buffer_gl_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num);
+  int in_num);
 
 /*******************************************************************************
  *
@@ -118,7 +118,7 @@ static void element_buffer_gl_destroy(
  ******************************************************************************/
 void vertex_buffer_internal_platform_init(
   struct vertex_buffer_t* out_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   vertex_buffer_gl_init(
     out_vertex_buffer,
@@ -144,8 +144,8 @@ void vertex_buffer_internal_platform_bind(
 void vertex_buffer_internal_platform_set_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   vertex_buffer_gl_set_data(
     in_vertex_buffer,
@@ -162,7 +162,7 @@ void vertex_buffer_internal_platform_set_data(
 void vertex_buffer_internal_platform_set_sub_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const float* in_data,
-  const unsigned int in_data_bytes)
+  unsigned int in_data_bytes)
 {
   vertex_buffer_gl_set_sub_data(
     in_vertex_buffer,
@@ -177,7 +177,7 @@ void vertex_buffer_internal_platform_set_sub_data(
  ******************************************************************************/
 void vertex_buffer_internal_platform_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   vertex_buffer_gl_destroy(
     inout_vertex_buffer,
@@ -192,7 +192,7 @@ void vertex_buffer_internal_platform_destroy(
  ******************************************************************************/
 void element_buffer_internal_platform_init(
   struct element_buffer_t* out_element_buffer,
-  const int in_num)
+  int in_num)
 {
   element_buffer_gl_init(
     out_element_buffer,
@@ -218,8 +218,8 @@ void element_buffer_internal_platform_bind(
 void element_buffer_internal_platform_buffer_data(
   const struct element_buffer_t* in_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   element_buffer_gl_buffer_data(
     in_element_buffer,
@@ -235,7 +235,7 @@ void element_buffer_internal_platform_buffer_data(
  ******************************************************************************/
 void element_buffer_internal_platform_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num)
+  int in_num)
 {
   element_buffer_gl_destroy(
     inout_element_buffer,
@@ -288,7 +288,7 @@ static void vertex_buffer_gl_check_error(
  *
  ******************************************************************************/
 static GLenum vertex_buffer_gl_get_data_usage(
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   GLenum gl_usage_type;
 
@@ -336,7 +336,7 @@ static GLenum vertex_buffer_gl_get_data_usage(
  ******************************************************************************/
 static void vertex_buffer_gl_init(
   struct vertex_buffer_t* out_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   glGenBuffers(
     in_num,
@@ -374,8 +374,8 @@ static void vertex_buffer_gl_bind(
 static void vertex_buffer_gl_set_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const void* in_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   glBufferData(
     GL_ARRAY_BUFFER,
@@ -399,7 +399,7 @@ static void vertex_buffer_gl_set_data(
 static void vertex_buffer_gl_set_sub_data(
   const struct vertex_buffer_t* in_vertex_buffer,
   const float* in_data,
-  const unsigned int in_data_bytes)
+  unsigned int in_data_bytes)
 {
   glBufferSubData(
     GL_ARRAY_BUFFER,
@@ -422,7 +422,7 @@ static void vertex_buffer_gl_set_sub_data(
  ******************************************************************************/
 static void vertex_buffer_gl_destroy(
   struct vertex_buffer_t* inout_vertex_buffer,
-  const int in_num)
+  int in_num)
 {
   glDeleteBuffers(
     in_num,
@@ -436,7 +436,7 @@ static void vertex_buffer_gl_destroy(
  ******************************************************************************/
 static void element_buffer_gl_init(
   struct element_buffer_t* out_element_buffer,
-  const int in_num)
+  int in_num)
 {
   glGenBuffers(
     in_num,
@@ -474,8 +474,8 @@ static void element_buffer_gl_bind(
 static void element_buffer_gl_buffer_data(
   const struct element_buffer_t* in_element_buffer,
   const void* in_index_data,
-  const unsigned int in_data_bytes,
-  const enum vertex_buffer_data_usage_t in_usage_type)
+  unsigned int in_data_bytes,
+  enum vertex_buffer_data_usage_t in_usage_type)
 {
   glBufferData(
     GL_ELEMENT_ARRAY_BUFFER,
@@ -498,7 +498,7 @@ static void element_buffer_gl_buffer_data(
  ******************************************************************************/
 static void element_buffer_gl_destroy(
   struct element_buffer_t* inout_element_buffer,
-  const int in_num)
+  int in_num)
 {
   glDeleteBuffers(
     in_num,

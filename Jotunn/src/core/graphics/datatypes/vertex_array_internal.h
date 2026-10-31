@@ -19,7 +19,7 @@
 //  out:    out_vertex_array
 void vertex_array_internal_platform_init(
   struct vertex_array_t* out_vertex_array,
-  const int in_num);
+  int in_num);
 
 // Makes a vertex array the one drawn from and configured
 //
@@ -46,4 +46,4 @@ void vertex_array_internal_platform_set_attribute(
 //  in/out: inout_vertex_array
 void vertex_array_internal_platform_destroy(
   struct vertex_array_t* inout_vertex_array,
-  const int in_num);
+  int in_num);
