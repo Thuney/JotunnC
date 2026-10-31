@@ -24,9 +24,11 @@ int main(
 
   uint8_t error = 0U;
 
+  // NULL, so the engine allocates its list of the application's windows
   error |= application_init(
     app_ptr,
     "JotunnTestApp",
+    NULL,
     max_windows);
 
   ball_window_init(

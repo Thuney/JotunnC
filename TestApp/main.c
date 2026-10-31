@@ -10,8 +10,17 @@
 
 #include "texture.h"
 
+// How many windows the application runs, and layers each window has
+#define TEST_APP_MAX_WINDOWS 2
+#define TEST_APP_MAX_WINDOW_LAYERS 1
+
 static struct application_t jotunn_app;
 static struct window_t window1, window2;
+// The engine's lists of the application's windows and each window's layers,
+//  kept here rather than allocated by the engine
+static struct window_t* jotunn_app_windows[TEST_APP_MAX_WINDOWS];
+static struct window_layer_t* window1_layers[TEST_APP_MAX_WINDOW_LAYERS];
+static struct window_layer_t* window2_layers[TEST_APP_MAX_WINDOW_LAYERS];
 static struct window_layer_t window1_layer, window2_layer;
 static struct framebuffer_t window1_framebuffer, window2_framebuffer;
 
@@ -83,8 +92,6 @@ int main(
   int argc,
   char** argv)
 {
-  const uint8_t max_windows = 2;
-
   struct application_t* app_ptr = &(jotunn_app);
   struct window_t* window1_ptr = &(window1);
   struct window_t* window2_ptr = &(window2);
@@ -94,7 +101,8 @@ int main(
   error |= application_init(
     app_ptr,
     "JotunnTestApp",
-    max_windows);
+    jotunn_app_windows,
+    TEST_APP_MAX_WINDOWS);
   test_app_window_1_init(
     app_ptr,
     window1_ptr);
@@ -428,12 +436,12 @@ static uint8_t test_app_window_1_init(
 
   const uint32_t width = 600;
   const uint32_t height = 400;
-  const uint8_t num_layers = 1;
 
   error |=
     window_init(
       out_window1,
-      num_layers,
+      window1_layers,
+      TEST_APP_MAX_WINDOW_LAYERS,
       width,
       height,
       "JotunnWindow1",
@@ -560,11 +568,11 @@ static uint8_t test_app_window_2_init(
 
   const uint32_t width = 200;
   const uint32_t height = 200;
-  const uint8_t num_layers = 1;
 
   error |= window_init(
     out_window2,
-    num_layers,
+    window2_layers,
+    TEST_APP_MAX_WINDOW_LAYERS,
     width,
     height,
     "JotunnWindow2",

@@ -40,6 +40,7 @@ static void _application_report_leaks(void);
 uint8_t application_init(
   struct application_t* out_app,
   const char* in_app_name,
+  struct window_t** inout_window_storage,
   uint8_t in_max_windows)
 {
 #ifdef DEBUG
@@ -48,8 +49,6 @@ uint8_t application_init(
     "Initializing application, with Jotunn at %s",
     PATH_FROM_JOTUNN_ROOT(""));
 #endif
-
-  uint8_t error = 0;
 
   memset(
     out_app,
@@ -61,10 +60,30 @@ uint8_t application_init(
   out_app->max_windows = in_max_windows;
   out_app->num_windows = 0;
 
-  out_app->windows =
-    (struct window_t**)allocator_allocate(
-      (out_app->max_windows * sizeof(struct window_t*)),
-      ALLOCATOR_TAG_APPLICATION);
+  if (inout_window_storage != NULL) {
+    out_app->windows = inout_window_storage;
+    out_app->is_windows_owned = false;
+  }
+  else {
+    out_app->windows =
+      (struct window_t**)allocator_allocate(
+        (in_max_windows * sizeof(struct window_t*)),
+        ALLOCATOR_TAG_APPLICATION);
+    out_app->is_windows_owned = true;
+
+    if ((out_app->windows == NULL) &&
+        (in_max_windows > 0))
+    {
+    #ifdef DEBUG
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Couldn't allocate room for %u windows",
+        (unsigned int)in_max_windows);
+    #endif
+
+      return 1;
+    }
+  }
 
   out_app->current_window = NULL;
 
@@ -85,7 +104,7 @@ uint8_t application_init(
 
   out_app->function_event_react = NULL;
 
-  return error;
+  return 0;
 }
 
 /*******************************************************************************
@@ -223,7 +242,13 @@ void application_cleanup(
 
   inout_app->max_windows = 0;
   inout_app->num_windows = 0;
-  allocator_free(inout_app->windows);
+
+  if (inout_app->is_windows_owned) {
+    allocator_free(inout_app->windows);
+  }
+
+  inout_app->windows = NULL;
+  inout_app->is_windows_owned = false;
 
 #ifdef DEBUG
   _application_report_leaks();

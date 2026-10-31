@@ -61,6 +61,7 @@ static void _window_render_layer(
  ******************************************************************************/
 uint8_t window_init(
   struct window_t* out_window,
+  struct window_layer_t** inout_layer_storage,
   uint8_t in_max_window_layers,
   uint32_t in_width,
   uint32_t in_height,
@@ -80,6 +81,35 @@ uint8_t window_init(
     in_app_parent,
     &(application_on_event));
 
+  // Set up before the window opens, so that failing leaves nothing to close
+  out_window->max_layers = in_max_window_layers;
+  out_window->num_layers = 0;
+
+  if (inout_layer_storage != NULL) {
+    out_window->layers = inout_layer_storage;
+    out_window->is_layers_owned = false;
+  }
+  else {
+    out_window->layers =
+      (struct window_layer_t**)allocator_allocate(
+        (in_max_window_layers * sizeof(struct window_layer_t*)),
+        ALLOCATOR_TAG_WINDOW);
+    out_window->is_layers_owned = true;
+
+    if ((out_window->layers == NULL) &&
+        (in_max_window_layers > 0))
+    {
+    #ifdef DEBUG
+      log_write(
+        LOG_LEVEL_ERROR,
+        "Couldn't allocate room for %u window layers",
+        (unsigned int)in_max_window_layers);
+    #endif
+
+      return 1;
+    }
+  }
+
   const uint8_t error = window_internal_platform_init(out_window);
 
 #ifdef DEBUG
@@ -90,7 +120,15 @@ uint8_t window_init(
   }
 #endif
 
-  if (!error) {
+  if (error) {
+    if (out_window->is_layers_owned) {
+      allocator_free(out_window->layers);
+    }
+
+    out_window->layers = NULL;
+    out_window->is_layers_owned = false;
+  }
+  else {
     out_window->function_event_react = 0;
 
     window_set_context(out_window);
@@ -99,13 +137,6 @@ uint8_t window_init(
       &(out_window->window_layer_renderer),
       out_window,
       "Window Renderer");
-
-    out_window->max_layers = in_max_window_layers;
-    out_window->num_layers = 0;
-    out_window->layers =
-      (struct window_layer_t**)allocator_allocate(
-        (out_window->max_layers * sizeof(struct window_layer_t*)),
-        ALLOCATOR_TAG_WINDOW);
   }
 
   return error;
@@ -348,7 +379,13 @@ void window_cleanup(
 
   inout_window->max_layers = 0;
   inout_window->num_layers = 0;
-  allocator_free(inout_window->layers);
+
+  if (inout_window->is_layers_owned) {
+    allocator_free(inout_window->layers);
+  }
+
+  inout_window->layers = NULL;
+  inout_window->is_layers_owned = false;
 
   window_internal_platform_cleanup(inout_window);
 }

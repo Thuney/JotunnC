@@ -6,6 +6,7 @@
 //  and OpenGL)
 
 /** System Includes **/
+#include <stdbool.h>
 #include <stdint.h>
 
 /** Local Includes  **/
@@ -88,9 +89,13 @@ struct window_t
   struct window_data_t metadata;
   struct window_context_data_t context_data;
 
+  // Room for max_layers pointers, the first num_layers of them in use
   struct window_layer_t** layers;
   uint8_t num_layers;
   uint8_t max_layers;
+  // Set when window_init() allocated layers, which window_cleanup() then
+  //  frees; clear when the caller provided it
+  bool is_layers_owned;
 
   struct renderer_window_layer_t window_layer_renderer;
   // Created when diagnostics are first shown in the window, and only in builds
@@ -112,13 +117,18 @@ struct window_t
 //  to in_app_parent, with room for in_max_window_layers layers. On success
 //  the window's graphics context is left current. The window keeps in_tag,
 //  which must outlive it, and must stay where it is until window_cleanup(),
-//  since its backend finds it by address
+//  since its backend finds it by address. The list of layers is kept in
+//  inout_layer_storage, which must hold in_max_window_layers pointers and
+//  outlive the window; when it's NULL, the list is allocated instead
 //
 //  in:     in_max_window_layers, in_width, in_height, in_tag, in_app_parent
+//  in/out: inout_layer_storage
 //  out:    out_window
-//  ret:    0 on success; 1 when the backend couldn't open the window
+//  ret:    0 on success; 1 when inout_layer_storage is NULL and the list
+//            can't be allocated, or when the backend couldn't open the window
 uint8_t window_init(
   struct window_t* out_window,
+  struct window_layer_t** inout_layer_storage,
   uint8_t in_max_window_layers,
   uint32_t in_width,
   uint32_t in_height,
@@ -159,10 +169,11 @@ void window_hide(
 uint8_t window_run(
   struct window_t* inout_window);
 
-// Closes the window and releases what window_init() allocated, along with
-//  the window's diagnostics. Its layers, which the window doesn't own, are
-//  left alone. With the GL backend, closing the last open window also shuts
-//  GLFW down
+// Closes the window and releases what window_init() made, including the list
+//  of layers if it was allocated rather than provided, along with the
+//  window's diagnostics. The layers themselves, which the window doesn't
+//  own, are left alone. With the GL backend, closing the last open window
+//  also shuts GLFW down
 //
 //  in/out: inout_window
 void window_cleanup(

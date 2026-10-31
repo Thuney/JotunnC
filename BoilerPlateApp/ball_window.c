@@ -92,8 +92,10 @@ uint8_t ball_window_init(
   struct camera_base_t* camera_base_ptr = &(out_ball_window->camera_ortho.base);
   struct renderer_base_t* renderer_base_ptr = &(out_ball_window->renderer_2d.base);
 
+  // NULL, so the engine allocates its list of the window's layers
   error |= window_init(
     window_ptr,
+    NULL,
     num_layers,
     width,
     height,

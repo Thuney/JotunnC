@@ -5,6 +5,7 @@
 //  windows raise to the application, then to the windows and their layers
 
 /** System Includes **/
+#include <stdbool.h>
 
 /** Local Includes  **/
 #include "event.h"
@@ -25,9 +26,13 @@ struct application_t
   const char* name;
   //
   struct window_t* current_window;
+  // Room for max_windows pointers, the first num_windows of them in use
   struct window_t** windows;
   uint8_t num_windows;
   uint8_t max_windows;
+  // Set when application_init() allocated windows, which
+  //  application_cleanup() then frees; clear when the caller provided it
+  bool is_windows_owned;
   //
   struct timestep_t timer;
   // Nonzero while application_run() should run frames
@@ -48,14 +53,19 @@ struct application_t
 
 // Sets up an application with room for in_max_windows windows, and
 //  initializes the font library. The application keeps in_app_name, which
-//  must outlive it
+//  must outlive it. The list of windows is kept in inout_window_storage,
+//  which must hold in_max_windows pointers and outlive the application; when
+//  it's NULL, the list is allocated instead
 //
 //  in:     in_app_name, in_max_windows
+//  in/out: inout_window_storage
 //  out:    out_app
-//  ret:    0
+//  ret:    0 on success; 1 when inout_window_storage is NULL and the list
+//            can't be allocated
 uint8_t application_init(
   struct application_t* out_app,
   const char* in_app_name,
+  struct window_t** inout_window_storage,
   uint8_t in_max_windows);
 
 // Restarts the application's clock and marks it running, so that
@@ -85,9 +95,10 @@ uint8_t application_stop(
   struct application_t* inout_app);
 
 // Stops the application if it's running, cleans up each of its windows and
-//  the font library, and frees what application_init() allocated. The
-//  windows' own memory stays the caller's to free. Debug builds then log any
-//  heap memory or graphics resources still alive, each of which is a leak
+//  the font library, and frees the list of windows if application_init()
+//  allocated it. The windows' own memory stays the caller's to free. Debug
+//  builds then log any heap memory or graphics resources still alive, each
+//  of which is a leak
 //
 //  in/out: inout_app
 void application_cleanup(
