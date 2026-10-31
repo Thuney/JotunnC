@@ -43,8 +43,8 @@ void window_internal_platform_poll_events(
 void window_internal_platform_run(
   const struct window_t* in_window);
 
-// Closes the window's platform window. The GL backend also shuts GLFW down,
-//  which closes any other window still open
+// Closes the window's platform window. The GL backend shuts GLFW down once
+//  the last open window is closed
 //
 //  in:     in_window
 void window_internal_platform_cleanup(

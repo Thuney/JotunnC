@@ -160,8 +160,8 @@ uint8_t window_run(
 
 // Closes the window and releases what window_init() allocated, along with
 //  the window's diagnostics. Its layers, which the window doesn't own, are
-//  left alone. With the GL backend this also shuts GLFW down, closing any
-//  other window still open
+//  left alone. With the GL backend, closing the last open window also shuts
+//  GLFW down
 //
 //  in/out: inout_window
 void window_cleanup(

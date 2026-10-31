@@ -24,6 +24,10 @@
 static uint8_t is_glfw_initialized = 0;
 static uint8_t is_glew_initialized = 0;
 
+// Windows opened and not yet cleaned up; GLFW is terminated once the last one
+//  closes
+static uint32_t open_window_count = 0;
+
 // Standard cursors are created on first use and shared between windows; GLFW
 //  destroys them itself when it terminates
 static GLFWcursor* gl_cursors[WINDOW_CURSOR_SHAPE_COUNT];
@@ -191,9 +195,9 @@ static void window_gl_poll_events(
 static void window_gl_run(
   const struct window_t* in_window);
 
-// Closes the window and terminates GLFW, which closes any other window still
-//  open and destroys the standard cursors. Does nothing once GLFW has been
-//  terminated
+// Closes the window. Once the last open window is closed, also terminates
+//  GLFW, which destroys the standard cursors, so the next window opened
+//  initializes GLFW and GLEW again
 //
 //  in:     in_window
 static void window_gl_cleanup(
@@ -787,6 +791,10 @@ static uint8_t window_gl_init(
   // Assign to our window handle as void*
   inout_window->context_data.window_handle = (void*)gl_window_ptr;
 
+  if (gl_window_ptr != NULL) {
+    open_window_count++;
+  }
+
   // Set a pointer in GLFW to our window data
   glfwSetWindowUserPointer(
     gl_window_ptr,
@@ -914,10 +922,21 @@ static void window_gl_cleanup(
     "Cleaning up OpenGL Window");
 #endif
 
-  if (is_glfw_initialized) {
-    GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
+  GLFWwindow* gl_window_ptr = (GLFWwindow*)in_window->context_data.window_handle;
 
+  if (is_glfw_initialized &&
+      (gl_window_ptr != NULL))
+  {
     glfwDestroyWindow(gl_window_ptr);
+    open_window_count--;
+  }
+
+  // Other windows still need GLFW, and its standard cursors
+  if (open_window_count > 0) {
+    return;
+  }
+
+  if (is_glfw_initialized) {
     glfwTerminate();
 
     // Terminating destroyed any standard cursors that were created
