@@ -157,6 +157,22 @@ if (JOTUNN_ENABLE_DIAGNOSTICS)
     JOTUNN_DIAGNOSTICS)
 endif()
 
+# Whether Jotunn's allocator may use the C library's heap. Switched off, it
+#  never does: every allocator tag starts out forbidden, and the application
+#  must give each tag it needs a pool of memory it provides
+option(
+  JOTUNN_ENABLE_HEAP
+  "Let Jotunn's allocator use the C library's heap"
+  ON)
+
+if (NOT JOTUNN_ENABLE_HEAP)
+  # Public, so the application can tell which kind of build it's linked to
+  target_compile_definitions(
+    JotunnC
+    PUBLIC
+    JOTUNN_NO_HEAP)
+endif()
+
 # How many of each kind of primitive a renderer_2d batch holds. It sizes the
 #  public struct renderer_2d_storage_t, so it's a public definition, which
 #  keeps Jotunn and the applications built against it agreeing on it

@@ -9,7 +9,12 @@
 //  every tag uses until told otherwise, a pool carved from memory the
 //  application provides, or nowhere at all. Memory must be released by the
 //  allocator that provided it, so never mix these functions with malloc() and
-//  free(). The allocator assumes allocations happen on one thread
+//  free(). The allocator assumes allocations happen on one thread.
+//
+// Builds with JOTUNN_NO_HEAP, which CMake defines when JOTUNN_ENABLE_HEAP is
+//  off, have no heap: the allocator never calls the C library's, every tag
+//  starts out ALLOCATOR_POLICY_FORBIDDEN, and ALLOCATOR_POLICY_HEAP can't be
+//  set. Each tag the application needs must be given a pool
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -53,11 +58,13 @@ struct allocator_tag_stats_t
 // Where a tag's memory comes from
 enum allocator_policy_t
 {
-  // The C library's heap; every tag's policy until it's set otherwise
+  // The C library's heap; every tag's policy until it's set otherwise,
+  //  except in builds with JOTUNN_NO_HEAP, which lack it
   ALLOCATOR_POLICY_HEAP = 0x00,
   // A pool set up with allocator_pool_init()
   ALLOCATOR_POLICY_POOL,
-  // Nowhere: allocating fails, returning NULL
+  // Nowhere: allocating fails, returning NULL. Every tag's policy until it's
+  //  set otherwise in builds with JOTUNN_NO_HEAP
   ALLOCATOR_POLICY_FORBIDDEN,
   ALLOCATOR_POLICY_COUNT
 };
@@ -166,9 +173,10 @@ bool allocator_pool_init(
 //
 //  in:     in_tag, in_policy
 //  in/out: inout_pool
-//  ret:    true on success; false when in_tag or in_policy isn't valid, or
-//            in_policy is ALLOCATOR_POLICY_POOL and inout_pool is NULL, with
-//            the tag's policy left as it was
+//  ret:    true on success; false when in_tag or in_policy isn't valid,
+//            in_policy is ALLOCATOR_POLICY_POOL and inout_pool is NULL, or
+//            in_policy is ALLOCATOR_POLICY_HEAP in a build with
+//            JOTUNN_NO_HEAP, with the tag's policy left as it was
 bool allocator_set_tag_policy(
   enum allocator_tag_t in_tag,
   enum allocator_policy_t in_policy,

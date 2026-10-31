@@ -3,7 +3,9 @@
 #include <assert.h>
 #include <stdalign.h>
 #include <stdint.h>
-#include <stdlib.h>
+#ifndef JOTUNN_NO_HEAP
+  #include <stdlib.h>
+#endif
 #include <string.h>
 
 /*******************************************************************************
@@ -77,8 +79,31 @@ static_assert(
   (sizeof(allocator_tag_names) / sizeof(allocator_tag_names[0])) == ALLOCATOR_TAG_COUNT,
   "Every allocator tag needs a name");
 
-// Zeroed, so every tag starts out with ALLOCATOR_POLICY_HEAP
-static struct allocator_tag_source_t allocator_tag_sources[ALLOCATOR_TAG_COUNT];
+// What every tag's policy is until it's set otherwise
+#ifdef JOTUNN_NO_HEAP
+  #define ALLOCATOR_INITIAL_POLICY ALLOCATOR_POLICY_FORBIDDEN
+#else
+  #define ALLOCATOR_INITIAL_POLICY ALLOCATOR_POLICY_HEAP
+#endif
+
+static struct allocator_tag_source_t allocator_tag_sources[] =
+{
+  [ALLOCATOR_TAG_GENERAL]     = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_APPLICATION] = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_WINDOW]      = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_RENDERER]    = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_UI]          = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_FONT]        = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_FILE]        = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_DIAGNOSTICS] = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_IMGUI]       = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_FREETYPE]    = { .policy = ALLOCATOR_INITIAL_POLICY },
+  [ALLOCATOR_TAG_STB_IMAGE]   = { .policy = ALLOCATOR_INITIAL_POLICY },
+};
+
+static_assert(
+  (sizeof(allocator_tag_sources) / sizeof(allocator_tag_sources[0])) == ALLOCATOR_TAG_COUNT,
+  "Every allocator tag needs a source");
 
 #ifdef DEBUG
 static struct allocator_tag_stats_t allocator_tag_stats[ALLOCATOR_TAG_COUNT];
@@ -460,6 +485,12 @@ bool allocator_set_tag_policy(
     return false;
   }
 
+#ifdef JOTUNN_NO_HEAP
+  if (in_policy == ALLOCATOR_POLICY_HEAP) {
+    return false;
+  }
+#endif
+
   struct allocator_tag_source_t* source = &(allocator_tag_sources[in_tag]);
 
   source->policy = in_policy;
@@ -564,6 +595,7 @@ static void* allocator_source_allocate(
 
   switch (source->policy)
   {
+  #ifndef JOTUNN_NO_HEAP
     case ALLOCATOR_POLICY_HEAP:
     {
       if (in_is_zeroed) {
@@ -574,6 +606,7 @@ static void* allocator_source_allocate(
 
       return malloc(in_size_bytes);
     }
+  #endif
 
     case ALLOCATOR_POLICY_POOL:
     {
@@ -617,6 +650,7 @@ static void* allocator_source_reallocate(
 
   // Moving a block between sources would need its size, which a block from
   //  the heap doesn't record outside DEBUG builds
+#ifndef JOTUNN_NO_HEAP
   if ((source->policy == ALLOCATOR_POLICY_HEAP) &&
       (pool == NULL))
   {
@@ -624,6 +658,7 @@ static void* allocator_source_reallocate(
       inout_memory,
       in_size_bytes);
   }
+#endif
 
   if ((source->policy == ALLOCATOR_POLICY_POOL) &&
       (pool == source->pool))
@@ -652,9 +687,11 @@ static void allocator_source_free(
       pool,
       inout_memory);
   }
+#ifndef JOTUNN_NO_HEAP
   else {
     free(inout_memory);
   }
+#endif
 }
 
 /*******************************************************************************
