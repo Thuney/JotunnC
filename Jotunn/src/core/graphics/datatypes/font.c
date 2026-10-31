@@ -350,7 +350,7 @@ const struct font_glyph_t* typeface_get_glyph_from_char(
   const struct font_typeface_t* in_typeface,
   const char in_charcode)
 {
-  const struct font_glyph_t* char_glyph;
+  const struct font_glyph_t* char_glyph = NULL;
 
   if (in_typeface->is_loaded) {
     const unsigned int is_char_code_in_loaded_range =
@@ -409,6 +409,10 @@ union fvector2_t font_typeface_calculate_string_dimensions(
     const struct font_glyph_t* glyph = typeface_get_glyph_from_char(
       in_typeface,
       c);
+
+    if (glyph == NULL) {
+      continue;
+    }
 
     string_dimensions.comp.x += (glyph->advance_x_pixels);
 

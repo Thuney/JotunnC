@@ -108,8 +108,8 @@ int font_typeface_load_glyph_atlas(
 //  outside the loaded range
 //
 //  in:     in_typeface, in_charcode
-//  ret:    The glyph; not valid unless in_typeface is loaded and in_charcode
-//            is in the loaded range
+//  ret:    The glyph; NULL when in_typeface isn't loaded or in_charcode is
+//            outside the loaded range
 const struct font_glyph_t* typeface_get_glyph_from_char(
   const struct font_typeface_t* in_typeface,
   const char in_charcode);
@@ -122,8 +122,8 @@ void font_typeface_set_char_size(
   const struct font_typeface_t* in_typeface,
   const unsigned int in_char_height_pixels);
 
-// Measures a string as drawn in the typeface, every character of which must
-//  be in the loaded range
+// Measures a string as drawn in the typeface. Characters without a glyph,
+//  outside the loaded range or in a typeface not loaded, add nothing
 //
 //  in:     in_typeface, in_string, in_string_length
 //  ret:    The sum of the characters' advances as x and the tallest glyph's

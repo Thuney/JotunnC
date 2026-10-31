@@ -250,8 +250,8 @@ void renderer_2d_draw_mesh(
 
 // Adds a string to the batch as a textured quad per character, one unit per
 //  pixel of the typeface. The baseline sits the tallest glyph's height below
-//  in_start_position. in_typeface must be loaded, and every character of
-//  in_draw_string in its loaded range
+//  in_start_position. Characters without a glyph, outside the typeface's
+//  loaded range or in a typeface not loaded, are skipped
 //
 //  in:     in_typeface, in_start_position, in_draw_string
 //  in/out: inout_renderer

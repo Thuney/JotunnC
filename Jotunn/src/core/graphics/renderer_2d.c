@@ -627,6 +627,10 @@ void renderer_2d_draw_string(
       in_typeface,
       c);
 
+    if (character_glyph == NULL) {
+      continue;
+    }
+
     fvector3_set(
       &(texture_dimensions_scale_factors),
       (float)(character_glyph->width_pixels),
