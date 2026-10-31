@@ -15,3 +15,4 @@ set(
   ${JotunnExampleApplications_SOURCE_DIR}/res)
 
 add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/ImGuiApp)
+add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/Renderer2DApp)
