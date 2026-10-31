@@ -1,5 +1,7 @@
 #include "camera.h"
 
+#include <math.h>
+
 #ifdef DEBUG
   #include <stdio.h>
 #endif
@@ -164,6 +166,7 @@ void camera_orthographic_set_projection(
  ******************************************************************************/
 void camera_perspective_set_projection(
   struct camera_perspective_t* inout_camera,
+  const float in_field_of_view_radians,
   const float in_aspect_ratio,
   const float in_near_plane,
   const float in_far_plane)
@@ -173,14 +176,24 @@ void camera_perspective_set_projection(
   camera_base->near_plane = in_near_plane;
   camera_base->far_plane = in_far_plane;
 
+  inout_camera->field_of_view_radians = in_field_of_view_radians;
   inout_camera->aspect_ratio = in_aspect_ratio;
 
   camera_base->projection_type = CAMERA_PROJECTION_PERSPECTIVE;
 
-  const float persp_matrix[4][4] = {{0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f},
-                                    {0.0f, 0.0f, 0.0f, 0.0f}};
+  // The distance at which the field of view spans two units, the height of
+  //  clip space
+  const float focal_length = (1.0f / tanf(in_field_of_view_radians / 2.0f));
+  const float depth_range = (in_near_plane - in_far_plane);
+
+  const float persp_matrix[4][4] = {
+    {(focal_length / in_aspect_ratio), 0.0f, 0.0f, 0.0f},
+    {0.0f, focal_length, 0.0f, 0.0f},
+    {0.0f,
+     0.0f,
+     ((in_far_plane + in_near_plane) / depth_range),
+     ((2.0f * in_far_plane * in_near_plane) / depth_range)},
+    {0.0f, 0.0f, -1.0f, 0.0f}};
 
   fmatrix_4x4_set(
     &(camera_base->projection_matrix),
@@ -278,6 +291,7 @@ static void camera_reproject(
       struct camera_perspective_t* camera_perspective = (struct camera_perspective_t*)inout_camera;
       camera_perspective_set_projection(
         camera_perspective,
+        camera_perspective->field_of_view_radians,
         in_window_width / in_window_height,
         in_near_plane,
         in_far_plane);

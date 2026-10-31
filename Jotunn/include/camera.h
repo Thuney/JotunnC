@@ -63,6 +63,8 @@ struct camera_perspective_t
 {
   struct camera_base_t base;
   //
+  // The vertical angle the camera sees across
+  float field_of_view_radians;
   float aspect_ratio;
 };
 
@@ -126,14 +128,17 @@ void camera_orthographic_set_projection(
   const float in_near_plane,
   const float in_far_plane);
 
-// Records a perspective camera's aspect ratio and clip planes, and updates its
-//  view-projection matrix. Not finished: the projection matrix is set to all
-//  zeros
+// Sets a perspective camera's projection from its vertical field of view,
+//  aspect ratio (width over height) and clip planes, and updates its
+//  view-projection matrix. The field of view is kept for when the camera is
+//  reprojected to a new window size
 //
-//  in:     in_aspect_ratio, in_near_plane, in_far_plane
+//  in:     in_field_of_view_radians, in_aspect_ratio, in_near_plane,
+//            in_far_plane
 //  in/out: inout_camera
 void camera_perspective_set_projection(
   struct camera_perspective_t* inout_camera,
+  const float in_field_of_view_radians,
   const float in_aspect_ratio,
   const float in_near_plane,
   const float in_far_plane);
