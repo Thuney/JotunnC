@@ -309,8 +309,9 @@ void application_on_event(
         // Pointer to first window, to be iterated over
         struct window_t** cur_window = inout_app->windows;
         for (uint8_t i = 0U; i < inout_app->num_windows; i++) {
-          if ((*cur_window)->context_data.window_handle ==
-              window_resize_event->window_handle)
+          if (window_is_event_source(
+                *cur_window,
+                window_resize_event->window_handle))
           {
           #ifdef DEBUG
             fprintf(
@@ -343,8 +344,9 @@ void application_on_event(
           // Pointer to first window, to be iterated over
           struct window_t** cur_window = inout_app->windows;
           for (uint8_t i = 0U; i < inout_app->num_windows; i++) {
-            if ((*cur_window)->context_data.window_handle ==
-                window_focus_event->window_handle)
+            if (window_is_event_source(
+                  *cur_window,
+                  window_focus_event->window_handle))
             {
             // #ifdef DEBUG
             //   fprintf(stdout,

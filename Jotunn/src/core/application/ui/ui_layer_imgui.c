@@ -384,7 +384,6 @@ bool ui_layer_internal_imgui_event_react(
 {
   struct ui_layer_imgui_data_t* data = (struct ui_layer_imgui_data_t*)inout_ui_layer->ui_layer_data;
   const struct window_t* window = inout_ui_layer->ui_window_layer.parent_window;
-  const void* window_handle = window->context_data.window_handle;
 
   _ui_layer_imgui_make_current(data);
 
@@ -403,7 +402,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_mouse_moved_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         // Jotunn's mouse coordinates grow upward from the bottom of the
         //  window; ImGui's grow downward from the top
         ImGuiIO_AddMousePosEvent(
@@ -424,7 +426,9 @@ bool ui_layer_internal_imgui_event_react(
           struct event_mouse_button_t,
           base);
 
-      if ((event->window_handle == window_handle) &&
+      if (window_is_event_source(
+            window,
+            event->window_handle) &&
           ((int)event->button >= 0) &&
           ((int)event->button < ImGuiMouseButton_COUNT))
       {
@@ -449,7 +453,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_mouse_scrolled_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         ImGuiIO_AddMouseWheelEvent(
           io,
           event->x_offset,
@@ -468,7 +475,9 @@ bool ui_layer_internal_imgui_event_react(
           struct event_mouse_entered_t,
           base);
 
-      if ((event->window_handle == window_handle) &&
+      if (window_is_event_source(
+            window,
+            event->window_handle) &&
           !event->is_entered)
       {
         // ImGui's way of saying the mouse is nowhere over the window
@@ -488,7 +497,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_key_pressed_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         _ui_layer_imgui_update_modifiers(
           io,
           event->modifiers);
@@ -514,7 +526,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_key_released_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         _ui_layer_imgui_update_modifiers(
           io,
           event->modifiers);
@@ -540,7 +555,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_key_typed_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         ImGuiIO_AddInputCharacter(
           io,
           event->codepoint);
@@ -558,7 +576,10 @@ bool ui_layer_internal_imgui_event_react(
           struct event_window_focus_t,
           base);
 
-      if (event->window_handle == window_handle) {
+      if (window_is_event_source(
+            window,
+            event->window_handle))
+      {
         ImGuiIO_AddFocusEvent(
           io,
           (event->is_focused != 0));

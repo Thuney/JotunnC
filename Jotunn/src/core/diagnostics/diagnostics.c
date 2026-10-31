@@ -1459,7 +1459,9 @@ static const char* _diagnostics_find_event_window_tag(
   for (uint8_t i = 0; i < in_app->num_windows; i++) {
     const struct window_t* window = in_app->windows[i];
 
-    if ((window->context_data.window_handle == window_handle) &&
+    if (window_is_event_source(
+          window,
+          window_handle) &&
         (window->metadata.tag != NULL))
     {
       return window->metadata.tag;

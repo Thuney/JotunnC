@@ -205,6 +205,16 @@ void window_handle_event(
   struct window_t* inout_window,
   struct event_base_t* inout_event);
 
+// Finds whether an event came from a window. Every window is offered every
+//  window's input, so input and window events carry the handle of the window
+//  they came from
+//
+//  in:     in_window, in_event_window_handle
+//  ret:    true when in_event_window_handle is in_window's
+bool window_is_event_source(
+  const struct window_t* in_window,
+  const void* in_event_window_handle);
+
 /*******************************************************************************
  *
  *   GRAPHICS CONTEXT

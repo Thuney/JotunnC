@@ -74,7 +74,9 @@ bool diagnostics_internal_overlay_event_react(
 
     if ((key_event->key == _DIAGNOSTICS_OVERLAY_TOGGLE_KEY) &&
         !key_event->is_repeat &&
-        (key_event->window_handle == inout_window->context_data.window_handle))
+        window_is_event_source(
+          inout_window,
+          key_event->window_handle))
     {
       if (inout_window->diagnostics_overlay == NULL) {
         inout_window->diagnostics_overlay =

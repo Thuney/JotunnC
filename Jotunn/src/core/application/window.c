@@ -237,6 +237,18 @@ void window_handle_event(
 
 /*******************************************************************************
  *
+ *   Function: window_is_event_source()
+ *
+ ******************************************************************************/
+bool window_is_event_source(
+  const struct window_t* in_window,
+  const void* in_event_window_handle)
+{
+  return (in_event_window_handle == in_window->context_data.window_handle);
+}
+
+/*******************************************************************************
+ *
  *   Function: window_run()
  *
  ******************************************************************************/
