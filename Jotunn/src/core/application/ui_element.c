@@ -52,7 +52,7 @@ static void ui_element_slider_render(
 union fvector2_t ui_element_get_effective_size(
   const struct ui_element_t* in_ui_element)
 {
-  union fvector2_t effective_size =
+  const union fvector2_t effective_size =
     (union fvector2_t){.comp.x = (in_ui_element->width + 2 * in_ui_element->padding_x),
                .comp.y = (in_ui_element->height + 2 * in_ui_element->padding_y)};
 

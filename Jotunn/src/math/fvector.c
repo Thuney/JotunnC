@@ -201,8 +201,7 @@ void fvector4_setv(
 float fvector2_magnitude(
   const union fvector2_t* in_vector)
 {
-  float magnitude;
-  magnitude = sqrtf(
+  const float magnitude = sqrtf(
     (in_vector->comp.x * in_vector->comp.x) + (in_vector->comp.y * in_vector->comp.y));
   return magnitude;
 }
@@ -215,8 +214,7 @@ float fvector2_magnitude(
 float fvector3_magnitude(
   const union fvector3_t* in_vector)
 {
-  float magnitude;
-  magnitude = sqrtf(
+  const float magnitude = sqrtf(
     (in_vector->comp.x * in_vector->comp.x) + (in_vector->comp.y * in_vector->comp.y) +
     (in_vector->comp.z * in_vector->comp.z));
   return magnitude;
@@ -230,8 +228,7 @@ float fvector3_magnitude(
 float fvector4_magnitude(
   const union fvector4_t* in_vector)
 {
-  float magnitude;
-  magnitude = sqrtf(
+  const float magnitude = sqrtf(
     (in_vector->comp.w * in_vector->comp.w) + (in_vector->comp.x * in_vector->comp.x) +
     (in_vector->comp.y * in_vector->comp.y) + (in_vector->comp.z * in_vector->comp.z));
   return magnitude;

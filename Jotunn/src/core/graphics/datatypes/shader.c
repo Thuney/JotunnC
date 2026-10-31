@@ -47,7 +47,7 @@ int shader_vertex_init_filepath(
   const char* in_filepath)
 {
   char* file_contents = util_read_raw_file_contents(in_filepath);
-  int is_compiled = vertex_shader_internal_platform_init(
+  const int is_compiled = vertex_shader_internal_platform_init(
     out_shader,
     file_contents);
   allocator_free(file_contents);
@@ -64,7 +64,7 @@ int shader_fragment_init_filepath(
   const char* in_filepath)
 {
   char* file_contents = util_read_raw_file_contents(in_filepath);
-  int is_compiled = fragment_shader_internal_platform_init(
+  const int is_compiled = fragment_shader_internal_platform_init(
     out_shader,
     file_contents);
   allocator_free(file_contents);
@@ -144,7 +144,7 @@ int shader_program_init(
   const struct shader_vertex_t* in_vertex_shader,
   const struct shader_fragment_t* in_fragment_shader)
 {
-  int is_attached = shader_program_internal_platform_init(
+  const int is_attached = shader_program_internal_platform_init(
     inout_shader_program,
     in_vertex_shader,
     in_fragment_shader);
@@ -166,7 +166,7 @@ int shader_program_init(
 int shader_program_link(
   struct shader_program_t* inout_shader_program)
 {
-  int is_linked = shader_program_internal_platform_link(inout_shader_program);
+  const int is_linked = shader_program_internal_platform_link(inout_shader_program);
   return !is_linked;
 }
 
