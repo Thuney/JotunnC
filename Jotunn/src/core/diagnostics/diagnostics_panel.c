@@ -4,6 +4,7 @@
 #include "framebuffer.h"
 #include "resource.h"
 #include "texture.h"
+#include "ui_imgui.h"
 
 #include "cimgui.h"
 #include "cimplot.h"
@@ -133,11 +134,6 @@ static float _diagnostics_panel_get_history_maximum(
 static void _diagnostics_panel_plot_history(
   const char* in_label,
   const struct diagnostics_internal_history_t* in_history);
-
-// Reads ImPlot's default plot item specification
-//
-//  ret:    A copy of the defaults
-static ImPlotSpec_c _diagnostics_panel_get_default_spec(void);
 
 // Shows a texture in a tooltip while the last item drawn is hovered
 //
@@ -350,7 +346,7 @@ static void _diagnostics_panel_draw_overview(
         y_maximum))
   {
     // Drawn first, so a frame interval right on target still shows over it
-    ImPlotSpec_c target_spec = _diagnostics_panel_get_default_spec();
+    ImPlotSpec_c target_spec = ui_imgui_get_default_plot_spec();
     target_spec.Flags = ImPlotInfLinesFlags_Horizontal;
 
     const double target_milliseconds = in_state->target_interval_milliseconds;
@@ -1360,7 +1356,7 @@ static void _diagnostics_panel_plot_history(
 
   // Once the ring is full its oldest value is the next to be overwritten, so
   //  the plot starts there
-  ImPlotSpec_c spec = _diagnostics_panel_get_default_spec();
+  ImPlotSpec_c spec = ui_imgui_get_default_plot_spec();
   spec.Offset =
     (in_history->count == DIAGNOSTICS_INTERNAL_HISTORY_LENGTH) ?
       (int)in_history->next_index :
@@ -1374,29 +1370,6 @@ static void _diagnostics_panel_plot_history(
     1.0,
     -(double)(in_history->count - 1),
     spec);
-}
-
-/*******************************************************************************
- *
- *   Function: _diagnostics_panel_get_default_spec()
- *
- ******************************************************************************/
-static ImPlotSpec_c _diagnostics_panel_get_default_spec(void)
-{
-  static ImPlotSpec_c default_spec;
-  static bool is_default_spec_read = false;
-
-  // ImPlot's defaults are set by its C++ constructor, so one is constructed
-  //  once to copy them from
-  if (!is_default_spec_read) {
-    ImPlotSpec_c* constructed_spec = ImPlotSpec_ImPlotSpec();
-    default_spec = *constructed_spec;
-    ImPlotSpec_destroy(constructed_spec);
-
-    is_default_spec_read = true;
-  }
-
-  return default_spec;
 }
 
 /*******************************************************************************
