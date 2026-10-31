@@ -89,6 +89,7 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/graphics/datatypes/vertexattribute.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/datatypes/vertexbuffer.c
 
+  ${JotunnC_SOURCE_DIR}/src/math/color.c
   ${JotunnC_SOURCE_DIR}/src/math/fmath.c
   ${JotunnC_SOURCE_DIR}/src/math/fvector.c
   ${JotunnC_SOURCE_DIR}/src/math/fmatrix.c
