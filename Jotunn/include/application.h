@@ -87,6 +87,15 @@ uint8_t application_start(
 void application_run(
   struct application_t* inout_app);
 
+// Runs the application's main loop until a window asks to close: starts the
+//  application, calls application_run() for as long as it's running, then
+//  stops it. Returns at once, having started and stopped the application,
+//  when it has no windows, as nothing would ever ask it to stop
+//
+//  in/out: inout_app
+void application_run_until_closed(
+  struct application_t* inout_app);
+
 // Marks the application as no longer running
 //
 //  in/out: inout_app

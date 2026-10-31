@@ -191,6 +191,27 @@ void application_run(
 
 /*******************************************************************************
  *
+ *   Function: application_run_until_closed()
+ *
+ ******************************************************************************/
+void application_run_until_closed(
+  struct application_t* inout_app)
+{
+  application_start(inout_app);
+
+  // Each pass runs a frame once its time is due, and returns at once
+  //  otherwise
+  while (inout_app->running &&
+         (inout_app->num_windows > 0))
+  {
+    application_run(inout_app);
+  }
+
+  application_stop(inout_app);
+}
+
+/*******************************************************************************
+ *
  *   Function: application_stop()
  *
  ******************************************************************************/
