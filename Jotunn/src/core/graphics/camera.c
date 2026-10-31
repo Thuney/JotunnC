@@ -38,7 +38,7 @@ static union fmatrix_4x4_t camera_position_to_matrix(
   union fvector3_t in_position);
 
 // Builds the view matrix of a camera at in_position looking at in_target,
-//  with in_up as up
+//  with up taken from in_up made perpendicular to the view direction
 //
 //  in:     in_position, in_target, in_up
 //  ret:    The view matrix
@@ -207,6 +207,40 @@ void camera_perspective_set_projection(
 
 /*******************************************************************************
  *
+ *   Function: camera_set_view()
+ *
+ ******************************************************************************/
+void camera_set_view(
+  struct camera_base_t* inout_camera,
+  union fvector3_t in_position,
+  union fvector3_t in_up,
+  union fvector3_t in_front)
+{
+  fvector3_setv(
+    &(inout_camera->position),
+    in_position);
+  fvector3_setv(
+    &(inout_camera->up),
+    in_up);
+  fvector3_setv(
+    &(inout_camera->front),
+    in_front);
+
+  const union fvector3_t target =
+    fvector3_add(
+      &(in_position),
+      &(in_front));
+
+  inout_camera->view_matrix =
+    camera_calculate_look_at_matrix(
+      in_position,
+      target,
+      in_up);
+  camera_recalculate_view_projection_matrix(inout_camera);
+}
+
+/*******************************************************************************
+ *
  *   Function: camera_recalculate_view_projection_matrix()
  *
  ******************************************************************************/
@@ -347,7 +381,7 @@ static union fmatrix_4x4_t camera_calculate_look_at_matrix(
   union fvector3_t in_target,
   union fvector3_t in_up)
 {
-  union fvector3_t direction, right;
+  union fvector3_t direction, right, camera_up;
 
   union fvector3_t pos_minus_target, up_cross_direction;
 
@@ -361,11 +395,17 @@ static union fmatrix_4x4_t camera_calculate_look_at_matrix(
     &(direction));
   right = fvector3_normalize(&(up_cross_direction));
 
+  // in_up need not be perpendicular to the view direction, so the up used is
+  //  derived from the other two, keeping the basis orthonormal
+  camera_up = fvector3_cross(
+    &(direction),
+    &(right));
+
   union fmatrix_4x4_t coordinate_matrix;
 
   const float coordinate_matrix_data[4][4] = {
     {right.comp.x, right.comp.y, right.comp.z, 0.0f},
-    {in_up.comp.x, in_up.comp.y, in_up.comp.z, 0.0f},
+    {camera_up.comp.x, camera_up.comp.y, camera_up.comp.z, 0.0f},
     {direction.comp.x, direction.comp.y, direction.comp.z, 0.0f},
     {0.0f, 0.0f, 0.0f, 1.0f}};
 
@@ -398,25 +438,11 @@ static void camera_init(
   fmatrix_4x4_init(&(out_camera->view_matrix));
   fmatrix_4x4_init(&(out_camera->view_projection_matrix));
 
-  fvector3_setv(
-    &(out_camera->position),
-    in_position);
-  fvector3_setv(
-    &(out_camera->up),
-    in_up);
-  fvector3_setv(
-    &(out_camera->front),
-    in_front);
-
-  union fvector3_t target = fvector3_add(
-    &(in_position),
-    &(in_front));
-
-  out_camera->view_matrix = camera_calculate_look_at_matrix(
+  camera_set_view(
+    out_camera,
     in_position,
-    target,
-    in_up);
-  camera_recalculate_view_projection_matrix(out_camera);
+    in_up,
+    in_front);
 
   out_camera->function_reproject = &(camera_reproject);
 }

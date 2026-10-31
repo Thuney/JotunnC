@@ -156,6 +156,19 @@ void camera_recalculate_view_projection_matrix(
  *
  ******************************************************************************/
 
+// Moves a camera to in_position, looking along in_front with in_up as up,
+//  and updates its view and view-projection matrices. in_up needn't be
+//  perpendicular to in_front, so a fixed world up suits a camera looking up
+//  or down, short of straight along it
+//
+//  in:     in_position, in_up, in_front
+//  in/out: inout_camera
+void camera_set_view(
+  struct camera_base_t* inout_camera,
+  union fvector3_t in_position,
+  union fvector3_t in_up,
+  union fvector3_t in_front);
+
 // Gets the direction a camera faces
 //
 //  in:     in_camera
