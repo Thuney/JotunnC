@@ -74,8 +74,10 @@ set(APP_SRCS
   ${JotunnC_SOURCE_DIR}/src/core/graphics/api/render_api.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer_2d.c
+  ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer_3d.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderer_window_layer.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/renderable_2d_primitive.c
+  ${JotunnC_SOURCE_DIR}/src/core/graphics/renderable_3d_primitive.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/resource.c
   ${JotunnC_SOURCE_DIR}/src/core/graphics/camera.c
 
@@ -186,6 +188,18 @@ target_compile_definitions(
   JotunnC
   PUBLIC
   RENDERER_2D_MAX_PRIMITIVES_PER_BATCH=${JOTUNN_RENDERER_2D_MAX_PRIMITIVES_PER_BATCH})
+
+# The same for renderer_3d, whose public struct renderer_3d_storage_t it sizes
+set(
+  JOTUNN_RENDERER_3D_MAX_PRIMITIVES_PER_BATCH
+  128
+  CACHE STRING
+  "How many of each kind of primitive a renderer_3d batch holds")
+
+target_compile_definitions(
+  JotunnC
+  PUBLIC
+  RENDERER_3D_MAX_PRIMITIVES_PER_BATCH=${JOTUNN_RENDERER_3D_MAX_PRIMITIVES_PER_BATCH})
 
 target_compile_definitions(
   JotunnC
