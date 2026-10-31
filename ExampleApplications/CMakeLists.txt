@@ -13,3 +13,5 @@ project (JotunnExampleApplications)
 set(
   JOTUNN_EXAMPLE_RES_PATH
   ${JotunnExampleApplications_SOURCE_DIR}/res)
+
+add_subdirectory(${JotunnExampleApplications_SOURCE_DIR}/ImGuiApp)
