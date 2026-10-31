@@ -316,7 +316,7 @@ union fvector4_t fvector4_add(
   const union fvector4_t* in_vector2)
 {
   union fvector4_t resultant;
-  resultant.comp.x = (in_vector1->comp.w + in_vector2->comp.w);
+  resultant.comp.w = (in_vector1->comp.w + in_vector2->comp.w);
   resultant.comp.x = (in_vector1->comp.x + in_vector2->comp.x);
   resultant.comp.y = (in_vector1->comp.y + in_vector2->comp.y);
   resultant.comp.z = (in_vector1->comp.z + in_vector2->comp.z);
@@ -367,7 +367,7 @@ union fvector4_t fvector4_subtract(
   const union fvector4_t* in_vector2)
 {
   union fvector4_t resultant;
-  resultant.comp.x = (in_vector1->comp.w - in_vector2->comp.w);
+  resultant.comp.w = (in_vector1->comp.w - in_vector2->comp.w);
   resultant.comp.x = (in_vector1->comp.x - in_vector2->comp.x);
   resultant.comp.y = (in_vector1->comp.y - in_vector2->comp.y);
   resultant.comp.z = (in_vector1->comp.z - in_vector2->comp.z);
