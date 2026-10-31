@@ -565,8 +565,9 @@ static void window_gl_mouse_button_callback(
     (struct event_mouse_button_t){
       .base = (struct event_base_t){.event_type = EVENT_TYPE_MOUSE_BUTTON, .is_handled = 0},
       .window_handle = (void*)in_window,
-      .button = in_button,
-      .action = in_action,
+      // GLFW numbers the left, right and middle buttons as Jotunn does
+      .button = (enum event_mouse_button_code_t)in_button,
+      .action = (in_action == GLFW_PRESS) ? EVENT_MOUSE_ACTION_PRESS : EVENT_MOUSE_ACTION_RELEASE,
       .mods = _window_gl_translate_modifiers(in_mods)};
 
   metadata->function_event_notify(

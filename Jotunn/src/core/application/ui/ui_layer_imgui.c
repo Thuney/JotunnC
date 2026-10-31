@@ -425,16 +425,16 @@ bool ui_layer_internal_imgui_event_react(
           base);
 
       if ((event->window_handle == window_handle) &&
-          (event->button >= 0) &&
-          (event->button < ImGuiMouseButton_COUNT))
+          ((int)event->button >= 0) &&
+          ((int)event->button < ImGuiMouseButton_COUNT))
       {
         _ui_layer_imgui_update_modifiers(
           io,
           (uint8_t)event->mods);
         ImGuiIO_AddMouseButtonEvent(
           io,
-          event->button,
-          (event->action == 1));
+          (int)event->button,
+          (event->action == EVENT_MOUSE_ACTION_PRESS));
 
         is_captured = io->WantCaptureMouse;
       }

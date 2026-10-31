@@ -1182,8 +1182,8 @@ static void _diagnostics_describe_event(
         out_text,
         in_text_length,
         "button %d %s, modifiers 0x%02x",
-        event->button,
-        (event->action == 1) ? "pressed" : "released",
+        (int)event->button,
+        (event->action == EVENT_MOUSE_ACTION_PRESS) ? "pressed" : "released",
         (unsigned int)event->mods);
     }
     break;

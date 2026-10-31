@@ -186,6 +186,29 @@ enum event_key_modifier_t
 
 /*******************************************************************************
  *
+ *   MOUSE BUTTONS
+ *
+ ******************************************************************************/
+
+// Mouse buttons, independent of the windowing backend. Buttons past the
+//  middle one, on mice that have them, are numbered on from
+//  EVENT_MOUSE_BUTTON_CODE_MIDDLE
+enum event_mouse_button_code_t
+{
+  EVENT_MOUSE_BUTTON_CODE_LEFT = 0x00,
+  EVENT_MOUSE_BUTTON_CODE_RIGHT,
+  EVENT_MOUSE_BUTTON_CODE_MIDDLE
+};
+
+// What a mouse button did
+enum event_mouse_action_t
+{
+  EVENT_MOUSE_ACTION_RELEASE = 0x00,
+  EVENT_MOUSE_ACTION_PRESS
+};
+
+/*******************************************************************************
+ *
  *   BASE
  *
  ******************************************************************************/
@@ -311,10 +334,8 @@ struct event_mouse_button_t
 {
   struct event_base_t base;
   void* window_handle;
-  // 0 is the left button, 1 the right and 2 the middle
-  int button;
-  // 1 when pressed, 0 when released
-  int action;
+  enum event_mouse_button_code_t button;
+  enum event_mouse_action_t action;
   // Bit set of enum event_key_modifier_t
   int mods;
 };
