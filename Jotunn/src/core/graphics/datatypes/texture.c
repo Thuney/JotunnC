@@ -22,6 +22,16 @@
   #include <stdio.h>
 #endif
 
+// The placeholder texture: a checkerboard of 8 by 8 cells, each 8 pixels
+//  square, with 4 bytes (RGBA) to a pixel
+#define TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS 64
+#define TEXTURE_2D_PLACEHOLDER_CELL_PIXELS 8
+#define TEXTURE_2D_PLACEHOLDER_CHANNELS 4
+#define TEXTURE_2D_PLACEHOLDER_SIZE_BYTES \
+  (TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS *   \
+   TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS *   \
+   TEXTURE_2D_PLACEHOLDER_CHANNELS)
+
 /*******************************************************************************
  *
  *   STATIC PROTOTYPES
@@ -269,6 +279,52 @@ void texture_2d_create_from_file_path(
     // The pixels live on in the texture's graphics memory
     stbi_image_free(data);
   }
+}
+
+/*******************************************************************************
+ *
+ *   Function: texture_2d_create_placeholder()
+ *
+ ******************************************************************************/
+void texture_2d_create_placeholder(
+  struct texture_2d_t* inout_texture)
+{
+  const bool should_wrap = true;
+
+  const unsigned char magenta[TEXTURE_2D_PLACEHOLDER_CHANNELS] = {0xFF, 0x00, 0xFF, 0xFF};
+  const unsigned char black[TEXTURE_2D_PLACEHOLDER_CHANNELS] = {0x00, 0x00, 0x00, 0xFF};
+
+  // Static rather than on the stack for its size; the texture keeps no copy,
+  //  so it's free to be filled again for the next placeholder
+  static unsigned char pixels[TEXTURE_2D_PLACEHOLDER_SIZE_BYTES];
+
+  for (unsigned int y = 0; y < TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS; y++) {
+    for (unsigned int x = 0; x < TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS; x++) {
+      const unsigned int cell_x = (x / TEXTURE_2D_PLACEHOLDER_CELL_PIXELS);
+      const unsigned int cell_y = (y / TEXTURE_2D_PLACEHOLDER_CELL_PIXELS);
+      const unsigned char* color = (((cell_x + cell_y) % 2) == 0) ? magenta : black;
+      const unsigned int pixel_offset_bytes =
+        (((y * TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS) + x) * TEXTURE_2D_PLACEHOLDER_CHANNELS);
+
+      memcpy(
+        &(pixels[pixel_offset_bytes]),
+        color,
+        TEXTURE_2D_PLACEHOLDER_CHANNELS);
+    }
+  }
+
+  texture_2d_init(
+    inout_texture,
+    TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS,
+    TEXTURE_2D_PLACEHOLDER_SIZE_PIXELS,
+    TEXTURE_2D_INTERNAL_FORMAT_RGBA,
+    TEXTURE_2D_DATA_FORMAT_RGBA,
+    should_wrap);
+
+  texture_2d_set_data(
+    inout_texture,
+    pixels,
+    sizeof(pixels));
 }
 
 /*******************************************************************************

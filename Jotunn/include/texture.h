@@ -158,6 +158,15 @@ void texture_2d_create_from_file_path(
   const char* in_file_path,
   unsigned int in_should_flip_vertically);
 
+// Creates a texture to stand in for one that couldn't be loaded: a
+//  checkerboard of magenta and black, 64 pixels square in cells of 8, that
+//  wraps. It's hard to mistake for an intended image, so a missing one shows
+//  up where it's drawn rather than leaving a gap
+//
+//  in/out: inout_texture
+void texture_2d_create_placeholder(
+  struct texture_2d_t* inout_texture);
+
 /*******************************************************************************
  *
  *   BINDING
