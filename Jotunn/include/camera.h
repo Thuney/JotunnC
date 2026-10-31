@@ -9,6 +9,8 @@
 #include "fquaternion.h"
 #include "fvector.h"
 
+#include <stdint.h>
+
 /*******************************************************************************
  *
  *   TYPES
@@ -93,6 +95,19 @@ void camera_orthographic_init(
   union fvector3_t in_position,
   union fvector3_t in_up,
   union fvector3_t in_front);
+
+// Sets up an orthographic camera mapping one unit to one pixel of a render
+//  target of the given size, with the origin at its bottom-left corner, as
+//  2D layers and UIs draw. It sits at a Z of 2 looking along -Z with +Y as
+//  up, with clip planes at -3 and 100, so anything drawn at a Z of 0 is in
+//  view. Reprojecting it to a new window size keeps the same mapping
+//
+//  in:     in_width_pixels, in_height_pixels
+//  out:    out_camera
+void camera_orthographic_init_pixel_space(
+  struct camera_orthographic_t* out_camera,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels);
 
 // Sets up a perspective camera's view, at in_position looking along in_front
 //  with in_up as up. Its projection is identity until

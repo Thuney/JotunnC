@@ -97,6 +97,36 @@ void camera_orthographic_init(
 
 /*******************************************************************************
  *
+ *   Function: camera_orthographic_init_pixel_space()
+ *
+ ******************************************************************************/
+void camera_orthographic_init_pixel_space(
+  struct camera_orthographic_t* out_camera,
+  uint32_t in_width_pixels,
+  uint32_t in_height_pixels)
+{
+  const float near_plane = -3.0f;
+  const float far_plane = 100.0f;
+
+  camera_orthographic_init(
+    out_camera,
+    (union fvector3_t){{0.0f, 0.0f, 2.0f}},
+    (union fvector3_t){{0.0f, 1.0f, 0.0f}},
+    (union fvector3_t){{0.0f, 0.0f, -1.0f}});
+
+  // Left, right, top and bottom edges, in pixels
+  camera_orthographic_set_projection(
+    out_camera,
+    0.0f,
+    (float)in_width_pixels,
+    (float)in_height_pixels,
+    0.0f,
+    near_plane,
+    far_plane);
+}
+
+/*******************************************************************************
+ *
  *   Function: camera_perspective_init()
  *
  ******************************************************************************/

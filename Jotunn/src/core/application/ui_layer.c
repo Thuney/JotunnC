@@ -76,31 +76,10 @@ uint8_t ui_layer_init(
     &(out_ui_layer->ui_camera_ortho.base),
     &(out_ui_layer->ui_renderer_2d.base));
 
-  // Camera stuff
-  const union fvector3_t camera_position = (union fvector3_t) { {0.0f, 0.0f,  2.0f} };
-  const union fvector3_t camera_up       = (union fvector3_t) { {0.0f, 1.0f,  0.0f} };
-  const union fvector3_t camera_front    = (union fvector3_t) { {0.0f, 0.0f, -1.0f} };
-
-  const float ortho_left   = 0.0f;
-  const float ortho_right  = (float)in_width_pixels;
-  const float ortho_top    = (float)in_height_pixels;
-  const float ortho_bottom = 0.0f;
-  const float ortho_near_plane = -3.0f;
-  const float ortho_far_plane  = 100.0f;
-
-  camera_orthographic_init(
+  camera_orthographic_init_pixel_space(
     &(out_ui_layer->ui_camera_ortho),
-    camera_position,
-    camera_up,
-    camera_front);
-  camera_orthographic_set_projection(
-    &(out_ui_layer->ui_camera_ortho),
-    ortho_left,
-    ortho_right,
-    ortho_top,
-    ortho_bottom,
-    ortho_near_plane,
-    ortho_far_plane);
+    in_width_pixels,
+    in_height_pixels);
 
   const uint8_t error =
     renderer_2d_init(
